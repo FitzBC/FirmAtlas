@@ -1,0 +1,26 @@
+__pycache__/
+node_modules/
+*.py[cod]
+*.egg-info/
+*.tsbuildinfo
+.coverage
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+.idea/
+.vscode/
+.DS_Store
+
+# Firmware samples and analysis output must not enter source control.
+artifacts/
+samples/private/
+workspaces/
+reports/
+var/
+*.bin
+*.img
+*.fw
+*.rom

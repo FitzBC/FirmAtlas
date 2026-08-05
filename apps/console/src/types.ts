@@ -1,0 +1,320 @@
+export type RelevanceLevel = 'strong' | 'likely' | 'review' | 'unrelated'
+
+export interface RelevanceSignal {
+  code: string
+  label: string
+  weight: number
+  evidence: string
+}
+
+export interface Vulnerability {
+  identifier: string
+  title: string
+  summary: string
+  published_at: string | null
+  modified_at: string | null
+  vendor: string | null
+  product: string | null
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | null
+  cvss_score: number | null
+  cvss_vector: string | null
+  cvss_version: string | null
+  impact_score: number | null
+  exploitability_score: number | null
+  attack_vector: string | null
+  attack_complexity: string | null
+  privileges_required: string | null
+  user_interaction: string | null
+  scope: string | null
+  cvss_metrics: CvssMetric[]
+  aliases: string[]
+  cwes: string[]
+  cpes: string[]
+  references: string[]
+  reference_details: ReferenceDetail[]
+  exploit_references: string[]
+  has_exploit: boolean
+  cwe_details: Array<{ id: string; source: string | null; type: string | null }>
+  affected_products: AffectedProduct[]
+  sources: string[]
+  kev: boolean
+  kev_date_added: string | null
+  kev_due_date: string | null
+  ransomware_use: string | null
+  required_action: string | null
+  relevance_score: number
+  relevance_level: RelevanceLevel
+  relevance_signals: RelevanceSignal[]
+  policy_version: string
+  is_firmware_related: boolean
+  semantic_interface_count: number
+  semantic_parameter_count: number
+}
+
+export interface CvssMetric {
+  version: string
+  type: string | null
+  source: string | null
+  base_score: number | null
+  base_severity: string | null
+  vector: string | null
+  impact_score: number | null
+  exploitability_score: number | null
+  attack_vector: string | null
+  attack_complexity: string | null
+  privileges_required: string | null
+  user_interaction: string | boolean | null
+  scope: string | null
+}
+
+export interface ReferenceDetail {
+  url: string
+  source: string | null
+  tags: string[]
+}
+
+export interface AffectedProduct {
+  criteria: string
+  vulnerable: boolean
+  match_criteria_id: string | null
+  version_start_including: string | null
+  version_start_excluding: string | null
+  version_end_including: string | null
+  version_end_excluding: string | null
+}
+
+export interface VulnerabilityPage {
+  items: Vulnerability[]
+  total: number
+  limit: number
+  offset: number
+  page: number
+  pages: number
+  has_previous: boolean
+  has_next: boolean
+}
+
+export interface Overview {
+  counts: {
+    relevant: number
+    critical: number
+    kev: number
+    exploit: number
+  }
+  last_updated: string | null
+  levels: Array<{ label: RelevanceLevel; value: number }>
+  vendors: Array<{ label: string; value: number }>
+  recent: Vulnerability[]
+}
+
+export interface IntelligenceStatistics {
+  counts: { total: number; relevant: number; exploit: number; kev: number; with_cwe: number }
+  severity: Array<{ label: string; value: number }>
+  cvss_versions: Array<{ label: string; value: number }>
+  cwes: Array<{ label: string; value: number }>
+  years: Array<{ label: string; value: number }>
+}
+
+export interface SyncRun {
+  run_id: string
+  sources: string[]
+  status: 'running' | 'succeeded' | 'failed'
+  started_at: string
+  finished_at: string | null
+  fetched_count: number
+  relevant_count: number
+  error: string | null
+}
+
+export interface RelevancePolicy {
+  version: string
+  firmware_keywords: string[]
+  device_keywords: string[]
+  vendor_keywords: string[]
+  firmware_only_vendors: string[]
+  strong_threshold: number
+  likely_threshold: number
+  review_threshold: number
+}
+
+export interface IntelligenceFilters {
+  query: string
+  vendor: string
+  severity: string
+  relevance: string
+  kevOnly: boolean
+  exploitOnly: boolean
+}
+
+export interface SemanticInterfaceObservation {
+  value: string
+  kind: string
+  method: string | null
+  protocol: string | null
+  component: string | null
+  confidence: number
+  evidence: string
+  source: 'rules' | 'llm'
+}
+
+export interface SemanticParameterObservation {
+  name: string
+  interface: string | null
+  location: string | null
+  security_effect: string | null
+  confidence: number
+  evidence: string
+  source: 'rules' | 'llm'
+}
+
+export interface SemanticAnalysis {
+  analysis_id: string
+  vulnerability_identifier: string
+  input_sha256: string
+  analyzer_fingerprint: string
+  strategy: 'rules' | 'hybrid'
+  status: 'succeeded' | 'partial' | 'failed'
+  warning: string | null
+  prompt_tokens: number
+  completion_tokens: number
+  created_at: string
+  finished_at: string
+  cached?: boolean
+  result: {
+    vulnerability_identifier: string
+    interfaces: SemanticInterfaceObservation[]
+    parameters: SemanticParameterObservation[]
+    attack_type: string | null
+    remotely_exploitable: boolean | null
+    analyzer_version: string
+  }
+}
+
+export interface SemanticOverview {
+  total: number
+  analyzed: number
+  pending: number
+  interfaces: number
+  parameters: number
+  prompt_tokens: number
+  completion_tokens: number
+  top_interfaces: Array<{ label: string; value: number }>
+  top_parameters: Array<{ label: string; value: number }>
+}
+
+export interface SemanticJob {
+  job_id: string
+  status: 'running' | 'succeeded' | 'failed'
+  strategy: 'rules' | 'hybrid'
+  force: number
+  total_count: number
+  processed_count: number
+  analyzed_count: number
+  cached_count: number
+  failed_count: number
+  interfaces_count: number
+  parameters_count: number
+  started_at: string
+  finished_at: string | null
+  error: string | null
+}
+
+export interface SemanticModelSettings {
+  enabled: boolean
+  base_url: string
+  model: string
+  timeout_seconds: number
+  temperature: number
+  max_tokens: number
+  has_api_key: boolean
+  active: boolean
+}
+
+export type SemanticExploreKind = 'interface' | 'parameter' | 'category'
+
+export interface SemanticCatalogItem {
+  value: string
+  category: string
+  subtype?: string | null
+  subtype_label?: string | null
+  kind?: string | null
+  method?: string | null
+  protocol?: string | null
+  component?: string | null
+  interface_value?: string | null
+  location?: string | null
+  security_effect?: string | null
+  occurrence_count: number
+  vulnerability_count: number
+  vendor_count: number
+  vendors: string[]
+  latest_at: string | null
+}
+
+export interface SemanticCategory {
+  key: string
+  label: string
+  description: string
+  tone: string
+  interface_count: number
+  vulnerability_count: number
+  vendor_count: number
+  firmware_count: number
+  vendors: string[]
+  latest_at: string | null
+  top_interfaces: Array<{ value: string; value_count: number }>
+}
+
+export interface SemanticAssociation {
+  identifier: string
+  title: string
+  summary: string
+  published_at: string | null
+  modified_at: string | null
+  vendor: string | null
+  product: string | null
+  severity: string | null
+  cvss_score: number | null
+  cpes: string[]
+  matched_values: string
+  semantic_evidence: string
+  semantic_confidence: number
+  firmware_model: FirmwareModel
+}
+
+export interface FirmwareModel {
+  key: string
+  label: string
+  vendor: string
+  model: string
+  version_summary: string
+  source: 'description' | 'cpe'
+  alignment: 'aligned' | 'description_primary' | 'cpe_fallback'
+  vulnerability_count?: number
+}
+
+export interface SemanticSubtype {
+  key: string
+  label: string
+  description: string
+  interface_count: number
+  vulnerability_count: number
+}
+
+export interface SemanticCategoryProfile extends SemanticCategory {
+  subtypes: SemanticSubtype[]
+  top_vendors: Array<{ vendor: string; vulnerability_count: number; model_count: number }>
+  top_models: FirmwareModel[]
+}
+
+export interface SemanticExplorePage<T> {
+  items: T[]
+  total: number
+  limit: number
+  offset: number
+  page: number
+  pages: number
+  has_previous: boolean
+  has_next: boolean
+  selection?: Record<string, unknown>
+}
