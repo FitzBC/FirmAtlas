@@ -14,6 +14,7 @@ from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
 
 from .models import RelevanceDecision, RelevancePolicy, VulnerabilityRecord
 from .semantic import (
+    INTERFACE_SUBTYPE_VERSION,
     INTERFACE_STYLE_CATEGORIES,
     classify_interface_style,
     classify_interface_subtype,
@@ -345,7 +346,15 @@ class IntelligenceRepository:
                        WHERE style_category='' AND kind!='network_listener'
                          AND lower(value) NOT LIKE 'tcp://%' AND lower(value) NOT LIKE 'udp://%'"""
                 )
-            if style_subtype_added:
+            subtype_marker = connection.execute(
+                "SELECT value_json FROM settings WHERE key='semantic_subtype_classifier_version'"
+            ).fetchone()
+            subtype_backfill_required = (
+                style_subtype_added
+                or not subtype_marker
+                or _loads(subtype_marker[0], "") != INTERFACE_SUBTYPE_VERSION
+            )
+            if subtype_backfill_required:
                 observations = connection.execute(
                     "SELECT analysis_id,value,kind,component,style_category "
                     "FROM semantic_interface_observations"
@@ -363,6 +372,15 @@ class IntelligenceRepository:
                         )
                         for row in observations
                     ],
+                )
+                connection.execute(
+                    """INSERT INTO settings(key,value_json,updated_at) VALUES(?,?,?)
+                       ON CONFLICT(key) DO UPDATE SET value_json=excluded.value_json,
+                           updated_at=excluded.updated_at""",
+                    (
+                        "semantic_subtype_classifier_version",
+                        _json(INTERFACE_SUBTYPE_VERSION), _utc_now(),
+                    ),
                 )
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_vuln_exploit ON vulnerabilities(has_exploit, modified_at DESC)"
@@ -1243,7 +1261,7 @@ class IntelligenceRepository:
         metadata = {item["key"]: dict(item) for item in INTERFACE_STYLE_CATEGORIES}
         with self.read_connection() as connection:
             rows = connection.execute(
-                """SELECT o.style_category key,COUNT(*) interface_count,
+                """SELECT o.style_category key,COUNT(DISTINCT o.value) interface_count,
                           COUNT(DISTINCT a.vulnerability_identifier) vulnerability_count,
                           COUNT(DISTINCT CASE WHEN lower(COALESCE(v.vendor,''))
                             NOT IN ('','n/a','unknown') THEN v.vendor END) vendor_count,

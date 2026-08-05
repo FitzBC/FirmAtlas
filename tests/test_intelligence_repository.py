@@ -188,6 +188,46 @@ class IntelligenceRepositoryTests(unittest.TestCase):
         )
         self.assertEqual(["/upgrade_filter.asp"], [item["value"] for item in filtered["items"]])
 
+    def test_form_handler_subtypes_follow_route_intent_not_http_kind(self) -> None:
+        base = demo_records()[0]
+        expected = {
+            "/goform/SetLogin": "account_access",
+            "/goform/SetCmdlineRun": "diagnostics_command",
+            "/goform/PowerSaveSet": "configuration_mutation",
+            "/goform/AddDnsForward": "network_management",
+            "/goform/QuickIndex": "form_other",
+        }
+        semantic = SemanticAnalysisService(self.repository)
+        for index, route in enumerate(expected, start=1):
+            item = replace(
+                base,
+                identifier="CVE-2025-31{:02d}".format(index),
+                source_identifier="CVE-2025-31{:02d}".format(index),
+                summary="The HTTP endpoint {} accepts the parameter value.".format(route),
+            )
+            self.repository.upsert(item, self.classifier.classify(item, self.policy))
+            semantic.analyze_identifier(item.identifier)
+        duplicate = replace(
+            base,
+            identifier="CVE-2025-3199",
+            source_identifier="CVE-2025-3199",
+            summary="The HTTP endpoint /goform/SetLogin accepts the parameter username.",
+        )
+        self.repository.upsert(
+            duplicate, self.classifier.classify(duplicate, self.policy)
+        )
+        semantic.analyze_identifier(duplicate.identifier)
+
+        result = self.repository.semantic_explore(
+            "category", value="form_handler", limit=20
+        )
+
+        self.assertEqual(
+            expected,
+            {item["value"]: item["subtype"] for item in result["items"]},
+        )
+        self.assertEqual(5, result["selection"]["interface_count"])
+
 
 if __name__ == "__main__":
     unittest.main()

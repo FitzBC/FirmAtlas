@@ -16,6 +16,7 @@ from urllib.request import Request, urlopen
 
 ANALYZER_VERSION = "rules-2026.08.6"
 PROMPT_VERSION = "interface-map-2026.08.1"
+INTERFACE_SUBTYPE_VERSION = "subtypes-2026.08.2"
 
 
 @dataclass(frozen=True)
@@ -346,9 +347,13 @@ def classify_interface_subtype(
     value: str, kind: str = "", component: str = "", category: str = ""
 ) -> str:
     """Refine a top-level style by the route's operational intent."""
-    normalized = "{} {} {}".format(value or "", kind or "", component or "").lower()
+    normalized = "{} {}".format(value or "", component or "").lower()
+    kind_value = (kind or "").lower()
     category = category or classify_interface_style(value, kind, component)
-    has = lambda *needles: any(needle in normalized for needle in needles)
+
+    def has(*needles: str) -> bool:
+        return any(needle in normalized for needle in needles)
+
     if category == "web_action":
         if has("import", "export", "backup", "restore"):
             return "import_export_action"
@@ -364,7 +369,7 @@ def classify_interface_subtype(
     if category == "form_handler":
         if has("upload", "upgrade", "firmware", "import", "export", "restore"):
             return "upload_upgrade"
-        if has("wan", "lan", "wifi", "wlan", "dhcp", "nat", "route", "network"):
+        if has("wan", "lan", "wifi", "wlan", "dhcp", "dns", "nat", "route", "network"):
             return "network_management"
         if has("login", "auth", "account", "user", "password"):
             return "account_access"
@@ -404,7 +409,7 @@ def classify_interface_subtype(
             return "command_execution"
         if has("topic", "mqtt", "message", "publish", "subscribe"):
             return "message_topic"
-        if kind.lower() == "device_node" or normalized.strip().startswith("/dev/"):
+        if kind_value == "device_node" or normalized.strip().startswith("/dev/"):
             return "device_node"
         return "rpc_method"
     if category == "management_route":
