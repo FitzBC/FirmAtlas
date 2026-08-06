@@ -26,7 +26,7 @@ from .sources import is_meaningful_identity, vendors_and_products_from_cpes
 
 
 IDENTITY_NORMALIZATION_VERSION = "cpe-fallback-2026.08.1"
-ANALYTICS_CACHE_VERSION = "identity-aware-vendor-counts-2026.08.1"
+ANALYTICS_CACHE_VERSION = "casefolded-vendor-counts-2026.08.2"
 
 
 def _utc_now() -> str:
@@ -921,11 +921,11 @@ class IntelligenceRepository:
             ).fetchall()
             vendors = connection.execute(
                 """
-                SELECT COALESCE(vendor, 'Unknown') label, COUNT(*) value
+                SELECT MIN(vendor) label, COUNT(*) value
                 FROM vulnerabilities
                 WHERE relevance_level IN ('strong','likely')
                   AND lower(COALESCE(vendor, '')) NOT IN ('', 'n/a', 'unknown', 'linux', 'erlang')
-                GROUP BY vendor ORDER BY value DESC LIMIT 10
+                GROUP BY vendor COLLATE NOCASE ORDER BY value DESC LIMIT 10
                 """
             ).fetchall()
         recent = self.list(limit=6)

@@ -69,6 +69,29 @@ class IntelligenceRepositoryTests(unittest.TestCase):
         self.assertEqual("QNAP", result["items"][0]["vendor"])
         self.assertEqual("HIGH", result["items"][0]["severity"])
 
+    def test_vendor_analytics_matches_case_insensitive_filter_total(self) -> None:
+        base = demo_records()[0]
+        variant = replace(
+            base,
+            identifier="CVE-2026-99001",
+            source_identifier="CVE-2026-99001",
+            vendor=base.vendor.lower(),
+        )
+        for record in (base, variant):
+            self.repository.upsert(
+                record, self.classifier.classify(record, self.policy)
+            )
+
+        filtered = self.repository.list(vendor=base.vendor)
+        vendors = [
+            item for item in self.repository.overview()["vendors"]
+            if item["label"].lower() == base.vendor.lower()
+        ]
+
+        self.assertEqual(2, filtered["total"])
+        self.assertEqual(1, len(vendors))
+        self.assertEqual(filtered["total"], vendors[0]["value"])
+
     def test_placeholder_identity_never_overwrites_known_vendor_and_product(self) -> None:
         base = demo_records()[0]
         known = replace(
