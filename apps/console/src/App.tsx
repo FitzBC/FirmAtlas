@@ -10,6 +10,7 @@ import { VulnerabilityDetail } from './components/VulnerabilityDetail'
 import { VulnerabilityFeed } from './components/VulnerabilityFeed'
 import { SemanticAnalysisWorkspace } from './components/SemanticAnalysisWorkspace'
 import { SemanticModelDrawer } from './components/SemanticModelDrawer'
+import { FirmwareCatalogWorkspace } from './components/FirmwareCatalogWorkspace'
 import { useIntelligence } from './hooks/useIntelligence'
 import { formatRelativeTime } from './lib/format'
 import type { IntelligenceFilters, Vulnerability } from './types'
@@ -29,7 +30,8 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [syncStarting, setSyncStarting] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
-  const [activeView, setActiveView] = useState<'intelligence' | 'semantic'>('intelligence')
+  const [activeView, setActiveView] = useState<'intelligence' | 'firmware' | 'semantic'>('intelligence')
+  const [firmwareQuery, setFirmwareQuery] = useState('')
   const [modelSettingsOpen, setModelSettingsOpen] = useState(false)
   const [semanticRefreshKey, setSemanticRefreshKey] = useState(0)
   const {
@@ -66,6 +68,23 @@ export function App() {
 
   const syncing = syncStarting || latestSync?.status === 'running'
 
+  const openVulnerability = async (identifier: string) => {
+    setActiveView('intelligence')
+    setSyncError(null)
+    try {
+      setSelected(await intelligenceApi.vulnerability(identifier))
+    } catch (caught) {
+      setFilters({ ...initialFilters, query: identifier, relevance: '' })
+      setSyncError(caught instanceof Error ? caught.message : '无法打开关联漏洞')
+    }
+  }
+
+  const findFirmware = (identifier: string) => {
+    setFirmwareQuery(identifier)
+    setSelected(null)
+    setActiveView('firmware')
+  }
+
   return (
     <AppShell
       onOpenSettings={() => setSettingsOpen(true)}
@@ -76,6 +95,11 @@ export function App() {
         <SemanticAnalysisWorkspace
           key={semanticRefreshKey}
           onConfigureModel={() => setModelSettingsOpen(true)}
+        />
+      ) : activeView === 'firmware' ? (
+        <FirmwareCatalogWorkspace
+          initialQuery={firmwareQuery}
+          onOpenVulnerability={openVulnerability}
         />
       ) : (
       <>
@@ -157,7 +181,11 @@ export function App() {
         />
       </div>
 
-      <VulnerabilityDetail vulnerability={selected} onClose={() => setSelected(null)} />
+      <VulnerabilityDetail
+        vulnerability={selected}
+        onClose={() => setSelected(null)}
+        onFindFirmware={findFirmware}
+      />
       <PolicyDrawer
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}

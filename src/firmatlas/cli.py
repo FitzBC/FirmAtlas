@@ -99,6 +99,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "seed-demo", help="load deterministic UI development records"
     )
     _database_argument(seed_parser)
+
+    firmware = subparsers.add_parser(
+        "firmware", help="discover and query firmware sample metadata"
+    )
+    firmware_subparsers = firmware.add_subparsers(
+        dest="firmware_command", required=True
+    )
+    catalog_parser = firmware_subparsers.add_parser(
+        "bootstrap-catalog",
+        help="import public firmware sample URLs and vulnerability leads",
+    )
+    _database_argument(catalog_parser)
     args = parser.parse_args(argv)
 
     if args.command == "demo-report":
@@ -149,6 +161,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print(
                     json.dumps(repository.overview(), ensure_ascii=False, indent=2)
                 )
+                return 0
+        finally:
+            repository.close()
+    if args.command == "firmware":
+        from .firmware_catalog import bootstrap_public_catalog
+        from .intelligence.repository import IntelligenceRepository
+
+        repository = IntelligenceRepository(args.database)
+        try:
+            if args.firmware_command == "bootstrap-catalog":
+                result = bootstrap_public_catalog(repository)
+                print(json.dumps(result, ensure_ascii=False, indent=2))
                 return 0
         finally:
             repository.close()

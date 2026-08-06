@@ -13,14 +13,14 @@ import type { ReactNode } from 'react'
 interface AppShellProps {
   children: ReactNode
   onOpenSettings: () => void
-  activeView: 'intelligence' | 'semantic'
-  onNavigate: (view: 'intelligence' | 'semantic') => void
+  activeView: 'intelligence' | 'firmware' | 'semantic'
+  onNavigate: (view: 'intelligence' | 'firmware' | 'semantic') => void
 }
 
 const navigation = [
   { label: '态势总览', icon: Gauge, view: null },
   { label: '漏洞情报', icon: RadioTower, view: 'intelligence' as const },
-  { label: '固件资产', icon: Boxes, view: null },
+  { label: '固件资产', icon: Boxes, view: 'firmware' as const },
   { label: '语义洞察', icon: FileSearch, view: 'semantic' as const },
 ]
 

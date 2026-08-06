@@ -146,6 +146,90 @@ export interface IntelligenceFilters {
   exploitOnly: boolean
 }
 
+export interface FirmwareCatalogOverview {
+  counts: {
+    source_count: number
+    official_source_count: number
+    candidate_count: number
+    linked_candidate_count: number
+    vulnerability_lead_count: number
+  }
+  vendors: Array<{ label: string; value: number }>
+  sources: Array<{
+    source_id: string
+    name: string
+    source_type: string
+    trust_level: string
+    candidate_count: number
+  }>
+}
+
+export interface FirmwareSource {
+  source_id: string
+  name: string
+  source_type: 'official' | 'benchmark' | 'community' | 'archive' | 'advisory'
+  base_url: string
+  vendor: string | null
+  trust_level: 'primary' | 'high' | 'medium' | 'low'
+  access_notes: string
+  evidence_url: string
+  candidate_count: number
+  vulnerability_count: number
+}
+
+export interface FirmwareCandidate {
+  candidate_id: string
+  source_id: string
+  external_id: string | null
+  vendor: string
+  product: string
+  model: string
+  firmware_version: string | null
+  filename: string
+  download_url: string
+  source_page_url: string
+  evidence_url: string
+  url_status: 'listed' | 'verified' | 'restricted' | 'unavailable'
+  download_kind: 'direct' | 'portal' | 'repository_directory'
+  notes: string
+  source_name: string
+  source_type: string
+  trust_level: string
+  vulnerability_count: number
+  vulnerability_identifiers: string[]
+}
+
+export interface FirmwareVulnerabilityLead {
+  candidate_id: string
+  vulnerability_identifier: string
+  relationship: string
+  confidence: string
+  evidence_url: string
+  notes: string
+  title: string | null
+  vulnerability_vendor: string | null
+  vulnerability_product: string | null
+  severity: string | null
+  cvss_score: number | null
+}
+
+export interface FirmwareCandidateDetail extends FirmwareCandidate {
+  source_base_url: string
+  source_access_notes: string
+  vulnerabilities: FirmwareVulnerabilityLead[]
+}
+
+export interface FirmwareCandidatePage {
+  items: FirmwareCandidate[]
+  total: number
+  limit: number
+  offset: number
+  page: number
+  pages: number
+  has_previous: boolean
+  has_next: boolean
+}
+
 export interface SemanticInterfaceObservation {
   value: string
   kind: string

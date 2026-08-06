@@ -183,6 +183,61 @@ class IntelligenceRepository:
                 CREATE INDEX IF NOT EXISTS idx_vulnerability_cwes_cwe
                     ON vulnerability_cwes(cwe_id);
 
+                CREATE TABLE IF NOT EXISTS firmware_sources (
+                    source_id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    source_type TEXT NOT NULL,
+                    base_url TEXT NOT NULL,
+                    vendor TEXT,
+                    trust_level TEXT NOT NULL,
+                    access_notes TEXT NOT NULL DEFAULT '',
+                    evidence_url TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_firmware_sources_type
+                    ON firmware_sources(source_type, trust_level);
+
+                CREATE TABLE IF NOT EXISTS firmware_sample_candidates (
+                    candidate_id TEXT PRIMARY KEY,
+                    source_id TEXT NOT NULL,
+                    external_id TEXT,
+                    vendor TEXT NOT NULL,
+                    product TEXT NOT NULL,
+                    model TEXT NOT NULL,
+                    firmware_version TEXT,
+                    filename TEXT NOT NULL,
+                    download_url TEXT NOT NULL,
+                    source_page_url TEXT NOT NULL,
+                    evidence_url TEXT NOT NULL,
+                    url_status TEXT NOT NULL DEFAULT 'listed',
+                    download_kind TEXT NOT NULL DEFAULT 'direct',
+                    notes TEXT NOT NULL DEFAULT '',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(source_id) REFERENCES firmware_sources(source_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_firmware_candidates_vendor
+                    ON firmware_sample_candidates(vendor COLLATE NOCASE, model COLLATE NOCASE);
+                CREATE INDEX IF NOT EXISTS idx_firmware_candidates_source
+                    ON firmware_sample_candidates(source_id, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS firmware_sample_vulnerabilities (
+                    candidate_id TEXT NOT NULL,
+                    vulnerability_identifier TEXT NOT NULL,
+                    relationship TEXT NOT NULL,
+                    confidence TEXT NOT NULL,
+                    evidence_url TEXT NOT NULL,
+                    notes TEXT NOT NULL DEFAULT '',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(candidate_id, vulnerability_identifier),
+                    FOREIGN KEY(candidate_id) REFERENCES firmware_sample_candidates(candidate_id)
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_firmware_leads_vulnerability
+                    ON firmware_sample_vulnerabilities(vulnerability_identifier, candidate_id);
+
                 CREATE TABLE IF NOT EXISTS analytics_cache (
                     cache_key TEXT PRIMARY KEY,
                     value_json TEXT NOT NULL,
@@ -558,6 +613,252 @@ class IntelligenceRepository:
             )
         connection.execute("DELETE FROM analytics_cache")
         return len(updates)
+
+    def upsert_firmware_sources(self, sources: Sequence[Dict[str, Any]]) -> int:
+        now = _utc_now()
+        with self.transaction() as connection:
+            connection.executemany(
+                """INSERT INTO firmware_sources(
+                       source_id,name,source_type,base_url,vendor,trust_level,
+                       access_notes,evidence_url,created_at,updated_at
+                   ) VALUES(?,?,?,?,?,?,?,?,?,?)
+                   ON CONFLICT(source_id) DO UPDATE SET
+                       name=excluded.name,source_type=excluded.source_type,
+                       base_url=excluded.base_url,vendor=excluded.vendor,
+                       trust_level=excluded.trust_level,
+                       access_notes=excluded.access_notes,
+                       evidence_url=excluded.evidence_url,
+                       updated_at=excluded.updated_at""",
+                [
+                    (
+                        item["source_id"], item["name"], item["source_type"],
+                        item["base_url"], item.get("vendor"), item["trust_level"],
+                        item.get("access_notes", ""), item["evidence_url"], now, now,
+                    )
+                    for item in sources
+                ],
+            )
+        return len(sources)
+
+    def upsert_firmware_candidates(self, candidates: Sequence[Dict[str, Any]]) -> int:
+        now = _utc_now()
+        with self.transaction() as connection:
+            connection.executemany(
+                """INSERT INTO firmware_sample_candidates(
+                       candidate_id,source_id,external_id,vendor,product,model,
+                       firmware_version,filename,download_url,source_page_url,
+                       evidence_url,url_status,download_kind,notes,created_at,updated_at
+                   ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                   ON CONFLICT(candidate_id) DO UPDATE SET
+                       source_id=excluded.source_id,external_id=excluded.external_id,
+                       vendor=excluded.vendor,product=excluded.product,model=excluded.model,
+                       firmware_version=excluded.firmware_version,filename=excluded.filename,
+                       download_url=excluded.download_url,
+                       source_page_url=excluded.source_page_url,
+                       evidence_url=excluded.evidence_url,url_status=excluded.url_status,
+                       download_kind=excluded.download_kind,notes=excluded.notes,
+                       updated_at=excluded.updated_at""",
+                [
+                    (
+                        item["candidate_id"], item["source_id"], item.get("external_id"),
+                        item["vendor"], item["product"], item["model"],
+                        item.get("firmware_version"), item["filename"],
+                        item["download_url"], item["source_page_url"],
+                        item["evidence_url"], item.get("url_status", "listed"),
+                        item.get("download_kind", "direct"), item.get("notes", ""),
+                        now, now,
+                    )
+                    for item in candidates
+                ],
+            )
+        return len(candidates)
+
+    def upsert_firmware_vulnerability_leads(
+        self, leads: Sequence[Dict[str, Any]]
+    ) -> int:
+        now = _utc_now()
+        with self.transaction() as connection:
+            connection.executemany(
+                """INSERT INTO firmware_sample_vulnerabilities(
+                       candidate_id,vulnerability_identifier,relationship,confidence,
+                       evidence_url,notes,created_at,updated_at
+                   ) VALUES(?,?,?,?,?,?,?,?)
+                   ON CONFLICT(candidate_id,vulnerability_identifier) DO UPDATE SET
+                       relationship=excluded.relationship,confidence=excluded.confidence,
+                       evidence_url=excluded.evidence_url,notes=excluded.notes,
+                       updated_at=excluded.updated_at""",
+                [
+                    (
+                        item["candidate_id"], item["vulnerability_identifier"],
+                        item["relationship"], item["confidence"], item["evidence_url"],
+                        item.get("notes", ""), now, now,
+                    )
+                    for item in leads
+                ],
+            )
+        return len(leads)
+
+    def firmware_catalog_overview(self) -> Dict[str, Any]:
+        with self.read_connection() as connection:
+            counts = connection.execute(
+                """SELECT
+                     (SELECT COUNT(*) FROM firmware_sources) source_count,
+                     (SELECT COUNT(*) FROM firmware_sources WHERE source_type='official') official_source_count,
+                     (SELECT COUNT(*) FROM firmware_sample_candidates) candidate_count,
+                     (SELECT COUNT(DISTINCT candidate_id) FROM firmware_sample_vulnerabilities) linked_candidate_count,
+                     (SELECT COUNT(*) FROM firmware_sample_vulnerabilities) vulnerability_lead_count"""
+            ).fetchone()
+            vendors = connection.execute(
+                """SELECT MIN(vendor) label,COUNT(*) value
+                   FROM firmware_sample_candidates
+                   GROUP BY vendor COLLATE NOCASE ORDER BY value DESC,label LIMIT 12"""
+            ).fetchall()
+            sources = connection.execute(
+                """SELECT s.source_id,s.name,s.source_type,s.trust_level,
+                          COUNT(c.candidate_id) candidate_count
+                   FROM firmware_sources s LEFT JOIN firmware_sample_candidates c
+                     ON c.source_id=s.source_id
+                   GROUP BY s.source_id ORDER BY candidate_count DESC,s.name LIMIT 12"""
+            ).fetchall()
+        return {
+            "counts": {key: counts[key] or 0 for key in counts.keys()},
+            "vendors": [dict(row) for row in vendors],
+            "sources": [dict(row) for row in sources],
+        }
+
+    def list_firmware_sources(self) -> List[Dict[str, Any]]:
+        with self.read_connection() as connection:
+            rows = connection.execute(
+                """SELECT s.*,
+                          COUNT(DISTINCT c.candidate_id) candidate_count,
+                          COUNT(DISTINCT l.vulnerability_identifier) vulnerability_count
+                   FROM firmware_sources s
+                   LEFT JOIN firmware_sample_candidates c ON c.source_id=s.source_id
+                   LEFT JOIN firmware_sample_vulnerabilities l ON l.candidate_id=c.candidate_id
+                   GROUP BY s.source_id
+                   ORDER BY CASE s.trust_level WHEN 'primary' THEN 0 WHEN 'high' THEN 1 ELSE 2 END,
+                            candidate_count DESC,s.name"""
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_firmware_candidates(
+        self,
+        query: str = "",
+        vendor: str = "",
+        source_id: str = "",
+        has_vulnerability: bool = False,
+        limit: int = 30,
+        offset: int = 0,
+    ) -> Dict[str, Any]:
+        clauses: List[str] = []
+        values: List[Any] = []
+        if query:
+            clauses.append(
+                "(c.external_id LIKE ? OR c.vendor LIKE ? OR c.product LIKE ? "
+                "OR c.model LIKE ? OR c.firmware_version LIKE ? OR c.filename LIKE ? "
+                "OR EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities ql "
+                "          WHERE ql.candidate_id=c.candidate_id "
+                "            AND ql.vulnerability_identifier LIKE ?))"
+            )
+            wildcard = "%{}%".format(query)
+            values.extend([wildcard] * 7)
+        if vendor:
+            clauses.append("c.vendor = ? COLLATE NOCASE")
+            values.append(vendor)
+        if source_id:
+            clauses.append("c.source_id = ?")
+            values.append(source_id)
+        if has_vulnerability:
+            clauses.append(
+                "EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities hl "
+                "       WHERE hl.candidate_id=c.candidate_id)"
+            )
+        where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        limit = max(1, min(limit, 100))
+        offset = max(0, offset)
+        base = " FROM firmware_sample_candidates c JOIN firmware_sources s ON s.source_id=c.source_id"
+        with self.read_connection() as connection:
+            total = connection.execute("SELECT COUNT(*)" + base + where, values).fetchone()[0]
+            rows = connection.execute(
+                """SELECT c.*,s.name source_name,s.source_type,s.trust_level,
+                          (SELECT COUNT(*) FROM firmware_sample_vulnerabilities l
+                           WHERE l.candidate_id=c.candidate_id) vulnerability_count,
+                          (SELECT GROUP_CONCAT(vulnerability_identifier, ',')
+                           FROM firmware_sample_vulnerabilities l
+                           WHERE l.candidate_id=c.candidate_id) vulnerability_identifiers"""
+                + base + where
+                + " ORDER BY vulnerability_count DESC,c.vendor COLLATE NOCASE,c.model COLLATE NOCASE,c.external_id LIMIT ? OFFSET ?",
+                values + [limit, offset],
+            ).fetchall()
+        items = []
+        for row in rows:
+            item = dict(row)
+            item["vulnerability_identifiers"] = [
+                value for value in (item["vulnerability_identifiers"] or "").split(",") if value
+            ]
+            items.append(item)
+        pages = (total + limit - 1) // limit if total else 0
+        return {
+            "items": items,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "page": offset // limit + 1,
+            "pages": pages,
+            "has_previous": offset > 0,
+            "has_next": offset + limit < total,
+        }
+
+    def get_firmware_candidate(self, candidate_id: str) -> Optional[Dict[str, Any]]:
+        with self.read_connection() as connection:
+            row = connection.execute(
+                """SELECT c.*,s.name source_name,s.source_type,s.trust_level,
+                          s.base_url source_base_url,s.access_notes source_access_notes
+                   FROM firmware_sample_candidates c JOIN firmware_sources s
+                     ON s.source_id=c.source_id WHERE c.candidate_id=?""",
+                (candidate_id,),
+            ).fetchone()
+            if not row:
+                return None
+            leads = connection.execute(
+                """SELECT l.*,v.title,v.vendor vulnerability_vendor,
+                          v.product vulnerability_product,v.severity,v.cvss_score
+                   FROM firmware_sample_vulnerabilities l
+                   LEFT JOIN vulnerabilities v ON v.identifier=l.vulnerability_identifier
+                   WHERE l.candidate_id=? ORDER BY l.vulnerability_identifier""",
+                (candidate_id,),
+            ).fetchall()
+        result = dict(row)
+        result["vulnerabilities"] = [dict(item) for item in leads]
+        result["vulnerability_count"] = len(leads)
+        result["vulnerability_identifiers"] = [
+            item["vulnerability_identifier"] for item in leads
+        ]
+        return result
+
+    def firmware_candidates_for_vulnerability(
+        self, identifier: str, limit: int = 50
+    ) -> Dict[str, Any]:
+        limit = max(1, min(limit, 100))
+        with self.read_connection() as connection:
+            rows = connection.execute(
+                """SELECT c.*,s.name source_name,s.source_type,s.trust_level,
+                          l.relationship,l.confidence,l.evidence_url lead_evidence_url,l.notes lead_notes
+                   FROM firmware_sample_vulnerabilities l
+                   JOIN firmware_sample_candidates c ON c.candidate_id=l.candidate_id
+                   JOIN firmware_sources s ON s.source_id=c.source_id
+                   WHERE l.vulnerability_identifier=?
+                   ORDER BY CASE l.confidence WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END,
+                            c.vendor COLLATE NOCASE,c.model COLLATE NOCASE LIMIT ?""",
+                (identifier, limit),
+            ).fetchall()
+        items = []
+        for row in rows:
+            item = dict(row)
+            item["vulnerability_count"] = 1
+            item["vulnerability_identifiers"] = [identifier]
+            items.append(item)
+        return {"identifier": identifier, "items": items, "total": len(items)}
 
     def get_policy(self) -> RelevancePolicy:
         with self._lock:

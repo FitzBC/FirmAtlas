@@ -179,6 +179,45 @@ class IntelligenceApiTests(unittest.TestCase):
             self.assertEqual(200, response.status)
             self.assertIn("<title>FirmAtlas</title>", body)
 
+    def test_firmware_catalog_routes_support_bidirectional_lookup(self) -> None:
+        self.repository.upsert_firmware_sources(({
+            "source_id": "fixture", "name": "Fixture source",
+            "source_type": "benchmark", "base_url": "https://example.test",
+            "vendor": None, "trust_level": "high", "access_notes": "",
+            "evidence_url": "https://example.test/evidence",
+        },))
+        self.repository.upsert_firmware_candidates(({
+            "candidate_id": "fixture:BM-1", "source_id": "fixture",
+            "external_id": "BM-1", "vendor": "Hikvision", "product": "DS-2CD",
+            "model": "DS-2CD", "firmware_version": "V1", "filename": "firmware.bin",
+            "download_url": "https://example.test/firmware.bin",
+            "source_page_url": "https://example.test/BM-1",
+            "evidence_url": "https://example.test/evidence", "url_status": "listed",
+            "download_kind": "direct", "notes": "",
+        },))
+        self.repository.upsert_firmware_vulnerability_leads(({
+            "candidate_id": "fixture:BM-1",
+            "vulnerability_identifier": "CVE-2026-29417",
+            "relationship": "verified_benchmark_environment", "confidence": "high",
+            "evidence_url": "https://example.test/detail", "notes": "",
+        },))
+
+        overview_status, overview = self.get("/api/firmware/overview")
+        page_status, page = self.get("/api/firmware/candidates?q=CVE-2026-29417")
+        detail_status, detail = self.get("/api/firmware/candidates/fixture%3ABM-1")
+        reverse_status, reverse = self.get(
+            "/api/firmware/vulnerabilities/CVE-2026-29417/samples"
+        )
+
+        self.assertEqual(200, overview_status)
+        self.assertEqual(1, overview["counts"]["candidate_count"])
+        self.assertEqual(200, page_status)
+        self.assertEqual(1, page["total"])
+        self.assertEqual(200, detail_status)
+        self.assertEqual("firmware.bin", detail["filename"])
+        self.assertEqual(200, reverse_status)
+        self.assertEqual("fixture:BM-1", reverse["items"][0]["candidate_id"])
+
 
 if __name__ == "__main__":
     unittest.main()

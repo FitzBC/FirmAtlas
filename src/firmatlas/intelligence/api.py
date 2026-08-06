@@ -114,6 +114,43 @@ def create_handler(
                 return HTTPStatus.OK, service.repository.overview()
             if method == "GET" and path == "/api/intelligence/statistics":
                 return HTTPStatus.OK, service.repository.statistics()
+            if method == "GET" and path == "/api/firmware/overview":
+                return HTTPStatus.OK, service.repository.firmware_catalog_overview()
+            if method == "GET" and path == "/api/firmware/sources":
+                return HTTPStatus.OK, {
+                    "items": service.repository.list_firmware_sources()
+                }
+            if method == "GET" and path == "/api/firmware/candidates":
+                page_size = max(1, min(_integer(query, "page_size", 30), 100))
+                page = max(1, _integer(query, "page", 1))
+                return HTTPStatus.OK, service.repository.list_firmware_candidates(
+                    query=_one(query, "q"),
+                    vendor=_one(query, "vendor"),
+                    source_id=_one(query, "source"),
+                    has_vulnerability=_one(query, "has_vulnerability") == "true",
+                    limit=page_size,
+                    offset=(page - 1) * page_size,
+                )
+            firmware_vulnerability_prefix = "/api/firmware/vulnerabilities/"
+            if (
+                method == "GET"
+                and path.startswith(firmware_vulnerability_prefix)
+                and path.endswith("/samples")
+            ):
+                identifier = unquote(
+                    path[len(firmware_vulnerability_prefix) : -len("/samples")]
+                ).rstrip("/")
+                return HTTPStatus.OK, service.repository.firmware_candidates_for_vulnerability(
+                    identifier
+                )
+            firmware_candidate_prefix = "/api/firmware/candidates/"
+            if method == "GET" and path.startswith(firmware_candidate_prefix):
+                candidate = service.repository.get_firmware_candidate(
+                    unquote(path[len(firmware_candidate_prefix) :])
+                )
+                if not candidate:
+                    raise ApiError(HTTPStatus.NOT_FOUND, "firmware candidate not found")
+                return HTTPStatus.OK, candidate
             if method == "GET" and path == "/api/intelligence/feeds":
                 return HTTPStatus.OK, service.repository.list_feed_states()
             if method == "GET" and path == "/api/intelligence/semantic/settings":

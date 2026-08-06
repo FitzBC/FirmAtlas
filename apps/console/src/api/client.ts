@@ -16,6 +16,11 @@ import type {
   SemanticExploreKind,
   SemanticExplorePage,
   InterfaceStructureRecommendation,
+  FirmwareCatalogOverview,
+  FirmwareSource,
+  FirmwareCandidatePage,
+  FirmwareCandidateDetail,
+  FirmwareCandidate,
 } from '../types'
 
 interface Envelope<T> {
@@ -133,4 +138,27 @@ export const intelligenceApi = {
     request<{ ok: boolean; models: string[] }>('/api/intelligence/semantic/settings/test', {
       method: 'POST', body: JSON.stringify(settings),
     }),
+  firmwareOverview: () => request<FirmwareCatalogOverview>('/api/firmware/overview'),
+  firmwareSources: () => request<{ items: FirmwareSource[] }>('/api/firmware/sources'),
+  firmwareCandidates: (filters: {
+    query?: string
+    vendor?: string
+    source?: string
+    hasVulnerability?: boolean
+  }, page = 1, signal?: AbortSignal) => {
+    const params = new URLSearchParams({ page: String(page), page_size: '30' })
+    if (filters.query) params.set('q', filters.query)
+    if (filters.vendor) params.set('vendor', filters.vendor)
+    if (filters.source) params.set('source', filters.source)
+    if (filters.hasVulnerability) params.set('has_vulnerability', 'true')
+    return request<FirmwareCandidatePage>(`/api/firmware/candidates?${params}`, { signal })
+  },
+  firmwareCandidate: (candidateId: string, signal?: AbortSignal) =>
+    request<FirmwareCandidateDetail>(
+      `/api/firmware/candidates/${encodeURIComponent(candidateId)}`, { signal },
+    ),
+  firmwareSamplesForVulnerability: (identifier: string, signal?: AbortSignal) =>
+    request<{ identifier: string; items: FirmwareCandidate[]; total: number }>(
+      `/api/firmware/vulnerabilities/${encodeURIComponent(identifier)}/samples`, { signal },
+    ),
 }
