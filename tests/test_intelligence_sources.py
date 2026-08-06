@@ -111,6 +111,32 @@ class SourceNormalizationTests(unittest.TestCase):
         self.assertEqual("Edge Gateway", normalized.product)
         self.assertEqual(("cpe:/h:acme:edge_gateway",), normalized.cpes)
 
+    def test_nvd_placeholder_identity_falls_back_to_cpe_identity(self) -> None:
+        normalized = normalize_nvd(
+            {
+                "id": "CVE-2018-16119",
+                "descriptions": [{
+                    "lang": "en",
+                    "value": "Stack overflow in TP-Link WR1043nd firmware version 3.",
+                }],
+                "affected": [{
+                    "affectedData": [{"vendor": "n/a", "product": "n/a"}],
+                }],
+                "configurations": [{
+                    "nodes": [{
+                        "cpeMatch": [{
+                            "criteria": "cpe:2.3:o:tp-link:tl-wr1043nd_firmware:3.00:*:*:*:*:*:*:*",
+                            "vulnerable": True,
+                        }],
+                    }],
+                }],
+            }
+        )
+
+        self.assertEqual("TP-Link", normalized.vendor)
+        self.assertEqual("tl-wr1043nd firmware", normalized.product)
+        self.assertNotIn("n/a", normalized.title.lower())
+
     def test_normalizes_cisa_kev_enrichment(self) -> None:
         normalized = normalize_cisa_kev(
             {

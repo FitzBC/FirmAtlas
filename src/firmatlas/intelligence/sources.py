@@ -19,6 +19,14 @@ CISA_KEV_URL = (
     "https://www.cisa.gov/sites/default/files/feeds/"
     "known_exploited_vulnerabilities.json"
 )
+CPE_VENDOR_LABELS = {
+    "d-link": "D-Link",
+    "dlink": "D-Link",
+    "tp-link": "TP-Link",
+    "tplink": "TP-Link",
+    "netgear": "NETGEAR",
+    "totolink": "TOTOLINK",
+}
 
 
 class SourceError(RuntimeError):
@@ -172,12 +180,12 @@ def normalize_nvd(cve: Dict[str, Any]) -> VulnerabilityRecord:
             + tuple(_walk_field_values(affected, "cpes"))
         )
     )
-    cpe_vendors, cpe_products = _vendors_and_products(cpes)
-    vendors = list(
-        dict.fromkeys(tuple(_walk_field_values(affected, "vendor")) + tuple(cpe_vendors))
+    cpe_vendors, cpe_products = vendors_and_products_from_cpes(cpes)
+    vendors = _meaningful_identity_values(
+        tuple(_walk_field_values(affected, "vendor")) + tuple(cpe_vendors)
     )
-    products = list(
-        dict.fromkeys(tuple(_walk_field_values(affected, "product")) + tuple(cpe_products))
+    products = _meaningful_identity_values(
+        tuple(_walk_field_values(affected, "product")) + tuple(cpe_products)
     )
     cvss_metrics = _cvss_metrics(cve.get("metrics", {}))
     best_cvss = cvss_metrics[0] if cvss_metrics else {}
@@ -336,7 +344,9 @@ def _walk_field_values(value: Any, field: str) -> Iterator[str]:
             yield from _walk_field_values(child, field)
 
 
-def _vendors_and_products(cpes: Iterable[str]) -> Tuple[List[str], List[str]]:
+def vendors_and_products_from_cpes(
+    cpes: Iterable[str],
+) -> Tuple[List[str], List[str]]:
     vendors: List[str] = []
     products: List[str] = []
     for cpe in cpes:
@@ -349,11 +359,30 @@ def _vendors_and_products(cpes: Iterable[str]) -> Tuple[List[str], List[str]]:
             product = parts[4].replace("_", " ")
         else:
             continue
-        if vendor not in ("*", "-") and vendor not in vendors:
+        vendor = CPE_VENDOR_LABELS.get(vendor.lower(), vendor)
+        if is_meaningful_identity(vendor) and vendor not in vendors:
             vendors.append(vendor)
-        if product not in ("*", "-") and product not in products:
+        if is_meaningful_identity(product) and product not in products:
             products.append(product)
     return vendors, products
+
+
+def is_meaningful_identity(value: Any) -> bool:
+    return str(value or "").strip().lower() not in {
+        "", "*", "-", "n/a", "na", "unknown", "unspecified", "not applicable",
+    }
+
+
+def _meaningful_identity_values(values: Iterable[Any]) -> List[str]:
+    result: List[str] = []
+    seen = set()
+    for value in values:
+        text = str(value or "").strip()
+        key = text.lower()
+        if is_meaningful_identity(text) and key not in seen:
+            result.append(text)
+            seen.add(key)
+    return result
 
 
 def _cvss_metrics(metrics: Dict[str, Any]) -> Tuple[Dict[str, Any], ...]:

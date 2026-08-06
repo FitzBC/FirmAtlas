@@ -22,6 +22,10 @@ from .semantic import (
     interface_subtype_metadata,
     normalize_firmware_model,
 )
+from .sources import is_meaningful_identity, vendors_and_products_from_cpes
+
+
+IDENTITY_NORMALIZATION_VERSION = "cpe-fallback-2026.08.1"
 
 
 def _utc_now() -> str:
@@ -447,6 +451,93 @@ class IntelligenceRepository:
                 )
             except sqlite3.OperationalError:
                 pass
+            identity_marker = connection.execute(
+                "SELECT value_json FROM settings WHERE key='identity_normalization_version'"
+            ).fetchone()
+            if (
+                not identity_marker
+                or _loads(identity_marker[0], "") != IDENTITY_NORMALIZATION_VERSION
+            ):
+                self._repair_vulnerability_identities(connection)
+                self._save_identity_normalization_marker(connection)
+
+    def repair_vulnerability_identities(self, force: bool = False) -> int:
+        """Restore missing vendor/product identities from existing CPE evidence."""
+        with self.transaction() as connection:
+            marker = connection.execute(
+                "SELECT value_json FROM settings WHERE key='identity_normalization_version'"
+            ).fetchone()
+            if (
+                not force and marker
+                and _loads(marker[0], "") == IDENTITY_NORMALIZATION_VERSION
+            ):
+                return 0
+            repaired = self._repair_vulnerability_identities(connection)
+            self._save_identity_normalization_marker(connection)
+            return repaired
+
+    @staticmethod
+    def _save_identity_normalization_marker(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            """INSERT INTO settings(key,value_json,updated_at) VALUES(?,?,?)
+               ON CONFLICT(key) DO UPDATE SET value_json=excluded.value_json,
+                   updated_at=excluded.updated_at""",
+            (
+                "identity_normalization_version",
+                _json(IDENTITY_NORMALIZATION_VERSION),
+                _utc_now(),
+            ),
+        )
+
+    @staticmethod
+    def _repair_vulnerability_identities(connection: sqlite3.Connection) -> int:
+        rows = connection.execute(
+            """SELECT identifier,title,vendor,product,cpes_json
+               FROM vulnerabilities
+               WHERE lower(trim(COALESCE(vendor,''))) IN ('','n/a','na','unknown','unspecified')
+                  OR lower(trim(COALESCE(product,''))) IN ('','n/a','na','unknown','unspecified')"""
+        ).fetchall()
+        updates: List[Tuple[Optional[str], Optional[str], str, str, str]] = []
+        for row in rows:
+            cpe_vendors, cpe_products = vendors_and_products_from_cpes(
+                _loads(row["cpes_json"], [])
+            )
+            vendor = (
+                row["vendor"] if is_meaningful_identity(row["vendor"])
+                else cpe_vendors[0] if cpe_vendors else None
+            )
+            product = (
+                row["product"] if is_meaningful_identity(row["product"])
+                else cpe_products[0] if cpe_products else None
+            )
+            if vendor == row["vendor"] and product == row["product"]:
+                continue
+            title = row["title"] or row["identifier"]
+            title_suffix = title.split("·", 1)[1] if "·" in title else ""
+            if title_suffix and not any(
+                is_meaningful_identity(value)
+                for value in title_suffix.strip().split()
+            ):
+                identity = " ".join(value for value in (vendor, product) if value)
+                title = "{} · {}".format(row["identifier"], identity or "未知厂商")
+            updates.append((vendor, product, title, _utc_now(), row["identifier"]))
+        if not updates:
+            return 0
+        connection.executemany(
+            """UPDATE vulnerabilities SET vendor=?,product=?,title=?,updated_at=?
+               WHERE identifier=?""",
+            updates,
+        )
+        fts_exists = connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='vulnerabilities_fts'"
+        ).fetchone()
+        if fts_exists:
+            connection.execute("DELETE FROM vulnerabilities_fts")
+            connection.execute(
+                """INSERT INTO vulnerabilities_fts(identifier,title,summary,vendor,product)
+                   SELECT identifier,title,summary,vendor,product FROM vulnerabilities"""
+            )
+        return len(updates)
 
     def get_policy(self) -> RelevancePolicy:
         with self._lock:
@@ -1754,7 +1845,12 @@ class IntelligenceRepository:
         self, existing: Optional[sqlite3.Row], incoming: VulnerabilityRecord
     ) -> VulnerabilityRecord:
         if not existing:
-            return replace(incoming, raw={"sources": (incoming.source,)})
+            return replace(
+                incoming,
+                vendor=incoming.vendor if is_meaningful_identity(incoming.vendor) else None,
+                product=incoming.product if is_meaningful_identity(incoming.product) else None,
+                raw={"sources": (incoming.source,)},
+            )
         current = self._row_to_record(existing)
         existing_sources = tuple(_loads(existing["sources_json"], []))
         sources = tuple(dict.fromkeys(existing_sources + (incoming.source,)))
@@ -1769,8 +1865,16 @@ class IntelligenceRepository:
             modified_at=max(
                 filter(None, (current.modified_at, incoming.modified_at)), default=None
             ),
-            vendor=incoming.vendor or current.vendor,
-            product=incoming.product or current.product,
+            vendor=(
+                incoming.vendor if is_meaningful_identity(incoming.vendor)
+                else current.vendor if is_meaningful_identity(current.vendor)
+                else None
+            ),
+            product=(
+                incoming.product if is_meaningful_identity(incoming.product)
+                else current.product if is_meaningful_identity(current.product)
+                else None
+            ),
             severity=incoming.severity or current.severity,
             cvss_score=(
                 incoming.cvss_score

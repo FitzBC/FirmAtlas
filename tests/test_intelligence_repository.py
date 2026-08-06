@@ -69,6 +69,62 @@ class IntelligenceRepositoryTests(unittest.TestCase):
         self.assertEqual("QNAP", result["items"][0]["vendor"])
         self.assertEqual("HIGH", result["items"][0]["severity"])
 
+    def test_placeholder_identity_never_overwrites_known_vendor_and_product(self) -> None:
+        base = demo_records()[0]
+        known = replace(
+            base, identifier="CVE-2025-2401", source_identifier="CVE-2025-2401",
+            vendor="TP-Link", product="TL-WR1043ND firmware", source="nvd",
+        )
+        placeholder = replace(
+            known, source="cisa-kev", vendor="n/a", product="unknown",
+        )
+
+        self.repository.upsert(known, self.classifier.classify(known, self.policy))
+        self.repository.upsert(
+            placeholder, self.classifier.classify(placeholder, self.policy)
+        )
+
+        stored = self.repository.get(known.identifier)
+        self.assertEqual("TP-Link", stored["vendor"])
+        self.assertEqual("TL-WR1043ND firmware", stored["product"])
+
+    def test_identity_repair_restores_cpe_vendor_for_downstream_statistics(self) -> None:
+        base = demo_records()[0]
+        item = replace(
+            base, identifier="CVE-2018-16119", source_identifier="CVE-2018-16119",
+            vendor="TP-Link", product="tl-wr1043nd firmware",
+            title="TP-Link TL-WR1043ND buffer overflow",
+            summary=(
+                "TP-Link WR1043nd firmware exposes the HTTP endpoint "
+                "/userRpm/MediaServerFoldersCfgRpm.htm."
+            ),
+            cpes=(
+                "cpe:2.3:o:tp-link:tl-wr1043nd_firmware:3.00:*:*:*:*:*:*:*",
+            ),
+        )
+        self.repository.upsert(item, self.classifier.classify(item, self.policy))
+        SemanticAnalysisService(self.repository).analyze_identifier(item.identifier)
+        with self.repository.transaction() as connection:
+            connection.execute(
+                "UPDATE vulnerabilities SET vendor='n/a',product='n/a',title=? "
+                "WHERE identifier=?",
+                ("CVE-2018-16119 · n/a n/a", item.identifier),
+            )
+
+        repaired = self.repository.repair_vulnerability_identities(force=True)
+
+        stored = self.repository.get(item.identifier)
+        self.assertEqual(1, repaired)
+        self.assertEqual("TP-Link", stored["vendor"])
+        self.assertEqual("tl-wr1043nd firmware", stored["product"])
+        self.assertEqual(
+            "CVE-2018-16119 · TP-Link tl-wr1043nd firmware", stored["title"]
+        )
+        categories = self.repository.semantic_categories()["items"]
+        management = next(row for row in categories if row["key"] == "management_route")
+        self.assertEqual(1, management["vendor_count"])
+        self.assertEqual(["TP-Link"], management["vendors"])
+
     def test_feed_pages_are_newest_first_and_include_semantic_badges(self) -> None:
         base = demo_records()[0]
         older = replace(
