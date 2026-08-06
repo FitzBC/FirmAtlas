@@ -11,6 +11,7 @@ import re
 import sqlite3
 import threading
 from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
+from urllib.parse import urlsplit
 
 from .models import RelevanceDecision, RelevancePolicy, VulnerabilityRecord
 from .semantic import (
@@ -1353,6 +1354,137 @@ class IntelligenceRepository:
                 item["top_interfaces"] = [dict(value) for value in top]
                 items.append(item)
         return {"items": items, "total": len(items)}
+
+    def recommend_interface_structure(
+        self, value: str, limit: int = 20, offset: int = 0
+    ) -> Dict[str, Any]:
+        """Recommend observed interfaces with the same inferred backend structure."""
+        raw_value = (value or "").strip()
+        if not raw_value:
+            raise ValueError("interface value is required")
+        if len(raw_value) > 1000:
+            raise ValueError("interface value is too long")
+        parsed = urlsplit(raw_value)
+        normalized = parsed.path or raw_value
+        category = classify_interface_style(normalized)
+        if not category:
+            raise ValueError("interface value does not describe an exposed route")
+        architecture = classify_interface_subtype(
+            normalized, category=category
+        )
+        limit = max(1, min(int(limit), 100))
+        offset = max(0, int(offset))
+
+        with self.read_connection() as connection:
+            observed = bool(connection.execute(
+                """SELECT 1 FROM semantic_interface_observations o
+                   JOIN semantic_analyses a USING(analysis_id)
+                   WHERE a.is_current=1 AND o.value=? LIMIT 1""",
+                (normalized,),
+            ).fetchone())
+            candidate_rows = connection.execute(
+                """SELECT o.value,MIN(o.kind) kind,MIN(o.method) method,
+                          MIN(o.protocol) protocol,MIN(o.component) component,
+                          MIN(o.style_category) category,MIN(o.style_subtype) subtype,
+                          COUNT(*) occurrence_count,
+                          COUNT(DISTINCT a.vulnerability_identifier) vulnerability_count,
+                          COUNT(DISTINCT CASE WHEN lower(COALESCE(v.vendor,''))
+                            NOT IN ('','n/a','unknown') THEN v.vendor END) vendor_count,
+                          GROUP_CONCAT(DISTINCT CASE WHEN lower(COALESCE(v.vendor,''))
+                            NOT IN ('','n/a','unknown') THEN v.vendor END) vendors,
+                          MAX(COALESCE(v.published_at,v.modified_at)) latest_at
+                   FROM semantic_interface_observations o
+                   JOIN semantic_analyses a USING(analysis_id)
+                   JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
+                   WHERE a.is_current=1 AND o.style_category=? AND o.style_subtype=?
+                     AND o.value!=?
+                   GROUP BY o.value""",
+                (category, architecture, normalized),
+            ).fetchall()
+            vulnerability_rows = connection.execute(
+                """SELECT DISTINCT v.identifier,v.title,v.summary,v.vendor,v.product,
+                          v.severity,v.cvss_score,v.published_at,v.modified_at
+                   FROM semantic_interface_observations o
+                   JOIN semantic_analyses a USING(analysis_id)
+                   JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
+                   WHERE a.is_current=1 AND o.style_category=? AND o.style_subtype=?
+                   ORDER BY COALESCE(v.cvss_score,0) DESC,
+                            COALESCE(v.published_at,v.modified_at,'') DESC LIMIT 8""",
+                (category, architecture),
+            ).fetchall()
+
+        query_path = normalized.split("?", 1)[0]
+        query_prefix = query_path.strip("/").split("/", 1)[0].lower()
+        query_depth = len([part for part in query_path.split("/") if part])
+        query_extension = query_path.rsplit(".", 1)[-1].lower() if "." in query_path else ""
+        candidates: List[Dict[str, Any]] = []
+        for row in candidate_rows:
+            item = dict(row)
+            candidate_path = item["value"].split("?", 1)[0]
+            candidate_prefix = candidate_path.strip("/").split("/", 1)[0].lower()
+            candidate_depth = len([part for part in candidate_path.split("/") if part])
+            candidate_extension = (
+                candidate_path.rsplit(".", 1)[-1].lower()
+                if "." in candidate_path else ""
+            )
+            score = 80
+            signals = ["后端通信架构风格一致"]
+            if query_prefix and query_prefix == candidate_prefix:
+                score += 10
+                signals.append("入口命名空间一致")
+            if query_depth == candidate_depth:
+                score += 5
+                signals.append("路径层级一致")
+            if query_extension and query_extension == candidate_extension:
+                score += 5
+                signals.append("处理器后缀一致")
+            item["similarity_score"] = min(score, 100)
+            item["similarity_signals"] = signals
+            item["vendors"] = [
+                vendor for vendor in (item.get("vendors") or "").split(",") if vendor
+            ][:5]
+            item["subtype_label"] = interface_subtype_metadata(
+                category, architecture
+            )["label"]
+            candidates.append(item)
+        candidates.sort(
+            key=lambda item: (
+                -item["similarity_score"],
+                -item["vulnerability_count"],
+                item["value"],
+            )
+        )
+        total = len(candidates)
+        result = self._semantic_page(
+            candidates[offset : offset + limit], total, limit, offset
+        )
+        category_metadata = next(
+            (dict(item) for item in INTERFACE_STYLE_CATEGORIES if item["key"] == category),
+            {"key": category, "label": category, "description": "接口风格关联"},
+        )
+        profile = self._semantic_category_profile(category, architecture)
+        result["selection"] = {
+            "value": raw_value,
+            "normalized_value": normalized,
+            "observed": observed,
+            "category": category_metadata,
+            "architecture": interface_subtype_metadata(category, architecture),
+            "rationale": [
+                "先按调用入口形态确定顶层类别",
+                "再按路径语法、命名空间和分发形态确定后端架构风格",
+                "推荐结果仅表示结构相似，不构成代码同源或组件身份结论",
+            ],
+        }
+        result["related_vendors"] = profile["top_vendors"]
+        result["related_firmware"] = profile["top_models"]
+        result["related_vulnerabilities"] = [dict(row) for row in vulnerability_rows]
+        result["scope"] = {
+            "interface_count": profile["scope_interface_count"],
+            "vulnerability_count": profile["scope_vulnerability_count"],
+            "vendor_count": profile["scope_vendor_count"],
+            "model_count": profile["scope_model_count"],
+        }
+        return result
 
     def _semantic_associations(
         self, kind: str, value: str, limit: int, offset: int

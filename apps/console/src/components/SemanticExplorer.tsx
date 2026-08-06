@@ -8,6 +8,7 @@ import { formatRelativeTime, severityTone } from '../lib/format'
 import type {
   SemanticAssociation, SemanticCatalogItem, SemanticCategory,
   SemanticCategoryProfile, SemanticExploreKind, SemanticExplorePage, Vulnerability,
+  InterfaceStructureRecommendation,
 } from '../types'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { PaginationControls } from './PaginationControls'
@@ -106,7 +107,7 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
     <section className="mt-4">
       {error && <div role="alert" className="mb-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
       {mode === 'category'
-        ? <CategoryAtlas categories={categories} loading={loading} onSelect={openCategory} />
+        ? <><InterfaceStructureSearch onSelectInterface={(value) => open('interface', value)} /><CategoryAtlas categories={categories} loading={loading} onSelect={openCategory} /></>
         : (
           <>
             <div className="mb-4 flex flex-col gap-3 rounded-[20px] border border-white/[0.07] bg-white/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -167,6 +168,51 @@ function CatalogTable({ mode, page, loading, onSelect, onPage }: {
       </div>
       {page && <PaginationControls page={page.page} pages={page.pages} total={page.total} hasPrevious={page.has_previous} hasNext={page.has_next} onPage={onPage} />}
     </div>
+  )
+}
+
+function InterfaceStructureSearch({ onSelectInterface }: { onSelectInterface: (value: string) => void }) {
+  const [value, setValue] = useState('')
+  const [submitted, setSubmitted] = useState('')
+  const [result, setResult] = useState<InterfaceStructureRecommendation | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const run = (route: string, page = 1) => {
+    const query = route.trim()
+    if (!query) return
+    const controller = new AbortController()
+    setSubmitted(query); setLoading(true); setError(null)
+    void intelligenceApi.recommendInterfaceStructure(query, page, controller.signal)
+      .then(setResult)
+      .catch((caught) => setError(caught instanceof Error ? caught.message : '无法分析该接口'))
+      .finally(() => setLoading(false))
+  }
+
+  return (
+    <article className="mb-4 overflow-hidden rounded-[24px] border border-signal/15 bg-gradient-to-br from-signal/[0.055] via-[#0e151e] to-cyan/[0.025] shadow-lift">
+      <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+        <div><div className="eyebrow"><Search size={13} /> Interface structure query</div><h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-white">输入接口，寻找相似后端通信结构</h2><p className="mt-2 max-w-2xl text-[10px] leading-5 text-slate-600">支持数据库中尚未出现的路径。系统先推断接口类别和后端架构风格，再关联同结构接口、漏洞、厂商与固件型号。</p></div>
+        <form aria-label="接口结构查询" onSubmit={(event) => { event.preventDefault(); run(value) }} className="flex gap-2">
+          <label className="search-field min-w-0 flex-1"><Network size={14} /><span className="sr-only">固件接口</span><input value={value} onChange={(event) => setValue(event.target.value)} placeholder="输入固件接口，例如 /goform/SetOnlineDevName" /></label>
+          <button type="submit" disabled={!value.trim() || loading} className="rounded-xl border border-signal/20 bg-signal/[0.10] px-4 text-[10px] font-semibold text-signal transition hover:bg-signal/[0.16] disabled:opacity-40">{loading ? '分析中…' : '分析并推荐'}</button>
+        </form>
+      </div>
+      {error && <div role="alert" className="mx-5 mb-5 rounded-xl border border-ember/20 bg-ember/[0.06] px-3 py-2 text-[10px] text-ember">{error}</div>}
+      {result && <div className="border-t border-white/[0.065] p-5">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_repeat(4,110px)]">
+          <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-4"><div className="flex flex-wrap items-center gap-2"><span className="rounded-lg bg-cyan/[0.08] px-2 py-1 text-[9px] text-cyan">{result.selection.category.label}</span><ArrowRight size={12} className="text-slate-700" /><strong className="text-xs text-signal">{result.selection.architecture.label}</strong><span className="rounded bg-white/[0.04] px-1.5 py-1 text-[8px] text-slate-600">{result.selection.observed ? '已有观察' : '路径推断'}</span></div><p className="mt-2 text-[9px] leading-4 text-slate-650">{result.selection.architecture.description}</p><p className="mt-2 text-[8px] text-slate-750">结构相似性推荐，不构成代码同源或组件身份结论。</p></div>
+          <MiniStatCard label="相似接口" value={result.scope.interface_count} /><MiniStatCard label="关联漏洞" value={result.scope.vulnerability_count} /><MiniStatCard label="厂商" value={result.scope.vendor_count} /><MiniStatCard label="固件型号" value={result.scope.model_count} />
+        </div>
+        <div className="mt-4 grid gap-4 xl:grid-cols-[1.15fr_.85fr]">
+          <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-black/10"><div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3"><div className="eyebrow"><Network size={12} /> Recommended interfaces</div><span className="font-mono text-[9px] text-slate-700">{result.total} matches</span></div><div className="divide-y divide-white/[0.05]">{result.items.map((item) => <button type="button" key={item.value} onClick={() => onSelectInterface(item.value)} className="grid w-full grid-cols-[minmax(0,1fr)_70px] items-center gap-3 px-4 py-3 text-left transition hover:bg-white/[0.035]"><div className="min-w-0"><code className="block truncate text-[11px] font-semibold text-slate-200">{item.value}</code><p className="mt-1 truncate text-[8px] text-slate-650">{item.similarity_signals.join(' · ')}</p><div className="mt-1.5 flex flex-wrap gap-1">{item.vendors.map((vendor) => <span key={vendor} className="rounded bg-white/[0.035] px-1.5 py-0.5 text-[8px] text-slate-500">{vendor}</span>)}</div></div><div className="text-right"><strong className="font-mono text-sm text-signal">{item.similarity_score}</strong><span className="block text-[7px] uppercase text-slate-700">similarity</span><span className="mt-1 block text-[8px] text-slate-600">{item.vulnerability_count} 漏洞</span></div></button>)}</div>{result.pages > 1 && <PaginationControls page={result.page} pages={result.pages} total={result.total} hasPrevious={result.has_previous} hasNext={result.has_next} onPage={(page) => run(submitted, page)} />}</section>
+          <div className="space-y-3">
+            <section className="rounded-2xl border border-white/[0.07] bg-black/10 p-4"><div className="eyebrow"><BarChart3 size={12} /> Related vendors & firmware</div><div className="mt-3 flex flex-wrap gap-1.5">{result.related_vendors.slice(0, 8).map((item) => <span key={item.vendor} className="rounded-lg border border-white/[0.06] bg-white/[0.025] px-2 py-1 text-[8px] text-slate-400">{item.vendor} · {item.model_count} 型号</span>)}</div><div className="mt-3 grid gap-1.5 sm:grid-cols-2">{result.related_firmware.slice(0, 6).map((item) => <div key={item.key} className="rounded-lg bg-white/[0.025] p-2"><strong className="block truncate text-[9px] text-slate-300">{item.label}</strong><span className="mt-1 block truncate font-mono text-[8px] text-cyan/70">{item.version_summary}</span></div>)}</div></section>
+            <section className="rounded-2xl border border-white/[0.07] bg-black/10 p-4"><div className="eyebrow"><ShieldAlert size={12} /> Representative vulnerabilities</div><div className="mt-3 space-y-2">{result.related_vulnerabilities.slice(0, 5).map((item) => <article key={item.identifier} className="rounded-lg border border-white/[0.05] bg-white/[0.02] p-2.5"><div className="flex items-center justify-between gap-2"><code className="text-[9px] font-semibold text-cyan">{item.identifier}</code><span className={`rounded px-1.5 py-0.5 text-[8px] ${severityTone(item.severity)}`}>{item.cvss_score ?? '—'}</span></div><p className="mt-1 truncate text-[9px] text-slate-400">{item.title}</p><span className="mt-1 block text-[8px] text-slate-700">{[item.vendor, item.product].filter((value) => value && value.toLowerCase() !== 'n/a').join(' · ') || '厂商/型号待补全'}</span></article>)}</div></section>
+          </div>
+        </div>
+      </div>}
+    </article>
   )
 }
 

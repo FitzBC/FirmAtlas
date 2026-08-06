@@ -130,6 +130,9 @@ class IntelligenceApiTests(unittest.TestCase):
         categories_status, categories = self.get(
             "/api/intelligence/semantic/categories"
         )
+        recommend_status, recommendation = self.get(
+            "/api/intelligence/semantic/interface-recommendation?value=%2Fgoform%2Fsave"
+        )
 
         self.assertEqual(200, feed_status)
         self.assertEqual(2, feed["page"])
@@ -138,6 +141,12 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertGreaterEqual(explore["total"], 1)
         self.assertEqual(200, categories_status)
         self.assertGreaterEqual(categories["total"], 1)
+        self.assertEqual(200, recommend_status)
+        self.assertEqual(
+            "goform_lower_registry",
+            recommendation["selection"]["architecture"]["key"],
+        )
+        self.assertEqual(["/goform/apply"], [item["value"] for item in recommendation["items"]])
 
 
 if __name__ == "__main__":

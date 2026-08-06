@@ -315,6 +315,47 @@ export interface SemanticCategoryProfile extends SemanticCategory {
   top_models: FirmwareModel[]
 }
 
+export interface InterfaceStructureRecommendation {
+  items: Array<SemanticCatalogItem & {
+    similarity_score: number
+    similarity_signals: string[]
+  }>
+  total: number
+  limit: number
+  offset: number
+  page: number
+  pages: number
+  has_previous: boolean
+  has_next: boolean
+  selection: {
+    value: string
+    normalized_value: string
+    observed: boolean
+    category: Pick<SemanticCategory, 'key' | 'label' | 'description'>
+    architecture: { key: string; label: string; description: string }
+    rationale: string[]
+  }
+  scope: {
+    interface_count: number
+    vulnerability_count: number
+    vendor_count: number
+    model_count: number
+  }
+  related_vendors: Array<{ vendor: string; vulnerability_count: number; model_count: number }>
+  related_firmware: FirmwareModel[]
+  related_vulnerabilities: Array<{
+    identifier: string
+    title: string
+    summary: string
+    vendor: string | null
+    product: string | null
+    severity: string | null
+    cvss_score: number | null
+    published_at: string | null
+    modified_at: string | null
+  }>
+}
+
 export interface SemanticExplorePage<T> {
   items: T[]
   total: number

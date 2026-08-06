@@ -94,6 +94,17 @@ def create_handler(
                 return HTTPStatus.OK, semantic.overview()
             if method == "GET" and path == "/api/intelligence/semantic/categories":
                 return HTTPStatus.OK, service.repository.semantic_categories()
+            if method == "GET" and path == "/api/intelligence/semantic/interface-recommendation":
+                recommend_size = max(1, min(_integer(query, "page_size", 20), 100))
+                recommend_page = max(1, _integer(query, "page", 1))
+                try:
+                    return HTTPStatus.OK, service.repository.recommend_interface_structure(
+                        value=_one(query, "value"),
+                        limit=recommend_size,
+                        offset=(recommend_page - 1) * recommend_size,
+                    )
+                except ValueError as error:
+                    raise ApiError(HTTPStatus.BAD_REQUEST, str(error))
             if method == "GET" and path == "/api/intelligence/semantic/explore":
                 explore_size = max(1, min(_integer(query, "page_size", 25), 100))
                 explore_page = max(1, _integer(query, "page", 1))

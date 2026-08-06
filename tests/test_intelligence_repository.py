@@ -230,6 +230,65 @@ class IntelligenceRepositoryTests(unittest.TestCase):
             {item["value"] for item in camel["examples"]},
         )
 
+    def test_interface_structure_recommendation_accepts_an_unseen_route(self) -> None:
+        base = demo_records()[0]
+        fixtures = (
+            replace(
+                base, identifier="CVE-2025-2301", source_identifier="CVE-2025-2301",
+                vendor="Tenda", product="AC10 firmware",
+                summary="The HTTP endpoint /goform/SetOnlineDevName accepts the parameter name.",
+            ),
+            replace(
+                base, identifier="CVE-2025-2302", source_identifier="CVE-2025-2302",
+                vendor="Tenda", product="AC18 firmware",
+                summary="The HTTP endpoint /goform/SetStaticRouteCfg accepts the parameter route.",
+            ),
+            replace(
+                base, identifier="CVE-2025-2303", source_identifier="CVE-2025-2303",
+                vendor="D-Link", product="DIR-825 firmware",
+                summary="The HTTP endpoint /goform/goform_set_cmd_process accepts the parameter cmd.",
+            ),
+        )
+        semantic = SemanticAnalysisService(self.repository)
+        for item in fixtures:
+            self.repository.upsert(item, self.classifier.classify(item, self.policy))
+            semantic.analyze_identifier(item.identifier)
+
+        result = self.repository.recommend_interface_structure(
+            "/goform/SetGuestWifiCfg", limit=10
+        )
+
+        self.assertEqual("form_handler", result["selection"]["category"]["key"])
+        self.assertEqual(
+            "goform_camel_registry", result["selection"]["architecture"]["key"]
+        )
+        self.assertFalse(result["selection"]["observed"])
+        self.assertEqual(
+            {"/goform/SetOnlineDevName", "/goform/SetStaticRouteCfg"},
+            {item["value"] for item in result["items"]},
+        )
+        self.assertTrue(all(item["similarity_score"] >= 80 for item in result["items"]))
+        self.assertEqual(["Tenda"], [item["vendor"] for item in result["related_vendors"]])
+        self.assertEqual(
+            {"Tenda AC10 固件", "Tenda AC18 固件"},
+            {item["label"] for item in result["related_firmware"]},
+        )
+        self.assertEqual(
+            {"CVE-2025-2301", "CVE-2025-2302"},
+            {item["identifier"] for item in result["related_vulnerabilities"]},
+        )
+
+        full_url = self.repository.recommend_interface_structure(
+            "http://router.local/goform/SetGuestWifiCfg?token=secret", limit=10
+        )
+        self.assertEqual(
+            "/goform/SetGuestWifiCfg", full_url["selection"]["normalized_value"]
+        )
+        self.assertEqual(
+            {item["value"] for item in result["items"]},
+            {item["value"] for item in full_url["items"]},
+        )
+
     def test_form_handler_subtypes_describe_backend_registration_architecture(self) -> None:
         base = demo_records()[0]
         expected = {

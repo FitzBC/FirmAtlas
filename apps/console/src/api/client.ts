@@ -15,6 +15,7 @@ import type {
   SemanticCategory,
   SemanticExploreKind,
   SemanticExplorePage,
+  InterfaceStructureRecommendation,
 } from '../types'
 
 interface Envelope<T> {
@@ -77,6 +78,12 @@ export const intelligenceApi = {
   semanticCategories: () => request<{ items: SemanticCategory[]; total: number }>(
     '/api/intelligence/semantic/categories',
   ),
+  recommendInterfaceStructure: (value: string, page = 1, signal?: AbortSignal) => {
+    const params = new URLSearchParams({ value, page: String(page), page_size: '20' })
+    return request<InterfaceStructureRecommendation>(
+      `/api/intelligence/semantic/interface-recommendation?${params}`, { signal },
+    )
+  },
   semanticExplore: (
     kind: SemanticExploreKind, page = 1, query = '', value = '', signal?: AbortSignal,
     subtype = '',

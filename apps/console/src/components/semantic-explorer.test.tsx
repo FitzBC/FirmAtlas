@@ -73,6 +73,41 @@ it('renders intelligent style categories as an explorable visual map', async () 
   expect(screen.getByText('/cgi-bin/apply.cgi')).toBeInTheDocument()
 })
 
+it('recommends structurally related interfaces from an entered firmware route', async () => {
+  vi.spyOn(intelligenceApi, 'semanticCategories').mockResolvedValue({ items: [], total: 0 })
+  const recommend = vi.spyOn(intelligenceApi, 'recommendInterfaceStructure').mockResolvedValue({
+    selection: {
+      value: '/goform/SetGuestWifiCfg', normalized_value: '/goform/SetGuestWifiCfg', observed: false,
+      category: { key: 'form_handler', label: '表单处理器', description: '表单入口' },
+      architecture: { key: 'goform_camel_registry', label: 'goform 驼峰命名注册表', description: '驼峰处理器注册结构' },
+      rationale: ['推荐结果仅表示结构相似'],
+    },
+    scope: { interface_count: 318, vulnerability_count: 828, vendor_count: 9, model_count: 87 },
+    items: [{
+      value: '/goform/SetOnlineDevName', category: 'form_handler', subtype: 'goform_camel_registry',
+      kind: 'http_route', protocol: 'HTTP', component: 'Web Interface', occurrence_count: 15,
+      vulnerability_count: 15, vendor_count: 1, vendors: ['Tenda'], latest_at: '2025-01-01T00:00:00Z',
+      similarity_score: 95, similarity_signals: ['后端通信架构风格一致', '入口命名空间一致'],
+    }],
+    related_vendors: [{ vendor: 'Tenda', vulnerability_count: 569, model_count: 67 }],
+    related_firmware: [{ key: 'tenda ac18', label: 'Tenda AC18 固件', vendor: 'Tenda', model: 'AC18', version_summary: '15.03.05.19', source: 'description', alignment: 'aligned', vulnerability_count: 34 }],
+    related_vulnerabilities: [{ identifier: 'CVE-2025-2301', title: 'Router handler vulnerability', summary: 'summary', vendor: 'Tenda', product: 'AC18 firmware', severity: 'HIGH', cvss_score: 8.8, published_at: '2025-01-01T00:00:00Z', modified_at: '2025-01-02T00:00:00Z' }],
+    total: 1, limit: 20, offset: 0, page: 1, pages: 1, has_previous: false, has_next: false,
+  })
+
+  render(<SemanticExplorer mode="category" />)
+  const inputs = await screen.findAllByPlaceholderText('输入固件接口，例如 /goform/SetOnlineDevName')
+  fireEvent.change(inputs[inputs.length - 1], { target: { value: '/goform/SetGuestWifiCfg' } })
+  const submitButtons = screen.getAllByRole('button', { name: '分析并推荐' })
+  fireEvent.click(submitButtons[submitButtons.length - 1])
+
+  expect((await screen.findAllByText('goform 驼峰命名注册表')).length).toBeGreaterThan(0)
+  expect(screen.getAllByText('/goform/SetOnlineDevName').length).toBeGreaterThan(0)
+  expect(screen.getAllByText('Tenda AC18 固件').length).toBeGreaterThan(0)
+  expect(screen.getAllByText('CVE-2025-2301').length).toBeGreaterThan(0)
+  expect(recommend).toHaveBeenCalledWith('/goform/SetGuestWifiCfg', 1, expect.any(AbortSignal))
+})
+
 it('filters vendor and firmware families by backend architecture style', async () => {
   vi.spyOn(intelligenceApi, 'semanticCategories').mockResolvedValue({
     total: 1,
