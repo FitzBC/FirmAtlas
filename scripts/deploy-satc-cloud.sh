@@ -64,7 +64,7 @@ if $with_database; then
   trap 'rm -rf "$snapshot_dir"' EXIT
   echo "Creating a consistent SQLite snapshot..."
   sqlite3 "$repository_root/var/firmatlas.db" ".backup '$snapshot_dir/firmatlas.db'"
-  rsync -ah --partial --info=progress2 \
+  rsync -ah --partial --progress \
     "$snapshot_dir/firmatlas.db" \
     "$deployment_host:$remote_root/shared/var/firmatlas.db.incoming"
   ssh -o BatchMode=yes "$deployment_host" \
