@@ -231,32 +231,34 @@ function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSu
             <div><div className="eyebrow"><Sparkles size={13} /> Category intelligence</div><h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">{profile.label || category}</h2><p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-600">{profile.description || '正在构建接口类别画像…'}</p></div>
             <button type="button" onClick={onClose} aria-label="关闭类别详情" className="grid h-9 w-9 place-items-center rounded-xl border border-white/[0.08] text-slate-500 transition hover:text-white"><X size={16} /></button>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4"><MiniStatCard label="关联接口" value={profile.interface_count || page?.total || 0} /><MiniStatCard label="关联漏洞" value={profile.vulnerability_count || 0} /><MiniStatCard label="厂商" value={profile.vendor_count || 0} /><MiniStatCard label="固件型号" value={profile.firmware_count || 0} /></div>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4"><MiniStatCard label="关联接口" value={subtype ? profile.scope_interface_count : (profile.interface_count || page?.total || 0)} /><MiniStatCard label="关联漏洞" value={subtype ? profile.scope_vulnerability_count : (profile.vulnerability_count || 0)} /><MiniStatCard label="厂商" value={subtype ? profile.scope_vendor_count : (profile.vendor_count || 0)} /><MiniStatCard label="固件型号" value={subtype ? profile.scope_model_count : (profile.firmware_count || 0)} /></div>
         </header>
         <div className="space-y-5 p-6">
           {loading && !page ? <div className="grid min-h-80 place-items-center"><LoaderCircle className="animate-spin text-signal" /></div> : (
             <>
               <div className="grid gap-4 lg:grid-cols-2">
                 <section className="rounded-2xl border border-white/[0.07] bg-white/[0.022] p-4">
-                  <div className="eyebrow"><Layers3 size={12} /> Action subtypes</div>
+                  <div className="eyebrow"><Layers3 size={12} /> Backend architecture styles</div>
+                  <p className="mt-2 text-[9px] leading-4 text-slate-650">按路径语法、命名空间和分发形态推断通信结构；用于发现可能同源的后端控制面，不等同于已确认组件。</p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">{(profile.subtypes || []).map((item) => (
                     <button key={item.key} type="button" onClick={() => onSubtype(subtype === item.key ? '' : item.key)} className={`rounded-xl border p-3 text-left transition ${subtype === item.key ? 'border-signal/35 bg-signal/[0.07]' : 'border-white/[0.06] bg-black/10 hover:border-white/[0.13]'}`}>
                       <div className="flex items-center justify-between"><strong className="text-[11px] text-slate-200">{item.label}</strong><span className="font-mono text-[9px] text-signal">{item.interface_count}</span></div>
                       <p className="mt-1.5 line-clamp-2 text-[9px] leading-4 text-slate-650">{item.description}</p>
-                      <span className="mt-2 block text-[8px] text-slate-700">{item.vulnerability_count} 个关联漏洞</span>
+                      <div className="mt-2 flex flex-wrap gap-1">{(item.examples || []).slice(0, 2).map((example) => <code key={example.value} title={example.value} className="max-w-full truncate rounded bg-black/25 px-1.5 py-1 text-[8px] text-cyan/80">{example.value}</code>)}</div>
+                      <span className="mt-2 block text-[8px] text-slate-700">{item.vulnerability_count} 漏洞 · {item.vendor_count} 厂商 · {item.model_count} 型号</span>
                     </button>
                   ))}</div>
                 </section>
                 <section className="rounded-2xl border border-white/[0.07] bg-white/[0.022] p-4">
-                  <div className="eyebrow"><BarChart3 size={12} /> Vendor distribution</div>
+                  <div className="eyebrow"><BarChart3 size={12} /> {profile.active_subtype ? `${profile.active_subtype.label} · Vendor distribution` : 'Vendor distribution'}</div>
                   <div className="mt-4 space-y-3">{(profile.top_vendors || []).slice(0, 8).map((item) => (
                     <div key={item.vendor}><div className="mb-1.5 flex items-center justify-between text-[10px]"><span className="text-slate-400">{item.vendor}</span><span className="font-mono text-slate-600">{item.vulnerability_count} 漏洞 · {item.model_count} 型号</span></div><div className="h-1.5 overflow-hidden rounded-full bg-white/[0.05]"><i className="block h-full rounded-full bg-gradient-to-r from-cyan/50 to-signal" style={{ width: `${item.vulnerability_count / maxVendor * 100}%` }} /></div></div>
                   ))}</div>
                 </section>
               </div>
               <section className="rounded-2xl border border-white/[0.07] bg-white/[0.022] p-4">
-                <div className="eyebrow"><CircuitBoard size={12} /> Standard firmware models</div>
-                <p className="mt-2 text-[9px] text-slate-650">描述与产品标题为主，CPE 仅补充版本边界与一致性校验。</p>
+                <div className="eyebrow"><CircuitBoard size={12} /> {profile.active_subtype ? `${profile.active_subtype.label} · Firmware families` : 'Standard firmware models'}</div>
+                <p className="mt-2 text-[9px] text-slate-650">{profile.active_subtype ? '以下厂商与型号均出现过该通信架构，可作为后端结构同族分析的候选集合。' : '选择一种后端架构风格，即可收敛到可能共享通信结构的厂商与固件型号。'}</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">{(profile.top_models || []).map((model) => (
                   <article key={model.key} className="rounded-xl border border-white/[0.06] bg-black/10 p-3"><strong className="block truncate text-[11px] text-slate-200" title={model.label}>{model.label}</strong><div className="mt-2 flex items-center justify-between gap-2"><span className="font-mono text-[9px] text-cyan">{model.version_summary}</span><span className={`rounded px-1.5 py-0.5 text-[8px] ${model.alignment === 'aligned' ? 'bg-signal/10 text-signal' : 'bg-amber-400/10 text-amber-300'}`}>{model.alignment === 'aligned' ? '描述/CPE 一致' : model.source === 'description' ? '描述优先' : 'CPE 补全'}</span></div><span className="mt-2 block text-[8px] text-slate-700">{model.vulnerability_count || 0} 个漏洞</span></article>
                 ))}</div>
@@ -266,7 +268,7 @@ function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSu
                 <div className="divide-y divide-white/[0.055]">{page?.items.map((item) => (
                   <button key={item.value} type="button" onClick={() => onSelectInterface(item.value)} className="group grid w-full grid-cols-[minmax(0,1fr)_105px] items-center gap-3 px-4 py-3 text-left transition hover:bg-white/[0.035] sm:grid-cols-[minmax(0,1fr)_160px_120px_100px]">
                     <div className="min-w-0"><code className="block truncate text-[11px] font-semibold text-slate-200 group-hover:text-signal">{item.value}</code><span className="mt-1 block text-[9px] text-slate-650">{[item.method, item.protocol, item.component].filter(Boolean).join(' · ') || '管理路由'}</span></div>
-                    <span className="rounded-lg border border-white/[0.07] px-2 py-1 text-[9px] text-cyan">{item.subtype_label || item.subtype || '其他动作'}</span>
+                    <span className="rounded-lg border border-white/[0.07] px-2 py-1 text-[9px] text-cyan">{item.subtype_label || item.subtype || '未定型结构'}</span>
                     <span className="hidden text-[9px] text-slate-600 sm:block">{item.vendor_count} 家厂商</span>
                     <span className="flex items-center justify-end gap-2 font-mono text-[10px] text-white">{item.vulnerability_count}<ArrowRight size={12} className="text-slate-700 group-hover:text-signal" /></span>
                   </button>

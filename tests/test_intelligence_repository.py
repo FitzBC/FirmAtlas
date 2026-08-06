@@ -130,7 +130,7 @@ class IntelligenceRepositoryTests(unittest.TestCase):
             {item["key"] for item in categories["items"]},
         )
 
-    def test_category_drilldown_distinguishes_actions_and_normalizes_models(self) -> None:
+    def test_category_drilldown_groups_architecture_and_normalizes_models(self) -> None:
         base = demo_records()[0]
         fixtures = (
             replace(
@@ -162,11 +162,7 @@ class IntelligenceRepositoryTests(unittest.TestCase):
 
         self.assertEqual(3, result["total"])
         self.assertEqual(
-            {
-                "import_export_action",
-                "firmware_upgrade_action",
-                "data_service_action",
-            },
+            {"flat_page_controller"},
             {item["subtype"] for item in result["items"]},
         )
         profile = result["selection"]
@@ -188,14 +184,60 @@ class IntelligenceRepositoryTests(unittest.TestCase):
         )
         self.assertEqual(["/upgrade_filter.asp"], [item["value"] for item in filtered["items"]])
 
-    def test_form_handler_subtypes_follow_route_intent_not_http_kind(self) -> None:
+    def test_architecture_filter_profiles_only_matching_firmware_families(self) -> None:
+        base = demo_records()[0]
+        fixtures = (
+            replace(
+                base, identifier="CVE-2025-2201", source_identifier="CVE-2025-2201",
+                vendor="Tenda", product="AC10 firmware",
+                summary="The HTTP endpoint /goform/SetOnlineDevName accepts the parameter name.",
+            ),
+            replace(
+                base, identifier="CVE-2025-2202", source_identifier="CVE-2025-2202",
+                vendor="Tenda", product="AC18 firmware",
+                summary="The HTTP endpoint /goform/SetStaticRouteCfg accepts the parameter route.",
+            ),
+            replace(
+                base, identifier="CVE-2025-2203", source_identifier="CVE-2025-2203",
+                vendor="D-Link", product="DIR-825 firmware",
+                summary="The HTTP endpoint /goform/goform_set_cmd_process accepts the parameter cmd.",
+            ),
+        )
+        semantic = SemanticAnalysisService(self.repository)
+        for item in fixtures:
+            self.repository.upsert(item, self.classifier.classify(item, self.policy))
+            semantic.analyze_identifier(item.identifier)
+
+        result = self.repository.semantic_explore(
+            "category", value="form_handler", subtype="goform_camel_registry", limit=10
+        )
+        profile = result["selection"]
+
+        self.assertEqual(2, result["total"])
+        self.assertEqual("goform_camel_registry", profile["active_subtype"]["key"])
+        self.assertEqual(2, profile["scope_interface_count"])
+        self.assertEqual(1, profile["scope_vendor_count"])
+        self.assertEqual(["Tenda"], [item["vendor"] for item in profile["top_vendors"]])
+        self.assertEqual(
+            {"Tenda AC10 固件", "Tenda AC18 固件"},
+            {item["label"] for item in profile["top_models"]},
+        )
+        camel = next(item for item in profile["subtypes"] if item["key"] == "goform_camel_registry")
+        self.assertEqual(1, camel["vendor_count"])
+        self.assertEqual(2, camel["model_count"])
+        self.assertEqual(
+            {"/goform/SetOnlineDevName", "/goform/SetStaticRouteCfg"},
+            {item["value"] for item in camel["examples"]},
+        )
+
+    def test_form_handler_subtypes_describe_backend_registration_architecture(self) -> None:
         base = demo_records()[0]
         expected = {
-            "/goform/SetLogin": "account_access",
-            "/goform/SetCmdlineRun": "diagnostics_command",
-            "/goform/PowerSaveSet": "configuration_mutation",
-            "/goform/AddDnsForward": "network_management",
-            "/goform/QuickIndex": "form_other",
+            "/goform/SetOnlineDevName": "goform_camel_registry",
+            "/goform/SetStaticRouteCfg": "goform_camel_registry",
+            "/goform/goform_set_cmd_process": "goform_snake_registry",
+            "/goform/ate": "goform_lower_registry",
+            "/goform/*": "goform_wildcard_dispatcher",
         }
         semantic = SemanticAnalysisService(self.repository)
         for index, route in enumerate(expected, start=1):
@@ -211,7 +253,7 @@ class IntelligenceRepositoryTests(unittest.TestCase):
             base,
             identifier="CVE-2025-3199",
             source_identifier="CVE-2025-3199",
-            summary="The HTTP endpoint /goform/SetLogin accepts the parameter username.",
+            summary="The HTTP endpoint /goform/SetOnlineDevName accepts the parameter name.",
         )
         self.repository.upsert(
             duplicate, self.classifier.classify(duplicate, self.policy)
@@ -227,6 +269,64 @@ class IntelligenceRepositoryTests(unittest.TestCase):
             {item["value"]: item["subtype"] for item in result["items"]},
         )
         self.assertEqual(5, result["selection"]["interface_count"])
+
+    def test_all_style_subtypes_describe_backend_routing_architecture(self) -> None:
+        base = demo_records()[0]
+        expected = {
+            "cgi_gateway": {
+                "/cgi-bin/cstecgi.cgi": "shared_cgi_dispatcher",
+                "/cgi-bin/admin/setparam.cgi": "nested_cgi_module",
+                "/cgi-bin/account_mgr.cgi": "cgi_executable_registry",
+                "/authentication.cgi": "external_cgi_handler",
+            },
+            "hnap_soap": {
+                "/HNAP1": "hnap_envelope_dispatcher",
+                "/HNAP1/SetClientInfo": "hnap_uri_method",
+                "/control/WANIPConnection": "upnp_service_control",
+                "/web/cgi-bin/hnap/hnap_service": "soap_service_endpoint",
+            },
+            "resource_api": {
+                "/api/v1/devices/register": "versioned_resource_router",
+                "/api/CONFIG/restore": "namespaced_api_router",
+                "/api/login": "flat_api_registry",
+            },
+            "web_action": {
+                "/importexport.php": "flat_page_controller",
+                "/sysmanage/updateos.php": "namespaced_page_controller",
+                "/home.jsp": "servlet_page_controller",
+                "/download.do": "framework_action_dispatcher",
+            },
+            "management_route": {
+                "/boafrm/formFilter": "boafrm_handler_registry",
+                "/RPC2": "flat_named_management_handler",
+                "/admin/sign/DeviceSynch": "namespaced_management_router",
+                "/config.xml": "structured_data_endpoint",
+                "/images/captcha.jpeg": "media_endpoint",
+                "/opaque/path": "unresolved_management_route",
+            },
+        }
+        semantic = SemanticAnalysisService(self.repository)
+        index = 0
+        for routes in expected.values():
+            for route in routes:
+                index += 1
+                item = replace(
+                    base,
+                    identifier="CVE-2025-32{:02d}".format(index),
+                    source_identifier="CVE-2025-32{:02d}".format(index),
+                    summary="The HTTP endpoint {} accepts the parameter value.".format(route),
+                )
+                self.repository.upsert(
+                    item, self.classifier.classify(item, self.policy)
+                )
+                semantic.analyze_identifier(item.identifier)
+
+        for category, routes in expected.items():
+            result = self.repository.semantic_explore(
+                "category", value=category, limit=50
+            )
+            actual = {item["value"]: item["subtype"] for item in result["items"]}
+            self.assertEqual(routes, actual)
 
 
 if __name__ == "__main__":

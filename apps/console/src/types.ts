@@ -299,10 +299,18 @@ export interface SemanticSubtype {
   description: string
   interface_count: number
   vulnerability_count: number
+  vendor_count: number
+  model_count: number
+  examples: Array<{ value: string; vulnerability_count: number }>
 }
 
 export interface SemanticCategoryProfile extends SemanticCategory {
   subtypes: SemanticSubtype[]
+  active_subtype?: Pick<SemanticSubtype, 'key' | 'label' | 'description'> | null
+  scope_interface_count: number
+  scope_vulnerability_count: number
+  scope_vendor_count: number
+  scope_model_count: number
   top_vendors: Array<{ vendor: string; vulnerability_count: number; model_count: number }>
   top_models: FirmwareModel[]
 }

@@ -16,7 +16,7 @@ from urllib.request import Request, urlopen
 
 ANALYZER_VERSION = "rules-2026.08.6"
 PROMPT_VERSION = "interface-map-2026.08.1"
-INTERFACE_SUBTYPE_VERSION = "subtypes-2026.08.2"
+INTERFACE_SUBTYPE_VERSION = "architecture-styles-2026.08.1"
 
 
 @dataclass(frozen=True)
@@ -270,40 +270,37 @@ INTERFACE_STYLE_CATEGORIES = (
 
 INTERFACE_STYLE_SUBTYPES = {
     "form_handler": (
-        ("upload_upgrade", "上传与升级", "固件上传、升级、导入或恢复操作。"),
-        ("network_management", "网络配置", "WAN、LAN、无线、路由与 DHCP 管理。"),
-        ("account_access", "账户与访问", "登录、账户、口令与鉴权配置。"),
-        ("diagnostics_command", "诊断与命令", "诊断、Ping、执行与命令入口。"),
-        ("configuration_mutation", "配置变更", "通用设置、应用与写入处理器。"),
-        ("form_other", "其他表单动作", "尚未归入专门用途的表单入口。"),
+        ("goform_camel_registry", "goform 驼峰命名注册表", "单层 CamelCase/PascalCase URI 名称直接映射后端处理器。"),
+        ("goform_snake_registry", "goform 下划线命名注册表", "单层 snake_case URI 名称映射处理器，常见于另一套代码生成或注册约定。"),
+        ("goform_lower_registry", "goform 小写命名注册表", "单层全小写 URI 名称映射处理器。"),
+        ("goform_symbol_registry", "goform 符号命名注册表", "缩写或全大写处理器名称形成的直接注册表。"),
+        ("goform_wildcard_dispatcher", "goform 通配分发器", "通配 URI 进入统一分发入口，而非逐动作暴露。"),
+        ("form_namespace_registry", "form 命名空间注册表", "使用 /form/ 命名空间注册的单层表单处理器。"),
     ),
     "cgi_gateway": (
-        ("cgi_upload_upgrade", "上传与升级 CGI", "固件上传、升级与恢复 CGI。"),
-        ("cgi_authentication", "认证 CGI", "登录、会话与账户鉴权 CGI。"),
-        ("cgi_configuration", "配置 CGI", "设备配置读取与修改 CGI。"),
-        ("cgi_dispatcher", "通用 CGI 分派器", "集中路由多个管理动作的 CGI。"),
-        ("cgi_other", "其他 CGI", "尚未归入专门用途的 CGI 入口。"),
+        ("shared_cgi_dispatcher", "共享 CGI 分发器", "多个动作复用 cstecgi.cgi、webproc、apply.cgi 等单一入口。"),
+        ("cgi_executable_registry", "CGI 可执行注册表", "在 /cgi-bin/ 下以单层可执行名称映射处理程序。"),
+        ("nested_cgi_module", "分层 CGI 模块", "在 /cgi-bin/<module>/ 下按模块层级组织处理程序。"),
+        ("external_cgi_handler", "外置 CGI 处理器", "不使用标准 /cgi-bin/ 前缀的独立 CGI 路由。"),
+        ("scgi_gateway", "SCGI 网关", "使用 /scgi-bin/ 命名空间的网关式处理结构。"),
     ),
     "hnap_soap": (
-        ("hnap_action", "HNAP 动作", "HNAP 设备管理动作。"),
-        ("soap_control", "SOAP 控制", "SOAP/XML 控制调用。"),
-        ("upnp_control", "UPnP 控制", "UPnP 控制端点与动作。"),
-        ("service_action", "服务动作", "其他服务化 XML 动作。"),
+        ("hnap_envelope_dispatcher", "HNAP 信封分发器", "所有 HNAP 动作进入 /HNAP1，由 SOAPAction 或消息体决定方法。"),
+        ("hnap_uri_method", "HNAP URI 方法映射", "将 HNAP 方法名直接编码进 /HNAP1/<Method> 路径。"),
+        ("upnp_service_control", "UPnP 服务控制端点", "按 /control/<Service> 暴露 UPnP 服务控制面。"),
+        ("soap_service_endpoint", "SOAP 服务端点", "使用独立服务 URI 承载 SOAP/HNAP 消息分发。"),
     ),
     "resource_api": (
-        ("authentication_api", "认证 API", "登录、令牌、会话与账户资源。"),
-        ("firmware_lifecycle_api", "固件生命周期 API", "固件上传、升级与版本管理资源。"),
-        ("configuration_api", "配置 API", "设备配置读取与修改资源。"),
-        ("device_resource_api", "设备资源 API", "设备、状态与遥测资源。"),
-        ("rest_other", "其他资源 API", "尚未归入专门用途的资源接口。"),
+        ("versioned_resource_router", "版本化资源路由器", "以 /v1、/api/v1 或 /api/2.0 固化协议版本边界。"),
+        ("namespaced_api_router", "分层 API 命名空间", "以 /api/<module>/<handler> 组织模块和处理器。"),
+        ("flat_api_registry", "扁平 API 注册表", "以 /api/<handler> 单层注册调用入口。"),
+        ("rest_resource_tree", "REST 资源树", "以 /rest/<resource>/... 的资源层级组织路由。"),
     ),
     "web_action": (
-        ("import_export_action", "导入、导出与备份", "配置导入、导出、备份与恢复页面动作。"),
-        ("firmware_upgrade_action", "固件升级", "固件上传、升级、更新与过滤页面动作。"),
-        ("data_service_action", "数据服务", "数据库、查询与后端数据服务页面动作。"),
-        ("authentication_action", "认证动作", "登录、账户、会话与鉴权页面动作。"),
-        ("configuration_page_action", "配置页面动作", "通用配置读取、设置与应用页面动作。"),
-        ("web_action_other", "其他动态页面", "尚未归入专门用途的动态页面动作。"),
+        ("flat_page_controller", "扁平页面控制器", "动态页面位于 Web 根目录，以文件名直接映射控制器。"),
+        ("namespaced_page_controller", "分层页面控制器", "按目录模块组织 ASP/PHP 页面控制器。"),
+        ("servlet_page_controller", "Servlet 页面控制器", "以 JSP/ASPX 页面映射到 Servlet 或托管运行时。"),
+        ("framework_action_dispatcher", "框架动作分发器", "使用 .do/.action 等动作后缀进入框架分发链。"),
     ),
     "rpc_command": (
         ("command_execution", "命令执行", "命令解释器与执行调用。"),
@@ -312,11 +309,12 @@ INTERFACE_STYLE_SUBTYPES = {
         ("rpc_method", "RPC 方法", "RPC 方法与服务调用。"),
     ),
     "management_route": (
-        ("boa_form_handler", "Boa 表单入口", "Boa Web 服务器的表单处理入口。"),
-        ("media_resource", "媒体资源", "截图、视频、音频与媒体流资源。"),
-        ("configuration_route", "配置路由", "配置读取与修改路由。"),
-        ("admin_route", "管理后台", "管理员控制台与系统管理路由。"),
-        ("management_other", "其他管理路由", "尚未归入专门用途的管理路由。"),
+        ("boafrm_handler_registry", "boafrm 处理器注册表", "以 /boafrm/form<Name> 形成单层命名处理器注册结构。"),
+        ("flat_named_management_handler", "扁平命名管理处理器", "根路径下的扩展名无关命名处理器。"),
+        ("namespaced_management_router", "分层管理路由器", "以 /admin、/web、/cgi 等目录表达管理模块层级。"),
+        ("structured_data_endpoint", "结构化数据端点", "以 XML/JSON 文件形态承载控制面数据交换。"),
+        ("media_endpoint", "媒体传输端点", "以图片、视频或流文件形态暴露媒体数据。"),
+        ("unresolved_management_route", "未定型管理路由", "路径证据不足，暂不推断具体注册或分发架构。"),
     ),
 }
 
@@ -332,7 +330,12 @@ def classify_interface_style(value: str, kind: str = "", component: str = "") ->
         return "form_handler"
     if normalized.startswith(("/cgi-bin/", "/scgi-bin/")) or ".cgi" in normalized:
         return "cgi_gateway"
-    if "hnap" in normalized or "soap" in normalized or "soap" in context:
+    if (
+        "hnap" in normalized
+        or "soap" in normalized
+        or "soap" in context
+        or normalized.startswith("/control/")
+    ):
         return "hnap_soap"
     if normalized.startswith(("/api/", "/rest/", "/v1/", "/v2/")):
         return "resource_api"
@@ -346,7 +349,7 @@ def classify_interface_style(value: str, kind: str = "", component: str = "") ->
 def classify_interface_subtype(
     value: str, kind: str = "", component: str = "", category: str = ""
 ) -> str:
-    """Refine a top-level style by the route's operational intent."""
+    """Refine a top-level style by its routing and handler architecture."""
     normalized = "{} {}".format(value or "", component or "").lower()
     kind_value = (kind or "").lower()
     category = category or classify_interface_style(value, kind, component)
@@ -355,55 +358,60 @@ def classify_interface_subtype(
         return any(needle in normalized for needle in needles)
 
     if category == "web_action":
-        if has("import", "export", "backup", "restore"):
-            return "import_export_action"
-        if has("upgrade", "update", "firmware", "upload", "flash"):
-            return "firmware_upgrade_action"
-        if has("dbsrv", "database", "query", "datasrv", "data_service"):
-            return "data_service_action"
-        if has("login", "auth", "account", "user", "session", "password"):
-            return "authentication_action"
-        if has("config", "setting", "setup", "apply", "save"):
-            return "configuration_page_action"
-        return "web_action_other"
+        route = (value or "").strip().rstrip("'").lower()
+        if re.search(r"\.(?:do|action)(?:/|$)", route):
+            return "framework_action_dispatcher"
+        if re.search(r"\.(?:jsp|aspx)(?:/|$)", route):
+            return "servlet_page_controller"
+        if route.count("/") > 1:
+            return "namespaced_page_controller"
+        return "flat_page_controller"
     if category == "form_handler":
-        if has("upload", "upgrade", "firmware", "import", "export", "restore"):
-            return "upload_upgrade"
-        if has("wan", "lan", "wifi", "wlan", "dhcp", "dns", "nat", "route", "network"):
-            return "network_management"
-        if has("login", "auth", "account", "user", "password"):
-            return "account_access"
-        if has("exec", "command", "cmd", "diag", "ping", "trace"):
-            return "diagnostics_command"
-        if has("set", "apply", "write", "config", "cfg", "save"):
-            return "configuration_mutation"
-        return "form_other"
+        route = (value or "").strip().rstrip("'")
+        if "*" in route:
+            return "goform_wildcard_dispatcher"
+        if route.lower().startswith("/form/"):
+            return "form_namespace_registry"
+        handler = route.rsplit("/", 1)[-1]
+        if "_" in handler:
+            return "goform_snake_registry"
+        if handler.islower():
+            return "goform_lower_registry"
+        if handler.isupper():
+            return "goform_symbol_registry"
+        return "goform_camel_registry"
     if category == "cgi_gateway":
-        if has("upload", "upgrade", "firmware", "restore"):
-            return "cgi_upload_upgrade"
-        if has("login", "auth", "account", "session", "password"):
-            return "cgi_authentication"
-        if has("config", "setting", "apply", "setup"):
-            return "cgi_configuration"
-        if has("cstecgi", "webproc", "dispatch", "controller", "router"):
-            return "cgi_dispatcher"
-        return "cgi_other"
+        route = (value or "").strip().rstrip("'").lower()
+        basename = route.rsplit("/", 1)[-1]
+        if route.startswith("/scgi-bin/"):
+            return "scgi_gateway"
+        if basename in {"cstecgi.cgi", "webproc", "apply.cgi", "cgi", "main"}:
+            return "shared_cgi_dispatcher"
+        if route.startswith("/cgi-bin/") and route.count("/") > 2:
+            return "nested_cgi_module"
+        if route.startswith("/cgi-bin/"):
+            return "cgi_executable_registry"
+        return "external_cgi_handler"
     if category == "hnap_soap":
-        if "hnap" in normalized:
-            return "hnap_action"
-        if "upnp" in normalized or "/control/" in normalized:
-            return "upnp_control"
-        return "soap_control" if "soap" in normalized else "service_action"
+        route = (value or "").strip().rstrip("/.").lower()
+        if route == "/hnap1":
+            return "hnap_envelope_dispatcher"
+        if route.startswith("/hnap1/"):
+            return "hnap_uri_method"
+        if route.startswith("/control/"):
+            return "upnp_service_control"
+        return "soap_service_endpoint"
     if category == "resource_api":
-        if has("login", "auth", "token", "session", "account", "password"):
-            return "authentication_api"
-        if has("firmware", "upgrade", "update", "upload", "version"):
-            return "firmware_lifecycle_api"
-        if has("config", "setting", "setup", "preference"):
-            return "configuration_api"
-        if has("device", "status", "system", "telemetry", "info"):
-            return "device_resource_api"
-        return "rest_other"
+        route = (value or "").strip().lower()
+        if re.match(r"/(?:api/)?v\d+(?:\.\d+)?/", route) or re.match(
+            r"/api/\d+(?:\.\d+)?/", route
+        ):
+            return "versioned_resource_router"
+        if route.startswith("/rest/"):
+            return "rest_resource_tree"
+        if route.startswith("/api/") and route.count("/") >= 3:
+            return "namespaced_api_router"
+        return "flat_api_registry"
     if category == "rpc_command":
         if has("command", "exec", "shell", "cmd"):
             return "command_execution"
@@ -413,15 +421,19 @@ def classify_interface_subtype(
             return "device_node"
         return "rpc_method"
     if category == "management_route":
-        if "/boafrm/" in normalized:
-            return "boa_form_handler"
-        if has("stream", "video", "audio", "snapshot", "image", "media"):
-            return "media_resource"
-        if has("config", "setting", "setup", "apply"):
-            return "configuration_route"
-        if has("admin", "manage", "system", "control"):
-            return "admin_route"
-        return "management_other"
+        route = (value or "").strip()
+        lowered = route.lower()
+        if lowered.startswith("/boafrm/"):
+            return "boafrm_handler_registry"
+        if re.search(r"\.(?:xml|json)(?:/|$)", lowered):
+            return "structured_data_endpoint"
+        if re.search(r"\.(?:jpe?g|png|gif|mp4|mjpg)(?:/|$)", lowered):
+            return "media_endpoint"
+        if lowered.startswith(("/admin/", "/web/", "/cgi/", "/management/", "/manage/")):
+            return "namespaced_management_router"
+        if re.fullmatch(r"/[A-Za-z][\w-]*", route):
+            return "flat_named_management_handler"
+        return "unresolved_management_route"
     return ""
 
 
@@ -429,7 +441,11 @@ def interface_subtype_metadata(category: str, subtype: str) -> Dict[str, str]:
     for key, label, description in INTERFACE_STYLE_SUBTYPES.get(category, ()):
         if key == subtype:
             return {"key": key, "label": label, "description": description}
-    return {"key": subtype, "label": subtype or "未分类", "description": "基于接口用途自动归纳。"}
+    return {
+        "key": subtype,
+        "label": subtype or "未分类",
+        "description": "基于路径语法、命名空间与分发形态推断。",
+    }
 
 
 def normalize_firmware_model(

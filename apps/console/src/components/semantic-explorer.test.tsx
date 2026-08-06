@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { intelligenceApi } from '../api/client'
 import { SemanticExplorer } from './SemanticExplorer'
@@ -73,7 +73,7 @@ it('renders intelligent style categories as an explorable visual map', async () 
   expect(screen.getByText('/cgi-bin/apply.cgi')).toBeInTheDocument()
 })
 
-it('opens a category workspace with subtype, vendor, model and searchable interfaces', async () => {
+it('filters vendor and firmware families by backend architecture style', async () => {
   vi.spyOn(intelligenceApi, 'semanticCategories').mockResolvedValue({
     total: 1,
     items: [{
@@ -87,12 +87,14 @@ it('opens a category workspace with subtype, vendor, model and searchable interf
     selection: {
       key: 'web_action', label: '动态页面动作', description: '动态控制器入口',
       interface_count: 3, vulnerability_count: 3, vendor_count: 2, firmware_count: 3,
-      subtypes: [{ key: 'firmware_upgrade_action', label: '固件升级', description: '升级动作', interface_count: 1, vulnerability_count: 1 }],
+      scope_interface_count: 3, scope_vulnerability_count: 3, scope_vendor_count: 2, scope_model_count: 3,
+      active_subtype: null,
+      subtypes: [{ key: 'flat_page_controller', label: '扁平页面控制器', description: '根目录文件映射控制器', interface_count: 3, vulnerability_count: 3, vendor_count: 2, model_count: 3, examples: [{ value: '/upgrade_filter.asp', vulnerability_count: 1 }] }],
       top_vendors: [{ vendor: 'D-Link', vulnerability_count: 2, model_count: 2 }],
       top_models: [{ key: 'd-link dir-816 a2', label: 'D-Link DIR-816 A2 固件', vendor: 'D-Link', model: 'DIR-816 A2', version_summary: '1.10CNB04', source: 'description', alignment: 'aligned', vulnerability_count: 1 }],
     },
     items: [{
-      value: '/upgrade_filter.asp', category: 'web_action', subtype: 'firmware_upgrade_action', subtype_label: '固件升级',
+      value: '/upgrade_filter.asp', category: 'web_action', subtype: 'flat_page_controller', subtype_label: '扁平页面控制器',
       kind: 'http_route', method: 'POST', protocol: 'HTTP', occurrence_count: 1,
       vulnerability_count: 1, vendor_count: 1, vendors: ['D-Link'], latest_at: '2025-01-01T00:00:00Z',
     }],
@@ -103,11 +105,13 @@ it('opens a category workspace with subtype, vendor, model and searchable interf
   fireEvent.click(await screen.findByRole('button', { name: /动态页面动作/ }))
 
   expect(await screen.findByText('D-Link DIR-816 A2 固件')).toBeInTheDocument()
-  expect(screen.getAllByText('固件升级').length).toBeGreaterThan(0)
+  expect(screen.getAllByText('扁平页面控制器').length).toBeGreaterThan(0)
   expect(screen.getAllByText('/upgrade_filter.asp').length).toBeGreaterThan(0)
+  fireEvent.click(screen.getAllByRole('button', { name: /扁平页面控制器/ })[0])
+  await waitFor(() => expect(explore).toHaveBeenLastCalledWith('category', 1, '', 'web_action', expect.any(AbortSignal), 'flat_page_controller'))
   fireEvent.change(screen.getByPlaceholderText('搜索该类别下的接口…'), { target: { value: 'upgrade' } })
   await new Promise((resolve) => setTimeout(resolve, 260))
-  expect(explore).toHaveBeenLastCalledWith('category', 1, 'upgrade', 'web_action', expect.any(AbortSignal), '')
+  expect(explore).toHaveBeenLastCalledWith('category', 1, 'upgrade', 'web_action', expect.any(AbortSignal), 'flat_page_controller')
 })
 
 it('keeps the catalog usable when an observation has no identified vendor', async () => {

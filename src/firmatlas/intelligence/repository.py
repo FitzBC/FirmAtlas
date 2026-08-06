@@ -1197,52 +1197,108 @@ class IntelligenceRepository:
                 category, item.get("subtype") or ""
             )["label"]
         result = self._semantic_page(items, total, limit, offset)
-        result["selection"] = self._semantic_category_profile(category)
+        result["selection"] = self._semantic_category_profile(category, subtype)
         return result
 
-    def _semantic_category_profile(self, category: str) -> Dict[str, Any]:
+    def _semantic_category_profile(
+        self, category: str, active_subtype: str = ""
+    ) -> Dict[str, Any]:
         category_item = next(
             (item for item in self.semantic_categories()["items"] if item["key"] == category),
             {"key": category, "label": category, "description": "接口风格关联"},
         )
+        active_subtype = active_subtype.strip()
+        scoped_clause = " AND o.style_subtype=?" if active_subtype else ""
+        scoped_values: Tuple[Any, ...] = (
+            (category, active_subtype) if active_subtype else (category,)
+        )
         with self.read_connection() as connection:
             subtype_rows = connection.execute(
                 """SELECT o.style_subtype subtype,COUNT(DISTINCT o.value) interface_count,
-                          COUNT(DISTINCT a.vulnerability_identifier) vulnerability_count
+                          COUNT(DISTINCT a.vulnerability_identifier) vulnerability_count,
+                          COUNT(DISTINCT CASE WHEN lower(COALESCE(v.vendor,''))
+                            NOT IN ('','n/a','unknown') THEN v.vendor END) vendor_count,
+                          COUNT(DISTINCT CASE WHEN lower(COALESCE(v.product,''))
+                            NOT IN ('','n/a','unknown') THEN v.product END) model_count
                    FROM semantic_interface_observations o
                    JOIN semantic_analyses a USING(analysis_id)
+                   JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
                    WHERE a.is_current=1 AND o.style_category=?
                    GROUP BY o.style_subtype ORDER BY vulnerability_count DESC,subtype""",
                 (category,),
             ).fetchall()
+            example_rows = connection.execute(
+                """SELECT o.style_subtype subtype,o.value,
+                          COUNT(DISTINCT a.vulnerability_identifier) vulnerability_count
+                   FROM semantic_interface_observations o
+                   JOIN semantic_analyses a USING(analysis_id)
+                   WHERE a.is_current=1 AND o.style_category=?
+                   GROUP BY o.style_subtype,o.value
+                   ORDER BY o.style_subtype,vulnerability_count DESC,o.value""",
+                (category,),
+            ).fetchall()
+            scope_row = connection.execute(
+                """SELECT COUNT(DISTINCT o.value) interface_count,
+                          COUNT(DISTINCT a.vulnerability_identifier) vulnerability_count,
+                          COUNT(DISTINCT CASE WHEN lower(COALESCE(v.vendor,''))
+                            NOT IN ('','n/a','unknown') THEN v.vendor END) vendor_count,
+                          COUNT(DISTINCT CASE WHEN lower(COALESCE(v.product,''))
+                            NOT IN ('','n/a','unknown') THEN v.product END) model_count
+                   FROM semantic_interface_observations o
+                   JOIN semantic_analyses a USING(analysis_id)
+                   JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
+                   WHERE a.is_current=1 AND o.style_category=?{}""".format(scoped_clause),
+                scoped_values,
+            ).fetchone()
             vendor_rows = connection.execute(
                 """SELECT v.vendor,COUNT(DISTINCT v.identifier) vulnerability_count,
                           COUNT(DISTINCT v.product) model_count
                    FROM semantic_interface_observations o
                    JOIN semantic_analyses a USING(analysis_id)
                    JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
-                   WHERE a.is_current=1 AND o.style_category=?
+                   WHERE a.is_current=1 AND o.style_category=?{}
                      AND lower(COALESCE(v.vendor,'')) NOT IN ('','n/a','unknown')
-                   GROUP BY v.vendor ORDER BY vulnerability_count DESC,v.vendor LIMIT 12""",
-                (category,),
+                   GROUP BY v.vendor ORDER BY vulnerability_count DESC,v.vendor LIMIT 12""".format(scoped_clause),
+                scoped_values,
             ).fetchall()
             firmware_rows = connection.execute(
                 """SELECT DISTINCT v.identifier,v.vendor,v.product,v.title,v.summary,v.cpes_json
                    FROM semantic_interface_observations o
                    JOIN semantic_analyses a USING(analysis_id)
                    JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
-                   WHERE a.is_current=1 AND o.style_category=?""",
-                (category,),
+                   WHERE a.is_current=1 AND o.style_category=?{}""".format(scoped_clause),
+                scoped_values,
             ).fetchall()
         profile = dict(category_item)
+        examples: Dict[str, List[Dict[str, Any]]] = {}
+        for row in example_rows:
+            bucket = examples.setdefault(row["subtype"] or "", [])
+            if len(bucket) < 3:
+                bucket.append({
+                    "value": row["value"],
+                    "vulnerability_count": row["vulnerability_count"],
+                })
         profile["subtypes"] = []
         for row in subtype_rows:
             item = interface_subtype_metadata(category, row["subtype"] or "")
             item.update({
                 "interface_count": row["interface_count"],
                 "vulnerability_count": row["vulnerability_count"],
+                "vendor_count": row["vendor_count"],
+                "model_count": row["model_count"],
+                "examples": examples.get(row["subtype"] or "", []),
             })
             profile["subtypes"].append(item)
+        profile["active_subtype"] = (
+            interface_subtype_metadata(category, active_subtype)
+            if active_subtype else None
+        )
+        profile.update({
+            "scope_interface_count": scope_row["interface_count"],
+            "scope_vulnerability_count": scope_row["vulnerability_count"],
+            "scope_vendor_count": scope_row["vendor_count"],
+            "scope_model_count": scope_row["model_count"],
+        })
         profile["top_vendors"] = [dict(row) for row in vendor_rows]
         models: Dict[str, Dict[str, Any]] = {}
         for row in firmware_rows:
