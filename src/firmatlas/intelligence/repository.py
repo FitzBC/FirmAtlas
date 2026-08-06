@@ -26,6 +26,7 @@ from .sources import is_meaningful_identity, vendors_and_products_from_cpes
 
 
 IDENTITY_NORMALIZATION_VERSION = "cpe-fallback-2026.08.1"
+ANALYTICS_CACHE_VERSION = "identity-aware-vendor-counts-2026.08.1"
 
 
 def _utc_now() -> str:
@@ -460,6 +461,24 @@ class IntelligenceRepository:
             ):
                 self._repair_vulnerability_identities(connection)
                 self._save_identity_normalization_marker(connection)
+            analytics_marker = connection.execute(
+                "SELECT value_json FROM settings WHERE key='analytics_cache_version'"
+            ).fetchone()
+            if (
+                not analytics_marker
+                or _loads(analytics_marker[0], "") != ANALYTICS_CACHE_VERSION
+            ):
+                connection.execute("DELETE FROM analytics_cache")
+                connection.execute(
+                    """INSERT INTO settings(key,value_json,updated_at) VALUES(?,?,?)
+                       ON CONFLICT(key) DO UPDATE SET value_json=excluded.value_json,
+                           updated_at=excluded.updated_at""",
+                    (
+                        "analytics_cache_version",
+                        _json(ANALYTICS_CACHE_VERSION),
+                        _utc_now(),
+                    ),
+                )
 
     def repair_vulnerability_identities(self, force: bool = False) -> int:
         """Restore missing vendor/product identities from existing CPE evidence."""
@@ -537,6 +556,7 @@ class IntelligenceRepository:
                 """INSERT INTO vulnerabilities_fts(identifier,title,summary,vendor,product)
                    SELECT identifier,title,summary,vendor,product FROM vulnerabilities"""
             )
+        connection.execute("DELETE FROM analytics_cache")
         return len(updates)
 
     def get_policy(self) -> RelevancePolicy:

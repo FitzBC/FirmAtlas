@@ -110,6 +110,8 @@ class IntelligenceRepositoryTests(unittest.TestCase):
                 "WHERE identifier=?",
                 ("CVE-2018-16119 · n/a n/a", item.identifier),
             )
+        self.repository.refresh_analytics()
+        self.assertEqual([], self.repository.overview()["vendors"])
 
         repaired = self.repository.repair_vulnerability_identities(force=True)
 
@@ -119,6 +121,10 @@ class IntelligenceRepositoryTests(unittest.TestCase):
         self.assertEqual("tl-wr1043nd firmware", stored["product"])
         self.assertEqual(
             "CVE-2018-16119 · TP-Link tl-wr1043nd firmware", stored["title"]
+        )
+        self.assertEqual(
+            [{"label": "TP-Link", "value": 1}],
+            self.repository.overview()["vendors"],
         )
         categories = self.repository.semantic_categories()["items"]
         management = next(row for row in categories if row["key"] == "management_route")
