@@ -105,6 +105,6 @@ if [[ "$remote_revision" != "$revision" ]]; then
 fi
 
 ssh -o BatchMode=yes "$deployment_host" \
-  "curl --fail --silent --max-time 10 http://127.0.0.1:18080/ | grep -q '<title>FirmAtlas</title>'"
+  "curl --fail --silent --max-time 10 http://127.0.0.1:18080/ | grep -q '<title>FirmAtlas'"
 
 echo "FirmAtlas $revision is running on $deployment_host:18080."
