@@ -1,4 +1,4 @@
-.PHONY: test demo seed-demo api intelligence-bootstrap intelligence-update web-install web-dev web-build
+.PHONY: test demo seed-demo api intelligence-bootstrap intelligence-update web-install web-dev web-build deploy deploy-with-data
 
 test:
 	PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -26,3 +26,9 @@ web-dev:
 
 web-build:
 	pnpm --dir apps/console build
+
+deploy:
+	./scripts/deploy-satc-cloud.sh
+
+deploy-with-data:
+	./scripts/deploy-satc-cloud.sh --with-database

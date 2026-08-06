@@ -1,0 +1,14 @@
+[Unit]
+Description=FirmAtlas vulnerability intelligence platform
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/apps/firmatlas/current
+Environment=PYTHONPATH=%h/apps/firmatlas/current/src
+ExecStart=/usr/bin/python3 -m firmatlas intelligence serve --database %h/apps/firmatlas/shared/var/firmatlas.db --host 0.0.0.0 --port 18080 --static-dir %h/apps/firmatlas/current/apps/console/dist
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

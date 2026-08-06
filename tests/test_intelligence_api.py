@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+import tempfile
 import threading
 import unittest
 from dataclasses import replace
@@ -147,6 +149,35 @@ class IntelligenceApiTests(unittest.TestCase):
             recommendation["selection"]["architecture"]["key"],
         )
         self.assertEqual(["/goform/apply"], [item["value"] for item in recommendation["items"]])
+
+    def test_can_serve_built_console_and_spa_routes(self) -> None:
+        self.server.shutdown()
+        self.server.server_close()
+        self.thread.join(timeout=2)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "index.html").write_text(
+                "<!doctype html><title>FirmAtlas</title>", encoding="utf-8"
+            )
+            service = IntelligenceService(self.repository)
+            self.server = ThreadingHTTPServer(
+                ("127.0.0.1", 0), create_handler(service, static_dir=directory)
+            )
+            self.thread = threading.Thread(
+                target=self.server.serve_forever, daemon=True
+            )
+            self.thread.start()
+
+            with urlopen(
+                "http://127.0.0.1:{}/semantic/interfaces".format(
+                    self.server.server_port
+                ),
+                timeout=2,
+            ) as response:
+                body = response.read().decode("utf-8")
+
+            self.assertEqual(200, response.status)
+            self.assertIn("<title>FirmAtlas</title>", body)
 
 
 if __name__ == "__main__":

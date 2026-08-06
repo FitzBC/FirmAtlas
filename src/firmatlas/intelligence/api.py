@@ -6,6 +6,8 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import logging
+import mimetypes
+from pathlib import Path
 from typing import Any, Dict, Tuple
 from urllib.parse import parse_qs, unquote, urlparse
 
@@ -29,8 +31,10 @@ class ApiError(RuntimeError):
 def create_handler(
     service: IntelligenceService,
     semantic_service: SemanticAnalysisService = None,
+    static_dir: str = None,
 ):
     semantic = semantic_service or SemanticAnalysisService(service.repository)
+    static_root = Path(static_dir).resolve() if static_dir else None
 
     class IntelligenceHandler(BaseHTTPRequestHandler):
         server_version = "FirmAtlas/0.1"
@@ -52,6 +56,9 @@ def create_handler(
         def _dispatch(self, method: str) -> None:
             request_id = self.headers.get("X-Request-ID", "-")
             try:
+                if method == "GET" and static_root and not urlparse(self.path).path.startswith("/api/"):
+                    self._serve_static(static_root)
+                    return
                 status, payload = self._route(method)
                 self._send_json(status, {"data": payload, "request_id": request_id})
             except (BrokenPipeError, ConnectionResetError):
@@ -71,6 +78,31 @@ def create_handler(
                     HTTPStatus.INTERNAL_SERVER_ERROR,
                     {"error": "internal server error", "request_id": request_id},
                 )
+
+        def _serve_static(self, root: Path) -> None:
+            requested_path = unquote(urlparse(self.path).path).lstrip("/")
+            candidate = (root / (requested_path or "index.html")).resolve()
+            try:
+                candidate.relative_to(root)
+            except ValueError:
+                raise ApiError(HTTPStatus.NOT_FOUND, "route not found")
+
+            if not candidate.is_file():
+                candidate = root / "index.html"
+            if not candidate.is_file():
+                raise ApiError(HTTPStatus.NOT_FOUND, "route not found")
+
+            encoded = candidate.read_bytes()
+            content_type = mimetypes.guess_type(str(candidate))[0] or "application/octet-stream"
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(encoded)))
+            self.send_header(
+                "Cache-Control",
+                "no-cache" if candidate.name == "index.html" else "public, max-age=31536000, immutable",
+            )
+            self.end_headers()
+            self.wfile.write(encoded)
 
         def _route(self, method: str) -> Tuple[int, Any]:
             parsed = urlparse(self.path)
@@ -231,10 +263,17 @@ def create_handler(
     return IntelligenceHandler
 
 
-def serve(database: str, host: str = "127.0.0.1", port: int = 8787) -> None:
+def serve(
+    database: str,
+    host: str = "127.0.0.1",
+    port: int = 8787,
+    static_dir: str = None,
+) -> None:
     repository = IntelligenceRepository(database)
     service = IntelligenceService(repository)
-    server = ThreadingHTTPServer((host, port), create_handler(service))
+    server = ThreadingHTTPServer(
+        (host, port), create_handler(service, static_dir=static_dir)
+    )
     LOGGER.info("FirmAtlas API listening on http://%s:%s", host, port)
     try:
         server.serve_forever()

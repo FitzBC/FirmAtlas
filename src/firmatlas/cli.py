@@ -62,6 +62,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _database_argument(serve_parser)
     serve_parser.add_argument("--host", default="127.0.0.1")
     serve_parser.add_argument("--port", type=int, default=8787)
+    serve_parser.add_argument(
+        "--static-dir",
+        help="serve the built console from this directory on non-API routes",
+    )
 
     sync_parser = intelligence_subparsers.add_parser(
         "sync", help="incrementally update official intelligence sources"
@@ -105,7 +109,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             from .intelligence.api import serve
 
             logging.basicConfig(level=logging.INFO, format="%(message)s")
-            serve(args.database, args.host, args.port)
+            serve(args.database, args.host, args.port, args.static_dir)
             return 0
 
         from .intelligence.relevance import FirmwareRelevanceClassifier
