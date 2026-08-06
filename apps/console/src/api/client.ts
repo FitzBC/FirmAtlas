@@ -28,12 +28,29 @@ interface ErrorEnvelope {
   request_id?: string
 }
 
+let fallbackRequestSequence = 0
+
+function createRequestId(): string {
+  const randomUUID = globalThis.crypto?.randomUUID
+  if (typeof randomUUID === 'function') {
+    return randomUUID.call(globalThis.crypto)
+  }
+
+  fallbackRequestSequence += 1
+  return [
+    'req',
+    Date.now().toString(36),
+    fallbackRequestSequence.toString(36),
+    Math.random().toString(36).slice(2, 10),
+  ].join('-')
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'X-Request-ID': crypto.randomUUID(),
+      'X-Request-ID': createRequestId(),
       ...init?.headers,
     },
   })
