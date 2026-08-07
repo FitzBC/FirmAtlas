@@ -1,128 +1,231 @@
+<div align="center">
+
+<sub><b>FIRMWARE INTELLIGENCE / EVIDENCE OS</b></sub>
+
 # FirmAtlas
 
-FirmAtlas 是一个以证据为核心的一体化固件分析平台。它将固件归档、递归解包、组件清单、通信拓扑、接口与参数、历史漏洞关联、版本差异和最新漏洞情报放入同一条可追溯分析链。
+### 把固件、版本、接口与漏洞放进同一张可追溯证据图谱
 
-当前仓库已经包含：
+FirmAtlas 是一个证据驱动的一体化固件分析平台。它聚合固件样本与官方漏洞情报，提取通信接口和参数，按版本边界建立漏洞关联，并让每一个判断都能回到来源与匹配理由。
 
-- 统一的[领域词汇](./CONTEXT.md)，避免“固件版本”“文件”“漏洞命中”等概念混用；
-- [总体架构](./docs/architecture.md)、[功能范围与路线图](./docs/product-scope.md)；
-- [情报源与同步策略](./docs/intelligence-sources.md)；
-- 一个零第三方依赖的 Python 领域内核，用来固化首个分析结果接口；
-- 针对不可信固件输入的[安全基线](./docs/security.md)；
-- 可增量更新的 NVD / CISA KEV 情报后端与高级 React 情报工作台；
-- 基于后端通信架构风格的接口语义分类、相似接口推荐与漏洞下钻；
-- 元数据优先的固件样本目录，以及可解释的厂商、产品和版本范围漏洞关联；可从固件查漏洞，也可从漏洞反查关联样本。
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)](#快速开始)
+[![React Console](https://img.shields.io/badge/Console-React-61DAFB?style=flat-square&logo=react&logoColor=07111A)](./apps/console)
+[![SQLite FTS5](https://img.shields.io/badge/Search-SQLite_FTS5-4A90E2?style=flat-square&logo=sqlite&logoColor=white)](#能力矩阵)
+[![Evidence First](https://img.shields.io/badge/Mode-Evidence_First-B7F36B?style=flat-square)](./docs/security.md)
 
-## 先跑起来
+**[系统演示](#系统演示)** · **[能力矩阵](#能力矩阵)** · **[快速开始](#快速开始)** · **[技术架构](#技术架构)** · **[文档中心](#文档中心)**
 
-要求 Python 3.9+；运行前端需要 Node.js 22.12+ 与 pnpm 10+。
+</div>
 
-```bash
-make test
-make demo
+![FirmAtlas 漏洞情报工作台](./docs/assets/firmatlas-dashboard.jpg)
+
+## 为什么是 FirmAtlas
+
+传统固件分析往往把“样本目录、静态分析、接口测绘、漏洞情报”拆成互不相通的工具。FirmAtlas 用统一领域模型连接这些证据，让分析者回答三个更重要的问题：
+
+- **这个固件到底是什么？** 厂商、型号、候选版本、下载来源与制品状态分别记录，不把 URL 冒充成已验证样本。
+- **它可能受哪些漏洞影响？** 精确版本、版本范围、产品范围与来源实证分层展示，并保留 CPE 边界、分值和匹配理由。
+- **它的后端通信结构像谁？** 从漏洞描述中提取接口、参数与请求方式，按 `/goform`、CGI、HNAP/SOAP、动态页面控制器等架构风格聚类并推荐相似接口。
+
+> [!IMPORTANT]
+> FirmAtlas 输出的是带证据的分析线索。自动版本关联不等同于漏洞复现，候选下载地址也不等同于已下载、哈希校验的固件制品。
+
+## 系统演示
+
+### 调查栈：从固件一路追到漏洞证据
+
+在固件详情中查看关联漏洞、版本边界和来源证据；继续打开漏洞时不会离开当前工作区。多级详情按调查栈展开，关闭后逐级回到原始列表与筛选状态。
+
+![FirmAtlas 固件与漏洞分层调查栈](./docs/assets/firmatlas-investigation-stack.jpg)
+
+### 接口智能关联：寻找相似后端通信架构
+
+输入任意固件接口，系统优先返回原样命中和关键词命中，再根据路径命名空间、处理器命名及架构风格推荐相似接口，并同步聚合关联漏洞、厂商和固件型号。
+
+![FirmAtlas 接口结构智能关联](./docs/assets/firmatlas-interface-intelligence.jpg)
+
+## 能力矩阵
+
+| 分析面 | 当前能力 | 输出证据 |
+| --- | --- | --- |
+| 漏洞情报 | NVD 年度 Feed、增量更新、CISA KEV、CVSS/CWE、EXP/PoC 信号 | 原始来源记录、同步状态、评分版本、更新时间 |
+| 固件资产 | 公开 benchmark、研究数据集、厂商入口与候选下载地址统一检索 | 来源可信度、真实下载域名、候选版本身份、文件名与 URL |
+| 版本关联 | 厂商 → 产品 → 版本三层匹配，支持精确版本与 NVD 范围边界 | 匹配类型、受影响边界、解释信号、相关性分值 |
+| 接口测绘 | 从漏洞证据提取路径、CGI、HTTP 方法、参数与安全影响 | 接口原文、所属类别、参数上下文、关联 CVE |
+| 架构聚类 | 表单处理器、CGI 网关、管理路由、动态页面、资源型 API、HNAP/SOAP | 相似接口、命中理由、厂商与固件型号分布 |
+| 调查体验 | 固件 ↔ 漏洞 ↔ 接口多级下钻，不丢失列表与筛选上下文 | 分层面板、逐级回退、父级可见、移动端全屏层级 |
+| 大规模检索 | SQLite FTS5、字段索引、服务端分页与输入防抖 | 17 万级候选无需全量加载到浏览器 |
+
+<details>
+<summary><b>当前演示数据快照</b></summary>
+
+> 数据量会随本地同步状态变化；以下是仓库当前演示环境的快照。
+
+| 指标 | 数量 |
+| --- | ---: |
+| 固件下载候选 | 173,878 |
+| 已提取候选版本身份 | 115,672 |
+| 实际下载域名 | 270 |
+| 精确版本关联 | 515 |
+| 版本范围关联 | 4,587 |
+| 仅产品范围线索 | 2,420 |
+| 固件—漏洞关联总数 | 7,617 |
+| 已覆盖漏洞 | 647 |
+
+</details>
+
+## 技术架构
+
+```mermaid
+flowchart LR
+    A["官方与研究来源<br/>NVD · CISA KEV · Benchmark · Vendor"] --> B["采集与规范化<br/>原始记录 · 去重 · 增量状态"]
+    B --> C["证据模型<br/>固件 · 版本 · CPE · CVE · 接口"]
+    C --> D["关联引擎<br/>精确版本 · 范围 · 来源实证"]
+    C --> E["语义引擎<br/>接口 · 参数 · 架构风格"]
+    D --> F["Investigation Console<br/>检索 · 解释 · 多级下钻"]
+    E --> F
+    F --> G["可复核结论<br/>来源 · 置信度 · 匹配理由"]
 ```
 
-`make demo` 会输出一个最小分析报告，展示后续分析器统一提交的结果形状。
+架构刻意区分三类对象：**外部地址**只是候选，**下载并校验后的文件**才是制品，**从制品或权威来源提取的结论**才进入证据链。更完整的边界、组件关系和部署视图见[总体架构](./docs/architecture.md)。
 
-## 固件漏洞情报工作台
+## 快速开始
+
+要求 Python 3.9+。运行 Web 控制台还需要 Node.js 22.12+ 与 pnpm 10+。
 
 ```bash
-# 终端 1：准备演示数据并启动 API
+git clone <your-fork-or-repository-url>
+cd FirmAtlas
+
+make test
 make seed-demo
+```
+
+分别启动 API 与 Web 控制台：
+
+```bash
+# 终端 1
 make api
 
-# 终端 2：安装并启动 React 控制台
+# 终端 2
 make web-install
 make web-dev
 ```
 
-访问 `http://127.0.0.1:5173`。获取真实官方情报可以执行：
+打开 `http://127.0.0.1:5173`。只想查看领域内核的最小输出时，可运行 `make demo`。
+
+<details>
+<summary><b>同步完整 NVD 情报</b></summary>
+
+获取最近一天的官方情报：
 
 ```bash
-PYTHONPATH=src python3 -m firmatlas intelligence sync --source nvd --source cisa-kev --days 1
+PYTHONPATH=src python3 -m firmatlas intelligence sync \
+  --source nvd --source cisa-kev --days 1
 ```
 
-需要完整的本地 NVD 数据集时，先执行一次年度全量初始化，再周期执行统一增量更新：
+需要完整本地 NVD 数据集时，先初始化年度 Feed，再周期执行统一增量更新：
 
 ```bash
-# 首次：下载 2002 至当前年份的全部 JSON 2.0 feeds，校验后批量入库
+# 首次：2002 至当前年份的 JSON 2.0 feeds
 make intelligence-bootstrap
 
-# 后续：按 META 判断是否变化，导入 modified feed；断档超过 8 天自动年度对账
+# 后续：按 META 判断变化并导入 modified feed
 make intelligence-update
 ```
 
-年度压缩包保存在 `var/nvd-feeds/`，规范化记录、原始来源记录、FTS5 索引和 feed 状态保存在 `var/firmatlas.db`。命令可安全重跑：SHA-256 未变化且已成功导入的年度会被跳过。完整导入需要数百 MB 下载空间和更大的本地 SQLite 空间。
+压缩包保存在 `var/nvd-feeds/`，规范化记录、原始来源、FTS5 索引和 Feed 状态保存在 `var/firmatlas.db`。命令可安全重跑；SHA-256 未变化且已成功导入的年度会被跳过。NVD API Key 可通过 `NVD_API_KEY` 提供，未提供时客户端自动使用更保守的分页间隔。完整导入需要数百 MB 下载空间和更大的 SQLite 空间。
 
-NVD API key 可通过 `NVD_API_KEY` 环境变量提供；未提供时客户端自动按更保守的分页间隔运行。完整判定与更新机制见[情报实现说明](./docs/intelligence-acquisition.md)。
+详细机制见[情报采集实现](./docs/intelligence-acquisition.md)。
 
-## 固件样本目录与双向关联
+</details>
 
-固件资产页聚合公开 benchmark、厂商下载中心、研究数据集和社区归档。当前同步会登记 18 个证据来源，从 FirmEmuHub 收录 100 个 benchmark 候选，并根据 IoTVulBench 建立 95 条漏洞复现环境线索（覆盖 15 个不同固件）；同时流式读取 WUSTL Firmware Dataset，本次公开快照的 187,429 条有效记录经 URL 去重后形成 173,778 个候选。系统当前共可检索 173,878 个固件下载候选，并从 URL 中识别出 270 个实际下载域名。同步过程只读取文本元数据，不下载固件二进制，也不会把候选地址冒充为已经校验的制品。
+<details>
+<summary><b>同步固件目录并重建版本关联</b></summary>
 
 ```bash
-# 流式写入公开来源、样本候选和漏洞关系；约 30 MB 元数据，可安全重跑
+# 流式写入公开来源、样本候选与来源实证关系
 make firmware-catalog-sync
 
-# 根据本地 NVD 受影响 CPE、精确版本和版本边界重建关联
+# 根据本地 NVD CPE、精确版本与版本边界重建关联
 make firmware-version-link
 
 # 同时刷新目录和版本关联
 make firmware-refresh
-
-# 然后启动 API 和控制台，在左侧进入“固件资产”
-make api
-make web-dev
 ```
 
-支持的查询接口：
+关联器从来源字段和文件名提取带证据的候选版本身份，再与 NVD vulnerable CPE 做厂商、产品和版本匹配：
 
-- `GET /api/firmware/overview`：来源、候选、版本身份和各类漏洞关系总览；
-- `GET /api/firmware/sources`：即使暂无具体样本，也保留已验证的来源入口；
-- `GET /api/firmware/candidates?q=CVE-2017-13772`：按 CVE、厂商、型号、版本或文件名检索，可叠加 `vendor`、`source`、`host`、`has_vulnerability` 与 `match=version|exact_version|version_range|product_scope|curated_evidence`；
-- `GET /api/firmware/candidates/{candidate_id}`：查看下载候选、来源证据和关联漏洞；
-- `GET /api/firmware/vulnerabilities/{CVE}/samples`：从漏洞反查关联固件样本，支持 `page` 与 `page_size`。
+- `exact_version`：候选版本等于 CPE 明确版本；
+- `version_range`：版本方案兼容，且落在 NVD 起止边界内；
+- `product_scope`：NVD 将该产品所有版本列为受影响，仅代表产品范围；
+- `curated_evidence`：来自 benchmark 或研究仓库的明确环境映射。
 
-版本关联器会从来源版本字段和文件名提取带证据的“候选版本身份”，再与 NVD 的 vulnerable CPE 做厂商、产品和版本三层匹配。当前本地快照为 115,672 个候选提取出版本身份，并形成 515 条精确版本关联、4,587 条版本范围关联和 2,420 条仅产品范围线索；加上 95 条 benchmark 来源实证，共 7,617 条线索，覆盖 1,169 个固件候选和 647 个漏洞。UI 会显示候选版本、受影响边界、匹配方式和分值，并可只筛选“版本级命中”。
+版本方案不兼容时不会生成范围关联，避免把日期构建号与点分版本互相排序。每次更新漏洞 Feed 或固件目录后，应重新执行 `make firmware-version-link`；重建只替换自动派生关系，保留人工整理和来源实证关系。
 
-这些层级具有不同语义：`exact_version` 表示候选版本等于 CPE 明确版本；`version_range` 表示版本方案兼容且落在 NVD 起止边界内；`product_scope` 只表示 NVD 将该产品所有版本列为受影响，不能视为版本命中；`curated_evidence` 来自 benchmark/研究仓库的明确环境映射。自动关联均为待验证线索，不替代固件解包后的内部版本核验或漏洞复现。为避免日期构建号与点分版本互相排序，版本方案不兼容时不会生成范围关联。
+数据来源、已验证 raw 地址、SHA-256 和数据质量异常见[固件样本来源研究](./docs/research-firmware-sample-sources.md)。
 
-每次更新漏洞 feeds 或固件目录后应重新执行 `make firmware-version-link`。重建只替换自动派生关系，保留 IoTVulBench 等人工整理或来源实证关系。
+</details>
 
-UI 和 API 会明确区分“证据来源”“实际下载站点”“候选地址”“漏洞复现线索”和“已下载/哈希校验制品”。下载站点分布支持点击联动筛选；大目录使用 SQLite FTS5、主机索引和服务端分页，输入筛选不会把 17 万条记录加载到浏览器。完整来源清单、15 个已验证可访问的 raw 地址、SHA-256、95 个 CVE 分组及数据质量异常见[固件样本来源研究](./docs/research-firmware-sample-sources.md)。
+<details>
+<summary><b>固件目录查询 API</b></summary>
 
-详情查看采用统一的调查栈：左侧导航始终表示当前工作区，固件、漏洞和语义关联的交叉查看不会切换工作区或清空列表状态。一级详情固定在右侧，二级及后续详情依次向左展开；各层只在固定侧边栏右缘至屏幕右缘之间自适应分栏，并保留明确间隙，不再互相覆盖或被导航遮挡，父级也保持清晰可见。移动端按全屏层级展示。标题区“返回上一级”、返回图标、遮罩点击和 `Esc` 每次只关闭最上层；例如“固件 → 漏洞 → 关联固件”会依次回退到漏洞、原固件详情和原列表。只有用户主动点击左侧导航或“全部样本”时才离开当前调查栈。
+| API | 用途 |
+| --- | --- |
+| `GET /api/firmware/overview` | 来源、候选、版本身份与各类漏洞关系总览 |
+| `GET /api/firmware/sources` | 查询已登记来源；即使暂无具体样本也保留入口 |
+| `GET /api/firmware/candidates` | 按 CVE、厂商、型号、版本、主机或文件名检索 |
+| `GET /api/firmware/candidates/{candidate_id}` | 查看候选地址、来源证据和关联漏洞 |
+| `GET /api/firmware/vulnerabilities/{CVE}/samples` | 从漏洞反查关联固件样本 |
 
-漏洞详情会默认读取接口与参数分析；记录尚不存在时自动运行确定性规则并持久化，无需手动“检查缓存”。新结果通过页面事件同步刷新语义洞察、智能关联及覆盖统计。接口搜索按精确原文、直接路径片段、处理器关键词和同后端架构依次排序，并保留漏洞、厂商与固件型号证据。
+候选查询支持 `vendor`、`source`、`host`、`has_vulnerability` 和 `match=version|exact_version|version_range|product_scope|curated_evidence`，并使用服务端分页。
 
-当前导入器会规范化 `TP-LInk` 等已确认拼写问题，并保留原始值；对于 `BM-2024-00062` 这类型号、版本和文件名语义冲突，只标记待人工核验，不静默篡改。
+</details>
 
-## 首个纵向切片
+## 当前状态与路线图
 
-首版优先打通一条完整链路：
+| 状态 | 模块 |
+| --- | --- |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐 |
+| **Next** | 固件上传与 SHA-256 制品去重、隔离递归解包、文件系统与组件 SBOM、服务与监听端口测绘 |
+| **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
-1. 上传一个固件并按 SHA-256 去重；
-2. 在隔离环境中识别、递归解包并记录每一步证据；
-3. 生成文件系统、软件组件、服务、监听端口和配置接口清单；
-4. 用组件身份与版本范围关联历史漏洞，并保留匹配理由和置信度；
-5. 比较同一设备型号的两个固件版本；
-6. 持续同步漏洞情报，重新评估已有固件并产生提醒。
+首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。
 
-## 目录
+## 文档中心
+
+| 文档 | 内容 |
+| --- | --- |
+| [领域词汇](./CONTEXT.md) | 固件版本、文件、候选、制品和漏洞命中的统一语义 |
+| [总体架构](./docs/architecture.md) | 模块边界、数据流和部署视图 |
+| [产品范围](./docs/product-scope.md) | 能力边界、阶段目标和路线图 |
+| [安全基线](./docs/security.md) | 如何处理不可信固件输入 |
+| [情报源与同步策略](./docs/intelligence-sources.md) | 官方来源、刷新策略与证据保留 |
+| [情报采集实现](./docs/intelligence-acquisition.md) | NVD/CISA KEV 增量与全量同步机制 |
+| [固件样本来源研究](./docs/research-firmware-sample-sources.md) | 来源清单、完整性验证和质量异常 |
+
+## 仓库结构
 
 ```text
-src/firmatlas/          可执行的领域内核与稳定接口
-tests/                  面向接口的测试
-analyzers/              分析器接入约定与未来实现
-apps/                   控制面和 Web 控制台的演进位置
-deploy/                 本地与生产部署定义的演进位置
-docs/                   产品、架构、安全、情报与来源研究
+FirmAtlas/
+├── src/firmatlas/     # 领域内核、情报同步、关联与 API
+├── apps/web/          # React Intelligence Console
+├── analyzers/         # 分析器接入约定与演进位置
+├── tests/             # 领域与接口测试
+├── deploy/            # 本地及生产部署定义
+└── docs/              # 架构、安全、产品与来源研究
 ```
 
 ## 设计原则
 
-- **证据优先**：每个结论都能回到原始制品、文件偏移、路径或工具输出。
-- **可复现**：分析报告绑定制品摘要、分析器版本、规则版本和运行参数。
-- **事实与判断分离**：提取到的事实不因漏洞库更新而改变；漏洞匹配可以重复计算。
-- **允许不确定性**：组件版本、端点和漏洞匹配都有置信度及人工复核状态。
-- **默认隔离**：固件和解包内容是不可信输入，不在控制面进程内执行。
+1. **证据优先** — 每个结论都能回到原始制品、来源记录、路径或工具输出。
+2. **事实与判断分离** — 提取事实保持稳定，漏洞匹配和相关性可以重复计算。
+3. **可复现** — 报告绑定制品摘要、分析器版本、规则版本和运行参数。
+4. **允许不确定性** — 版本、接口和漏洞匹配都保留置信度及复核状态。
+5. **默认隔离** — 固件与解包内容是不可信输入，不在控制面进程内执行。
+
+---
+
+<div align="center">
+<sub>FirmAtlas · Map the firmware. Preserve the evidence.</sub>
+</div>
