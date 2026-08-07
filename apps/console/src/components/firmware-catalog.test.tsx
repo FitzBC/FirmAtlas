@@ -21,7 +21,7 @@ const candidate: FirmwareCandidate = {
 
 afterEach(() => vi.restoreAllMocks())
 
-it('searches sample metadata and follows the sample-to-vulnerability relationship', async () => {
+it('searches sample metadata and opens a stackable firmware detail', async () => {
   vi.spyOn(intelligenceApi, 'firmwareOverview').mockResolvedValue({
     counts: { source_count: 18, official_source_count: 12, download_host_count: 34, candidate_count: 100, linked_candidate_count: 15, vulnerability_lead_count: 95 },
     vendors: [{ label: 'TP-Link', value: 50 }], sources: [], hosts: [{ label: 'raw.example', value: 100 }],
@@ -33,13 +33,9 @@ it('searches sample metadata and follows the sample-to-vulnerability relationshi
     items: [candidate], total: 1, limit: 30, offset: 0, page: 1, pages: 1,
     has_previous: false, has_next: false,
   })
-  vi.spyOn(intelligenceApi, 'firmwareCandidate').mockResolvedValue({
-    ...candidate, source_base_url: 'https://example', source_access_notes: '',
-    vulnerabilities: [{ candidate_id: candidate.candidate_id, vulnerability_identifier: 'CVE-2017-13772', relationship: 'affected_release_candidate', confidence: 'high', evidence_url: 'https://example/detail', notes: '', title: 'Router vulnerability', vulnerability_vendor: 'TP-Link', vulnerability_product: 'TL-WR940N', severity: 'HIGH', cvss_score: 8.8, association_origin: 'derived', match_method: 'exact_version', match_score: 98, candidate_version: '3.16.9', affected_constraint: '3.16.9', matched_criteria: 'cpe:2.3:o:tp-link:tl-wr940n_firmware:3.16.9:*:*:*:*:*:*:*' }],
-  })
-  const onOpenVulnerability = vi.fn()
+  const onOpenFirmware = vi.fn()
 
-  render(<FirmwareCatalogWorkspace onOpenVulnerability={onOpenVulnerability} />)
+  render(<FirmwareCatalogWorkspace onOpenFirmware={onOpenFirmware} />)
 
   expect(await screen.findByText(/TP-Link · TL-WR940N/)).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: /版本级命中/ }))
@@ -55,6 +51,5 @@ it('searches sample metadata and follows the sample-to-vulnerability relationshi
     expect.objectContaining({ query: 'CVE-2017-13772' }), 1, expect.any(AbortSignal),
   ))
   fireEvent.click(screen.getByRole('button', { name: /TP-Link · TL-WR940N/ }))
-  fireEvent.click(await screen.findByRole('button', { name: /CVE-2017-13772/ }))
-  expect(onOpenVulnerability).toHaveBeenCalledWith('CVE-2017-13772')
+  expect(onOpenFirmware).toHaveBeenCalledWith(candidate.candidate_id)
 })

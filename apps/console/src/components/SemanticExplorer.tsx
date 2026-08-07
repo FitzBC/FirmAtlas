@@ -1,5 +1,5 @@
 import {
-  ArrowRight, BarChart3, Boxes, Braces, CircuitBoard,
+  ArrowLeft, ArrowRight, BarChart3, Boxes, Braces, CircuitBoard,
   Layers3, LoaderCircle, Network, Search, ShieldAlert, Sparkles, X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -128,6 +128,7 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
         <AssociationDrawer
           kind={selectedKind} value={selected} page={detail} loading={detailLoading}
           onClose={() => setSelected(null)} onPage={setDetailPage}
+          parentLabel={selectedCategory ? String(categoryDetail?.selection?.label || selectedCategory) : undefined}
         />
       )}
       {selectedCategory && (
@@ -138,6 +139,7 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
           onSubtype={(value) => { setCategorySubtype(value); setCategoryPage(1) }}
           onPage={setCategoryPage} onSelectInterface={(value) => open('interface', value)}
           onClose={() => setSelectedCategory(null)}
+          shifted={Boolean(selected)}
         />
       )}
     </section>
@@ -255,7 +257,7 @@ function CategoryAtlas({ categories, loading, onSelect }: { categories: Semantic
   )
 }
 
-function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSubtype, onPage, onSelectInterface, onClose }: {
+function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSubtype, onPage, onSelectInterface, onClose, shifted = false }: {
   category: string
   page: SemanticExplorePage<SemanticCatalogItem> | null
   loading: boolean
@@ -266,12 +268,13 @@ function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSu
   onPage: (page: number) => void
   onSelectInterface: (value: string) => void
   onClose: () => void
+  shifted?: boolean
 }) {
   const profile = (page?.selection || {}) as unknown as SemanticCategoryProfile
   const maxVendor = Math.max(1, ...(profile.top_vendors || []).map((item) => item.vulnerability_count))
   return (
     <div className="fixed inset-0 z-[60] bg-black/65 backdrop-blur-sm" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <aside role="dialog" aria-label={`${profile.label || category} 类别详情`} className="absolute inset-y-0 right-0 w-full max-w-[1120px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl">
+      <aside role="dialog" aria-label={`${profile.label || category} 类别详情`} className={`absolute inset-y-0 right-0 w-full max-w-[1120px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl transition-[right] duration-300 ${shifted ? 'investigation-shifted' : ''}`}>
         <header className="sticky top-0 z-20 border-b border-white/[0.07] bg-[#0b1119]/92 px-6 py-5 backdrop-blur-xl">
           <div className="flex items-start justify-between gap-4">
             <div><div className="eyebrow"><Sparkles size={13} /> Category intelligence</div><h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">{profile.label || category}</h2><p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-600">{profile.description || '正在构建接口类别画像…'}</p></div>
@@ -329,7 +332,7 @@ function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSu
   )
 }
 
-function AssociationDrawer({ kind, value, page, loading, onClose, onPage }: { kind: SemanticExploreKind; value: string; page: SemanticExplorePage<SemanticAssociation> | null; loading: boolean; onClose: () => void; onPage: (page: number) => void }) {
+function AssociationDrawer({ kind, value, page, loading, onClose, onPage, parentLabel }: { kind: SemanticExploreKind; value: string; page: SemanticExplorePage<SemanticAssociation> | null; loading: boolean; onClose: () => void; onPage: (page: number) => void; parentLabel?: string }) {
   const [expanded, setExpanded] = useState<Vulnerability | null>(null)
   const [expandedLoading, setExpandedLoading] = useState<string | null>(null)
   const selection = page?.selection ?? {}
@@ -341,9 +344,9 @@ function AssociationDrawer({ kind, value, page, loading, onClose, onPage }: { ki
   }
   return (
     <div className="fixed inset-0 z-[70] bg-black/65 backdrop-blur-sm" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <aside role="dialog" aria-label={`${label} 关联详情`} className="absolute inset-y-0 right-0 w-full max-w-[760px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl">
+      <aside role="dialog" aria-label={`${label} 关联详情`} className={`absolute inset-y-0 right-0 w-full max-w-[760px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl transition-[right] duration-300 ${expanded ? 'investigation-shifted' : ''}`}>
         <header className="sticky top-0 z-10 border-b border-white/[0.07] bg-[#0b1119]/90 px-6 py-5 backdrop-blur-xl">
-          <div className="flex items-start justify-between gap-4"><div><div className="eyebrow"><Network size={13} /> Association drilldown</div><h2 className="mt-2 break-all font-mono text-xl font-semibold text-white">{label}</h2><p className="mt-2 text-[11px] text-slate-600">{kind === 'category' ? String(selection.description || '接口风格关联') : [selection.method, selection.protocol, selection.category].filter(Boolean).join(' · ')}</p></div><button type="button" onClick={onClose} aria-label="关闭关联详情" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/[0.08] text-slate-500 transition hover:text-white"><X size={16} /></button></div>
+          <div className="flex items-start justify-between gap-4"><div>{parentLabel && <button type="button" onClick={onClose} className="mb-3 flex items-center gap-2 text-[10px] text-signal transition hover:text-white"><ArrowLeft size={12} /> 返回 {parentLabel}</button>}<div className="eyebrow"><Network size={13} /> Association drilldown</div><h2 className="mt-2 break-all font-mono text-xl font-semibold text-white">{label}</h2><p className="mt-2 text-[11px] text-slate-600">{kind === 'category' ? String(selection.description || '接口风格关联') : [selection.method, selection.protocol, selection.category].filter(Boolean).join(' · ')}</p></div><button type="button" onClick={onClose} aria-label={parentLabel ? '返回类别详情' : '关闭关联详情'} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/[0.08] text-slate-500 transition hover:text-white">{parentLabel ? <ArrowLeft size={16} /> : <X size={16} />}</button></div>
           <div className="mt-4 flex gap-2"><span className="rounded-lg bg-signal/[0.08] px-2.5 py-1 text-[9px] text-signal">{page?.total ?? 0} 漏洞</span>{selection.vendor_count != null && <span className="rounded-lg bg-cyan/[0.08] px-2.5 py-1 text-[9px] text-cyan">{String(selection.vendor_count)} 厂商</span>}</div>
         </header>
         <div className="space-y-3 p-6">{loading && !page ? <div className="grid min-h-64 place-items-center"><LoaderCircle className="animate-spin text-signal" /></div> : page?.items.map((item) => (
@@ -357,7 +360,7 @@ function AssociationDrawer({ kind, value, page, loading, onClose, onPage }: { ki
         ))}</div>
         {page && <PaginationControls page={page.page} pages={page.pages} total={page.total} hasPrevious={page.has_previous} hasNext={page.has_next} onPage={onPage} />}
       </aside>
-      <VulnerabilityDetail vulnerability={expanded} onClose={() => setExpanded(null)} layerClassName="z-[90]" />
+      <VulnerabilityDetail vulnerability={expanded} onClose={() => setExpanded(null)} layerClassName="z-[90]" parentLabel={label} />
     </div>
   )
 }

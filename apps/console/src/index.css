@@ -26,6 +26,21 @@ body {
   overflow-x: hidden;
 }
 
+.investigation-panel {
+  right: 0;
+  transition: right 280ms cubic-bezier(0.22, 1, 0.36, 1), transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 1280px) {
+  .investigation-panel {
+    right: min(calc(var(--stack-offset, 0) * 34vw), calc(var(--stack-offset, 0) * 560px));
+  }
+
+  .investigation-shifted {
+    right: min(34vw, 560px);
+  }
+}
+
 button,
 input,
 select {

@@ -1,5 +1,6 @@
 import {
   Archive,
+  ArrowLeft,
   Boxes,
   Building2,
   ChevronRight,
@@ -16,7 +17,7 @@ import {
   ShieldCheck,
   X,
 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 
 import { intelligenceApi } from '../api/client'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
@@ -31,7 +32,7 @@ import { PaginationControls } from './PaginationControls'
 
 interface FirmwareCatalogWorkspaceProps {
   initialQuery?: string
-  onOpenVulnerability: (identifier: string) => void
+  onOpenFirmware: (candidateId: string) => void
 }
 
 const emptyPage: FirmwareCandidatePage = {
@@ -40,7 +41,7 @@ const emptyPage: FirmwareCandidatePage = {
 }
 
 export function FirmwareCatalogWorkspace({
-  initialQuery = '', onOpenVulnerability,
+  initialQuery = '', onOpenFirmware,
 }: FirmwareCatalogWorkspaceProps) {
   const [overview, setOverview] = useState<FirmwareCatalogOverview | null>(null)
   const [sources, setSources] = useState<FirmwareSource[]>([])
@@ -52,8 +53,6 @@ export function FirmwareCatalogWorkspace({
   const [linkedOnly, setLinkedOnly] = useState(false)
   const [versionOnly, setVersionOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [detail, setDetail] = useState<FirmwareCandidateDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [filtering, setFiltering] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -98,20 +97,8 @@ export function FirmwareCatalogWorkspace({
     return () => controller.abort()
   }, [stableQuery, vendor, source, host, linkedOnly, versionOnly, currentPage])
 
-  useEffect(() => {
-    if (!selectedId) { setDetail(null); return }
-    const controller = new AbortController()
-    intelligenceApi.firmwareCandidate(selectedId, controller.signal)
-      .then(setDetail)
-      .catch((caught) => !controller.signal.aborted && setError(errorMessage(caught)))
-    return () => controller.abort()
-  }, [selectedId])
-
   const activeFilters = [stableQuery, vendor, source, host, linkedOnly ? 'linked' : '', versionOnly ? 'version' : ''].filter(Boolean).length
   const vendors = overview?.vendors ?? []
-  const sourceById = useMemo(
-    () => new Map(sources.map((item) => [item.source_id, item])), [sources],
-  )
   const featuredSources = useMemo(
     () => [...sources].sort((left, right) => (
       right.candidate_count - left.candidate_count
@@ -207,7 +194,7 @@ export function FirmwareCatalogWorkspace({
           <span>Candidate</span><span>Firmware identity</span><span>Evidence route</span><span className="text-right">Links</span>
         </div>
         <div className="divide-y divide-white/[0.055]">
-          {page.items.map((item) => <CandidateRow key={item.candidate_id} item={item} onSelect={() => setSelectedId(item.candidate_id)} />)}
+          {page.items.map((item) => <CandidateRow key={item.candidate_id} item={item} onSelect={() => onOpenFirmware(item.candidate_id)} />)}
           {!loading && page.items.length === 0 && <div className="py-16 text-center"><FileArchive size={24} className="mx-auto text-slate-800" /><p className="mt-3 text-xs text-slate-600">当前条件下没有固件样本候选</p></div>}
           {loading && <div className="flex items-center justify-center gap-2 py-16 text-xs text-slate-600"><LoaderCircle size={15} className="animate-spin" />正在读取固件目录…</div>}
         </div>
@@ -223,7 +210,6 @@ export function FirmwareCatalogWorkspace({
         />
       </section>
 
-      {detail && <CandidateDrawer detail={detail} source={sourceById.get(detail.source_id)} onClose={() => setSelectedId(null)} onOpenVulnerability={onOpenVulnerability} />}
     </div>
   )
 }
@@ -237,15 +223,22 @@ function CandidateRow({ item, onSelect }: { item: FirmwareCandidate; onSelect: (
   </button>
 }
 
-function CandidateDrawer({ detail, source, onClose, onOpenVulnerability }: { detail: FirmwareCandidateDetail; source?: FirmwareSource; onClose: () => void; onOpenVulnerability: (identifier: string) => void }) {
-  return <div className="fixed inset-0 z-[70] flex justify-end bg-black/60 backdrop-blur-sm" onMouseDown={onClose}><aside role="dialog" aria-modal="true" aria-label={`固件样本 ${detail.model}`} onMouseDown={(event) => event.stopPropagation()} className="detail-enter h-full w-full max-w-[620px] overflow-y-auto border-l border-white/10 bg-[#0b1018]/98 p-6 shadow-2xl sm:p-8">
-    <div className="flex items-start justify-between"><div><div className="eyebrow"><FileArchive size={13} /> Sample candidate evidence</div><div className="mt-3 font-mono text-xs text-signal">{detail.external_id}</div></div><button type="button" onClick={onClose} className="icon-button" aria-label="关闭固件详情"><X size={18} /></button></div>
+export function FirmwareCandidateDrawer({ detail, onClose, onOpenVulnerability, stackOffset = 0, isTop = true, parentLabel, layerStyle }: { detail: FirmwareCandidateDetail; onClose: () => void; onOpenVulnerability: (identifier: string) => void; stackOffset?: number; isTop?: boolean; parentLabel?: string; layerStyle?: CSSProperties }) {
+  useEffect(() => {
+    if (!isTop) return
+    const onKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isTop, onClose])
+  const panelStyle = { '--stack-offset': stackOffset } as CSSProperties
+  return <div className={`fixed inset-0 ${isTop ? 'pointer-events-auto' : 'pointer-events-none'} ${parentLabel ? 'bg-black/10' : 'bg-black/60 backdrop-blur-sm'}`} style={layerStyle} onMouseDown={(event) => isTop && event.target === event.currentTarget && onClose()}><aside role="dialog" aria-modal={isTop} aria-label={`固件样本 ${detail.model}`} style={panelStyle} className="investigation-panel detail-enter absolute inset-y-0 w-full max-w-[620px] overflow-y-auto border-l border-white/10 bg-[#0b1018]/98 p-6 shadow-2xl sm:p-8">
+    <div className="flex items-start justify-between gap-4"><div>{parentLabel && <button type="button" onClick={onClose} className="mb-4 flex items-center gap-2 text-[10px] text-signal transition hover:text-white"><ArrowLeft size={13} /> 返回 {parentLabel}</button>}<div className="eyebrow"><FileArchive size={13} /> Sample candidate evidence</div><div className="mt-3 font-mono text-xs text-signal">{detail.external_id}</div></div><button type="button" onClick={onClose} className="icon-button" aria-label={parentLabel ? '返回上一级' : '关闭固件详情'}>{parentLabel ? <ArrowLeft size={18} /> : <X size={18} />}</button></div>
     <h2 className="mt-5 text-2xl font-semibold tracking-[-0.035em] text-white">{detail.vendor} {detail.model}</h2>
     <p className="mt-2 break-all font-mono text-[11px] leading-5 text-slate-500">{detail.filename}</p>
     <div className="mt-6 grid grid-cols-3 gap-2"><MiniMetric label="来源可信度" value={trustLabel(detail.trust_level)} /><MiniMetric label="漏洞线索" value={String(detail.vulnerability_count)} /><MiniMetric label="下载状态" value="未下载" /></div>
     <section className="mt-7 rounded-2xl border border-cyan/15 bg-cyan/[0.035] p-4"><div className="flex items-center justify-between"><h3 className="text-xs font-semibold text-cyan">候选版本身份</h3><span className="text-[9px] text-slate-700">来源字段 / 文件名提取</span></div><div className="mt-3 flex flex-wrap gap-2">{(detail.version_identities ?? []).map((item) => <span key={`${item.source}-${item.normalized}`} title={`${item.source} · ${item.confidence}`} className="rounded-lg border border-cyan/15 bg-black/15 px-2.5 py-1.5 font-mono text-[10px] text-cyan">{item.raw}</span>)}{!(detail.version_identities ?? []).length && <span className="text-[10px] text-slate-600">尚未从元数据中提取出可靠版本</span>}</div></section>
     <section className="mt-7 rounded-2xl border border-signal/15 bg-signal/[0.045] p-4"><div className="flex items-center gap-2 text-xs font-semibold text-signal"><Download size={15} />候选下载地址</div><a href={detail.download_url} target="_blank" rel="noreferrer" className="mt-3 block break-all rounded-xl border border-white/[0.07] bg-black/20 p-3 font-mono text-[10px] leading-5 text-cyan hover:border-cyan/25">{detail.download_url}</a><p className="mt-3 text-[10px] leading-5 text-slate-600">该地址来自公开元数据，FirmAtlas 尚未下载、计算哈希或验证内容真实性。</p></section>
-    <section className="mt-7"><h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">来源证据</h3><div className="mt-3 space-y-2"><EvidenceLink href={detail.source_page_url} label="Benchmark / 发行页面" /><EvidenceLink href={detail.evidence_url} label="目录证据" /><EvidenceLink href={detail.source_base_url} label={source?.name || detail.source_name} /></div>{detail.source_access_notes && <p className="mt-3 text-[10px] leading-5 text-slate-600">{detail.source_access_notes}</p>}</section>
+    <section className="mt-7"><h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">来源证据</h3><div className="mt-3 space-y-2"><EvidenceLink href={detail.source_page_url} label="Benchmark / 发行页面" /><EvidenceLink href={detail.evidence_url} label="目录证据" /><EvidenceLink href={detail.source_base_url} label={detail.source_name} /></div>{detail.source_access_notes && <p className="mt-3 text-[10px] leading-5 text-slate-600">{detail.source_access_notes}</p>}</section>
     <section className="mt-7 pb-10"><div className="flex items-center justify-between"><h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">关联漏洞线索</h3><span className="text-[9px] text-slate-700">版本线索 ≠ 已复现漏洞</span></div><div className="mt-3 space-y-2">{detail.vulnerabilities.map((item) => <button key={item.vulnerability_identifier} type="button" onClick={() => onOpenVulnerability(item.vulnerability_identifier)} className="flex w-full items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3 text-left transition hover:border-ember/20 hover:bg-ember/[0.04]"><FlaskConical size={14} className="text-ember" /><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="font-mono text-[10px] font-semibold text-slate-200">{item.vulnerability_identifier}</span><span className="rounded bg-signal/[0.08] px-1.5 py-0.5 text-[8px] text-signal">{matchLabel(item.match_method)}</span></div><div className="mt-1 truncate text-[9px] text-slate-600">{item.candidate_version ? `候选 ${item.candidate_version} · ` : ''}{item.affected_constraint || item.title || item.relationship}</div></div><span className="font-mono text-[9px] text-slate-600">{item.match_score}</span><ChevronRight size={13} className="text-slate-700" /></button>)}{detail.vulnerabilities.length === 0 && <p className="rounded-xl border border-dashed border-white/[0.07] py-8 text-center text-[10px] text-slate-700">暂未发现明确漏洞环境关联</p>}</div></section>
   </aside></div>
 }

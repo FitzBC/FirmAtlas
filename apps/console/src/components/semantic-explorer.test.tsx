@@ -53,6 +53,10 @@ it('drills from an interface into associated vendors and firmware', async () => 
   expect(screen.getByText('endpoint evidence')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: /CVE-2025-0001.*Router command injection/i }))
   expect(await screen.findByText('Full firmware vulnerability narrative from the canonical record.')).toBeInTheDocument()
+  expect(screen.getByText('返回 /goform/apply')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: '返回上一级' }))
+  expect(screen.queryByText('Full firmware vulnerability narrative from the canonical record.')).not.toBeInTheDocument()
+  expect(screen.getByText('DIR-816 firmware')).toBeInTheDocument()
 })
 
 it('renders intelligent style categories as an explorable visual map', async () => {

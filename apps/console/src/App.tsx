@@ -1,5 +1,5 @@
 import { RefreshCw, Satellite, Settings2 } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { intelligenceApi } from './api/client'
 import { AppShell } from './components/AppShell'
 import { PolicyDrawer } from './components/PolicyDrawer'
@@ -10,10 +10,14 @@ import { VulnerabilityDetail } from './components/VulnerabilityDetail'
 import { VulnerabilityFeed } from './components/VulnerabilityFeed'
 import { SemanticAnalysisWorkspace } from './components/SemanticAnalysisWorkspace'
 import { SemanticModelDrawer } from './components/SemanticModelDrawer'
-import { FirmwareCatalogWorkspace } from './components/FirmwareCatalogWorkspace'
+import { FirmwareCandidateDrawer, FirmwareCatalogWorkspace } from './components/FirmwareCatalogWorkspace'
 import { useIntelligence } from './hooks/useIntelligence'
 import { formatRelativeTime } from './lib/format'
-import type { IntelligenceFilters, Vulnerability } from './types'
+import type { FirmwareCandidateDetail, IntelligenceFilters, Vulnerability } from './types'
+
+type InvestigationEntry =
+  | { kind: 'vulnerability'; id: string; vulnerability: Vulnerability }
+  | { kind: 'firmware'; id: string; firmware: FirmwareCandidateDetail }
 
 const initialFilters: IntelligenceFilters = {
   query: '',
@@ -26,7 +30,7 @@ const initialFilters: IntelligenceFilters = {
 
 export function App() {
   const [filters, setFilters] = useState(initialFilters)
-  const [selected, setSelected] = useState<Vulnerability | null>(null)
+  const [investigation, setInvestigation] = useState<InvestigationEntry[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [syncStarting, setSyncStarting] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
@@ -68,28 +72,55 @@ export function App() {
 
   const syncing = syncStarting || latestSync?.status === 'running'
 
+  useEffect(() => {
+    if (!investigation.length) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previous }
+  }, [investigation.length])
+
   const openVulnerability = async (identifier: string) => {
-    setActiveView('intelligence')
     setSyncError(null)
     try {
-      setSelected(await intelligenceApi.vulnerability(identifier))
+      const vulnerability = await intelligenceApi.vulnerability(identifier)
+      setInvestigation((current) => current.at(-1)?.id === identifier
+        ? current
+        : [...current, { kind: 'vulnerability', id: identifier, vulnerability }])
     } catch (caught) {
-      setFilters({ ...initialFilters, query: identifier, relevance: '' })
       setSyncError(caught instanceof Error ? caught.message : '无法打开关联漏洞')
     }
   }
 
-  const findFirmware = (identifier: string) => {
+  const openFirmware = async (candidateId: string) => {
+    setSyncError(null)
+    try {
+      const firmware = await intelligenceApi.firmwareCandidate(candidateId)
+      setInvestigation((current) => current.at(-1)?.id === candidateId
+        ? current
+        : [...current, { kind: 'firmware', id: candidateId, firmware }])
+    } catch (caught) {
+      setSyncError(caught instanceof Error ? caught.message : '无法打开关联固件')
+    }
+  }
+
+  const browseFirmware = (identifier: string) => {
     setFirmwareQuery(identifier)
-    setSelected(null)
+    setInvestigation([])
     setActiveView('firmware')
   }
+
+  const navigate = (view: 'intelligence' | 'firmware' | 'semantic') => {
+    setInvestigation([])
+    setActiveView(view)
+  }
+
+  const popInvestigation = () => setInvestigation((current) => current.slice(0, -1))
 
   return (
     <AppShell
       onOpenSettings={() => setSettingsOpen(true)}
       activeView={activeView}
-      onNavigate={setActiveView}
+      onNavigate={navigate}
     >
       {activeView === 'semantic' ? (
         <SemanticAnalysisWorkspace
@@ -99,7 +130,7 @@ export function App() {
       ) : activeView === 'firmware' ? (
         <FirmwareCatalogWorkspace
           initialQuery={firmwareQuery}
-          onOpenVulnerability={openVulnerability}
+          onOpenFirmware={(candidateId) => void openFirmware(candidateId)}
         />
       ) : (
       <>
@@ -164,7 +195,7 @@ export function App() {
           page={page}
           filters={filters}
           onFiltersChange={setFilters}
-          onSelect={setSelected}
+          onSelect={(item) => setInvestigation([{ kind: 'vulnerability', id: item.identifier, vulnerability: item }])}
           onPageChange={setCurrentPage}
           loading={loading}
           filtering={filtering}
@@ -181,17 +212,49 @@ export function App() {
         />
       </div>
 
-      <VulnerabilityDetail
-        vulnerability={selected}
-        onClose={() => setSelected(null)}
-        onFindFirmware={findFirmware}
-      />
       <PolicyDrawer
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         onSaved={() => void refresh()}
       />
       </>
+      )}
+      {investigation.map((entry, index) => {
+        const isTop = index === investigation.length - 1
+        const stackOffset = investigation.length - index - 1
+        const parent = investigation[index - 1]
+        const parentLabel = parent
+          ? parent.kind === 'firmware' ? `${parent.firmware.vendor} ${parent.firmware.model}` : parent.id
+          : undefined
+        return entry.kind === 'vulnerability' ? (
+          <VulnerabilityDetail
+            key={`${entry.kind}-${entry.id}-${index}`}
+            vulnerability={entry.vulnerability}
+            onClose={popInvestigation}
+            onOpenFirmware={(candidateId) => void openFirmware(candidateId)}
+            onBrowseFirmware={browseFirmware}
+            stackOffset={stackOffset}
+            isTop={isTop}
+            parentLabel={parentLabel}
+            layerStyle={{ zIndex: 80 + index * 10 }}
+          />
+        ) : (
+          <FirmwareCandidateDrawer
+            key={`${entry.kind}-${entry.id}-${index}`}
+            detail={entry.firmware}
+            onClose={popInvestigation}
+            onOpenVulnerability={(identifier) => void openVulnerability(identifier)}
+            stackOffset={stackOffset}
+            isTop={isTop}
+            parentLabel={parentLabel}
+            layerStyle={{ zIndex: 80 + index * 10 }}
+          />
+        )
+      })}
+      {syncError && activeView !== 'intelligence' && (
+        <div role="alert" className="fixed bottom-5 left-1/2 z-[140] -translate-x-1/2 rounded-xl border border-ember/20 bg-[#171016]/95 px-4 py-3 text-xs text-ember shadow-2xl backdrop-blur-xl">
+          {syncError}
+        </div>
       )}
       <SemanticModelDrawer
         open={modelSettingsOpen}
