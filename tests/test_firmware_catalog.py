@@ -1,4 +1,5 @@
 import unittest
+from io import StringIO
 
 from firmatlas.firmware_catalog import (
     FIRMEMUHUB_DEVICES_URL,
@@ -6,6 +7,7 @@ from firmatlas.firmware_catalog import (
     IOTVULBENCH_LIST_URL,
     collect_public_catalog,
     parse_firmemuhub_devices,
+    parse_wustl_candidates,
 )
 from firmatlas.intelligence.repository import IntelligenceRepository
 
@@ -76,6 +78,27 @@ class FirmwareCatalogTests(unittest.TestCase):
         self.assertEqual(2, overview["counts"]["candidate_count"])
         self.assertEqual(2, overview["counts"]["linked_candidate_count"])
         self.assertGreaterEqual(overview["counts"]["source_count"], 10)
+
+    def test_streams_large_url_catalog_and_indexes_candidate_search(self) -> None:
+        csv_text = """vendor,product,version,date,url
+tplink,Archer C7,1.2.3,2020-01-02,https://downloads.example/Archer_C7_1.2.3.bin
+zyxel,P-660,unknown,unknown,ftp://ftp.example/P-660/firmware.bin
+broken,ignored,unknown,unknown,not-a-url
+"""
+        items = list(parse_wustl_candidates(StringIO(csv_text)))
+        sources, _, _, _ = collect_public_catalog(self.loader)
+        self.repository.upsert_firmware_sources(sources)
+        self.repository.upsert_firmware_candidates(items)
+
+        result = self.repository.list_firmware_candidates(query="Archer")
+        punctuation = self.repository.list_firmware_candidates(query="!!!")
+
+        self.assertEqual(2, len(items))
+        self.assertEqual("TP-Link", items[0]["vendor"])
+        self.assertEqual("unverified", items[0]["url_status"])
+        self.assertEqual(1, result["total"])
+        self.assertEqual("Archer C7", result["items"][0]["model"])
+        self.assertEqual(0, punctuation["total"])
 
 
 if __name__ == "__main__":

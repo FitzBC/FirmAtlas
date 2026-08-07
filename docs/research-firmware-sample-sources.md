@@ -7,7 +7,7 @@
 - [FirmEmuHub](https://github.com/a101e-lab/FirmEmuHub) 当前包含 100 个 `BM-*` 基准、100 个 `benchmark.yml` 和 100 个固件文件路径，覆盖 55 个规范化前的型号名称。厂商分布为 TP-Link 50、D-Link 49、Tenda 1。
 - [IoTVulBench](https://github.com/a101e-lab/IoTVulBench) 当前包含 95 个 CVE 目录、95 个 `detail.yml` 和 96 个验证载荷。它通过 `environments[].name = BM-*` 与 FirmEmuHub 关联。
 - IoTVulBench 的 95 个 CVE 实际只依赖 15 个不同的 FirmEmuHub 固件。下方首批清单的 15 个 `raw.githubusercontent.com` 端点在核查日均以 HTTP HEAD 返回 200，因此可以不下载文件就先导入系统。
-- [WUSTL-CSPL/Firmware-Dataset](https://github.com/WUSTL-CSPL/Firmware-Dataset) 的当前 CSV 可解析出 187,431 条下载记录和 33 个 FTP 站点，是后续扩充覆盖面的高价值“线索库”；但其中混有 OEM、OpenWrt、DD-WRT 等不同类型镜像，不能仅凭 `vendor` 字段判定为厂商原版固件。
+- [WUSTL-CSPL/Firmware-Dataset](https://github.com/WUSTL-CSPL/Firmware-Dataset) 的研究盘点解析出 187,431 条下载记录和 33 个 FTP 站点；2026-08-07 的 FirmAtlas 流式导入实测读取 187,429 条有效行，经 URL 去重为 173,778 个候选。它是扩充覆盖面的高价值“线索库”，但其中混有 OEM、OpenWrt、DD-WRT 等不同类型镜像，不能仅凭 `vendor` 字段判定为厂商原版固件。
 - 十个重点厂商均有可记录的官方入口。除 Cisco 外，核查时均可匿名访问；Cisco 下载目录当前对无会话请求返回 403，且官方说明多数镜像要求登录，有些还要求有效服务合同。
 
 ## 可信度与来源类型
@@ -114,7 +114,7 @@ vulnerability --< vulnerability_sample >-- firmware_sample
 |---|---|---|---|---|
 | FirmEmuHub | 100 个可仿真固件，带 SHA-256、架构、型号、版本 | `benchmark_repository` / high（样本存在性） | GitHub raw 直链；无需登录；无地区限制；可能受 GitHub 限速 | [仓库](https://github.com/a101e-lab/FirmEmuHub)。厂商原始出处未在所有记录中单独证明。 |
 | IoTVulBench | 95 个 CVE、95 个 detail、96 个 payload，映射到 15 个固件 | `benchmark_repository` / high（仓库内映射） | 元数据/载荷可直接读取；无需登录；无地区限制 | [仓库](https://github.com/a101e-lab/IoTVulBench)。导入时处理重复环境关系。 |
-| WUSTL Firmware-Dataset | 当前 CSV 187,431 条可解析 URL、33 个 FTP 主机；重点厂商记录包括 TP-Link 943、D-Link/DLINK 449、Tenda 328、NETGEAR 4,002、Linksys 242、ASUS 3,387、QNAP 6,342、Synology 16,212、Ubiquiti 1,442 | `research_dataset` / medium-high | URL 多为直链；登录、地区限制和存活状态随上游而异（默认 unknown）；不应自动下载 | [仓库与论文说明](https://github.com/WUSTL-CSPL/Firmware-Dataset)、[HTTP/FTP URL CSV](https://github.com/WUSTL-CSPL/Firmware-Dataset/blob/main/dat/firmware_download_list.csv)、[FTP 主机 CSV](https://github.com/WUSTL-CSPL/Firmware-Dataset/blob/main/dat/firmware_ftp_list.csv)。同一 vendor 下可能混有 DD-WRT/OpenWrt，必须按域名和镜像类型二次分类。 |
+| WUSTL Firmware-Dataset | 研究盘点为 187,431 条可解析 URL、33 个 FTP 主机；2026-08-07 导入快照去重后为 173,778 个 URL 候选。重点厂商记录包括 TP-Link 943、D-Link/DLINK 449、Tenda 328、NETGEAR 4,002、Linksys 242、ASUS 3,387、QNAP 6,342、Synology 16,212、Ubiquiti 1,442 | `research_dataset` / medium-high | URL 多为直链；登录、地区限制和存活状态随上游而异（默认 unknown）；不应自动下载 | [仓库与论文说明](https://github.com/WUSTL-CSPL/Firmware-Dataset)、[HTTP/FTP URL CSV](https://github.com/WUSTL-CSPL/Firmware-Dataset/blob/main/dat/firmware_download_list.csv)、[FTP 主机 CSV](https://github.com/WUSTL-CSPL/Firmware-Dataset/blob/main/dat/firmware_ftp_list.csv)。同一 vendor 下可能混有 DD-WRT/OpenWrt，必须按域名和镜像类型二次分类。 |
 | firmware.center | 面向多个厂商的公开目录归档，当前可见 Asus、D-Link、DrayTek、Huawei 等目录 | `community_archive` / low-medium | 目录通常可直链、无需登录；未观察到地区限制；缺少统一 provenance/checksum | [根目录](https://firmware.center/firmware/)。仅作为发现与失效链接回补线索，需用厂商页或哈希交叉验证。 |
 | OpenWrt Downloads / Firmware Selector | 大规模设备型号索引、历史 release、snapshot 和可定位镜像 | `open_source_firmware` / high | 直链、无需登录、无地区限制；Firmware Selector 可定位型号，ASU 另有构建 API | [下载目录](https://downloads.openwrt.org/)、[Firmware Selector](https://firmware-selector.openwrt.org/)、[官方说明](https://openwrt.org/docs/guide-developer/imagebuilder_frontends)。它是第三方替代固件，不得标作 OEM 固件。 |
 

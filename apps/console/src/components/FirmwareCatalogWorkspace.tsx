@@ -209,7 +209,7 @@ export function FirmwareCatalogWorkspace({
 
 function CandidateRow({ item, onSelect }: { item: FirmwareCandidate; onSelect: () => void }) {
   return <button type="button" onClick={onSelect} className="grid w-full grid-cols-[132px_minmax(0,1.3fr)_minmax(180px,.8fr)_94px] items-center gap-4 px-4 py-4 text-left transition hover:bg-white/[0.025]">
-    <div><div className="font-mono text-[10px] font-semibold text-signal">{item.external_id || item.candidate_id}</div><div className="mt-1 text-[9px] text-slate-700">{item.url_status === 'listed' ? '地址已收录' : item.url_status}</div></div>
+    <div><div className="truncate font-mono text-[10px] font-semibold text-signal">{item.external_id || item.candidate_id}</div><div className="mt-1 text-[9px] text-slate-700">{urlStatusLabel(item.url_status)}</div></div>
     <div className="min-w-0"><div className="truncate text-xs font-medium text-slate-200">{item.vendor} · {item.model}</div><div className="mt-1 truncate font-mono text-[9px] text-slate-600">{item.filename}</div></div>
     <div className="min-w-0"><div className="flex items-center gap-2 text-[10px] text-slate-400"><SourceIcon type={item.source_type} /> <span className="truncate">{item.source_name}</span></div><div className="mt-1 text-[8px] uppercase tracking-wider text-slate-700">{trustLabel(item.trust_level)} · {item.download_kind === 'direct' ? 'direct URL' : 'portal'}</div></div>
     <div className="flex items-center justify-end gap-2"><span className={`rounded-lg px-2 py-1 font-mono text-[10px] ${item.vulnerability_count ? 'bg-ember/10 text-ember' : 'bg-white/[0.04] text-slate-600'}`}>{item.vulnerability_count} CVE</span><ChevronRight size={14} className="text-slate-700" /></div>
@@ -234,4 +234,5 @@ function SourceIcon({ type }: { type: string }) { return type === 'official' ? <
 function EvidenceLink({ href, label }: { href: string; label: string }) { return <a href={href} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl border border-white/[0.06] px-3 py-2.5 text-[10px] text-slate-500 transition hover:border-white/15 hover:text-cyan"><ExternalLink size={13} /><span className="min-w-0 flex-1 truncate">{label}</span><span className="max-w-[55%] truncate font-mono text-[8px] text-slate-700">{href}</span></a> }
 function trustLabel(value: string) { return value === 'primary' ? '官方' : value === 'high' ? '高可信' : value === 'medium' ? '中可信' : '待核验' }
 function trustTone(value: string) { return value === 'primary' ? 'bg-cyan/[0.08] text-cyan' : value === 'high' ? 'bg-violet-400/[0.08] text-violet-300' : 'bg-white/[0.05] text-slate-500' }
+function urlStatusLabel(value: string) { return value === 'listed' ? '地址已收录' : value === 'verified' ? '地址已验证' : value === 'unverified' ? '地址待验证' : value === 'restricted' ? '访问受限' : value === 'unavailable' ? '地址失效' : value }
 function errorMessage(value: unknown) { return value instanceof Error ? value.message : '固件目录服务暂不可用' }

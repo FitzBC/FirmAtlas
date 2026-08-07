@@ -27,6 +27,7 @@ from .sources import is_meaningful_identity, vendors_and_products_from_cpes
 
 IDENTITY_NORMALIZATION_VERSION = "cpe-fallback-2026.08.1"
 ANALYTICS_CACHE_VERSION = "casefolded-vendor-counts-2026.08.2"
+FIRMWARE_FTS_VERSION = "firmware-candidates-2026.08.1"
 
 
 def _utc_now() -> str:
@@ -507,6 +508,60 @@ class IntelligenceRepository:
                 )
             except sqlite3.OperationalError:
                 pass
+            try:
+                connection.executescript(
+                    """
+                    CREATE VIRTUAL TABLE IF NOT EXISTS firmware_candidates_fts USING fts5(
+                        external_id,vendor,product,model,firmware_version,filename,download_url,
+                        content='firmware_sample_candidates',content_rowid='rowid'
+                    );
+                    CREATE TRIGGER IF NOT EXISTS firmware_candidates_fts_ai AFTER INSERT
+                    ON firmware_sample_candidates BEGIN
+                      INSERT INTO firmware_candidates_fts(
+                        rowid,external_id,vendor,product,model,firmware_version,filename,download_url)
+                      VALUES(new.rowid,new.external_id,new.vendor,new.product,new.model,
+                        new.firmware_version,new.filename,new.download_url);
+                    END;
+                    CREATE TRIGGER IF NOT EXISTS firmware_candidates_fts_ad AFTER DELETE
+                    ON firmware_sample_candidates BEGIN
+                      INSERT INTO firmware_candidates_fts(
+                        firmware_candidates_fts,rowid,external_id,vendor,product,model,
+                        firmware_version,filename,download_url)
+                      VALUES('delete',old.rowid,old.external_id,old.vendor,old.product,old.model,
+                        old.firmware_version,old.filename,old.download_url);
+                    END;
+                    CREATE TRIGGER IF NOT EXISTS firmware_candidates_fts_au AFTER UPDATE
+                    ON firmware_sample_candidates BEGIN
+                      INSERT INTO firmware_candidates_fts(
+                        firmware_candidates_fts,rowid,external_id,vendor,product,model,
+                        firmware_version,filename,download_url)
+                      VALUES('delete',old.rowid,old.external_id,old.vendor,old.product,old.model,
+                        old.firmware_version,old.filename,old.download_url);
+                      INSERT INTO firmware_candidates_fts(
+                        rowid,external_id,vendor,product,model,firmware_version,filename,download_url)
+                      VALUES(new.rowid,new.external_id,new.vendor,new.product,new.model,
+                        new.firmware_version,new.filename,new.download_url);
+                    END;
+                    """
+                )
+                firmware_fts_marker = connection.execute(
+                    "SELECT value_json FROM settings WHERE key='firmware_fts_version'"
+                ).fetchone()
+                if (
+                    not firmware_fts_marker
+                    or _loads(firmware_fts_marker[0], "") != FIRMWARE_FTS_VERSION
+                ):
+                    connection.execute(
+                        "INSERT INTO firmware_candidates_fts(firmware_candidates_fts) VALUES('rebuild')"
+                    )
+                    connection.execute(
+                        """INSERT INTO settings(key,value_json,updated_at) VALUES(?,?,?)
+                           ON CONFLICT(key) DO UPDATE SET value_json=excluded.value_json,
+                               updated_at=excluded.updated_at""",
+                        ("firmware_fts_version", _json(FIRMWARE_FTS_VERSION), _utc_now()),
+                    )
+            except sqlite3.OperationalError:
+                pass
             identity_marker = connection.execute(
                 "SELECT value_json FROM settings WHERE key='identity_normalization_version'"
             ).fetchone()
@@ -753,15 +808,38 @@ class IntelligenceRepository:
         clauses: List[str] = []
         values: List[Any] = []
         if query:
-            clauses.append(
-                "(c.external_id LIKE ? OR c.vendor LIKE ? OR c.product LIKE ? "
-                "OR c.model LIKE ? OR c.firmware_version LIKE ? OR c.filename LIKE ? "
-                "OR EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities ql "
-                "          WHERE ql.candidate_id=c.candidate_id "
-                "            AND ql.vulnerability_identifier LIKE ?))"
+            vulnerability_query = re.fullmatch(
+                r"(?:CVE|CNVD)-\d{4}-\d+", query.strip(), flags=re.IGNORECASE
             )
-            wildcard = "%{}%".format(query)
-            values.extend([wildcard] * 7)
+            if vulnerability_query:
+                clauses.append(
+                    "EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities ql "
+                    "       WHERE ql.candidate_id=c.candidate_id "
+                    "         AND ql.vulnerability_identifier=? COLLATE NOCASE)"
+                )
+                values.append(query.strip())
+            elif self._firmware_fts_available():
+                terms = re.findall(r"[\w.-]+", query, flags=re.UNICODE)
+                if terms:
+                    clauses.append(
+                        "c.rowid IN (SELECT rowid FROM firmware_candidates_fts "
+                        "            WHERE firmware_candidates_fts MATCH ?)"
+                    )
+                    values.append(
+                        " AND ".join(
+                            '"{}"*'.format(term.replace('"', '""')) for term in terms
+                        )
+                    )
+                else:
+                    clauses.append("0=1")
+            else:
+                clauses.append(
+                    "(c.external_id LIKE ? OR c.vendor LIKE ? OR c.product LIKE ? "
+                    "OR c.model LIKE ? OR c.firmware_version LIKE ? OR c.filename LIKE ? "
+                    "OR c.download_url LIKE ?)"
+                )
+                wildcard = "%{}%".format(query)
+                values.extend([wildcard] * 7)
         if vendor:
             clauses.append("c.vendor = ? COLLATE NOCASE")
             values.append(vendor)
@@ -859,6 +937,14 @@ class IntelligenceRepository:
             item["vulnerability_identifiers"] = [identifier]
             items.append(item)
         return {"identifier": identifier, "items": items, "total": len(items)}
+
+    def _firmware_fts_available(self) -> bool:
+        with self.read_connection() as connection:
+            row = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' "
+                "AND name='firmware_candidates_fts'"
+            ).fetchone()
+        return bool(row)
 
     def get_policy(self) -> RelevancePolicy:
         with self._lock:

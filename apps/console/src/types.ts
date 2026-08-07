@@ -189,7 +189,7 @@ export interface FirmwareCandidate {
   download_url: string
   source_page_url: string
   evidence_url: string
-  url_status: 'listed' | 'verified' | 'restricted' | 'unavailable'
+  url_status: 'listed' | 'verified' | 'unverified' | 'restricted' | 'unavailable'
   download_kind: 'direct' | 'portal' | 'repository_directory'
   notes: string
   source_name: string

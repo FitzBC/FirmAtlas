@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import csv
+import hashlib
+from io import TextIOWrapper
 import re
-from typing import Any, Callable, Dict, Iterable, List, Tuple
-from urllib.parse import quote
+from typing import Any, Callable, Dict, Iterable, Iterator, List, TextIO, Tuple
+from urllib.parse import quote, unquote, urlsplit
 from urllib.request import Request, urlopen
 
 
@@ -18,6 +21,14 @@ IOTVULBENCH_LIST_URL = (
 IOTVULBENCH_DETAIL_URL = (
     "https://raw.githubusercontent.com/a101e-lab/IoTVulBench/main/"
     "Vulnerabilities/{identifier}/detail.yml"
+)
+WUSTL_FIRMWARE_LIST_URL = (
+    "https://raw.githubusercontent.com/WUSTL-CSPL/Firmware-Dataset/main/"
+    "dat/firmware_download_list.csv"
+)
+WUSTL_FIRMWARE_LIST_PAGE = (
+    "https://github.com/WUSTL-CSPL/Firmware-Dataset/blob/main/"
+    "dat/firmware_download_list.csv"
 )
 
 
@@ -267,6 +278,68 @@ def vulnerability_identifiers(markdown: str) -> List[str]:
     return identifiers
 
 
+_VENDOR_NAMES = {
+    "asus": "ASUS",
+    "cisco": "Cisco",
+    "d-link": "D-Link",
+    "dlink": "D-Link",
+    "linksys": "Linksys",
+    "netgear": "NETGEAR",
+    "qnap": "QNAP",
+    "synology": "Synology",
+    "tenda": "Tenda",
+    "tp-link": "TP-Link",
+    "tplink": "TP-Link",
+    "ubiquiti": "Ubiquiti",
+    "zyxel": "Zyxel",
+}
+
+
+def parse_wustl_candidates(stream: TextIO) -> Iterator[Dict[str, Any]]:
+    """Parse the large WUSTL URL catalog without loading it into memory."""
+    for row in csv.DictReader(stream):
+        download_url = (row.get("url") or "").strip()
+        parsed = urlsplit(download_url)
+        if parsed.scheme.lower() not in ("http", "https", "ftp") or not parsed.netloc:
+            continue
+        vendor_raw = (row.get("vendor") or "unknown").strip() or "unknown"
+        vendor = _VENDOR_NAMES.get(vendor_raw.lower(), vendor_raw)
+        product = (row.get("product") or "unknown").strip() or "unknown"
+        version = (row.get("version") or "unknown").strip() or "unknown"
+        release_date = (row.get("date") or "unknown").strip() or "unknown"
+        filename = unquote(parsed.path.rstrip("/").rsplit("/", 1)[-1]) or product
+        digest = hashlib.sha256(download_url.encode("utf-8")).hexdigest()
+        yield {
+            "candidate_id": "wustl:{}".format(digest),
+            "source_id": "wustl-firmware-dataset",
+            "external_id": digest[:16],
+            "vendor": vendor,
+            "product": product,
+            "model": product,
+            "firmware_version": None if version.lower() == "unknown" else version,
+            "filename": filename,
+            "download_url": download_url,
+            "source_page_url": WUSTL_FIRMWARE_LIST_PAGE,
+            "evidence_url": WUSTL_FIRMWARE_LIST_URL,
+            "url_status": "unverified",
+            "download_kind": "direct",
+            "notes": (
+                "WUSTL 固件 URL 数据集候选；发布日期 {}。"
+                "尚未由 FirmAtlas 请求文件、跟随跳转或校验内容。"
+            ).format(release_date),
+        }
+
+
+def iter_wustl_candidates(timeout: int = 60) -> Iterator[Dict[str, Any]]:
+    request = Request(
+        WUSTL_FIRMWARE_LIST_URL,
+        headers={"User-Agent": "FirmAtlas/0.1 metadata-catalog"},
+    )
+    with urlopen(request, timeout=timeout) as response:
+        with TextIOWrapper(response, encoding="utf-8", errors="replace", newline="") as stream:
+            yield from parse_wustl_candidates(stream)
+
+
 def parse_iotvulbench_detail(identifier: str, detail: str) -> List[Dict[str, Any]]:
     leads = []
     for benchmark_id in dict.fromkeys(re.findall(r"\bBM-\d{4}-\d+\b", detail)):
@@ -312,9 +385,42 @@ def bootstrap_public_catalog(repository: Any) -> Dict[str, Any]:
     repository.upsert_firmware_sources(sources)
     repository.upsert_firmware_candidates(candidates)
     repository.upsert_firmware_vulnerability_leads(leads)
+    wustl_processed = 0
+    wustl_error = ""
+    batch: List[Dict[str, Any]] = []
+    try:
+        for candidate in iter_wustl_candidates():
+            batch.append(candidate)
+            if len(batch) < 2000:
+                continue
+            repository.upsert_firmware_candidates(batch)
+            wustl_processed += len(batch)
+            batch = []
+        if batch:
+            repository.upsert_firmware_candidates(batch)
+            wustl_processed += len(batch)
+    except (OSError, csv.Error) as error:
+        if batch:
+            repository.upsert_firmware_candidates(batch)
+            wustl_processed += len(batch)
+        wustl_error = str(error)
+    source_counts = {
+        item["source_id"]: item["candidate_count"]
+        for item in repository.list_firmware_sources()
+    }
+    total_candidates = repository.firmware_catalog_overview()["counts"][
+        "candidate_count"
+    ]
     return {
         "sources": len(sources),
-        "candidates": len(candidates),
+        "benchmark_candidates": len(candidates),
+        "wustl_rows_processed": wustl_processed,
+        "wustl_candidates": source_counts.get("wustl-firmware-dataset", 0),
+        "candidates": total_candidates,
         "vulnerability_leads": len(leads),
         "detail_failures": failures,
+        "large_source_failures": (
+            [{"source": "wustl-firmware-dataset", "error": wustl_error}]
+            if wustl_error else []
+        ),
     }
