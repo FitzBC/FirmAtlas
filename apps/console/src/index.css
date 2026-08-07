@@ -33,11 +33,12 @@ body {
 
 @media (min-width: 1280px) {
   .investigation-panel {
-    right: min(calc(var(--stack-offset, 0) * 34vw), calc(var(--stack-offset, 0) * 560px));
-  }
-
-  .investigation-child {
-    right: min(34vw, 560px);
+    --stack-gap: 16px;
+    --stack-lane: calc((100% - (var(--stack-size, 1) - 1) * var(--stack-gap)) / var(--stack-size, 1));
+    --stack-step: min(var(--stack-max-width, 620px), var(--stack-lane));
+    right: calc(var(--stack-offset, 0) * (var(--stack-step) + var(--stack-gap)));
+    width: min(var(--panel-width, 620px), var(--stack-lane));
+    max-width: none;
   }
 }
 

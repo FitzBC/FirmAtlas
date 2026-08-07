@@ -236,6 +236,7 @@ export function App() {
             onOpenFirmware={(candidateId) => void openFirmware(candidateId)}
             onBrowseFirmware={browseFirmware}
             stackOffset={stackOffset}
+            stackSize={investigation.length}
             isTop={isTop}
             parentLabel={parentLabel}
             layerStyle={{ zIndex: 80 + index * 10 }}
@@ -247,6 +248,7 @@ export function App() {
             onClose={popInvestigation}
             onOpenVulnerability={(identifier) => void openVulnerability(identifier)}
             stackOffset={stackOffset}
+            stackSize={investigation.length}
             isTop={isTop}
             parentLabel={parentLabel}
             layerStyle={{ zIndex: 80 + index * 10 }}

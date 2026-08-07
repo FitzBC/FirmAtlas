@@ -223,14 +223,14 @@ function CandidateRow({ item, onSelect }: { item: FirmwareCandidate; onSelect: (
   </button>
 }
 
-export function FirmwareCandidateDrawer({ detail, onClose, onOpenVulnerability, stackOffset = 0, isTop = true, parentLabel, layerStyle }: { detail: FirmwareCandidateDetail; onClose: () => void; onOpenVulnerability: (identifier: string) => void; stackOffset?: number; isTop?: boolean; parentLabel?: string; layerStyle?: CSSProperties }) {
+export function FirmwareCandidateDrawer({ detail, onClose, onOpenVulnerability, stackOffset = 0, stackSize = 1, isTop = true, parentLabel, layerStyle }: { detail: FirmwareCandidateDetail; onClose: () => void; onOpenVulnerability: (identifier: string) => void; stackOffset?: number; stackSize?: number; isTop?: boolean; parentLabel?: string; layerStyle?: CSSProperties }) {
   useEffect(() => {
     if (!isTop) return
     const onKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isTop, onClose])
-  const panelStyle = { '--stack-offset': stackOffset } as CSSProperties
+  const panelStyle = { '--stack-offset': stackOffset, '--stack-size': stackSize, '--panel-width': '620px', '--stack-max-width': '620px' } as CSSProperties
   return <div className={`fixed inset-0 ${isTop ? 'pointer-events-auto' : 'pointer-events-none'} ${parentLabel ? 'bg-transparent' : 'bg-black/50 backdrop-blur-[2px]'}`} style={layerStyle} onMouseDown={(event) => isTop && event.target === event.currentTarget && onClose()}><aside role="dialog" aria-modal={isTop} aria-label={`固件样本 ${detail.model}`} style={panelStyle} className="investigation-panel detail-enter absolute inset-y-0 w-full max-w-[620px] overflow-y-auto border-l border-white/10 bg-[#0b1018]/98 p-6 shadow-2xl sm:p-8">
     <div className="flex items-start justify-between gap-4"><div>{parentLabel && <button type="button" onClick={onClose} className="mb-4 flex items-center gap-2 text-[10px] text-signal transition hover:text-white"><ArrowLeft size={13} /> 返回 {parentLabel}</button>}<div className="eyebrow"><FileArchive size={13} /> Sample candidate evidence</div><div className="mt-3 font-mono text-xs text-signal">{detail.external_id}</div></div><button type="button" onClick={onClose} className="icon-button" aria-label={parentLabel ? '返回上一级' : '关闭固件详情'}>{parentLabel ? <ArrowLeft size={18} /> : <X size={18} />}</button></div>
     <h2 className="mt-5 text-2xl font-semibold tracking-[-0.035em] text-white">{detail.vendor} {detail.model}</h2>
