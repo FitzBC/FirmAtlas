@@ -215,6 +215,7 @@ class IntelligenceRepository:
                     url_status TEXT NOT NULL DEFAULT 'listed',
                     download_kind TEXT NOT NULL DEFAULT 'direct',
                     notes TEXT NOT NULL DEFAULT '',
+                    version_identities_json TEXT NOT NULL DEFAULT '[]',
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
                     FOREIGN KEY(source_id) REFERENCES firmware_sources(source_id)
@@ -231,6 +232,12 @@ class IntelligenceRepository:
                     confidence TEXT NOT NULL,
                     evidence_url TEXT NOT NULL,
                     notes TEXT NOT NULL DEFAULT '',
+                    association_origin TEXT NOT NULL DEFAULT 'curated',
+                    match_method TEXT NOT NULL DEFAULT 'curated_evidence',
+                    match_score INTEGER NOT NULL DEFAULT 100,
+                    candidate_version TEXT,
+                    affected_constraint TEXT,
+                    matched_criteria TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
                     PRIMARY KEY(candidate_id, vulnerability_identifier),
@@ -351,6 +358,35 @@ class IntelligenceRepository:
                     "ALTER TABLE firmware_sample_candidates "
                     "ADD COLUMN download_host TEXT NOT NULL DEFAULT ''"
                 )
+            if "version_identities_json" not in firmware_columns:
+                connection.execute(
+                    "ALTER TABLE firmware_sample_candidates "
+                    "ADD COLUMN version_identities_json TEXT NOT NULL DEFAULT '[]'"
+                )
+            lead_columns = {
+                row[1] for row in connection.execute(
+                    "PRAGMA table_info(firmware_sample_vulnerabilities)"
+                )
+            }
+            lead_additions = {
+                "association_origin": "TEXT NOT NULL DEFAULT 'curated'",
+                "match_method": "TEXT NOT NULL DEFAULT 'curated_evidence'",
+                "match_score": "INTEGER NOT NULL DEFAULT 100",
+                "candidate_version": "TEXT",
+                "affected_constraint": "TEXT",
+                "matched_criteria": "TEXT",
+            }
+            for name, definition in lead_additions.items():
+                if name not in lead_columns:
+                    connection.execute(
+                        "ALTER TABLE firmware_sample_vulnerabilities ADD COLUMN {} {}".format(
+                            name, definition
+                        )
+                    )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS idx_firmware_leads_match "
+                "ON firmware_sample_vulnerabilities(match_method,match_score DESC)"
+            )
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_firmware_candidates_host "
                 "ON firmware_sample_candidates(download_host, vendor COLLATE NOCASE)"
@@ -771,17 +807,28 @@ class IntelligenceRepository:
             connection.executemany(
                 """INSERT INTO firmware_sample_vulnerabilities(
                        candidate_id,vulnerability_identifier,relationship,confidence,
-                       evidence_url,notes,created_at,updated_at
-                   ) VALUES(?,?,?,?,?,?,?,?)
+                       evidence_url,notes,association_origin,match_method,match_score,
+                       candidate_version,affected_constraint,matched_criteria,
+                       created_at,updated_at
+                   ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                    ON CONFLICT(candidate_id,vulnerability_identifier) DO UPDATE SET
                        relationship=excluded.relationship,confidence=excluded.confidence,
                        evidence_url=excluded.evidence_url,notes=excluded.notes,
+                       association_origin=excluded.association_origin,
+                       match_method=excluded.match_method,match_score=excluded.match_score,
+                       candidate_version=excluded.candidate_version,
+                       affected_constraint=excluded.affected_constraint,
+                       matched_criteria=excluded.matched_criteria,
                        updated_at=excluded.updated_at""",
                 [
                     (
                         item["candidate_id"], item["vulnerability_identifier"],
                         item["relationship"], item["confidence"], item["evidence_url"],
-                        item.get("notes", ""), now, now,
+                        item.get("notes", ""), item.get("association_origin", "curated"),
+                        item.get("match_method", "curated_evidence"),
+                        item.get("match_score", 100), item.get("candidate_version"),
+                        item.get("affected_constraint"), item.get("matched_criteria"),
+                        now, now,
                     )
                     for item in leads
                 ],
@@ -798,7 +845,15 @@ class IntelligenceRepository:
                         FROM firmware_sample_candidates WHERE download_host!='') download_host_count,
                      (SELECT COUNT(*) FROM firmware_sample_candidates) candidate_count,
                      (SELECT COUNT(DISTINCT candidate_id) FROM firmware_sample_vulnerabilities) linked_candidate_count,
-                     (SELECT COUNT(*) FROM firmware_sample_vulnerabilities) vulnerability_lead_count"""
+                     (SELECT COUNT(*) FROM firmware_sample_vulnerabilities) vulnerability_lead_count,
+                     (SELECT COUNT(*) FROM firmware_sample_vulnerabilities
+                       WHERE match_method='exact_version') exact_version_link_count,
+                     (SELECT COUNT(*) FROM firmware_sample_vulnerabilities
+                       WHERE match_method='version_range') version_range_link_count,
+                     (SELECT COUNT(*) FROM firmware_sample_vulnerabilities
+                       WHERE match_method='product_scope') product_scope_link_count,
+                     (SELECT COUNT(*) FROM firmware_sample_candidates
+                       WHERE version_identities_json!='[]') version_identified_candidate_count"""
             ).fetchone()
             vendors = connection.execute(
                 """SELECT MIN(vendor) label,COUNT(*) value
@@ -847,6 +902,7 @@ class IntelligenceRepository:
         source_id: str = "",
         download_host: str = "",
         has_vulnerability: bool = False,
+        match_method: str = "",
         limit: int = 30,
         offset: int = 0,
     ) -> Dict[str, Any]:
@@ -899,6 +955,19 @@ class IntelligenceRepository:
                 "EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities hl "
                 "       WHERE hl.candidate_id=c.candidate_id)"
             )
+        if match_method:
+            if match_method == "version":
+                clauses.append(
+                    "EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities ml "
+                    "       WHERE ml.candidate_id=c.candidate_id "
+                    "         AND ml.match_method IN ('exact_version','version_range'))"
+                )
+            elif match_method in ("exact_version", "version_range", "product_scope", "curated_evidence"):
+                clauses.append(
+                    "EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities ml "
+                    "       WHERE ml.candidate_id=c.candidate_id AND ml.match_method=?)"
+                )
+                values.append(match_method)
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
         limit = max(1, min(limit, 100))
         offset = max(0, offset)
@@ -911,7 +980,13 @@ class IntelligenceRepository:
                            WHERE l.candidate_id=c.candidate_id) vulnerability_count,
                           (SELECT GROUP_CONCAT(vulnerability_identifier, ',')
                            FROM firmware_sample_vulnerabilities l
-                           WHERE l.candidate_id=c.candidate_id) vulnerability_identifiers"""
+                           WHERE l.candidate_id=c.candidate_id) vulnerability_identifiers,
+                          (SELECT COUNT(*) FROM firmware_sample_vulnerabilities vl
+                           WHERE vl.candidate_id=c.candidate_id
+                             AND vl.match_method IN ('exact_version','version_range')) version_link_count,
+                          (SELECT match_method FROM firmware_sample_vulnerabilities sl
+                           WHERE sl.candidate_id=c.candidate_id
+                           ORDER BY sl.match_score DESC LIMIT 1) strongest_match_method"""
                 + base + where
                 + " ORDER BY vulnerability_count DESC,c.vendor COLLATE NOCASE,c.model COLLATE NOCASE,c.external_id LIMIT ? OFFSET ?",
                 values + [limit, offset],
@@ -919,6 +994,7 @@ class IntelligenceRepository:
         items = []
         for row in rows:
             item = dict(row)
+            item["version_identities"] = _loads(item.pop("version_identities_json", "[]"), [])
             item["vulnerability_identifiers"] = [
                 value for value in (item["vulnerability_identifiers"] or "").split(",") if value
             ]
@@ -955,6 +1031,9 @@ class IntelligenceRepository:
                 (candidate_id,),
             ).fetchall()
         result = dict(row)
+        result["version_identities"] = _loads(
+            result.pop("version_identities_json", "[]"), []
+        )
         result["vulnerabilities"] = [dict(item) for item in leads]
         result["vulnerability_count"] = len(leads)
         result["vulnerability_identifiers"] = [
@@ -963,28 +1042,42 @@ class IntelligenceRepository:
         return result
 
     def firmware_candidates_for_vulnerability(
-        self, identifier: str, limit: int = 50
+        self, identifier: str, limit: int = 50, offset: int = 0
     ) -> Dict[str, Any]:
         limit = max(1, min(limit, 100))
+        offset = max(0, offset)
         with self.read_connection() as connection:
+            total = connection.execute(
+                "SELECT COUNT(*) FROM firmware_sample_vulnerabilities "
+                "WHERE vulnerability_identifier=?", (identifier,)
+            ).fetchone()[0]
             rows = connection.execute(
                 """SELECT c.*,s.name source_name,s.source_type,s.trust_level,
-                          l.relationship,l.confidence,l.evidence_url lead_evidence_url,l.notes lead_notes
+                          l.relationship,l.confidence,l.evidence_url lead_evidence_url,l.notes lead_notes,
+                          l.association_origin,l.match_method,l.match_score,
+                          l.candidate_version,l.affected_constraint,l.matched_criteria
                    FROM firmware_sample_vulnerabilities l
                    JOIN firmware_sample_candidates c ON c.candidate_id=l.candidate_id
                    JOIN firmware_sources s ON s.source_id=c.source_id
                    WHERE l.vulnerability_identifier=?
                    ORDER BY CASE l.confidence WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END,
-                            c.vendor COLLATE NOCASE,c.model COLLATE NOCASE LIMIT ?""",
-                (identifier, limit),
+                            c.vendor COLLATE NOCASE,c.model COLLATE NOCASE LIMIT ? OFFSET ?""",
+                (identifier, limit, offset),
             ).fetchall()
         items = []
         for row in rows:
             item = dict(row)
+            item["version_identities"] = _loads(item.pop("version_identities_json", "[]"), [])
             item["vulnerability_count"] = 1
             item["vulnerability_identifiers"] = [identifier]
             items.append(item)
-        return {"identifier": identifier, "items": items, "total": len(items)}
+        pages = (total + limit - 1) // limit if total else 0
+        return {
+            "identifier": identifier, "items": items, "total": total,
+            "limit": limit, "offset": offset, "page": offset // limit + 1,
+            "pages": pages, "has_previous": offset > 0,
+            "has_next": offset + limit < total,
+        }
 
     def _firmware_fts_available(self) -> bool:
         with self.read_connection() as connection:

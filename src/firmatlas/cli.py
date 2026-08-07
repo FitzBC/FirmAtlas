@@ -111,6 +111,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="import public firmware sample URLs and vulnerability leads",
     )
     _database_argument(catalog_parser)
+    link_parser = firmware_subparsers.add_parser(
+        "link-vulnerabilities",
+        help="derive explainable sample links from affected product version claims",
+    )
+    _database_argument(link_parser)
     args = parser.parse_args(argv)
 
     if args.command == "demo-report":
@@ -166,12 +171,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             repository.close()
     if args.command == "firmware":
         from .firmware_catalog import bootstrap_public_catalog
+        from .firmware_version_linking import FirmwareVersionLinker
         from .intelligence.repository import IntelligenceRepository
 
         repository = IntelligenceRepository(args.database)
         try:
             if args.firmware_command == "bootstrap-catalog":
                 result = bootstrap_public_catalog(repository)
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                return 0
+            if args.firmware_command == "link-vulnerabilities":
+                result = FirmwareVersionLinker(repository).rebuild()
                 print(json.dumps(result, ensure_ascii=False, indent=2))
                 return 0
         finally:

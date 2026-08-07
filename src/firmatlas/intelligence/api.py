@@ -129,6 +129,7 @@ def create_handler(
                     source_id=_one(query, "source"),
                     download_host=_one(query, "host"),
                     has_vulnerability=_one(query, "has_vulnerability") == "true",
+                    match_method=_one(query, "match"),
                     limit=page_size,
                     offset=(page - 1) * page_size,
                 )
@@ -141,8 +142,11 @@ def create_handler(
                 identifier = unquote(
                     path[len(firmware_vulnerability_prefix) : -len("/samples")]
                 ).rstrip("/")
+                sample_size = max(1, min(_integer(query, "page_size", 50), 100))
+                sample_page = max(1, _integer(query, "page", 1))
                 return HTTPStatus.OK, service.repository.firmware_candidates_for_vulnerability(
-                    identifier
+                    identifier, limit=sample_size,
+                    offset=(sample_page - 1) * sample_size,
                 )
             firmware_candidate_prefix = "/api/firmware/candidates/"
             if method == "GET" and path.startswith(firmware_candidate_prefix):

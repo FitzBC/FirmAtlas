@@ -50,6 +50,7 @@ export function FirmwareCatalogWorkspace({
   const [source, setSource] = useState('')
   const [host, setHost] = useState('')
   const [linkedOnly, setLinkedOnly] = useState(false)
+  const [versionOnly, setVersionOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [detail, setDetail] = useState<FirmwareCandidateDetail | null>(null)
@@ -74,13 +75,13 @@ export function FirmwareCatalogWorkspace({
     return () => { active = false }
   }, [])
 
-  useEffect(() => { setCurrentPage(1) }, [stableQuery, vendor, source, host, linkedOnly])
+  useEffect(() => { setCurrentPage(1) }, [stableQuery, vendor, source, host, linkedOnly, versionOnly])
 
   useEffect(() => {
     const controller = new AbortController()
     setFiltering(true)
     intelligenceApi.firmwareCandidates(
-      { query: stableQuery, vendor, source, host, hasVulnerability: linkedOnly },
+      { query: stableQuery, vendor, source, host, hasVulnerability: linkedOnly, match: versionOnly ? 'version' : '' },
       currentPage,
       controller.signal,
     ).then((nextPage) => {
@@ -95,7 +96,7 @@ export function FirmwareCatalogWorkspace({
       }
     })
     return () => controller.abort()
-  }, [stableQuery, vendor, source, host, linkedOnly, currentPage])
+  }, [stableQuery, vendor, source, host, linkedOnly, versionOnly, currentPage])
 
   useEffect(() => {
     if (!selectedId) { setDetail(null); return }
@@ -106,7 +107,7 @@ export function FirmwareCatalogWorkspace({
     return () => controller.abort()
   }, [selectedId])
 
-  const activeFilters = [stableQuery, vendor, source, host, linkedOnly ? 'linked' : ''].filter(Boolean).length
+  const activeFilters = [stableQuery, vendor, source, host, linkedOnly ? 'linked' : '', versionOnly ? 'version' : ''].filter(Boolean).length
   const vendors = overview?.vendors ?? []
   const sourceById = useMemo(
     () => new Map(sources.map((item) => [item.source_id, item])), [sources],
@@ -121,7 +122,7 @@ export function FirmwareCatalogWorkspace({
   )
 
   const clearFilters = () => {
-    setQuery(''); setVendor(''); setSource(''); setHost(''); setLinkedOnly(false)
+    setQuery(''); setVendor(''); setSource(''); setHost(''); setLinkedOnly(false); setVersionOnly(false)
   }
 
   return (
@@ -143,12 +144,14 @@ export function FirmwareCatalogWorkspace({
 
       {error && <div role="alert" className="mb-5 rounded-xl border border-ember/15 bg-ember/[0.055] px-4 py-3 text-xs text-ember">{error}</div>}
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
         <Metric icon={<Database size={16} />} label="样本候选" value={overview?.counts.candidate_count ?? 0} tone="signal" />
-        <Metric icon={<Link2 size={16} />} label="漏洞线索" value={overview?.counts.vulnerability_lead_count ?? 0} tone="ember" />
-        <Metric icon={<FlaskConical size={16} />} label="已关联候选" value={overview?.counts.linked_candidate_count ?? 0} tone="violet" />
+        <Metric icon={<FileArchive size={16} />} label="已识别版本" value={overview?.counts.version_identified_candidate_count ?? 0} tone="signal" />
+        <Metric icon={<ShieldCheck size={16} />} label="精确版本命中" value={overview?.counts.exact_version_link_count ?? 0} tone="ember" />
+        <Metric icon={<GitFork size={16} />} label="版本范围命中" value={overview?.counts.version_range_link_count ?? 0} tone="violet" />
+        <Metric icon={<Link2 size={16} />} label="仅产品范围" value={overview?.counts.product_scope_link_count ?? 0} tone="slate" />
+        <Metric icon={<FlaskConical size={16} />} label="关联总数" value={overview?.counts.vulnerability_lead_count ?? 0} tone="violet" />
         <Metric icon={<Building2 size={16} />} label="官方来源" value={overview?.counts.official_source_count ?? 0} tone="cyan" />
-        <Metric icon={<Archive size={16} />} label="来源总数" value={overview?.counts.source_count ?? 0} tone="slate" />
         <Metric icon={<Boxes size={16} />} label="实际下载站点" value={overview?.counts.download_host_count ?? 0} tone="cyan" />
       </section>
 
@@ -196,6 +199,7 @@ export function FirmwareCatalogWorkspace({
           <label className="select-field"><span className="sr-only">厂商</span><select value={vendor} onChange={(event) => setVendor(event.target.value)}><option value="">全部厂商</option>{vendors.map((item) => <option key={item.label} value={item.label}>{item.label} · {item.value}</option>)}</select></label>
           <label className="select-field"><span className="sr-only">来源</span><select value={source} onChange={(event) => setSource(event.target.value)}><option value="">全部来源</option>{sources.map((item) => <option key={item.source_id} value={item.source_id}>{item.name}</option>)}</select></label>
           <button type="button" onClick={() => setLinkedOnly((value) => !value)} className={`filter-button ${linkedOnly ? 'filter-button-exploit' : ''}`}><Link2 size={14} /> 有漏洞线索</button>
+          <button type="button" onClick={() => setVersionOnly((value) => !value)} className={`filter-button ${versionOnly ? 'filter-button-exploit' : ''}`}><ShieldCheck size={14} /> 版本级命中</button>
           {activeFilters > 0 && <button type="button" onClick={clearFilters} className="filter-button"><X size={13} /> 清除 {activeFilters}</button>}
         </div>
 
@@ -229,7 +233,7 @@ function CandidateRow({ item, onSelect }: { item: FirmwareCandidate; onSelect: (
     <div><div className="truncate font-mono text-[10px] font-semibold text-signal">{item.external_id || item.candidate_id}</div><div className="mt-1 text-[9px] text-slate-700">{urlStatusLabel(item.url_status)}</div></div>
     <div className="min-w-0"><div className="truncate text-xs font-medium text-slate-200">{item.vendor} · {item.model}</div><div className="mt-1 truncate font-mono text-[9px] text-slate-600">{item.filename}</div></div>
     <div className="min-w-0"><div className="flex items-center gap-2 text-[10px] text-slate-400"><SourceIcon type={item.source_type} /> <span className="truncate">{item.source_name}</span></div><div className="mt-1 text-[8px] uppercase tracking-wider text-slate-700">{trustLabel(item.trust_level)} · {item.download_kind === 'direct' ? 'direct URL' : 'portal'}</div></div>
-    <div className="flex items-center justify-end gap-2"><span className={`rounded-lg px-2 py-1 font-mono text-[10px] ${item.vulnerability_count ? 'bg-ember/10 text-ember' : 'bg-white/[0.04] text-slate-600'}`}>{item.vulnerability_count} CVE</span><ChevronRight size={14} className="text-slate-700" /></div>
+    <div className="flex items-center justify-end gap-2"><span className={`rounded-lg px-2 py-1 text-right font-mono text-[9px] ${item.vulnerability_count ? 'bg-ember/10 text-ember' : 'bg-white/[0.04] text-slate-600'}`}>{item.version_link_count ? <>{item.version_link_count} 版本<br /></> : null}{item.vulnerability_count} CVE</span><ChevronRight size={14} className="text-slate-700" /></div>
   </button>
 }
 
@@ -239,9 +243,10 @@ function CandidateDrawer({ detail, source, onClose, onOpenVulnerability }: { det
     <h2 className="mt-5 text-2xl font-semibold tracking-[-0.035em] text-white">{detail.vendor} {detail.model}</h2>
     <p className="mt-2 break-all font-mono text-[11px] leading-5 text-slate-500">{detail.filename}</p>
     <div className="mt-6 grid grid-cols-3 gap-2"><MiniMetric label="来源可信度" value={trustLabel(detail.trust_level)} /><MiniMetric label="漏洞线索" value={String(detail.vulnerability_count)} /><MiniMetric label="下载状态" value="未下载" /></div>
+    <section className="mt-7 rounded-2xl border border-cyan/15 bg-cyan/[0.035] p-4"><div className="flex items-center justify-between"><h3 className="text-xs font-semibold text-cyan">候选版本身份</h3><span className="text-[9px] text-slate-700">来源字段 / 文件名提取</span></div><div className="mt-3 flex flex-wrap gap-2">{(detail.version_identities ?? []).map((item) => <span key={`${item.source}-${item.normalized}`} title={`${item.source} · ${item.confidence}`} className="rounded-lg border border-cyan/15 bg-black/15 px-2.5 py-1.5 font-mono text-[10px] text-cyan">{item.raw}</span>)}{!(detail.version_identities ?? []).length && <span className="text-[10px] text-slate-600">尚未从元数据中提取出可靠版本</span>}</div></section>
     <section className="mt-7 rounded-2xl border border-signal/15 bg-signal/[0.045] p-4"><div className="flex items-center gap-2 text-xs font-semibold text-signal"><Download size={15} />候选下载地址</div><a href={detail.download_url} target="_blank" rel="noreferrer" className="mt-3 block break-all rounded-xl border border-white/[0.07] bg-black/20 p-3 font-mono text-[10px] leading-5 text-cyan hover:border-cyan/25">{detail.download_url}</a><p className="mt-3 text-[10px] leading-5 text-slate-600">该地址来自公开元数据，FirmAtlas 尚未下载、计算哈希或验证内容真实性。</p></section>
     <section className="mt-7"><h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">来源证据</h3><div className="mt-3 space-y-2"><EvidenceLink href={detail.source_page_url} label="Benchmark / 发行页面" /><EvidenceLink href={detail.evidence_url} label="目录证据" /><EvidenceLink href={detail.source_base_url} label={source?.name || detail.source_name} /></div>{detail.source_access_notes && <p className="mt-3 text-[10px] leading-5 text-slate-600">{detail.source_access_notes}</p>}</section>
-    <section className="mt-7 pb-10"><div className="flex items-center justify-between"><h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">关联漏洞线索</h3><span className="text-[9px] text-slate-700">线索 ≠ 已验证漏洞匹配</span></div><div className="mt-3 space-y-2">{detail.vulnerabilities.map((item) => <button key={item.vulnerability_identifier} type="button" onClick={() => onOpenVulnerability(item.vulnerability_identifier)} className="flex w-full items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3 text-left transition hover:border-ember/20 hover:bg-ember/[0.04]"><FlaskConical size={14} className="text-ember" /><div className="min-w-0 flex-1"><div className="font-mono text-[10px] font-semibold text-slate-200">{item.vulnerability_identifier}</div><div className="mt-1 truncate text-[9px] text-slate-600">{item.title || item.relationship}</div></div><span className="rounded bg-signal/[0.08] px-1.5 py-1 text-[8px] uppercase text-signal">{item.confidence}</span><ChevronRight size={13} className="text-slate-700" /></button>)}{detail.vulnerabilities.length === 0 && <p className="rounded-xl border border-dashed border-white/[0.07] py-8 text-center text-[10px] text-slate-700">暂未发现明确漏洞环境关联</p>}</div></section>
+    <section className="mt-7 pb-10"><div className="flex items-center justify-between"><h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">关联漏洞线索</h3><span className="text-[9px] text-slate-700">版本线索 ≠ 已复现漏洞</span></div><div className="mt-3 space-y-2">{detail.vulnerabilities.map((item) => <button key={item.vulnerability_identifier} type="button" onClick={() => onOpenVulnerability(item.vulnerability_identifier)} className="flex w-full items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3 text-left transition hover:border-ember/20 hover:bg-ember/[0.04]"><FlaskConical size={14} className="text-ember" /><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="font-mono text-[10px] font-semibold text-slate-200">{item.vulnerability_identifier}</span><span className="rounded bg-signal/[0.08] px-1.5 py-0.5 text-[8px] text-signal">{matchLabel(item.match_method)}</span></div><div className="mt-1 truncate text-[9px] text-slate-600">{item.candidate_version ? `候选 ${item.candidate_version} · ` : ''}{item.affected_constraint || item.title || item.relationship}</div></div><span className="font-mono text-[9px] text-slate-600">{item.match_score}</span><ChevronRight size={13} className="text-slate-700" /></button>)}{detail.vulnerabilities.length === 0 && <p className="rounded-xl border border-dashed border-white/[0.07] py-8 text-center text-[10px] text-slate-700">暂未发现明确漏洞环境关联</p>}</div></section>
   </aside></div>
 }
 
@@ -252,4 +257,5 @@ function EvidenceLink({ href, label }: { href: string; label: string }) { return
 function trustLabel(value: string) { return value === 'primary' ? '官方' : value === 'high' ? '高可信' : value === 'medium' ? '中可信' : '待核验' }
 function trustTone(value: string) { return value === 'primary' ? 'bg-cyan/[0.08] text-cyan' : value === 'high' ? 'bg-violet-400/[0.08] text-violet-300' : 'bg-white/[0.05] text-slate-500' }
 function urlStatusLabel(value: string) { return value === 'listed' ? '地址已收录' : value === 'verified' ? '地址已验证' : value === 'unverified' ? '地址待验证' : value === 'restricted' ? '访问受限' : value === 'unavailable' ? '地址失效' : value }
+function matchLabel(value?: string) { return value === 'exact_version' ? '精确版本' : value === 'version_range' ? '版本范围' : value === 'product_scope' ? '仅产品范围' : '来源实证' }
 function errorMessage(value: unknown) { return value instanceof Error ? value.message : '固件目录服务暂不可用' }

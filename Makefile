@@ -1,4 +1,4 @@
-.PHONY: test demo seed-demo api intelligence-bootstrap intelligence-update firmware-catalog-sync web-install web-dev web-build deploy deploy-with-data
+.PHONY: test demo seed-demo api intelligence-bootstrap intelligence-update firmware-catalog-sync firmware-version-link firmware-refresh web-install web-dev web-build deploy deploy-with-data
 
 test:
 	PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -20,6 +20,11 @@ intelligence-update:
 
 firmware-catalog-sync:
 	PYTHONPATH=src python3 -m firmatlas firmware bootstrap-catalog
+
+firmware-version-link:
+	PYTHONPATH=src python3 -m firmatlas firmware link-vulnerabilities
+
+firmware-refresh: firmware-catalog-sync firmware-version-link
 
 web-install:
 	pnpm --dir apps/console install

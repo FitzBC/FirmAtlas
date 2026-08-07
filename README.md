@@ -11,7 +11,7 @@ FirmAtlas 是一个以证据为核心的一体化固件分析平台。它将固�
 - 针对不可信固件输入的[安全基线](./docs/security.md)；
 - 可增量更新的 NVD / CISA KEV 情报后端与高级 React 情报工作台；
 - 基于后端通信架构风格的接口语义分类、相似接口推荐与漏洞下钻；
-- 元数据优先的固件样本目录，可从固件查漏洞，也可从漏洞反查关联样本。
+- 元数据优先的固件样本目录，以及可解释的厂商、产品和版本范围漏洞关联；可从固件查漏洞，也可从漏洞反查关联样本。
 
 ## 先跑起来
 
@@ -64,6 +64,12 @@ NVD API key 可通过 `NVD_API_KEY` 环境变量提供；未提供时客户端�
 # 流式写入公开来源、样本候选和漏洞关系；约 30 MB 元数据，可安全重跑
 make firmware-catalog-sync
 
+# 根据本地 NVD 受影响 CPE、精确版本和版本边界重建关联
+make firmware-version-link
+
+# 同时刷新目录和版本关联
+make firmware-refresh
+
 # 然后启动 API 和控制台，在左侧进入“固件资产”
 make api
 make web-dev
@@ -71,11 +77,17 @@ make web-dev
 
 支持的查询接口：
 
-- `GET /api/firmware/overview`：来源、候选、厂商和漏洞关系总览；
+- `GET /api/firmware/overview`：来源、候选、版本身份和各类漏洞关系总览；
 - `GET /api/firmware/sources`：即使暂无具体样本，也保留已验证的来源入口；
-- `GET /api/firmware/candidates?q=CVE-2017-13772`：按 CVE、厂商、型号、版本或文件名检索，可叠加 `vendor`、`source`、`host` 与 `has_vulnerability`；
+- `GET /api/firmware/candidates?q=CVE-2017-13772`：按 CVE、厂商、型号、版本或文件名检索，可叠加 `vendor`、`source`、`host`、`has_vulnerability` 与 `match=version|exact_version|version_range|product_scope|curated_evidence`；
 - `GET /api/firmware/candidates/{candidate_id}`：查看下载候选、来源证据和关联漏洞；
-- `GET /api/firmware/vulnerabilities/{CVE}/samples`：从漏洞反查关联固件样本。
+- `GET /api/firmware/vulnerabilities/{CVE}/samples`：从漏洞反查关联固件样本，支持 `page` 与 `page_size`。
+
+版本关联器会从来源版本字段和文件名提取带证据的“候选版本身份”，再与 NVD 的 vulnerable CPE 做厂商、产品和版本三层匹配。当前本地快照为 115,672 个候选提取出版本身份，并形成 515 条精确版本关联、4,587 条版本范围关联和 2,420 条仅产品范围线索；加上 95 条 benchmark 来源实证，共 7,617 条线索，覆盖 1,169 个固件候选和 647 个漏洞。UI 会显示候选版本、受影响边界、匹配方式和分值，并可只筛选“版本级命中”。
+
+这些层级具有不同语义：`exact_version` 表示候选版本等于 CPE 明确版本；`version_range` 表示版本方案兼容且落在 NVD 起止边界内；`product_scope` 只表示 NVD 将该产品所有版本列为受影响，不能视为版本命中；`curated_evidence` 来自 benchmark/研究仓库的明确环境映射。自动关联均为待验证线索，不替代固件解包后的内部版本核验或漏洞复现。为避免日期构建号与点分版本互相排序，版本方案不兼容时不会生成范围关联。
+
+每次更新漏洞 feeds 或固件目录后应重新执行 `make firmware-version-link`。重建只替换自动派生关系，保留 IoTVulBench 等人工整理或来源实证关系。
 
 UI 和 API 会明确区分“证据来源”“实际下载站点”“候选地址”“漏洞复现线索”和“已下载/哈希校验制品”。下载站点分布支持点击联动筛选；大目录使用 SQLite FTS5、主机索引和服务端分页，输入筛选不会把 17 万条记录加载到浏览器。完整来源清单、15 个已验证可访问的 raw 地址、SHA-256、95 个 CVE 分组及数据质量异常见[固件样本来源研究](./docs/research-firmware-sample-sources.md)。
 

@@ -154,6 +154,10 @@ export interface FirmwareCatalogOverview {
     candidate_count: number
     linked_candidate_count: number
     vulnerability_lead_count: number
+    exact_version_link_count?: number
+    version_range_link_count?: number
+    product_scope_link_count?: number
+    version_identified_candidate_count?: number
   }
   vendors: Array<{ label: string; value: number }>
   sources: Array<{
@@ -200,6 +204,20 @@ export interface FirmwareCandidate {
   trust_level: string
   vulnerability_count: number
   vulnerability_identifiers: string[]
+  version_identities?: Array<{
+    raw: string
+    normalized: string
+    source: 'declared' | 'filename'
+    confidence: string
+  }>
+  version_link_count?: number
+  strongest_match_method?: string | null
+  association_origin?: 'curated' | 'derived'
+  match_method?: 'curated_evidence' | 'exact_version' | 'version_range' | 'product_scope'
+  match_score?: number
+  candidate_version?: string | null
+  affected_constraint?: string | null
+  matched_criteria?: string | null
 }
 
 export interface FirmwareVulnerabilityLead {
@@ -214,6 +232,12 @@ export interface FirmwareVulnerabilityLead {
   vulnerability_product: string | null
   severity: string | null
   cvss_score: number | null
+  association_origin: 'curated' | 'derived'
+  match_method: 'curated_evidence' | 'exact_version' | 'version_range' | 'product_scope'
+  match_score: number
+  candidate_version: string | null
+  affected_constraint: string | null
+  matched_criteria: string | null
 }
 
 export interface FirmwareCandidateDetail extends FirmwareCandidate {

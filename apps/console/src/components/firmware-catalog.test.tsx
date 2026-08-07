@@ -14,7 +14,9 @@ const candidate: FirmwareCandidate = {
   source_page_url: 'https://example/benchmark', evidence_url: 'https://example/devices',
   url_status: 'listed', download_kind: 'direct', notes: '', source_name: 'FirmEmuHub',
   source_type: 'benchmark', trust_level: 'high', vulnerability_count: 1,
-  vulnerability_identifiers: ['CVE-2017-13772'],
+  vulnerability_identifiers: ['CVE-2017-13772'], version_link_count: 1,
+  strongest_match_method: 'exact_version',
+  version_identities: [{ raw: '3.16.9', normalized: '3.16.9', source: 'filename', confidence: 'medium' }],
 }
 
 afterEach(() => vi.restoreAllMocks())
@@ -33,13 +35,17 @@ it('searches sample metadata and follows the sample-to-vulnerability relationshi
   })
   vi.spyOn(intelligenceApi, 'firmwareCandidate').mockResolvedValue({
     ...candidate, source_base_url: 'https://example', source_access_notes: '',
-    vulnerabilities: [{ candidate_id: candidate.candidate_id, vulnerability_identifier: 'CVE-2017-13772', relationship: 'reproduced_on', confidence: 'high', evidence_url: 'https://example/detail', notes: '', title: 'Router vulnerability', vulnerability_vendor: 'TP-Link', vulnerability_product: 'TL-WR940N', severity: 'HIGH', cvss_score: 8.8 }],
+    vulnerabilities: [{ candidate_id: candidate.candidate_id, vulnerability_identifier: 'CVE-2017-13772', relationship: 'affected_release_candidate', confidence: 'high', evidence_url: 'https://example/detail', notes: '', title: 'Router vulnerability', vulnerability_vendor: 'TP-Link', vulnerability_product: 'TL-WR940N', severity: 'HIGH', cvss_score: 8.8, association_origin: 'derived', match_method: 'exact_version', match_score: 98, candidate_version: '3.16.9', affected_constraint: '3.16.9', matched_criteria: 'cpe:2.3:o:tp-link:tl-wr940n_firmware:3.16.9:*:*:*:*:*:*:*' }],
   })
   const onOpenVulnerability = vi.fn()
 
   render(<FirmwareCatalogWorkspace onOpenVulnerability={onOpenVulnerability} />)
 
   expect(await screen.findByText(/TP-Link · TL-WR940N/)).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: /版本级命中/ }))
+  await waitFor(() => expect(list).toHaveBeenLastCalledWith(
+    expect.objectContaining({ match: 'version' }), 1, expect.any(AbortSignal),
+  ))
   fireEvent.click(screen.getByRole('button', { name: /raw.example.*100/ }))
   await waitFor(() => expect(list).toHaveBeenLastCalledWith(
     expect.objectContaining({ host: 'raw.example' }), 1, expect.any(AbortSignal),

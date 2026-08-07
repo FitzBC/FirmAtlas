@@ -200,6 +200,10 @@ class IntelligenceApiTests(unittest.TestCase):
             "vulnerability_identifier": "CVE-2026-29417",
             "relationship": "verified_benchmark_environment", "confidence": "high",
             "evidence_url": "https://example.test/detail", "notes": "",
+            "association_origin": "derived", "match_method": "exact_version",
+            "match_score": 98, "candidate_version": "V1",
+            "affected_constraint": "V1",
+            "matched_criteria": "cpe:2.3:o:hikvision:ds-2cd_firmware:v1:*:*:*:*:*:*:*",
         },))
 
         overview_status, overview = self.get("/api/firmware/overview")
@@ -207,6 +211,9 @@ class IntelligenceApiTests(unittest.TestCase):
         detail_status, detail = self.get("/api/firmware/candidates/fixture%3ABM-1")
         reverse_status, reverse = self.get(
             "/api/firmware/vulnerabilities/CVE-2026-29417/samples"
+        )
+        version_status, version_page = self.get(
+            "/api/firmware/candidates?match=version"
         )
 
         self.assertEqual(200, overview_status)
@@ -217,6 +224,10 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual("firmware.bin", detail["filename"])
         self.assertEqual(200, reverse_status)
         self.assertEqual("fixture:BM-1", reverse["items"][0]["candidate_id"])
+        self.assertEqual("exact_version", reverse["items"][0]["match_method"])
+        self.assertEqual(200, version_status)
+        self.assertEqual(1, version_page["total"])
+        self.assertEqual(1, overview["counts"]["exact_version_link_count"])
 
 
 if __name__ == "__main__":
