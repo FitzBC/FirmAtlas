@@ -48,6 +48,7 @@ export function FirmwareCatalogWorkspace({
   const [query, setQuery] = useState(initialQuery)
   const [vendor, setVendor] = useState('')
   const [source, setSource] = useState('')
+  const [host, setHost] = useState('')
   const [linkedOnly, setLinkedOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -73,13 +74,13 @@ export function FirmwareCatalogWorkspace({
     return () => { active = false }
   }, [])
 
-  useEffect(() => { setCurrentPage(1) }, [stableQuery, vendor, source, linkedOnly])
+  useEffect(() => { setCurrentPage(1) }, [stableQuery, vendor, source, host, linkedOnly])
 
   useEffect(() => {
     const controller = new AbortController()
     setFiltering(true)
     intelligenceApi.firmwareCandidates(
-      { query: stableQuery, vendor, source, hasVulnerability: linkedOnly },
+      { query: stableQuery, vendor, source, host, hasVulnerability: linkedOnly },
       currentPage,
       controller.signal,
     ).then((nextPage) => {
@@ -94,7 +95,7 @@ export function FirmwareCatalogWorkspace({
       }
     })
     return () => controller.abort()
-  }, [stableQuery, vendor, source, linkedOnly, currentPage])
+  }, [stableQuery, vendor, source, host, linkedOnly, currentPage])
 
   useEffect(() => {
     if (!selectedId) { setDetail(null); return }
@@ -105,7 +106,7 @@ export function FirmwareCatalogWorkspace({
     return () => controller.abort()
   }, [selectedId])
 
-  const activeFilters = [stableQuery, vendor, source, linkedOnly ? 'linked' : ''].filter(Boolean).length
+  const activeFilters = [stableQuery, vendor, source, host, linkedOnly ? 'linked' : ''].filter(Boolean).length
   const vendors = overview?.vendors ?? []
   const sourceById = useMemo(
     () => new Map(sources.map((item) => [item.source_id, item])), [sources],
@@ -120,7 +121,7 @@ export function FirmwareCatalogWorkspace({
   )
 
   const clearFilters = () => {
-    setQuery(''); setVendor(''); setSource(''); setLinkedOnly(false)
+    setQuery(''); setVendor(''); setSource(''); setHost(''); setLinkedOnly(false)
   }
 
   return (
@@ -142,12 +143,13 @@ export function FirmwareCatalogWorkspace({
 
       {error && <div role="alert" className="mb-5 rounded-xl border border-ember/15 bg-ember/[0.055] px-4 py-3 text-xs text-ember">{error}</div>}
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
         <Metric icon={<Database size={16} />} label="样本候选" value={overview?.counts.candidate_count ?? 0} tone="signal" />
         <Metric icon={<Link2 size={16} />} label="漏洞线索" value={overview?.counts.vulnerability_lead_count ?? 0} tone="ember" />
         <Metric icon={<FlaskConical size={16} />} label="已关联候选" value={overview?.counts.linked_candidate_count ?? 0} tone="violet" />
         <Metric icon={<Building2 size={16} />} label="官方来源" value={overview?.counts.official_source_count ?? 0} tone="cyan" />
         <Metric icon={<Archive size={16} />} label="来源总数" value={overview?.counts.source_count ?? 0} tone="slate" />
+        <Metric icon={<Boxes size={16} />} label="实际下载站点" value={overview?.counts.download_host_count ?? 0} tone="cyan" />
       </section>
 
       <section className="mt-4 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02]">
@@ -167,6 +169,21 @@ export function FirmwareCatalogWorkspace({
               <div className="mt-1 flex gap-3 text-[9px] text-slate-700"><span>{item.candidate_count} 候选</span><span>{item.vulnerability_count} 漏洞</span></div>
             </button>
           ))}
+        </div>
+        <div className="border-t border-white/[0.06] bg-[#090e15] px-4 py-4">
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <div><div className="eyebrow">Observed download hosts</div><h3 className="mt-1 text-xs font-semibold text-slate-300">实际下载站点分布</h3></div>
+            <span className="text-[9px] text-slate-700">聚合目录来源与文件真实落点分开统计</span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {(overview?.hosts ?? []).slice(0, 12).map((item, index, items) => {
+              const maximum = items[0]?.value || 1
+              return <button key={item.label} type="button" onClick={() => setHost(host === item.label ? '' : item.label)} className={`group relative overflow-hidden rounded-xl border px-3 py-2.5 text-left transition ${host === item.label ? 'border-cyan/35 bg-cyan/[0.07]' : 'border-white/[0.06] bg-white/[0.018] hover:border-white/15'}`}>
+                <span className="absolute inset-y-0 left-0 bg-cyan/[0.045] transition-all group-hover:bg-cyan/[0.07]" style={{ width: `${Math.max(4, item.value / maximum * 100)}%` }} />
+                <span className="relative flex items-center justify-between gap-3"><span className="truncate font-mono text-[9px] text-slate-400">{item.label}</span><strong className="font-mono text-[9px] text-cyan">{item.value.toLocaleString()}</strong></span>
+              </button>
+            })}
+          </div>
         </div>
       </section>
 

@@ -254,6 +254,7 @@ def parse_firmemuhub_devices(markdown: str) -> List[Dict[str, Any]]:
                     "https://raw.githubusercontent.com/a101e-lab/FirmEmuHub/"
                     "main/Benchmark/{}/emulation/firmware/{}"
                 ).format(benchmark_id, encoded_filename),
+                "download_host": "raw.githubusercontent.com",
                 "source_page_url": benchmark_url,
                 "evidence_url": FIRMEMUHUB_DEVICES_URL,
                 "url_status": "listed",
@@ -319,6 +320,7 @@ def parse_wustl_candidates(stream: TextIO) -> Iterator[Dict[str, Any]]:
             "firmware_version": None if version.lower() == "unknown" else version,
             "filename": filename,
             "download_url": download_url,
+            "download_host": parsed.hostname.lower() if parsed.hostname else "",
             "source_page_url": WUSTL_FIRMWARE_LIST_PAGE,
             "evidence_url": WUSTL_FIRMWARE_LIST_URL,
             "url_status": "unverified",

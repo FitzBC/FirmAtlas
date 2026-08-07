@@ -144,12 +144,14 @@ export const intelligenceApi = {
     query?: string
     vendor?: string
     source?: string
+    host?: string
     hasVulnerability?: boolean
   }, page = 1, signal?: AbortSignal) => {
     const params = new URLSearchParams({ page: String(page), page_size: '30' })
     if (filters.query) params.set('q', filters.query)
     if (filters.vendor) params.set('vendor', filters.vendor)
     if (filters.source) params.set('source', filters.source)
+    if (filters.host) params.set('host', filters.host)
     if (filters.hasVulnerability) params.set('has_vulnerability', 'true')
     return request<FirmwareCandidatePage>(`/api/firmware/candidates?${params}`, { signal })
   },

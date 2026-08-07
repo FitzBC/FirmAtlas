@@ -96,9 +96,16 @@ broken,ignored,unknown,unknown,not-a-url
         self.assertEqual(2, len(items))
         self.assertEqual("TP-Link", items[0]["vendor"])
         self.assertEqual("unverified", items[0]["url_status"])
+        self.assertEqual("downloads.example", items[0]["download_host"])
         self.assertEqual(1, result["total"])
         self.assertEqual("Archer C7", result["items"][0]["model"])
         self.assertEqual(0, punctuation["total"])
+        self.assertEqual(
+            1,
+            self.repository.list_firmware_candidates(
+                download_host="ftp.example"
+            )["total"],
+        )
 
 
 if __name__ == "__main__":

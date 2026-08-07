@@ -150,6 +150,7 @@ export interface FirmwareCatalogOverview {
   counts: {
     source_count: number
     official_source_count: number
+    download_host_count: number
     candidate_count: number
     linked_candidate_count: number
     vulnerability_lead_count: number
@@ -162,6 +163,7 @@ export interface FirmwareCatalogOverview {
     trust_level: string
     candidate_count: number
   }>
+  hosts: Array<{ label: string; value: number }>
 }
 
 export interface FirmwareSource {
@@ -187,6 +189,7 @@ export interface FirmwareCandidate {
   firmware_version: string | null
   filename: string
   download_url: string
+  download_host: string
   source_page_url: string
   evidence_url: string
   url_status: 'listed' | 'verified' | 'unverified' | 'restricted' | 'unavailable'

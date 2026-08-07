@@ -58,7 +58,7 @@ NVD API key 可通过 `NVD_API_KEY` 环境变量提供；未提供时客户端�
 
 ## 固件样本目录与双向关联
 
-固件资产页聚合公开 benchmark、厂商下载中心、研究数据集和社区归档。当前同步会登记 18 个来源，从 FirmEmuHub 收录 100 个 benchmark 候选，并根据 IoTVulBench 建立 95 条漏洞复现环境线索（覆盖 15 个不同固件）；同时流式读取 WUSTL Firmware Dataset，本次公开快照的 187,429 条有效记录经 URL 去重后形成 173,778 个候选。系统当前共可检索 173,878 个固件下载候选。同步过程只读取文本元数据，不下载固件二进制，也不会把候选地址冒充为已经校验的制品。
+固件资产页聚合公开 benchmark、厂商下载中心、研究数据集和社区归档。当前同步会登记 18 个证据来源，从 FirmEmuHub 收录 100 个 benchmark 候选，并根据 IoTVulBench 建立 95 条漏洞复现环境线索（覆盖 15 个不同固件）；同时流式读取 WUSTL Firmware Dataset，本次公开快照的 187,429 条有效记录经 URL 去重后形成 173,778 个候选。系统当前共可检索 173,878 个固件下载候选，并从 URL 中识别出 270 个实际下载域名。同步过程只读取文本元数据，不下载固件二进制，也不会把候选地址冒充为已经校验的制品。
 
 ```bash
 # 流式写入公开来源、样本候选和漏洞关系；约 30 MB 元数据，可安全重跑
@@ -73,11 +73,11 @@ make web-dev
 
 - `GET /api/firmware/overview`：来源、候选、厂商和漏洞关系总览；
 - `GET /api/firmware/sources`：即使暂无具体样本，也保留已验证的来源入口；
-- `GET /api/firmware/candidates?q=CVE-2017-13772`：按 CVE、厂商、型号、版本或文件名检索；
+- `GET /api/firmware/candidates?q=CVE-2017-13772`：按 CVE、厂商、型号、版本或文件名检索，可叠加 `vendor`、`source`、`host` 与 `has_vulnerability`；
 - `GET /api/firmware/candidates/{candidate_id}`：查看下载候选、来源证据和关联漏洞；
 - `GET /api/firmware/vulnerabilities/{CVE}/samples`：从漏洞反查关联固件样本。
 
-UI 和 API 会明确区分“候选地址”“漏洞复现线索”和“已下载/哈希校验制品”。大目录使用 SQLite FTS5 和服务端分页检索，输入筛选不会把 17 万条记录加载到浏览器。完整来源清单、15 个已验证可访问的 raw 地址、SHA-256、95 个 CVE 分组及数据质量异常见[固件样本来源研究](./docs/research-firmware-sample-sources.md)。
+UI 和 API 会明确区分“证据来源”“实际下载站点”“候选地址”“漏洞复现线索”和“已下载/哈希校验制品”。下载站点分布支持点击联动筛选；大目录使用 SQLite FTS5、主机索引和服务端分页，输入筛选不会把 17 万条记录加载到浏览器。完整来源清单、15 个已验证可访问的 raw 地址、SHA-256、95 个 CVE 分组及数据质量异常见[固件样本来源研究](./docs/research-firmware-sample-sources.md)。
 
 当前导入器会规范化 `TP-LInk` 等已确认拼写问题，并保留原始值；对于 `BM-2024-00062` 这类型号、版本和文件名语义冲突，只标记待人工核验，不静默篡改。
 

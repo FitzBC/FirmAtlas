@@ -209,6 +209,7 @@ class IntelligenceRepository:
                     firmware_version TEXT,
                     filename TEXT NOT NULL,
                     download_url TEXT NOT NULL,
+                    download_host TEXT NOT NULL DEFAULT '',
                     source_page_url TEXT NOT NULL,
                     evidence_url TEXT NOT NULL,
                     url_status TEXT NOT NULL DEFAULT 'listed',
@@ -340,6 +341,36 @@ class IntelligenceRepository:
                     connection.execute(
                         "ALTER TABLE vulnerabilities ADD COLUMN {} {}".format(name, definition)
                     )
+            firmware_columns = {
+                row[1] for row in connection.execute(
+                    "PRAGMA table_info(firmware_sample_candidates)"
+                )
+            }
+            if "download_host" not in firmware_columns:
+                connection.execute(
+                    "ALTER TABLE firmware_sample_candidates "
+                    "ADD COLUMN download_host TEXT NOT NULL DEFAULT ''"
+                )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS idx_firmware_candidates_host "
+                "ON firmware_sample_candidates(download_host, vendor COLLATE NOCASE)"
+            )
+            missing_hosts = connection.execute(
+                "SELECT candidate_id,download_url FROM firmware_sample_candidates "
+                "WHERE download_host=''"
+            ).fetchall()
+            if missing_hosts:
+                connection.executemany(
+                    "UPDATE firmware_sample_candidates SET download_host=? "
+                    "WHERE candidate_id=?",
+                    [
+                        (
+                            (urlsplit(row["download_url"]).hostname or "").lower(),
+                            row["candidate_id"],
+                        )
+                        for row in missing_hosts
+                    ],
+                )
             semantic_columns = {
                 row[1] for row in connection.execute("PRAGMA table_info(semantic_analyses)")
             }
@@ -701,14 +732,16 @@ class IntelligenceRepository:
             connection.executemany(
                 """INSERT INTO firmware_sample_candidates(
                        candidate_id,source_id,external_id,vendor,product,model,
-                       firmware_version,filename,download_url,source_page_url,
-                       evidence_url,url_status,download_kind,notes,created_at,updated_at
-                   ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                       firmware_version,filename,download_url,download_host,
+                       source_page_url,evidence_url,url_status,download_kind,notes,
+                       created_at,updated_at
+                   ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                    ON CONFLICT(candidate_id) DO UPDATE SET
                        source_id=excluded.source_id,external_id=excluded.external_id,
                        vendor=excluded.vendor,product=excluded.product,model=excluded.model,
                        firmware_version=excluded.firmware_version,filename=excluded.filename,
                        download_url=excluded.download_url,
+                       download_host=excluded.download_host,
                        source_page_url=excluded.source_page_url,
                        evidence_url=excluded.evidence_url,url_status=excluded.url_status,
                        download_kind=excluded.download_kind,notes=excluded.notes,
@@ -718,7 +751,9 @@ class IntelligenceRepository:
                         item["candidate_id"], item["source_id"], item.get("external_id"),
                         item["vendor"], item["product"], item["model"],
                         item.get("firmware_version"), item["filename"],
-                        item["download_url"], item["source_page_url"],
+                        item["download_url"], item.get("download_host") or (
+                            urlsplit(item["download_url"]).hostname or ""
+                        ).lower(), item["source_page_url"],
                         item["evidence_url"], item.get("url_status", "listed"),
                         item.get("download_kind", "direct"), item.get("notes", ""),
                         now, now,
@@ -759,6 +794,8 @@ class IntelligenceRepository:
                 """SELECT
                      (SELECT COUNT(*) FROM firmware_sources) source_count,
                      (SELECT COUNT(*) FROM firmware_sources WHERE source_type='official') official_source_count,
+                     (SELECT COUNT(DISTINCT download_host)
+                        FROM firmware_sample_candidates WHERE download_host!='') download_host_count,
                      (SELECT COUNT(*) FROM firmware_sample_candidates) candidate_count,
                      (SELECT COUNT(DISTINCT candidate_id) FROM firmware_sample_vulnerabilities) linked_candidate_count,
                      (SELECT COUNT(*) FROM firmware_sample_vulnerabilities) vulnerability_lead_count"""
@@ -766,7 +803,8 @@ class IntelligenceRepository:
             vendors = connection.execute(
                 """SELECT MIN(vendor) label,COUNT(*) value
                    FROM firmware_sample_candidates
-                   GROUP BY vendor COLLATE NOCASE ORDER BY value DESC,label LIMIT 12"""
+                   WHERE lower(trim(vendor)) NOT IN ('', 'unknown', 'others', 'n/a')
+                   GROUP BY vendor COLLATE NOCASE ORDER BY value DESC,label LIMIT 250"""
             ).fetchall()
             sources = connection.execute(
                 """SELECT s.source_id,s.name,s.source_type,s.trust_level,
@@ -775,10 +813,16 @@ class IntelligenceRepository:
                      ON c.source_id=s.source_id
                    GROUP BY s.source_id ORDER BY candidate_count DESC,s.name LIMIT 12"""
             ).fetchall()
+            hosts = connection.execute(
+                """SELECT download_host label,COUNT(*) value
+                   FROM firmware_sample_candidates WHERE download_host!=''
+                   GROUP BY download_host ORDER BY value DESC,label LIMIT 16"""
+            ).fetchall()
         return {
             "counts": {key: counts[key] or 0 for key in counts.keys()},
             "vendors": [dict(row) for row in vendors],
             "sources": [dict(row) for row in sources],
+            "hosts": [dict(row) for row in hosts],
         }
 
     def list_firmware_sources(self) -> List[Dict[str, Any]]:
@@ -801,6 +845,7 @@ class IntelligenceRepository:
         query: str = "",
         vendor: str = "",
         source_id: str = "",
+        download_host: str = "",
         has_vulnerability: bool = False,
         limit: int = 30,
         offset: int = 0,
@@ -846,6 +891,9 @@ class IntelligenceRepository:
         if source_id:
             clauses.append("c.source_id = ?")
             values.append(source_id)
+        if download_host:
+            clauses.append("c.download_host = ? COLLATE NOCASE")
+            values.append(download_host)
         if has_vulnerability:
             clauses.append(
                 "EXISTS(SELECT 1 FROM firmware_sample_vulnerabilities hl "

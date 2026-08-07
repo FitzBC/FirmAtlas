@@ -7,7 +7,7 @@
 - [FirmEmuHub](https://github.com/a101e-lab/FirmEmuHub) 当前包含 100 个 `BM-*` 基准、100 个 `benchmark.yml` 和 100 个固件文件路径，覆盖 55 个规范化前的型号名称。厂商分布为 TP-Link 50、D-Link 49、Tenda 1。
 - [IoTVulBench](https://github.com/a101e-lab/IoTVulBench) 当前包含 95 个 CVE 目录、95 个 `detail.yml` 和 96 个验证载荷。它通过 `environments[].name = BM-*` 与 FirmEmuHub 关联。
 - IoTVulBench 的 95 个 CVE 实际只依赖 15 个不同的 FirmEmuHub 固件。下方首批清单的 15 个 `raw.githubusercontent.com` 端点在核查日均以 HTTP HEAD 返回 200，因此可以不下载文件就先导入系统。
-- [WUSTL-CSPL/Firmware-Dataset](https://github.com/WUSTL-CSPL/Firmware-Dataset) 的研究盘点解析出 187,431 条下载记录和 33 个 FTP 站点；2026-08-07 的 FirmAtlas 流式导入实测读取 187,429 条有效行，经 URL 去重为 173,778 个候选。它是扩充覆盖面的高价值“线索库”，但其中混有 OEM、OpenWrt、DD-WRT 等不同类型镜像，不能仅凭 `vendor` 字段判定为厂商原版固件。
+- [WUSTL-CSPL/Firmware-Dataset](https://github.com/WUSTL-CSPL/Firmware-Dataset) 的研究盘点解析出 187,431 条下载记录和 33 个 FTP 站点；2026-08-07 的 FirmAtlas 流式导入实测读取 187,429 条有效行，经 URL 去重为 173,778 个候选，并识别出 270 个 HTTP/HTTPS/FTP 下载域名。它是扩充覆盖面的高价值“线索库”，但其中混有 OEM、OpenWrt、DD-WRT 等不同类型镜像，不能仅凭 `vendor` 字段判定为厂商原版固件。
 - 十个重点厂商均有可记录的官方入口。除 Cisco 外，核查时均可匿名访问；Cisco 下载目录当前对无会话请求返回 403，且官方说明多数镜像要求登录，有些还要求有效服务合同。
 
 ## 可信度与来源类型

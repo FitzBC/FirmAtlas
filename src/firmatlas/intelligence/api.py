@@ -127,6 +127,7 @@ def create_handler(
                     query=_one(query, "q"),
                     vendor=_one(query, "vendor"),
                     source_id=_one(query, "source"),
+                    download_host=_one(query, "host"),
                     has_vulnerability=_one(query, "has_vulnerability") == "true",
                     limit=page_size,
                     offset=(page - 1) * page_size,
