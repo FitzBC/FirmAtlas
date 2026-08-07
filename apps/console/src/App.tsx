@@ -221,7 +221,9 @@ export function App() {
       )}
       {investigation.map((entry, index) => {
         const isTop = index === investigation.length - 1
-        const stackOffset = investigation.length - index - 1
+        // Keep the first detail anchored on the right and place each child to
+        // its left, following the investigation depth.
+        const stackOffset = index
         const parent = investigation[index - 1]
         const parentLabel = parent
           ? parent.kind === 'firmware' ? `${parent.firmware.vendor} ${parent.firmware.model}` : parent.id

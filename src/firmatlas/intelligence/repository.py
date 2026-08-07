@@ -1711,9 +1711,18 @@ class IntelligenceRepository:
             if kind == "interface":
                 where = "a.is_current=1 AND o.style_category!=''"
                 values: List[Any] = []
+                ordering = "vulnerability_count DESC,o.value ASC"
+                ordering_values: List[Any] = []
                 if query.strip():
                     where += " AND (o.value LIKE ? OR o.component LIKE ?)"
                     values.extend([search, search])
+                    needle = query.strip()
+                    ordering = """CASE WHEN lower(o.value)=lower(?) THEN 0
+                                      WHEN lower(o.value) LIKE lower(?) THEN 1
+                                      WHEN lower(o.value) LIKE lower(?) THEN 2
+                                      ELSE 3 END,
+                                  vulnerability_count DESC,o.value ASC"""
+                    ordering_values = [needle, "{}%".format(needle), search]
                 total = connection.execute(
                     """SELECT COUNT(DISTINCT o.value)
                        FROM semantic_interface_observations o
@@ -1734,15 +1743,24 @@ class IntelligenceRepository:
                        JOIN semantic_analyses a USING(analysis_id)
                        JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
                        WHERE {} GROUP BY o.value
-                       ORDER BY vulnerability_count DESC,o.value ASC LIMIT ? OFFSET ?""".format(where),
-                    values + [limit, offset],
+                       ORDER BY {} LIMIT ? OFFSET ?""".format(where, ordering),
+                    values + ordering_values + [limit, offset],
                 ).fetchall()
             elif kind == "parameter":
                 where = "a.is_current=1"
                 values = []
+                ordering = "vulnerability_count DESC,p.name ASC"
+                ordering_values = []
                 if query.strip():
                     where += " AND (p.name LIKE ? OR p.security_effect LIKE ?)"
                     values.extend([search, search])
+                    needle = query.strip()
+                    ordering = """CASE WHEN lower(p.name)=lower(?) THEN 0
+                                      WHEN lower(p.name) LIKE lower(?) THEN 1
+                                      WHEN lower(p.name) LIKE lower(?) THEN 2
+                                      ELSE 3 END,
+                                  vulnerability_count DESC,p.name ASC"""
+                    ordering_values = [needle, "{}%".format(needle), search]
                 total = connection.execute(
                     """SELECT COUNT(DISTINCT p.name)
                        FROM semantic_parameter_observations p
@@ -1766,8 +1784,8 @@ class IntelligenceRepository:
                        LEFT JOIN semantic_interface_observations i
                          ON i.analysis_id=p.analysis_id AND i.value=p.interface_value
                        WHERE {} GROUP BY p.name
-                       ORDER BY vulnerability_count DESC,p.name ASC LIMIT ? OFFSET ?""".format(where),
-                    values + [limit, offset],
+                       ORDER BY {} LIMIT ? OFFSET ?""".format(where, ordering),
+                    values + ordering_values + [limit, offset],
                 ).fetchall()
             else:
                 categories = self.semantic_categories()
@@ -1796,6 +1814,8 @@ class IntelligenceRepository:
     ) -> Dict[str, Any]:
         where = "a.is_current=1 AND o.style_category=?"
         values: List[Any] = [category]
+        ordering = "vulnerability_count DESC,o.value ASC"
+        ordering_values: List[Any] = []
         if subtype.strip():
             where += " AND o.style_subtype=?"
             values.append(subtype.strip())
@@ -1803,6 +1823,13 @@ class IntelligenceRepository:
             search = "%{}%".format(query.strip())
             where += " AND (o.value LIKE ? OR o.component LIKE ?)"
             values.extend([search, search])
+            needle = query.strip()
+            ordering = """CASE WHEN lower(o.value)=lower(?) THEN 0
+                              WHEN lower(o.value) LIKE lower(?) THEN 1
+                              WHEN lower(o.value) LIKE lower(?) THEN 2
+                              ELSE 3 END,
+                          vulnerability_count DESC,o.value ASC"""
+            ordering_values = [needle, "{}%".format(needle), search]
         with self.read_connection() as connection:
             total = connection.execute(
                 """SELECT COUNT(DISTINCT o.value)
@@ -1825,8 +1852,8 @@ class IntelligenceRepository:
                    JOIN semantic_analyses a USING(analysis_id)
                    JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
                    WHERE {} GROUP BY o.value
-                   ORDER BY vulnerability_count DESC,o.value ASC LIMIT ? OFFSET ?""".format(where),
-                values + [limit, offset],
+                   ORDER BY {} LIMIT ? OFFSET ?""".format(where, ordering),
+                values + ordering_values + [limit, offset],
             ).fetchall()
         items = [dict(row) for row in rows]
         for item in items:
@@ -2036,9 +2063,8 @@ class IntelligenceRepository:
                    JOIN semantic_analyses a USING(analysis_id)
                    JOIN vulnerabilities v ON v.identifier=a.vulnerability_identifier
                    WHERE a.is_current=1 AND o.style_category=? AND o.style_subtype=?
-                     AND o.value!=?
                    GROUP BY o.value""",
-                (category, architecture, normalized),
+                (category, architecture),
             ).fetchall()
             vulnerability_rows = connection.execute(
                 """SELECT DISTINCT v.identifier,v.title,v.summary,v.vendor,v.product,
@@ -2056,6 +2082,9 @@ class IntelligenceRepository:
         query_prefix = query_path.strip("/").split("/", 1)[0].lower()
         query_depth = len([part for part in query_path.split("/") if part])
         query_extension = query_path.rsplit(".", 1)[-1].lower() if "." in query_path else ""
+        query_folded = query_path.casefold()
+        query_leaf = query_path.rstrip("/").rsplit("/", 1)[-1]
+        query_terms = self._interface_search_terms(query_leaf)
         candidates: List[Dict[str, Any]] = []
         for row in candidate_rows:
             item = dict(row)
@@ -2066,19 +2095,38 @@ class IntelligenceRepository:
                 candidate_path.rsplit(".", 1)[-1].lower()
                 if "." in candidate_path else ""
             )
+            candidate_folded = candidate_path.casefold()
+            candidate_leaf = candidate_path.rstrip("/").rsplit("/", 1)[-1]
+            candidate_terms = self._interface_search_terms(candidate_leaf)
             score = 80
             signals = ["后端通信架构风格一致"]
-            if query_prefix and query_prefix == candidate_prefix:
+            match_tier = "architecture"
+            if query_folded == candidate_folded:
+                score = 100
+                match_tier = "exact"
+                signals.insert(0, "原样精确命中")
+            elif query_folded in candidate_folded or candidate_folded in query_folded:
+                score += 15
+                match_tier = "substring"
+                signals.insert(0, "路径片段直接命中")
+            elif query_terms and candidate_terms:
+                common_terms = query_terms & candidate_terms
+                if common_terms:
+                    score += min(12, round(12 * len(common_terms) / len(query_terms)))
+                    match_tier = "keyword"
+                    signals.insert(0, "关键词命中：{}".format(" / ".join(sorted(common_terms))))
+            if score < 100 and query_prefix and query_prefix == candidate_prefix:
                 score += 10
                 signals.append("入口命名空间一致")
-            if query_depth == candidate_depth:
+            if score < 100 and query_depth == candidate_depth:
                 score += 5
                 signals.append("路径层级一致")
-            if query_extension and query_extension == candidate_extension:
+            if score < 100 and query_extension and query_extension == candidate_extension:
                 score += 5
                 signals.append("处理器后缀一致")
-            item["similarity_score"] = min(score, 100)
+            item["similarity_score"] = min(score, 100 if match_tier == "exact" else 99)
             item["similarity_signals"] = signals
+            item["match_tier"] = match_tier
             item["vendors"] = [
                 vendor for vendor in (item.get("vendors") or "").split(",") if vendor
             ][:5]
@@ -2088,6 +2136,9 @@ class IntelligenceRepository:
             candidates.append(item)
         candidates.sort(
             key=lambda item: (
+                {"exact": 0, "substring": 1, "keyword": 2, "architecture": 3}.get(
+                    item["match_tier"], 4
+                ),
                 -item["similarity_score"],
                 -item["vulnerability_count"],
                 item["value"],
@@ -2124,6 +2175,15 @@ class IntelligenceRepository:
             "model_count": profile["scope_model_count"],
         }
         return result
+
+    @staticmethod
+    def _interface_search_terms(value: str) -> set[str]:
+        """Tokenize route handlers so CamelCase and snake_case can rank together."""
+        expanded = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", value)
+        return {
+            token for token in re.findall(r"[a-z0-9]+", expanded.casefold())
+            if len(token) > 1 and token not in {"cgi", "api", "goform", "hnap"}
+        }
 
     def _semantic_associations(
         self, kind: str, value: str, limit: int, offset: int

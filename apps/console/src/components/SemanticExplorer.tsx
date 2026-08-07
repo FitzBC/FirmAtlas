@@ -42,12 +42,19 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
   const [categorySubtype, setCategorySubtype] = useState('')
   const [categoryPage, setCategoryPage] = useState(1)
   const [categoryLoading, setCategoryLoading] = useState(false)
+  const [analysisRevision, setAnalysisRevision] = useState(0)
   const debouncedQuery = useDebouncedValue(query, 220)
   const debouncedCategoryQuery = useDebouncedValue(categoryQuery, 220)
 
   useEffect(() => {
     setPage(1); setSelected(null); setDetail(null); setQuery(''); setSelectedCategory(null)
   }, [mode])
+
+  useEffect(() => {
+    const refresh = () => setAnalysisRevision((current) => current + 1)
+    window.addEventListener('firmatlas:semantic-analysis-updated', refresh)
+    return () => window.removeEventListener('firmatlas:semantic-analysis-updated', refresh)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -68,7 +75,7 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
         .finally(() => setLoading(false))
     }
     return () => controller.abort()
-  }, [mode, page, debouncedQuery])
+  }, [mode, page, debouncedQuery, analysisRevision])
 
   useEffect(() => {
     if (!selected) return
@@ -83,7 +90,7 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
       })
       .finally(() => setDetailLoading(false))
     return () => controller.abort()
-  }, [selectedKind, selected, detailPage])
+  }, [selectedKind, selected, detailPage, analysisRevision])
 
   useEffect(() => {
     if (!selectedCategory) return
@@ -98,7 +105,7 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
       })
       .finally(() => setCategoryLoading(false))
     return () => controller.abort()
-  }, [selectedCategory, categoryPage, debouncedCategoryQuery, categorySubtype])
+  }, [selectedCategory, categoryPage, debouncedCategoryQuery, categorySubtype, analysisRevision])
 
   const open = (kind: 'interface' | 'parameter', value: string) => { setSelectedKind(kind); setSelected(value); setDetailPage(1); setDetail(null) }
   const openCategory = (value: string) => { setSelectedCategory(value); setCategoryPage(1); setCategoryQuery(''); setCategorySubtype(''); setCategoryDetail(null) }
@@ -139,7 +146,6 @@ export function SemanticExplorer({ mode }: SemanticExplorerProps) {
           onSubtype={(value) => { setCategorySubtype(value); setCategoryPage(1) }}
           onPage={setCategoryPage} onSelectInterface={(value) => open('interface', value)}
           onClose={() => setSelectedCategory(null)}
-          shifted={Boolean(selected)}
         />
       )}
     </section>
@@ -207,7 +213,7 @@ function InterfaceStructureSearch({ onSelectInterface }: { onSelectInterface: (v
           <MiniStatCard label="相似接口" value={result.scope.interface_count} /><MiniStatCard label="关联漏洞" value={result.scope.vulnerability_count} /><MiniStatCard label="厂商" value={result.scope.vendor_count} /><MiniStatCard label="固件型号" value={result.scope.model_count} />
         </div>
         <div className="mt-4 grid gap-4 xl:grid-cols-[1.15fr_.85fr]">
-          <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-black/10"><div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3"><div className="eyebrow"><Network size={12} /> Recommended interfaces</div><span className="font-mono text-[9px] text-slate-700">{result.total} matches</span></div><div className="divide-y divide-white/[0.05]">{result.items.map((item) => <button type="button" key={item.value} onClick={() => onSelectInterface(item.value)} className="grid w-full grid-cols-[minmax(0,1fr)_70px] items-center gap-3 px-4 py-3 text-left transition hover:bg-white/[0.035]"><div className="min-w-0"><code className="block truncate text-[11px] font-semibold text-slate-200">{item.value}</code><p className="mt-1 truncate text-[8px] text-slate-650">{item.similarity_signals.join(' · ')}</p><div className="mt-1.5 flex flex-wrap gap-1">{item.vendors.map((vendor) => <span key={vendor} className="rounded bg-white/[0.035] px-1.5 py-0.5 text-[8px] text-slate-500">{vendor}</span>)}</div></div><div className="text-right"><strong className="font-mono text-sm text-signal">{item.similarity_score}</strong><span className="block text-[7px] uppercase text-slate-700">similarity</span><span className="mt-1 block text-[8px] text-slate-600">{item.vulnerability_count} 漏洞</span></div></button>)}</div>{result.pages > 1 && <PaginationControls page={result.page} pages={result.pages} total={result.total} hasPrevious={result.has_previous} hasNext={result.has_next} onPage={(page) => run(submitted, page)} />}</section>
+          <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-black/10"><div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3"><div><div className="eyebrow"><Network size={12} /> Recommended interfaces</div><p className="mt-1 text-[8px] text-slate-700">精确原文与关键词命中优先，其次按架构和漏洞证据排序</p></div><span className="font-mono text-[9px] text-slate-700">{result.total} matches</span></div><div className="divide-y divide-white/[0.05]">{result.items.map((item) => <button type="button" key={item.value} onClick={() => onSelectInterface(item.value)} className="group grid w-full grid-cols-[minmax(0,1fr)_70px] items-center gap-3 px-4 py-3 text-left transition hover:bg-white/[0.035]"><div className="min-w-0"><div className="flex items-center gap-2"><code className="block truncate text-[11px] font-semibold text-slate-200 group-hover:text-signal">{item.value}</code><MatchTierBadge tier={item.match_tier} /></div><p className="mt-1 truncate text-[8px] text-slate-650">{item.similarity_signals.join(' · ')}</p><div className="mt-1.5 flex flex-wrap gap-1">{item.vendors.map((vendor) => <span key={vendor} className="rounded bg-white/[0.035] px-1.5 py-0.5 text-[8px] text-slate-500">{vendor}</span>)}</div></div><div className="text-right"><strong className="font-mono text-sm text-signal">{item.similarity_score}</strong><span className="block text-[7px] uppercase text-slate-700">similarity</span><span className="mt-1 block text-[8px] text-slate-600">{item.vulnerability_count} 漏洞</span></div></button>)}</div>{result.pages > 1 && <PaginationControls page={result.page} pages={result.pages} total={result.total} hasPrevious={result.has_previous} hasNext={result.has_next} onPage={(page) => run(submitted, page)} />}</section>
           <div className="space-y-3">
             <section className="rounded-2xl border border-white/[0.07] bg-black/10 p-4"><div className="eyebrow"><BarChart3 size={12} /> Related vendors & firmware</div><div className="mt-3 flex flex-wrap gap-1.5">{result.related_vendors.slice(0, 8).map((item) => <span key={item.vendor} className="rounded-lg border border-white/[0.06] bg-white/[0.025] px-2 py-1 text-[8px] text-slate-400">{item.vendor} · {item.model_count} 型号</span>)}</div><div className="mt-3 grid gap-1.5 sm:grid-cols-2">{result.related_firmware.slice(0, 6).map((item) => <div key={item.key} className="rounded-lg bg-white/[0.025] p-2"><strong className="block truncate text-[9px] text-slate-300">{item.label}</strong><span className="mt-1 block truncate font-mono text-[8px] text-cyan/70">{item.version_summary}</span></div>)}</div></section>
             <section className="rounded-2xl border border-white/[0.07] bg-black/10 p-4"><div className="eyebrow"><ShieldAlert size={12} /> Representative vulnerabilities</div><div className="mt-3 space-y-2">{result.related_vulnerabilities.slice(0, 5).map((item) => <article key={item.identifier} className="rounded-lg border border-white/[0.05] bg-white/[0.02] p-2.5"><div className="flex items-center justify-between gap-2"><code className="text-[9px] font-semibold text-cyan">{item.identifier}</code><span className={`rounded px-1.5 py-0.5 text-[8px] ${severityTone(item.severity)}`}>{item.cvss_score ?? '—'}</span></div><p className="mt-1 truncate text-[9px] text-slate-400">{item.title}</p><span className="mt-1 block text-[8px] text-slate-700">{[item.vendor, item.product].filter((value) => value && value.toLowerCase() !== 'n/a').join(' · ') || '厂商/型号待补全'}</span></article>)}</div></section>
@@ -257,7 +263,7 @@ function CategoryAtlas({ categories, loading, onSelect }: { categories: Semantic
   )
 }
 
-function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSubtype, onPage, onSelectInterface, onClose, shifted = false }: {
+function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSubtype, onPage, onSelectInterface, onClose }: {
   category: string
   page: SemanticExplorePage<SemanticCatalogItem> | null
   loading: boolean
@@ -268,13 +274,12 @@ function CategoryDrawer({ category, page, loading, query, subtype, onQuery, onSu
   onPage: (page: number) => void
   onSelectInterface: (value: string) => void
   onClose: () => void
-  shifted?: boolean
 }) {
   const profile = (page?.selection || {}) as unknown as SemanticCategoryProfile
   const maxVendor = Math.max(1, ...(profile.top_vendors || []).map((item) => item.vulnerability_count))
   return (
     <div className="fixed inset-0 z-[60] bg-black/65 backdrop-blur-sm" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <aside role="dialog" aria-label={`${profile.label || category} 类别详情`} className={`absolute inset-y-0 right-0 w-full max-w-[1120px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl transition-[right] duration-300 ${shifted ? 'investigation-shifted' : ''}`}>
+      <aside role="dialog" aria-label={`${profile.label || category} 类别详情`} className="absolute inset-y-0 right-0 w-full max-w-[1120px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl">
         <header className="sticky top-0 z-20 border-b border-white/[0.07] bg-[#0b1119]/92 px-6 py-5 backdrop-blur-xl">
           <div className="flex items-start justify-between gap-4">
             <div><div className="eyebrow"><Sparkles size={13} /> Category intelligence</div><h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">{profile.label || category}</h2><p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-600">{profile.description || '正在构建接口类别画像…'}</p></div>
@@ -343,8 +348,8 @@ function AssociationDrawer({ kind, value, page, loading, onClose, onPage, parent
     finally { setExpandedLoading(null) }
   }
   return (
-    <div className="fixed inset-0 z-[70] bg-black/65 backdrop-blur-sm" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <aside role="dialog" aria-label={`${label} 关联详情`} className={`absolute inset-y-0 right-0 w-full max-w-[760px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl transition-[right] duration-300 ${expanded ? 'investigation-shifted' : ''}`}>
+    <div className={`fixed inset-0 z-[70] ${parentLabel ? 'bg-transparent' : 'bg-black/50 backdrop-blur-[2px]'}`} role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <aside role="dialog" aria-label={`${label} 关联详情`} className={`absolute inset-y-0 right-0 w-full max-w-[760px] overflow-y-auto border-l border-white/[0.09] bg-[#0b1119]/98 shadow-2xl transition-[right] duration-300 ${parentLabel ? 'investigation-child' : ''}`}>
         <header className="sticky top-0 z-10 border-b border-white/[0.07] bg-[#0b1119]/90 px-6 py-5 backdrop-blur-xl">
           <div className="flex items-start justify-between gap-4"><div>{parentLabel && <button type="button" onClick={onClose} className="mb-3 flex items-center gap-2 text-[10px] text-signal transition hover:text-white"><ArrowLeft size={12} /> 返回 {parentLabel}</button>}<div className="eyebrow"><Network size={13} /> Association drilldown</div><h2 className="mt-2 break-all font-mono text-xl font-semibold text-white">{label}</h2><p className="mt-2 text-[11px] text-slate-600">{kind === 'category' ? String(selection.description || '接口风格关联') : [selection.method, selection.protocol, selection.category].filter(Boolean).join(' · ')}</p></div><button type="button" onClick={onClose} aria-label={parentLabel ? '返回类别详情' : '关闭关联详情'} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/[0.08] text-slate-500 transition hover:text-white">{parentLabel ? <ArrowLeft size={16} /> : <X size={16} />}</button></div>
           <div className="mt-4 flex gap-2"><span className="rounded-lg bg-signal/[0.08] px-2.5 py-1 text-[9px] text-signal">{page?.total ?? 0} 漏洞</span>{selection.vendor_count != null && <span className="rounded-lg bg-cyan/[0.08] px-2.5 py-1 text-[9px] text-cyan">{String(selection.vendor_count)} 厂商</span>}</div>
@@ -360,7 +365,7 @@ function AssociationDrawer({ kind, value, page, loading, onClose, onPage, parent
         ))}</div>
         {page && <PaginationControls page={page.page} pages={page.pages} total={page.total} hasPrevious={page.has_previous} hasNext={page.has_next} onPage={onPage} />}
       </aside>
-      <VulnerabilityDetail vulnerability={expanded} onClose={() => setExpanded(null)} layerClassName="z-[90]" parentLabel={label} />
+      <VulnerabilityDetail vulnerability={expanded} onClose={() => setExpanded(null)} layerClassName="z-[90]" parentLabel={label} stackOffset={parentLabel ? 2 : 1} />
     </div>
   )
 }
@@ -368,6 +373,10 @@ function AssociationDrawer({ kind, value, page, loading, onClose, onPage, parent
 function StyleBadge({ category }: { category: string }) {
   const labels: Record<string, string> = { form_handler: 'Form handler', cgi_gateway: 'CGI gateway', hnap_soap: 'HNAP / SOAP', resource_api: 'Resource API', web_action: 'Web action', rpc_command: 'RPC / command', management_route: 'Management' }
   return <span className="hidden w-fit rounded-lg border border-white/[0.07] bg-white/[0.025] px-2 py-1 text-[9px] text-slate-500 sm:block">{labels[category] || category}</span>
+}
+function MatchTierBadge({ tier }: { tier?: 'exact' | 'substring' | 'keyword' | 'architecture' }) {
+  const label = tier === 'exact' ? '精确命中' : tier === 'substring' ? '片段命中' : tier === 'keyword' ? '关键词' : '同架构'
+  return <span className={`shrink-0 rounded px-1.5 py-0.5 text-[7px] ${tier === 'exact' ? 'bg-signal/12 text-signal' : tier === 'substring' || tier === 'keyword' ? 'bg-cyan/10 text-cyan' : 'bg-white/[0.04] text-slate-600'}`}>{label}</span>
 }
 function MiniStat({ label, value }: { label: string; value: number }) { return <div><strong className="block font-mono text-xs text-slate-300">{value}</strong><span className="mt-1 block text-[8px] text-slate-700">{label}</span></div> }
 function MiniStatCard({ label, value }: { label: string; value: number }) { return <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] px-3 py-2"><strong className="font-mono text-sm text-white">{value}</strong><span className="ml-2 text-[8px] uppercase tracking-wider text-slate-650">{label}</span></div> }

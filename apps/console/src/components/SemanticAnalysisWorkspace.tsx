@@ -40,6 +40,12 @@ export function SemanticAnalysisWorkspace({ onConfigureModel }: SemanticAnalysis
   useEffect(() => { void load() }, [load])
 
   useEffect(() => {
+    const refresh = () => void load()
+    window.addEventListener('firmatlas:semantic-analysis-updated', refresh)
+    return () => window.removeEventListener('firmatlas:semantic-analysis-updated', refresh)
+  }, [load])
+
+  useEffect(() => {
     if (job?.status !== 'running') return
     const timer = window.setInterval(() => {
       void Promise.all([

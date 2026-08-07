@@ -373,6 +373,18 @@ class IntelligenceRepositoryTests(unittest.TestCase):
             {item["value"] for item in result["items"]},
             {item["value"] for item in full_url["items"]},
         )
+        exact = self.repository.recommend_interface_structure(
+            "/goform/SetOnlineDevName", limit=10
+        )
+        self.assertEqual("/goform/SetOnlineDevName", exact["items"][0]["value"])
+        self.assertEqual("exact", exact["items"][0]["match_tier"])
+        self.assertEqual(100, exact["items"][0]["similarity_score"])
+
+        partial = self.repository.recommend_interface_structure(
+            "/goform/SetOnlineDev", limit=10
+        )
+        self.assertEqual("/goform/SetOnlineDevName", partial["items"][0]["value"])
+        self.assertEqual("substring", partial["items"][0]["match_tier"])
 
     def test_form_handler_subtypes_describe_backend_registration_architecture(self) -> None:
         base = demo_records()[0]

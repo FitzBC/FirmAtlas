@@ -430,6 +430,7 @@ export interface InterfaceStructureRecommendation {
   items: Array<SemanticCatalogItem & {
     similarity_score: number
     similarity_signals: string[]
+    match_tier?: 'exact' | 'substring' | 'keyword' | 'architecture'
   }>
   total: number
   limit: number

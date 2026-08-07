@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 
 import { intelligenceApi } from '../api/client'
-import type { FirmwareCandidateDetail, Vulnerability } from '../types'
+import type { FirmwareCandidateDetail, SemanticAnalysis, Vulnerability } from '../types'
 import { FirmwareCandidateDrawer } from './FirmwareCatalogWorkspace'
 import { VulnerabilityDetail } from './VulnerabilityDetail'
 
@@ -39,6 +39,20 @@ const vulnerability = {
   semantic_interface_count: 0, semantic_parameter_count: 0,
 } as Vulnerability
 
+const semanticAnalysis: SemanticAnalysis = {
+  analysis_id: 'analysis-one', vulnerability_identifier: vulnerability.identifier,
+  input_sha256: 'input', analyzer_fingerprint: 'rules', strategy: 'rules', status: 'succeeded',
+  warning: null, prompt_tokens: 0, completion_tokens: 0,
+  created_at: '2025-01-01T00:00:00Z', finished_at: '2025-01-01T00:00:01Z',
+  result: {
+    vulnerability_identifier: vulnerability.identifier, interfaces: [{
+      value: '/HNAP1', kind: 'http_route', method: 'POST', protocol: 'HTTP', component: 'Web Interface',
+      confidence: 0.9, evidence: 'HNAP endpoint evidence', source: 'rules',
+    }], parameters: [], attack_type: 'command injection', remotely_exploitable: true,
+    analyzer_version: 'rules-test',
+  },
+}
+
 afterEach(() => vi.restoreAllMocks())
 
 it('returns one drawer level at a time and only the top layer handles Escape', () => {
@@ -49,6 +63,7 @@ it('returns one drawer level at a time and only the top layer handles Escape', (
 
   expect(screen.getByRole('button', { name: '返回上一级' })).toBeInTheDocument()
   expect(screen.getByText('返回 CVE-2025-1001')).toBeInTheDocument()
+  expect(screen.getByRole('dialog')).toHaveStyle({ '--stack-offset': '1' })
   fireEvent.keyDown(window, { key: 'Escape' })
   expect(onClose).not.toHaveBeenCalled()
 
@@ -59,6 +74,7 @@ it('returns one drawer level at a time and only the top layer handles Escape', (
 
 it('opens an exact associated firmware as the next investigation layer', async () => {
   vi.spyOn(intelligenceApi, 'semanticAnalysis').mockResolvedValue(null)
+  const analyze = vi.spyOn(intelligenceApi, 'analyzeVulnerability').mockResolvedValue(semanticAnalysis)
   vi.spyOn(intelligenceApi, 'firmwareSamplesForVulnerability').mockResolvedValue({
     identifier: vulnerability.identifier, items: [firmware], total: 1,
   })
@@ -70,5 +86,8 @@ it('opens an exact associated firmware as the next investigation layer', async (
   fireEvent.click(sample)
   expect(onOpenFirmware).toHaveBeenCalledWith(firmware.candidate_id)
   expect(screen.getByText('返回 D-Link DIR-823G')).toBeInTheDocument()
+  expect(await screen.findByText('/HNAP1')).toBeInTheDocument()
+  expect(screen.getByText('分析结果已归档，并同步到语义洞察与智能关联')).toBeInTheDocument()
+  expect(analyze).toHaveBeenCalledWith(vulnerability.identifier)
   await waitFor(() => expect(intelligenceApi.firmwareSamplesForVulnerability).toHaveBeenCalled())
 })

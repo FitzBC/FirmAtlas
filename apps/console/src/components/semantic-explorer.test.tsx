@@ -43,7 +43,14 @@ it('drills from an interface into associated vendors and firmware', async () => 
     relevance_level: 'strong', relevance_signals: [], policy_version: 'test', is_firmware_related: true,
     semantic_interface_count: 1, semantic_parameter_count: 1,
   })
-  vi.spyOn(intelligenceApi, 'semanticAnalysis').mockResolvedValue(null)
+  vi.spyOn(intelligenceApi, 'semanticAnalysis').mockResolvedValue({
+    analysis_id: 'cached', vulnerability_identifier: 'CVE-2025-0001', input_sha256: 'input',
+    analyzer_fingerprint: 'rules', strategy: 'rules', status: 'succeeded', warning: null,
+    prompt_tokens: 0, completion_tokens: 0, created_at: '2025-01-01T00:00:00Z',
+    finished_at: '2025-01-01T00:00:01Z', cached: true,
+    result: { vulnerability_identifier: 'CVE-2025-0001', interfaces: [], parameters: [],
+      attack_type: null, remotely_exploitable: null, analyzer_version: 'rules-test' },
+  })
 
   render(<SemanticExplorer mode="interface" />)
 
@@ -91,7 +98,7 @@ it('recommends structurally related interfaces from an entered firmware route', 
       value: '/goform/SetOnlineDevName', category: 'form_handler', subtype: 'goform_camel_registry',
       kind: 'http_route', protocol: 'HTTP', component: 'Web Interface', occurrence_count: 15,
       vulnerability_count: 15, vendor_count: 1, vendors: ['Tenda'], latest_at: '2025-01-01T00:00:00Z',
-      similarity_score: 95, similarity_signals: ['后端通信架构风格一致', '入口命名空间一致'],
+      similarity_score: 99, similarity_signals: ['路径片段直接命中', '后端通信架构风格一致'], match_tier: 'substring',
     }],
     related_vendors: [{ vendor: 'Tenda', vulnerability_count: 569, model_count: 67 }],
     related_firmware: [{ key: 'tenda ac18', label: 'Tenda AC18 固件', vendor: 'Tenda', model: 'AC18', version_summary: '15.03.05.19', source: 'description', alignment: 'aligned', vulnerability_count: 34 }],
@@ -107,6 +114,7 @@ it('recommends structurally related interfaces from an entered firmware route', 
 
   expect((await screen.findAllByText('goform 驼峰命名注册表')).length).toBeGreaterThan(0)
   expect(screen.getAllByText('/goform/SetOnlineDevName').length).toBeGreaterThan(0)
+  expect(screen.getByText('片段命中')).toBeInTheDocument()
   expect(screen.getAllByText('Tenda AC18 固件').length).toBeGreaterThan(0)
   expect(screen.getAllByText('CVE-2025-2301').length).toBeGreaterThan(0)
   expect(recommend).toHaveBeenCalledWith('/goform/SetGuestWifiCfg', 1, expect.any(AbortSignal))
