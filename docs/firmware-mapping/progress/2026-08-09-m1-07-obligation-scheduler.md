@@ -60,4 +60,6 @@ discover 策略不注册高成本 `native-deep/runtime` Adapter，因此结果�
 | 前端测试与构建 | Vitest 16/16、TypeScript 与 Vite build 通过 |
 | JSON / Python validation | `json.tool`、`py_compile`、`git diff --check` 通过 |
 | 本地 API/UI smoke | 临时 SQLite 下 health、overview、构建首页均 HTTP 200 |
+| 实现修订 | `0067863` |
+| GitHub push | 随本里程碑关闭提交一并验证 |
 | SSH deployment | 不适用（用户当前测绘范围） |
