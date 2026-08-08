@@ -37,6 +37,17 @@ class FrontendRequestProducerContractTests(unittest.TestCase):
         self.assertEqual(len(content), result.processed_bytes)
         self.assertEqual([], list(result.diagnostics))
         self.assertEqual(
+            {
+                "R.pageModel",
+                "R.moduleModel.getSubmitData",
+                "jQuery.getJSON",
+                "jQuery.post",
+                "jQuery.ajax",
+                "HTML.form",
+            },
+            set(result.supported_constructs),
+        )
+        self.assertEqual(
             [
                 ("goform/GetStaticRouteCfg", FrontendRequestRole.READ),
                 ("goform/SetStaticRouteCfg", FrontendRequestRole.WRITE),

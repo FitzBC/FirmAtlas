@@ -23,6 +23,14 @@ from .inventory import SourceArtifactEntry
 
 FRONTEND_RESULT_SCHEMA_VERSION = "firmatlas.mapping.frontend-result/v1alpha1"
 _PRODUCER = AnalyzerIdentity(name="frontend-request-producer", version="0.1.0")
+_SUPPORTED_CONSTRUCTS = (
+    "R.pageModel",
+    "R.moduleModel.getSubmitData",
+    "jQuery.getJSON",
+    "jQuery.post",
+    "jQuery.ajax",
+    "HTML.form",
+)
 
 
 class FrontendRequestRole(str, Enum):
@@ -211,6 +219,7 @@ class FrontendProducerResult:
     parameters: Tuple[FrontendParameterCandidate, ...]
     evidence_atoms: Tuple[EvidenceAtom, ...]
     diagnostics: Tuple[FrontendDiagnostic, ...] = ()
+    supported_constructs: Tuple[str, ...] = _SUPPORTED_CONSTRUCTS
     schema_version: str = FRONTEND_RESULT_SCHEMA_VERSION
 
     def to_dict(self) -> dict:
@@ -238,6 +247,7 @@ class FrontendProducerResult:
             ],
             "evidence_atoms": [item.to_dict() for item in self.evidence_atoms],
             "diagnostics": [asdict(item) for item in self.diagnostics],
+            "supported_constructs": list(self.supported_constructs),
         }
 
 

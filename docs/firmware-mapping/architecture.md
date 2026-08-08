@@ -157,6 +157,8 @@ priority = expected_information_gain
 
 请求样例属于 Runtime/Intelligence 类 Evidence Adapter，不是特殊入口。
 
+M1-04 Frontend Producer 当前声明的能力范围是 `R.pageModel`、`R.moduleModel.getSubmitData`、jQuery `getJSON/post/ajax` 与 HTML Form。`completed` 表示这些声明构造已在文件内完整执行，不表示任意动态 JavaScript、框架封装或混淆代码都已恢复。结果保留 exact literal 与 literal prefix 的差别；完全动态 URL 必须在后续 Producer 或模型义务中保持 unknown。
+
 ## 6. 模型使用边界
 
 模型适合：
