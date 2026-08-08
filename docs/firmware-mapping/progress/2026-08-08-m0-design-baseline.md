@@ -54,7 +54,11 @@
 
 ## 发布证据
 
-将在本次提交、推送和 `satc_cloud` 部署核验后追加。
+- 设计基线提交：`1ab781258a7915adaffc1e3f12641156f6d26fc7`；
+- GitHub：已推送到 `FitzBC/FirmAtlas` 的 `main`；
+- `satc_cloud`：本次仅规划和文档设计，用户明确要求不进行 SSH 部署，因此标记为不适用；
+- 范围调整前曾启动一次 `make deploy`，它在 SSH banner/linger 预检阶段终止，未创建远端 release、未同步文件、未切换 `current`、未重启服务；
+- 本记录的状态收口将由紧随其后的文档提交发布到 GitHub。
 
 ## 覆盖缺口与未决义务
 
