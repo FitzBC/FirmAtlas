@@ -130,23 +130,25 @@ make mapping-inventory ROOT=/path/to/extracted-root
 
 输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。内置 Inventory 仍只读取已解包目录并以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装由独立 Container Extraction Worker 处理，不能把原始固件直接交给此命令。
 
-原始固件解包使用 Binwalk，但 Binwalk 只允许在隔离 extraction worker 中运行。当前仓库已经实现只接受固定镜像摘要的 `ContainerBinwalkWorker`，强制禁网、只读根/输入、能力清空、`no-new-privileges`、PID/CPU/内存、输出和日志预算，并保留父制品、工具、命令、派生 Inventory 与失败诊断谱系。真实 DAP-3520 回放恢复了 757 个条目和 `/HNAP1 → /usr/sbin/hnap`、PHP-XGI 页面控制器证据；DIR-882 的零产物回放则被明确标为 `extraction.no_output`。固定发布镜像重建与 HNAP/XGI Catalog 仍在进行中，详见 [M1-02B 记录](./docs/firmware-mapping/progress/2026-08-09-m1-02b-container-binwalk-worker.md)。
+原始固件解包使用 Binwalk，但 Binwalk 只允许在隔离 extraction worker 中运行。当前仓库已经实现只接受固定镜像摘要的 `ContainerBinwalkWorker`，强制禁网、只读根/输入、能力清空、`no-new-privileges`、PID/CPU/内存、输出和日志预算，并保留父制品、工具、命令、派生 Inventory 与失败诊断谱系。真实 DAP-3520 回放恢复了 757 个条目，已发布包含 `/HNAP1 → /usr/sbin/hnap` 和 PHP-XGI 页面控制器的 partial Catalog；DIR-882 的零产物回放则被明确标为 `extraction.no_output`。固定发布镜像重建仍在进行中，详见 [M1-02B 记录](./docs/firmware-mapping/progress/2026-08-09-m1-02b-container-binwalk-worker.md)。
 
 Inventory 条目现在可以通过统一的证据捕获 Interface 转换为 `firmatlas.mapping.evidence/v1alpha1` EvidenceAtom。文本与二进制证据都会校验源文件摘要、精确字节选区及选区摘要；文本另外保存可回放的 UTF-8 行列。真实 Tenda AC9 中间结果见 [M1-03 EvidenceAtom 样例](./docs/firmware-mapping/samples/tenda-ac9-m1-evidence-atoms.json)。
 
 Frontend Request Producer 已能从声明范围内的 HTML Form、Tenda `R.pageModel/R.moduleModel` 和 jQuery `getJSON/post/ajax` 构造中恢复请求候选、方法、表示形式、参数与 operation selector，并以 EvidenceAtom 输出。它区分动态 URL 的 literal prefix、合并重复调用身份但保留多处证据；AC9、HNAP 与共享 CGI 的对比输出见 [M1-04 样例](./docs/firmware-mapping/samples/m1-04-frontend-producer-summary.json)。
 
-Web Configuration Producer 已能从 nginx 配置和直接 POSIX shell 启动项恢复 listener、docroot、namespace mapping、auth requirement 与 service start finding。AC9 的真实配置回放确认了 `:8180 → /cgi-bin/luci/ → 127.0.0.1:8188 → app_data_center`，并明确保留 `/goform/*` 与主 `dhttpd/httpd` binding 为未知；完整中间输出见 [M1-05 样例](./docs/firmware-mapping/samples/m1-05-web-configuration-summary.json)。
+Web Configuration Producer 已能从 nginx、直接 POSIX shell 启动项和 proprietary httpd `Control/Alias/Location/External` 配置恢复 listener、docroot、namespace mapping、auth requirement、service start 与外部 handler binding。AC9 回放确认了 `:8180 → /cgi-bin/luci/ → 127.0.0.1:8188 → app_data_center`；DAP-3520 回放则确认 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap`，两者都不从路径名称猜测未观察的处理器。
 
 Native Shallow Producer 已能直接解析 ELF32/ELF64 metadata、printable route/server spans 与动态符号表，并为每条 hint 保存可回放二进制 EvidenceAtom。AC9 `httpd` 对 M1-04 的 6 个 action component 全部提供精确字符串佐证，而 `dhttpd` 为 0/6；这只用于选择深分析目标，不按名称猜测 handler binding。对照结果见 [M1-06A 样例](./docs/firmware-mapping/samples/m1-06a-native-shallow-summary.json)。
 
 Frontend/Native Correlation Module 通过大小写敏感的完整 endpoint 或末段 action component 精确匹配生成 candidate association，并自动创建 `registers_route/binds_handler` 未决义务。AC9 两份前端源与 `httpd/dhttpd` 联合回放得到 7/7 candidate、全部指向 `httpd`、0 个名称猜测 binding；过程输出见 [M1-06C 样例](./docs/firmware-mapping/samples/m1-06c-frontend-native-correlation-summary.json)。
 
-Script Backend Producer 已覆盖厂商 ASP、PHP、LuCI Lua 与 POSIX Shell CGI 的确定性语法，可区分请求参数、operation selector、显式 route、CGI program、配置状态访问与模板状态读取。D-Link DSL 真实样本已恢复 `admPass1 → Account_Entry0.web_passwd/console_passwd → commit`，同时保持空 `hnap.asp` 为零事实、Shell CGI 为“程序但非已注册路由”；过程输出见 [M1-06B 样例](./docs/firmware-mapping/samples/m1-06b-script-backend-summary.json)。
+Script Backend Producer 已覆盖厂商 ASP、PHP、PHP-XGI、LuCI Lua 与 POSIX Shell CGI 的确定性语法，可区分请求参数、operation selector、显式 route、CGI program、配置状态访问与模板状态读取。D-Link DSL 样本恢复了 `admPass1 → Account_Entry0.web_passwd/console_passwd → commit`；DAP-3520 的 `ACTION_POST` 恢复 5 个操作选择值以及 266 个 `query/queryEnc/set/setEnc` 状态访问，同时保持变量来源未知时不冒充 HTTP 参数。
 
 Obligation Scheduler 已将 route/handler 等未决能力变成确定性、预算受控的工作队列：每个义务与 Adapter 组合最多尝试一次，异常可降级，新增义务可去重，并明确区分 `fixed_point` 与 `budget_exhausted`。AC9 discover 回放在不启用高成本分析器时保留全部 14 个开放义务，而不是返回空成功；过程输出见 [M1-07 样例](./docs/firmware-mapping/samples/m1-07-obligation-scheduler-summary.json)。
 
 Discovery Catalog 通过单一 Interface 组装 Frontend、配置、脚本、Native、关联和调度结果，同时验证 EvidenceAtom、参数归属与义务目标。AC9 无 seed 回放现恢复 395 个候选、6 个参数、398 个证据原子和 16 个开放义务；其中新增的固件升级接口被识别为 `POST /cgi-bin/upgrade + multipart_form + upgradeFile`，并与 `bin/httpd` 的完整 endpoint literal 精确关联。过程输出见 [M1-08 样例](./docs/firmware-mapping/samples/m1-08-ac9-discovery-catalog-summary.json)。
+
+DAP-3520 HNAP/PHP-XGI Catalog 同样不使用漏洞文本或 seed，发布 273 个候选、1 个 selector 参数和 288 个可回放 EvidenceAtom。Catalog 会继承上游 Inventory coverage，因此虽然三个选定 Producer 均 completed，整机目录仍正确保持 partial；中间结果见 [M1-11A 样例](./docs/firmware-mapping/samples/m1-11a-dap3520-hnap-xgi-catalog-summary.json)。
 
 Discovery Catalog 现在可不可变地发布到 SQLite，并通过“通信测绘”工作区按目录版本、候选类型、接口 token 和来源构造查询。页面采用目录 → 候选 → 证据详情的稳定三级布局，详情同步展示参数、跨层关联、EvidenceAtom 定位、覆盖账本和开放义务；浏览器只读取服务端投影，不重新推断事实。
 
@@ -257,8 +259,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend、ELF Native Shallow 与 ARM32 PIC Deep Producer、frontend/native 候选关联、固定点调度、无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
-| **Next** | DAP-3520 HNAP/PHP-XGI 专用 Producer 与完整 Catalog、共享 CGI/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend、nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow 与 ARM32 PIC Deep Producer、frontend/native 候选关联、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
+| **Next** | 固件 chroot 绝对 symlink 安全解析、共享 CGI/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

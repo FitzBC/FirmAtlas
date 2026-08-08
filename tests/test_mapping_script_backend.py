@@ -11,6 +11,7 @@ from firmatlas.mapping import (
     ScriptParameterNamespace,
     SourceArtifactEntry,
     discover_script_backend,
+    replay_evidence,
 )
 
 
@@ -25,6 +26,49 @@ def source_for(path: str, content: bytes) -> SourceArtifactEntry:
 
 
 class ScriptBackendProducerContractTests(unittest.TestCase):
+    def test_php_xgi_action_selector_and_state_tree_accesses_are_explicit(self):
+        content = b'''<?
+if ($ACTION_POST == "tool_admin") {
+    if (query("/sys/systemName") != $sysname) {
+        set("/sys/systemName", $sysname);
+    }
+}
+?>'''
+
+        result = discover_script_backend(
+            source_for("www/__action.php", content), content
+        )
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(ScriptBackendLanguage.PHP, result.language)
+        self.assertEqual(
+            [("ACTION_POST", ScriptParameterNamespace.FORM, ("tool_admin",))],
+            [
+                (item.name, item.namespace, item.selector_values)
+                for item in result.parameters
+            ],
+        )
+        self.assertEqual(
+            [
+                ("query", "/sys/systemName", None),
+                ("set", "/sys/systemName", "sysname"),
+            ],
+            [
+                (item.operation, item.object_name, item.parameter_name)
+                for item in result.state_accesses
+            ],
+        )
+        self.assertEqual((), result.routes)
+        self.assertEqual(
+            {
+                "reads_parameter",
+                "selects_operation",
+                "reads_configuration",
+                "writes_configuration",
+            },
+            {item.capability for item in result.evidence_atoms},
+        )
+
     def test_vendor_asp_request_form_and_selector_are_backend_facts(self):
         content = b'''<%
 If Request_Form("button_type") = "1" Then
@@ -205,6 +249,41 @@ Rem TCWebApi_set("Fake", "field", "parameter")
         self.assertGreaterEqual(len(admin_result.state_accesses), 5)
         self.assertEqual((), empty_result.entries)
         self.assertEqual((), empty_result.parameters)
+
+    def test_actual_dap3520_xgi_dispatcher_replays_selectors_and_state_tree(self):
+        base = Path(
+            "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027"
+        )
+        roots = list(base.glob(
+            "*.ZIP.extracted/_*.bin.extracted/squashfs-root"
+        ))
+        if not roots:
+            self.skipTest("local DAP-3520 representative sample is unavailable")
+        path = roots[0] / "www/__action.php"
+        content = path.read_bytes()
+        self.assertEqual(
+            "79b77c6921c33f4c41d67d26cba7811bff5211f43270220f17e70f06aa76b439",
+            hashlib.sha256(content).hexdigest(),
+        )
+        source = source_for("www/__action.php", content)
+
+        result = discover_script_backend(source, content)
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(1, len(result.parameters))
+        self.assertEqual(
+            ("__sample", "st_logs", "sys_setting", "tool_admin", "tool_sntp"),
+            result.parameters[0].selector_values,
+        )
+        self.assertEqual(238, len(result.state_accesses))
+        self.assertEqual(248, len(result.evidence_atoms))
+        self.assertLessEqual(
+            {"query", "set", "query_encrypted", "set_encrypted"},
+            {item.operation for item in result.state_accesses},
+        )
+        self.assertTrue(
+            all(replay_evidence(atom, source, content) for atom in result.evidence_atoms)
+        )
 
     def test_documented_real_replay_summary_preserves_conservative_boundaries(self):
         payload = json.loads(Path(

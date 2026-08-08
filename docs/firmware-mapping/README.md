@@ -68,6 +68,7 @@
 | [M1-10A Native Deep 路由表记录](./progress/2026-08-09-m1-10a-native-deep-route-table.md) | 命名 route table Profile、三段证据链、Scheduler 关闭和 AC9 负例 | Native Deep Profile、证据门限或义务关闭语义变化时 |
 | [M1-10B ARM PIC 调用点记录](./progress/2026-08-09-m1-10b-arm-pic-callsite.md) | Worker/Validator seam、共同调用点证明、AC9 实证与误绑定控制 | Call-site Profile、Worker 合同或证据门限变化时 |
 | [M1-11 代表性 corpus gate 记录](./progress/2026-08-09-m1-11-representative-corpus-gate.md) | 证据层级、类别 gate、当前缺口与可重复报告 | corpus 类别、门限或样本证据层级变化时 |
+| [M1-11A DAP-3520 HNAP/XGI 记录](./progress/2026-08-09-m1-11a-dap3520-hnap-xgi.md) | proprietary httpd、PHP-XGI、Inventory coverage 传播与真实 Catalog | HNAP/XGI 语法、上游 coverage 或 DAP-3520 样本变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -136,8 +137,9 @@ M1 工作项：
 | M1-10A | Native 命名 route-table 深绑定 Adapter | 已验证 | M1-09 | 10 contract tests + synthetic ARM ELF + AC9 negative control + obligation closure |
 | M1-10B | ARM PIC call-site/decompiler Adapter | 已验证 | M1-10A | 12 contract tests + AC9 5/5 binding + 10/10 obligation closure + browser regression |
 | M1-11 | 代表性架构 corpus 出口门 | 进行中 | M1-04/06B/10B | `/goform`、共享 CGI、HNAP/SOAP、脚本后端、Native-only 的可重复 coverage report；当前 `partial` |
+| M1-11A | DAP-3520 proprietary httpd / PHP-XGI Catalog | 已验证 | M1-02B/05/06B/08/11 | 273 candidates + 288 replayable evidence + upstream Inventory partial propagation |
 
-**下一项建议**：继续 M1-11。已取得并通过隔离 Worker 回放 DAP-3520 HNAP/PHP-XGI 原始样本，下一步为 proprietary httpd `Alias/Location/External` 和 PHP-XGI `ACTION_POST/query/set` 建立 Producer、发布 Catalog，并明确绝对固件 symlink 的安全 coverage 政策；随后补共享 CGI 与 Native-only 样本。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
+**下一项建议**：继续 M1-11。DAP-3520 proprietary httpd / PHP-XGI Catalog 已发布且正确保持 partial；下一步先为“固件 chroot 绝对 symlink”设计安全重定向解析策略，验证能否关闭 Inventory coverage，再摄取原始共享 CGI 与 Native-only 样本。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
 
 ## 7. 跨会话无缝工作协议
 

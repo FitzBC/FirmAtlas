@@ -28,15 +28,16 @@ Real firmware 还必须同时满足：Catalog coverage completed、required capa
 
 ```bash
 PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
-  --ac9-root ../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root
+  --ac9-root ../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root \
+  --dap3520-root ../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/_DAP-3520_FW_v117-rc047.bin.extracted/squashfs-root
 ```
 
-输出：[M1-11 corpus report](../samples/m1-11-representative-corpus-report.json)，稳定身份为 `corpus-report:f266dd3578426395806815d00223d49dbc484431be3656da00920c9c95853d52`。该身份同时绑定完整 required/forbidden capability policy；修改已满足的门限也会产生新报告身份。
+输出：[M1-11 corpus report](../samples/m1-11-representative-corpus-report.json)，稳定身份为 `corpus-report:df81ad45658444d26f9a144b6320adb8bd8d9668001af92d0011748a893862da`。该身份同时绑定完整 required/forbidden capability policy、DAP-3520 Catalog 和上游 Inventory coverage；修改已满足的门限也会产生新报告身份。
 
 | 类别 | 当前状态 | 解释 |
 | --- | --- | --- |
 | `form_handler` | `verified` | AC9 真实制品身份；374 candidates、392 evidence、0 open obligations，包含 `constructs_request` 与 `binds_handler` |
-| `hnap_soap` | `coverage_gap` | DAP-3520 原始 Artifact 已通过隔离 Binwalk v3.1.0 回放并给出 `/HNAP1 → /usr/sbin/hnap` 配置证据，但 Inventory 因绝对固件 symlink 保持 partial，且尚缺 HNAP/XGI 专用 Producer Catalog；fixture 仍只证明 selector 合同 |
+| `hnap_soap` | `coverage_gap` | DAP-3520 partial Catalog 已发布：273 candidates、288 evidence、所需 5 类 capability 全部满足；Inventory 因绝对固件 symlink 保持 partial，所以真实样本不晋级 verified；fixture 仍只证明 selector 合同 |
 | `cgi_gateway` | `contract_only` | shared CGI/topicurl fixture 证明共享端点拆分，不是固件召回证据 |
 | `script_backend` | `coverage_gap` | D-Link DSL 旧 Binwalk 派生源码已有 Producer 结果，但缺原始制品身份绑定后的 Catalog |
 | `native_only` | `acquisition_gap` | 尚缺不依赖前端候选的可校验原始样本 |
@@ -51,20 +52,23 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
 
 ## 5. 下一步
 
-1. 用 DAP-3520 当前 Artifact/Inventory 谱系实现 proprietary httpd HNAP 与 PHP-XGI Producer，并发布完整 Discovery Catalog；
-2. 在不跟随宿主逃逸链接的前提下，区分固件 chroot 绝对 symlink 与真正越界，决定能否把安全 Inventory 晋级 completed；
-3. 摄取一个原始共享 CGI 固件，并选择一个前端缺失的 Native-only 原始固件；
+1. 在不跟随宿主逃逸链接的前提下，区分固件 chroot 绝对 symlink 与真正越界，决定能否把安全 Inventory 晋级 completed；
+2. 摄取一个原始共享 CGI 固件，并选择一个前端缺失的 Native-only 原始固件；
+3. 重新验证 D-Link DSL 脚本后端的原始 Artifact 谱系，替换 derived-only 缺口；
 4. 三个缺口全部关闭后再运行 M1-GATE，不因当前已有 AC9 或 DAP-3520 路径证据而提前标记 M1 完成。
 
 ## 6. 本轮验证
 
-- Corpus Report 合同与真实 AC9 重放：11 项通过；
-- Python 全量回归：228 项通过；
+- Corpus Report 合同与真实 AC9、DAP-3520 重放：12 项通过；
+- Python 全量回归：246 项通过；
 - Console：9 个测试文件、17 项通过；
 - TypeScript 检查与 Vite 生产构建通过，1800 modules；
 - Python 编译、JSON 解析、`git diff --check` 通过；
 - 脚本重放结果与记录 JSON 完全一致，report ID 稳定；
 - 本地 `GET /api/health` 返回 200，生产前端文档 GET 返回 200；
-- 本轮没有 UI 行为变化，浏览器交互验收不适用。
+- 本地 SQLite 发布后，Catalog API 返回 DAP-3520 的 273 个候选与
+  `source_inventory_coverage_status=partial`；HNAP1 查询精确返回 2 项；
+- 浏览器确认通信测绘工作台显示 `Inventory partial`，HNAP1 两项可检索，
+  handler 详情可回到 `etc/templates/httpd/httpd.php`，Console 无错误。
 
-实现修订为 `c1317a0`。通信测绘专项按用户明确范围不执行 SSH 部署。
+M1-11A 的实现与验证记录由本次 Git 历史共同固定。通信测绘专项按用户明确范围不执行 SSH 部署。

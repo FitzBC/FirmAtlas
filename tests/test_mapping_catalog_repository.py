@@ -59,6 +59,10 @@ class DiscoveryCatalogRepositoryTests(unittest.TestCase):
         self.assertEqual(self.catalog.catalog_id, result["items"][0]["catalog_id"])
         self.assertEqual(len(self.catalog.candidates), result["items"][0]["candidate_count"])
         self.assertEqual(len(self.catalog.parameters), result["items"][0]["parameter_count"])
+        self.assertEqual(
+            "completed",
+            result["items"][0]["source_inventory_coverage_status"],
+        )
 
     def test_same_catalog_id_with_different_payload_is_rejected(self):
         self.repository.publish(self.catalog)
@@ -92,6 +96,9 @@ class DiscoveryCatalogRepositoryTests(unittest.TestCase):
         self.assertEqual({"mac", "devName"}, {x["name"] for x in detail["parameters"]})
         self.assertGreaterEqual(len(detail["evidence_atoms"]), 1)
         self.assertEqual(1, len(detail["coverage"]))
+        self.assertEqual(
+            "completed", detail["catalog"]["source_inventory_coverage_status"]
+        )
         self.assertEqual([], detail["associations"])
         self.assertEqual([], detail["open_obligations"])
 

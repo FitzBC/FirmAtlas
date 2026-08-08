@@ -135,7 +135,7 @@ priority = expected_information_gain
 
 M1-07 Scheduler 的公开 Interface 是 `run_obligation_scheduler(initial_obligations, analyzers, policy)`。它以 `(obligation_id, analyzer_name)` 为幂等尝试身份，按 priority/identity 稳定选择，隔离 Adapter 异常和冲突输出，并在没有可执行组合时发布 `fixed_point`。开放义务不妨碍“调度 coverage completed”；它们必须保留在结果中。step 或 obligation 预算耗尽则是 `partial + budget_exhausted`。Scheduler 不读取源码，也不直接运行 Native 工具、模型、固件或 Binwalk。
 
-M1-08 Discovery Catalog 的公开 Interface 是 `assemble_discovery_catalog(DiscoveryCatalogInput)`。它把版本化 Producer Batch、Correlation 和 Scheduler 投影到一个稳定目录，验证所有 candidate/parameter/evidence/association/obligation 引用，并发布 coverage ledger 与 `seed_input_count=0`。不同能力的候选不因 canonical value 相同而合并；Producer 专属的 method、representation、namespace、upstream、language、hint kind 和 machine 进入稳定 attributes。required batch 缺失是 failed coverage，不能是空成功。
+M1-08 Discovery Catalog 的公开 Interface 是 `assemble_discovery_catalog(DiscoveryCatalogInput)`。它把版本化 Producer Batch、Correlation 和 Scheduler 投影到一个稳定目录，验证所有 candidate/parameter/evidence/association/obligation 引用，并发布 coverage ledger 与 `seed_input_count=0`。不同能力的候选不因 canonical value 相同而合并；Producer 专属的 method、representation、namespace、upstream、language、hint kind 和 machine 进入稳定 attributes。required batch 缺失是 failed coverage，不能是空成功。Catalog identity 与输出同时绑定 `source_inventory_coverage_status`；上游 Inventory 非 completed 时，局部 Producer 成功不能使整机 Catalog 晋级 completed。
 
 M1-09 的持久化 Adapter 是 `DiscoveryCatalogRepository`。它将完整目录 JSON 作为不可变、内容摘要校验的发布对象保存，同时生成可重建的候选查询投影；投影不产生新主张。重复发布相同文档是幂等操作，同一 `catalog_id` 若内容摘要不同则拒绝。候选详情从同一目录文档聚合参数、EvidenceAtom、关联、Coverage Ledger 与开放义务，避免 UI 侧再次推断。SQLite 表使用 `mapping_discovery_*` 命名空间，与情报/固件目录共享数据库文件但保持独立 Module 边界。
 
@@ -162,8 +162,8 @@ M1-11 Corpus Report Module 的公开 Interface 是 `build_corpus_report(CorpusRe
 | Producer | 主要输入 | 主要证据能力 |
 | --- | --- | --- |
 | Frontend | HTML、JS、模板、source map | constructs_request、serializes、mentions_endpoint |
-| Web Configuration | server config、rewrite、docroot、auth zone | exposes、maps_namespace、requires_auth |
-| Script Backend | PHP、ASP、Lua、Shell、CGI | reads_parameter、dispatches、calls、writes_state |
+| Web Configuration | nginx、startup、proprietary httpd Control | exposes、maps_namespace、requires_auth、binds_handler |
+| Script Backend | PHP、PHP-XGI、ASP、Lua、Shell、CGI | reads_parameter、selects_operation、reads/writes_configuration |
 | Native Shallow | strings、symbols、imports、sections | mentions_endpoint、mentions_parameter、server_hint |
 | Native Deep | route table、xref、decompile、data flow | registers_route、binds_handler、flows_to |
 | Startup/IPC | init、service、process config | starts、listens_on、connects_to |
@@ -174,9 +174,9 @@ M1-11 Corpus Report Module 的公开 Interface 是 `build_corpus_report(CorpusRe
 
 M1-04 Frontend Producer 当前声明的能力范围是 `R.pageModel`、`R.moduleModel.getSubmitData`、jQuery `getJSON/post/ajax` 与 HTML Form。`completed` 表示这些声明构造已在文件内完整执行，不表示任意动态 JavaScript、框架封装或混淆代码都已恢复。结果保留 exact literal 与 literal prefix 的差别；完全动态 URL 必须在后续 Producer 或模型义务中保持 unknown。
 
-M1-05 Web Configuration Producer 的公开 Interface 是 `discover_web_configuration(source_entry, source_bytes, policy)`。当前声明支持 nginx 配置与直接 POSIX shell 的 `nginx`/`spawn-fcgi` 启动形式，发布 listener、document root、namespace mapping、auth requirement 和 service start finding。配置事实与 frontend candidate 保持不同身份；只有后续身份解析取得兼容 scope 与独立 binding 证据后才能合并。`completed` 只表示声明格式和构造执行完成，不表示任意 Web server 配置或 shell 控制流均已恢复。
+M1-05 Web Configuration Producer 的公开 Interface 是 `discover_web_configuration(source_entry, source_bytes, policy)`。当前声明支持 nginx、直接 POSIX shell 的 `nginx`/`spawn-fcgi` 启动形式，以及模板中的 proprietary httpd `Control/Alias/Location/External` 静态块，发布 listener、document root、namespace mapping、auth requirement、service start 和 external handler binding。嵌入 PHP 会先被等长屏蔽而不会执行或作为静态配置；配置事实与 frontend candidate 保持不同身份。`completed` 只表示声明格式和构造执行完成，不表示任意 Web server 配置、模板控制流或运行时可达性均已恢复。
 
-M1-06B Script Backend Producer 的公开 Interface 是 `discover_script_backend(source_entry, source_bytes, policy)`。当前声明支持厂商 ASP 的 `Request_Form/TCWebApi_*`、PHP superglobal 与显式框架 route、LuCI `entry/formvalue`、Shell CGI shebang 与环境变量。它分别发布 CGI program、显式 route、parameter、selector、configuration access 和 template read；文件路径、扩展名和模板读取不能产生 `registers_route`。组合 LuCI 路径或规范化 HTTP header 使用 `deterministic_derived` 证据，仍保留精确来源 span。
+M1-06B Script Backend Producer 的公开 Interface 是 `discover_script_backend(source_entry, source_bytes, policy)`。当前声明支持厂商 ASP 的 `Request_Form/TCWebApi_*`、PHP superglobal 与显式框架 route、PHP-XGI `ACTION_POST/query/queryEnc/set/setEnc`、LuCI `entry/formvalue`、Shell CGI shebang与环境变量。它分别发布 CGI program、显式 route、parameter、selector、configuration access 和 template read；文件路径、扩展名和模板读取不能产生 `registers_route`。PHP-XGI 扫描要求同一源码存在 `$ACTION_POST` dialect anchor，复杂 set 表达式不发明参数身份；组合 LuCI 路径或规范化 HTTP header 使用 `deterministic_derived` 证据，仍保留精确来源 span。
 
 M1-06A Native Shallow Producer 的公开 Interface 是 `discover_native_hints(source_entry, source_bytes, policy)`。Implementation 直接读取 ELF section 与 dynamic symbol table，并从受控 printable spans 发布 endpoint literal、route token、symbol 与 server hint。普通字符串扫描排除 ELF string-table 区域，避免把链接符号重复误判为 route token。该 Producer 只用于候选召回和深分析调度；名字相似或同一制品中的字符串与符号不能产生 `binds_handler` 关系。
 

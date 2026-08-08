@@ -4,6 +4,7 @@ from pathlib import Path
 from dataclasses import replace
 
 from firmatlas.mapping import (
+    CoverageStatus,
     CorpusEvidenceTier,
     CorpusGateStatus,
     CorpusReportInput,
@@ -115,6 +116,36 @@ class CorpusReportContractTests(unittest.TestCase):
             {item.architecture_category: item.status for item in report.categories},
         )
 
+    def test_contract_fixture_cannot_mask_a_real_firmware_coverage_gap(self):
+        contract = _frontend_catalog(
+            b'$.ajax({url:"/HNAP1", headers:{"SOAPAction":"GetInfo"}});',
+            firmware_sha256="3" * 64,
+        )
+        partial_real = replace(
+            _frontend_catalog(b'fetch("/HNAP1");'),
+            coverage_status=CoverageStatus.PARTIAL,
+            source_inventory_coverage_status=CoverageStatus.PARTIAL,
+        )
+        report = build_corpus_report(CorpusReportInput(
+            corpus_version="firmatlas.mapping.corpus/m1.2",
+            required_categories=("hnap_soap",),
+            samples=(
+                CorpusSampleInput(
+                    "hnap-contract", "hnap_soap", "hnap_envelope", "contract",
+                    CorpusEvidenceTier.CONTRACT_FIXTURE,
+                    ("constructs_request", "selects_operation"), catalog=contract,
+                ),
+                CorpusSampleInput(
+                    "hnap-real-partial", "hnap_soap", "hnap_xgi", "validation",
+                    CorpusEvidenceTier.REAL_FIRMWARE,
+                    ("constructs_request",), expected_firmware_sha256="1" * 64,
+                    catalog=partial_real,
+                ),
+            ),
+        ))
+
+        self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, report.categories[0].status)
+
     def test_preexisting_extraction_is_reported_as_derived_not_real_firmware(self):
         catalog = _frontend_catalog(b'$.post("/cgi-bin/admin.asp", {});')
         report = build_corpus_report(CorpusReportInput(
@@ -195,13 +226,26 @@ class CorpusReportContractTests(unittest.TestCase):
         }
         self.assertEqual(CorpusGateStatus.PARTIAL, report.gate_status)
         self.assertEqual(CorpusSampleStatus.VERIFIED, categories["form_handler"])
-        self.assertEqual(CorpusSampleStatus.CONTRACT_ONLY, categories["hnap_soap"])
+        self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, categories["hnap_soap"])
         self.assertEqual(CorpusSampleStatus.CONTRACT_ONLY, categories["cgi_gateway"])
         self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, categories["script_backend"])
         self.assertEqual(CorpusSampleStatus.ACQUISITION_GAP, categories["native_only"])
         ac9 = next(item for item in report.samples if item.sample_id.startswith("tenda-ac9"))
         self.assertEqual(0, ac9.open_obligation_count)
         self.assertIn("binds_handler", ac9.observed_capabilities)
+        dap3520 = next(
+            item for item in report.samples if item.sample_id.startswith("dlink-dap3520")
+        )
+        self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, dap3520.status)
+        dap3520_root = Path(
+            "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/"
+            "_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/"
+            "_DAP-3520_FW_v117-rc047.bin.extracted/squashfs-root"
+        )
+        if dap3520_root.exists():
+            self.assertEqual(273, dap3520.candidate_count)
+            self.assertEqual(288, dap3520.evidence_count)
+            self.assertEqual((), dap3520.missing_capabilities)
 
     def test_open_obligation_prevents_verified_status(self):
         catalog = _frontend_catalog(b'$.post("/goform/SetX", {});')

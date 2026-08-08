@@ -154,6 +154,8 @@ PIC call-site Profile 还需覆盖：单一二参数调用不足以推断 regist
 
 原始固件 Extraction 另设正负门限：容器命令退出 0 但派生文件数为 0 必须是 `extraction.no_output`，不能计为成功；非零/超时若保留安全派生产物可返回 partial；进程成功但 Inventory 有 symlink、文件数、字节或归档深度诊断时，Extraction 最高为 partial。真实样本记录必须绑定 Artifact SHA、Binwalk 版本、镜像摘要、执行指纹、Inventory SHA 与预算，不能只保存截图或终端文本。
 
+Coverage 必须纵向单调传播：`Extraction/Inventory → Producer → Discovery Catalog → Corpus Report` 任一上游 required scope 非 completed，下游不得仅因选中文件成功而晋级 completed。Catalog identity 必须绑定源 Inventory coverage；同类别同时存在 contract fixture 成功与真实固件 coverage gap 时，类别显示 coverage gap，不能用合同通过掩盖真实样本缺口。
+
 ### 6.3 Module contract tests
 
 所有主要行为通过 `FirmwareMapper` Interface 测试：

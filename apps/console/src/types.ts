@@ -263,6 +263,7 @@ export interface MappingCatalogSummary {
   firmware_artifact_sha256: string
   source_inventory_sha256: string
   coverage_status: string
+  source_inventory_coverage_status: string
   scheduler_termination: string | null
   published_at: string
   candidate_count: number
@@ -286,7 +287,12 @@ export interface MappingCandidate {
 }
 
 export interface MappingCandidateDetail {
-  catalog: { catalog_id: string; coverage_status: string; scheduler_termination: string | null }
+  catalog: {
+    catalog_id: string
+    coverage_status: string
+    source_inventory_coverage_status: string
+    scheduler_termination: string | null
+  }
   candidate: MappingCandidate
   parameters: Array<{
     parameter_id: string; name: string; namespace: string; literal_value: string | null

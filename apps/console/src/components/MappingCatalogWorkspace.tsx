@@ -89,6 +89,7 @@ export function MappingCatalogWorkspace() {
                   className={`w-full rounded-xl border p-3 text-left transition ${catalogId === catalog.catalog_id ? 'border-signal/25 bg-signal/[0.07]' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.045]'}`}>
                   <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-slate-600"><span>Firmware</span><span>{catalog.coverage_status}</span></div>
                   <div className="mt-2 font-mono text-xs text-slate-200">{catalog.firmware_artifact_sha256.slice(0, 16)}…</div>
+                  <div className="mt-2 text-[9px] uppercase tracking-[0.1em] text-slate-600">Inventory {catalog.source_inventory_coverage_status}</div>
                   <div className="mt-3 flex gap-3 text-[10px] text-slate-500"><span>{catalog.candidate_count} 候选</span><span>{catalog.association_count} 关联</span><span>{catalog.open_obligation_count} 未决</span></div>
                 </button>
               ))}
@@ -117,7 +118,7 @@ export function MappingCatalogWorkspace() {
 }
 
 function StatusPill({ catalog }: { catalog: MappingCatalogSummary }) {
-  return <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3"><Activity size={16} className="text-signal" /><div><div className="text-[9px] uppercase tracking-[0.16em] text-slate-600">Latest coverage</div><div className="mt-1 text-xs text-slate-300">{catalog.coverage_status} · {catalog.candidate_count} candidates</div></div></div>
+  return <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3"><Activity size={16} className="text-signal" /><div><div className="text-[9px] uppercase tracking-[0.16em] text-slate-600">Latest coverage</div><div className="mt-1 text-xs text-slate-300">{catalog.coverage_status} · {catalog.candidate_count} candidates</div><div className="mt-1 text-[9px] uppercase tracking-[0.1em] text-slate-600">Inventory {catalog.source_inventory_coverage_status}</div></div></div>
 }
 
 function CandidateRow({ candidate, active, onClick }: { candidate: MappingCandidate; active: boolean; onClick: () => void }) {

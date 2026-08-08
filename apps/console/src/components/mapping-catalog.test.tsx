@@ -7,7 +7,8 @@ import { MappingCatalogWorkspace } from './MappingCatalogWorkspace'
 const catalog: MappingCatalogSummary = {
   catalog_id: 'discovery-catalog:abc', schema_version: 'firmatlas.mapping.discovery-catalog/v1alpha1',
   firmware_artifact_sha256: '1'.repeat(64), source_inventory_sha256: '2'.repeat(64),
-  coverage_status: 'completed', scheduler_termination: 'fixed_point',
+  coverage_status: 'partial', source_inventory_coverage_status: 'partial',
+  scheduler_termination: 'fixed_point',
   published_at: '2026-08-09T00:00:00Z', candidate_count: 1, parameter_count: 2,
   association_count: 0, open_obligation_count: 0,
 }
@@ -19,7 +20,12 @@ const candidate: MappingCandidate = {
   parameter_count: 2, association_count: 0, open_obligation_count: 0,
 }
 const detail: MappingCandidateDetail = {
-  catalog: { catalog_id: catalog.catalog_id, coverage_status: 'completed', scheduler_termination: 'fixed_point' },
+  catalog: {
+    catalog_id: catalog.catalog_id,
+    coverage_status: 'partial',
+    source_inventory_coverage_status: 'partial',
+    scheduler_termination: 'fixed_point',
+  },
   candidate,
   parameters: [{ parameter_id: 'p:1', name: 'devName', namespace: 'form', literal_value: null, selector_values: [], is_operation_selector: false, source_construct: 'form_urlencoded' }],
   associations: [],
@@ -43,6 +49,7 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   render(<MappingCatalogWorkspace />)
 
   expect(await screen.findByText('/goform/SetOnlineDevName')).toBeInTheDocument()
+  expect(screen.getAllByText('Inventory partial').length).toBeGreaterThan(0)
   fireEvent.click(screen.getByRole('button', { name: '请求接口' }))
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(
     catalog.catalog_id, expect.objectContaining({ kind: 'request_interface' }), expect.any(AbortSignal),

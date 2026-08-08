@@ -1,7 +1,7 @@
 # 代表性通信类别与样本基线
 
-> 基线版本：M1.0  
-> 数据观察日期：2026-08-08  
+> 基线版本：M1.2
+> 数据观察日期：2026-08-09
 > 机器可读清单：[representative-corpus.json](./representative-corpus.json)
 
 已发布的样本过程说明：
@@ -21,6 +21,7 @@
 - [M1-10 Native Deep route-table 中间输出](./m1-10-native-deep-route-table-summary.json)：ARM ELF `{route_ptr, handler_ptr}` 正例的三段证据链、Scheduler 义务关闭、Catalog 投影，以及 AC9 无可信命名表的真实负面对照。
 - [M1-10B AC9 ARM PIC call-site 中间输出](./m1-10b-ac9-arm-pic-callsite-summary.json)：从 `online_list.js` 的 5 个接口关联到 `httpd` 的 5 个 handler、共同 131-pair registrar、五段证据链和 10/10 义务关闭。
 - [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；当前 gate 为 `partial`，不把合同 fixture 或漏洞线索冒充真实固件覆盖。
+- [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；上游 Inventory partial 被传播到 Catalog。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -94,7 +95,8 @@
 - 当前隔离 Binwalk v3.1.0 回放恢复 757 个 Inventory 条目；
 - `httpd.php` 明确绑定 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap`；
 - 普通管理页使用 `ACTION_POST → __action.php → query/set` 的 PHP-XGI 配置链；
-- 当前因绝对固件 symlink 安全诊断和缺少专用 HNAP/XGI Producer 保持 coverage gap，不计入 verified 类别。
+- 专用 Producer 已恢复 5 条 httpd 配置关系、266 条 XGI 状态访问与 5 个 `ACTION_POST` 操作值；Catalog 为 273 candidates / 288 evidence；
+- 当前只因绝对固件 symlink 安全诊断使上游 Inventory 为 partial 而保持 coverage gap，不计入 verified 类别。
 
 ### Tier B：平台已有固件候选
 

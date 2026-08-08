@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    CoverageStatus,
     CorpusEvidenceTier,
     CorpusReportInput,
     CorpusSampleInput,
@@ -22,6 +23,8 @@ from firmatlas.mapping import (
     discover_arm_pic_callsite_bindings,
     discover_frontend_requests,
     discover_native_hints,
+    discover_script_backend,
+    discover_web_configuration,
     native_deep_scheduler_analyzer,
     run_obligation_scheduler,
 )
@@ -29,6 +32,13 @@ from firmatlas.mapping import (
 
 AC9_FIRMWARE_SHA256 = "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296"
 AC9_INVENTORY_SHA256 = "a6b3a57b7262de8692ebf9f9fac2aa249bbbdb69272a45c8c0a651089a6ddcf4"
+DAP3520_FIRMWARE_SHA256 = "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9"
+DAP3520_INVENTORY_SHA256 = "e6b0cfd9e5fed74302986e179ea23de8d9817198c2b361ee946a90e501e91334"
+DAP3520_ROOT = Path(
+    "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/"
+    "_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/"
+    "_DAP-3520_FW_v117-rc047.bin.extracted/squashfs-root"
+)
 
 
 def _source(path: str, content: bytes) -> SourceArtifactEntry:
@@ -95,7 +105,36 @@ def _ac9_catalog(root: Path):
     ))
 
 
-def build_m1_report(ac9_root: Path):
+def _dap3520_catalog(root: Path):
+    inputs = (
+        ("etc/templates/httpd/httpd.php", discover_web_configuration),
+        ("www/home_sys.php", discover_script_backend),
+        ("www/__action.php", discover_script_backend),
+    )
+    if not all((root / path).exists() for path, _ in inputs):
+        return None
+    results = []
+    for path, producer in inputs:
+        content = (root / path).read_bytes()
+        results.append((producer, producer(_source(path, content), content)))
+    web = tuple(result for producer, result in results if producer is discover_web_configuration)
+    scripts = tuple(result for producer, result in results if producer is discover_script_backend)
+    return assemble_discovery_catalog(DiscoveryCatalogInput(
+        DAP3520_FIRMWARE_SHA256,
+        DAP3520_INVENTORY_SHA256,
+        (
+            DiscoveryProducerBatch.web_configuration(
+                web, "etc/templates/httpd/httpd.php"
+            ),
+            DiscoveryProducerBatch.script_backend(
+                scripts, "www/{home_sys.php,__action.php}"
+            ),
+        ),
+        source_inventory_coverage_status=CoverageStatus.PARTIAL,
+    ))
+
+
+def build_m1_report(ac9_root: Path, dap3520_root: Path = DAP3520_ROOT):
     """Replay available evidence without promoting fixtures or leads to firmware truth."""
 
     ac9 = _ac9_catalog(ac9_root)
@@ -115,8 +154,9 @@ def build_m1_report(ac9_root: Path):
         });''',
         "shared-cgi-selector",
     )
+    dap3520 = _dap3520_catalog(dap3520_root)
     return build_corpus_report(CorpusReportInput(
-        corpus_version="firmatlas.mapping.corpus/m1.1",
+        corpus_version="firmatlas.mapping.corpus/m1.2",
         required_categories=(
             "form_handler", "hnap_soap", "cgi_gateway",
             "script_backend", "native_only",
@@ -135,6 +175,17 @@ def build_m1_report(ac9_root: Path):
                 "hnap_envelope_dispatcher", "contract",
                 CorpusEvidenceTier.CONTRACT_FIXTURE,
                 ("constructs_request", "selects_operation"), catalog=hnap,
+            ),
+            CorpusSampleInput(
+                "dlink-dap3520-hnap-xgi-validation", "hnap_soap",
+                "hybrid_hnap_xgi_dispatcher", "cross-architecture-validation",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                (
+                    "maps_namespace", "binds_handler", "selects_operation",
+                    "reads_configuration", "writes_configuration",
+                ),
+                expected_firmware_sha256=DAP3520_FIRMWARE_SHA256,
+                catalog=dap3520,
             ),
             CorpusSampleInput(
                 "shared-cgi-selector-contract", "cgi_gateway",
@@ -167,8 +218,13 @@ def main() -> int:
             "../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root"
         ),
     )
+    parser.add_argument("--dap3520-root", type=Path, default=DAP3520_ROOT)
     args = parser.parse_args()
-    print(json.dumps(build_m1_report(args.ac9_root).to_dict(), ensure_ascii=False, indent=2))
+    print(json.dumps(
+        build_m1_report(args.ac9_root, args.dap3520_root).to_dict(),
+        ensure_ascii=False,
+        indent=2,
+    ))
     return 0
 
 

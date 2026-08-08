@@ -216,6 +216,33 @@ End If
         self.assertEqual(CoverageStatus.FAILED, result.coverage[0].status)
         self.assertEqual("required_batch_has_no_results", result.coverage[0].diagnostic)
 
+    def test_partial_source_inventory_caps_catalog_coverage_at_partial(self):
+        content = b'''<?php
+if ($ACTION_POST == "tool_admin") {
+  set("/sys/systemName", $sysname);
+}
+?>'''
+        backend = discover_script_backend(
+            self.source("www/__action.php", content), content
+        )
+
+        result = assemble_discovery_catalog(DiscoveryCatalogInput(
+            "1" * 64,
+            "2" * 64,
+            (DiscoveryProducerBatch.script_backend(
+                (backend,), scope="www/__action.php"
+            ),),
+            source_inventory_coverage_status=CoverageStatus.PARTIAL,
+        ))
+
+        self.assertEqual(CoverageStatus.PARTIAL, result.coverage_status)
+        self.assertEqual(
+            CoverageStatus.PARTIAL, result.source_inventory_coverage_status
+        )
+        self.assertEqual(
+            "partial", result.to_dict()["source_inventory_coverage_status"]
+        )
+
     def test_actual_ac9_publishes_no_seed_cross_producer_catalog(self):
         root = Path("../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root")
         required = (

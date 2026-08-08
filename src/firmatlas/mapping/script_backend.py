@@ -15,7 +15,7 @@ from .inventory import SourceArtifactEntry
 
 
 SCRIPT_BACKEND_RESULT_SCHEMA_VERSION = "firmatlas.mapping.script-backend-result/v1alpha1"
-_PRODUCER = AnalyzerIdentity(name="script-backend-producer", version="0.1.0")
+_PRODUCER = AnalyzerIdentity(name="script-backend-producer", version="0.2.0")
 _CONTENT_KINDS = frozenset({"file", "hardlink", "archive", "archive_member"})
 _SUPPORTED_CONSTRUCTS = (
     "vendor_asp.Request_Form",
@@ -23,6 +23,11 @@ _SUPPORTED_CONSTRUCTS = (
     "vendor_asp.TCWebApi_commit",
     "vendor_asp.tcWebApi_get",
     "php.superglobal",
+    "php.xgi_action_selector",
+    "php.xgi_query",
+    "php.xgi_query_encrypted",
+    "php.xgi_set",
+    "php.xgi_set_encrypted",
     "php.slim_route",
     "luci.dispatcher.entry",
     "luci.http.formvalue",
@@ -277,6 +282,55 @@ def _scan(language: ScriptBackendLanguage, content: bytes, masked: bytes) -> lis
                 name, namespace = raw_name, namespaces[group]
             findings.append(_RawFinding("parameter", match.start(), match.end(),
                                         (name, namespace, None), "php.superglobal"))
+        if b"$ACTION_POST" in masked:
+            action_selector = re.compile(
+                rb"\$ACTION_POST\s*={2,3}\s*([\"'])([^\"']+)\1"
+            )
+            for match in action_selector.finditer(masked):
+                findings.append(_RawFinding(
+                    "parameter", match.start(), match.end(),
+                    (
+                        "ACTION_POST", ScriptParameterNamespace.FORM,
+                        match.group(2).decode("utf-8"),
+                    ),
+                    "php.xgi_action_selector",
+                ))
+            state_read = re.compile(
+                rb"(?<![A-Za-z0-9_])(query|queryEnc)\s*\(\s*"
+                rb"([\"'])([^\"']+)\2\s*\)",
+                re.IGNORECASE,
+            )
+            for match in state_read.finditer(masked):
+                operation = (
+                    "query_encrypted"
+                    if match.group(1).lower() == b"queryenc"
+                    else "query"
+                )
+                findings.append(_RawFinding(
+                    "state", match.start(), match.end(),
+                    (operation, match.group(3).decode("utf-8"), None, None),
+                    "php.xgi_{}".format(operation),
+                ))
+            state_write = re.compile(
+                rb"(?<![A-Za-z0-9_])(set|setEnc)\s*\(\s*"
+                rb"([\"'])([^\"']+)\2\s*,\s*"
+                rb"(?:\$([A-Za-z_]\w*)|[^\r\n;)]+)\s*\)",
+                re.IGNORECASE,
+            )
+            for match in state_write.finditer(masked):
+                operation = (
+                    "set_encrypted"
+                    if match.group(1).lower() == b"setenc"
+                    else "set"
+                )
+                findings.append(_RawFinding(
+                    "state", match.start(), match.end(),
+                    (
+                        operation, match.group(3).decode("utf-8"), None,
+                        match.group(4).decode("utf-8") if match.group(4) else None,
+                    ),
+                    "php.xgi_{}".format(operation),
+                ))
     elif language is ScriptBackendLanguage.LUA:
         route = re.compile(
             rb"entry\s*\(\s*\{([^}]*)\}\s*,\s*call\s*\(\s*([\"'])([^\"']+)\2\s*\)", re.IGNORECASE
@@ -407,7 +461,12 @@ def discover_script_backend(
             operation, object_name, field_name, parameter_name = finding.values
             item_id = _stable_id("script-state", source.canonical_path,
                                  (finding.start, *finding.values))
-            capability = "writes_configuration" if operation == "set" else "commits_configuration"
+            if operation in {"set", "set_encrypted", "delete"}:
+                capability = "writes_configuration"
+            elif operation in {"query", "query_encrypted"}:
+                capability = "reads_configuration"
+            else:
+                capability = "commits_configuration"
             atom = _claim(source, content, finding, item_id, operation, object_name, capability)
             evidence.append(atom)
             states.append(BackendStateAccess(item_id, operation, object_name, field_name,

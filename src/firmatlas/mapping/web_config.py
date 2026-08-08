@@ -23,8 +23,8 @@ from .inventory import SourceArtifactEntry
 
 
 WEB_CONFIG_RESULT_SCHEMA_VERSION = "firmatlas.mapping.web-config-result/v1alpha1"
-_PRODUCER = AnalyzerIdentity(name="web-configuration-producer", version="0.1.0")
-_SUPPORTED_FORMATS = ("nginx", "posix_shell")
+_PRODUCER = AnalyzerIdentity(name="web-configuration-producer", version="0.2.0")
+_SUPPORTED_FORMATS = ("nginx", "posix_shell", "proprietary_httpd")
 
 
 class WebConfigFindingKind(str, Enum):
@@ -159,12 +159,20 @@ def _empty_result(
 def _detect_format(path: str, text: str) -> Optional[str]:
     basename = posixpath.basename(path).lower()
     normalized = path.lower()
+    static_text = re.sub(r"<\?.*?\?>", "", text, flags=re.DOTALL)
     if "nginx" in normalized and (
         basename.endswith(".conf") or basename == "nginx.conf"
     ):
         return "nginx"
     if basename.endswith(".sh") or normalized.startswith("etc/init.d/"):
         return "posix_shell"
+    if (
+        "/templates/httpd/" in "/{}".format(normalized)
+        and re.search(r"(?m)^\s*Control\s*\{", static_text)
+        and re.search(r"(?m)^\s*Alias\s+/", static_text)
+        and re.search(r"(?m)^\s*Location\s+/", static_text)
+    ):
+        return "proprietary_httpd"
     if re.search(r"(?m)^\s*(?:http|server|events)\s*\{", text):
         return "nginx"
     if text.startswith("#!") or text.startswith("#/bin/sh"):
@@ -472,6 +480,122 @@ def _parse_shell(
     return findings, evidence_atoms, ()
 
 
+def _mask_httpd_dynamic_regions(content: bytes) -> bytes:
+    masked = bytearray(content)
+    for pattern in (rb"<\?.*?\?>", rb"/\*.*?\*/", rb"//[^\r\n]*"):
+        for match in re.finditer(pattern, content, flags=re.DOTALL):
+            for index in range(match.start(), match.end()):
+                if masked[index] not in (10, 13):
+                    masked[index] = 32
+    return bytes(masked)
+
+
+def _parse_proprietary_httpd(
+    source: SourceArtifactEntry, content: bytes, policy: WebConfigPolicy
+) -> tuple:
+    """Parse static Control blocks without evaluating embedded template PHP."""
+
+    masked = _mask_httpd_dynamic_regions(content)
+    findings = []
+    evidence_atoms = {}
+    stack = []
+    cursor = 0
+
+    def nearest_control():
+        return next(
+            (item for item in reversed(stack) if item["kind"] == "control"),
+            None,
+        )
+
+    def publish_control(control) -> None:
+        alias = control.get("alias")
+        location = control.get("location")
+        if alias is not None and location is not None:
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.NAMESPACE_MAPPING,
+                location.value, location, "maps_namespace",
+                namespace=alias.value, qualifier="alias",
+                source_construct="proprietary_httpd.alias_location",
+                extra_tokens=(alias,),
+            )
+        if alias is None:
+            return
+        for executable, extensions in control["external"]:
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.NAMESPACE_MAPPING,
+                executable.value, executable, "binds_handler",
+                namespace=alias.value, qualifier="external_handler",
+                related_value=extensions.value,
+                source_construct="proprietary_httpd.external",
+                extra_tokens=(alias, extensions),
+            )
+
+    for raw_line in masked.splitlines(keepends=True):
+        line = raw_line.decode("utf-8")
+        control = nearest_control()
+        external_active = bool(stack and stack[-1]["kind"] == "external")
+        handler_match = None
+        if external_active:
+            handler_match = re.match(
+                r"^\s*(/\S+)\s*\{\s*([^{}]+?)\s*\}\s*$", line
+            )
+        if handler_match is not None and control is not None:
+            executable = _Token(
+                handler_match.group(1),
+                cursor + handler_match.start(1),
+                cursor + handler_match.end(1),
+            )
+            extensions = _Token(
+                handler_match.group(2).strip(),
+                cursor + handler_match.start(2),
+                cursor + handler_match.end(2),
+            )
+            control["external"].append((executable, extensions))
+            cursor += len(raw_line)
+            continue
+
+        if control is not None and not external_active:
+            for key, directive in (("alias", "Alias"), ("location", "Location")):
+                match = re.match(r"^\s*{}\s+(\S+)\s*$".format(directive), line)
+                if match is not None:
+                    control[key] = _Token(
+                        match.group(1),
+                        cursor + match.start(1),
+                        cursor + match.end(1),
+                    )
+
+        opening = re.match(r"^\s*([A-Za-z][\w-]*)\s*\{\s*$", line)
+        if opening is not None:
+            kind = opening.group(1).lower()
+            entry = {"kind": kind}
+            if kind == "control":
+                entry.update(alias=None, location=None, external=[])
+            stack.append(entry)
+
+        closing = re.match(r"^\s*(}+)", line)
+        for _ in range(len(closing.group(1)) if closing is not None else 0):
+            if not stack:
+                break
+            closed = stack.pop()
+            if closed["kind"] == "control":
+                publish_control(closed)
+        cursor += len(raw_line)
+        if len(findings) > policy.max_findings:
+            return findings, evidence_atoms, (
+                WebConfigDiagnostic(
+                    "finding_budget_exceeded",
+                    "finding budget truncated proprietary httpd analysis",
+                ),
+            )
+    while stack:
+        closed = stack.pop()
+        if closed["kind"] == "control":
+            publish_control(closed)
+    return findings, evidence_atoms, ()
+
+
 def discover_web_configuration(
     source: SourceArtifactEntry,
     content: bytes,
@@ -500,6 +624,10 @@ def discover_web_configuration(
                              "unsupported_format", "source does not match a declared web configuration format")
     if detected_format == "nginx":
         findings, evidence_atoms, diagnostics = _parse_nginx(source, content, policy)
+    elif detected_format == "proprietary_httpd":
+        findings, evidence_atoms, diagnostics = _parse_proprietary_httpd(
+            source, content, policy
+        )
     else:
         findings, evidence_atoms, diagnostics = _parse_shell(source, content, policy)
     if len(findings) > policy.max_findings:

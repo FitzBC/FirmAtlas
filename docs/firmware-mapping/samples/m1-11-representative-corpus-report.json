@@ -1,7 +1,7 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:f266dd3578426395806815d00223d49dbc484431be3656da00920c9c95853d52",
-  "corpus_version": "firmatlas.mapping.corpus/m1.1",
+  "report_id": "corpus-report:df81ad45658444d26f9a144b6320adb8bd8d9668001af92d0011748a893862da",
+  "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
     "cgi_gateway",
@@ -12,6 +12,41 @@
   ],
   "samples": [
     {
+      "sample_id": "dlink-dap3520-hnap-xgi-validation",
+      "architecture_category": "hnap_soap",
+      "architecture_subtype": "hybrid_hnap_xgi_dispatcher",
+      "role": "cross-architecture-validation",
+      "evidence_tier": "real_firmware",
+      "status": "coverage_gap",
+      "catalog_id": "discovery-catalog:9604de198465109760e1a5ccfc8b8030885ab918c3eb586187a73418ae84521e",
+      "required_capabilities": [
+        "binds_handler",
+        "maps_namespace",
+        "reads_configuration",
+        "selects_operation",
+        "writes_configuration"
+      ],
+      "forbidden_capabilities": [],
+      "observed_capabilities": [
+        "binds_handler",
+        "maps_namespace",
+        "reads_configuration",
+        "reads_parameter",
+        "selects_operation",
+        "writes_configuration"
+      ],
+      "missing_capabilities": [],
+      "unexpected_capabilities": [],
+      "candidate_kinds": [
+        "script_source",
+        "state_access",
+        "web_configuration"
+      ],
+      "candidate_count": 273,
+      "evidence_count": 288,
+      "open_obligation_count": 0
+    },
+    {
       "sample_id": "dlink-dsl2877-derived",
       "architecture_category": "script_backend",
       "architecture_subtype": "vendor_asp_controller",
@@ -19,10 +54,16 @@
       "evidence_tier": "derived_firmware",
       "status": "coverage_gap",
       "catalog_id": null,
-      "required_capabilities": ["reads_parameter", "writes_configuration"],
+      "required_capabilities": [
+        "reads_parameter",
+        "writes_configuration"
+      ],
       "forbidden_capabilities": [],
       "observed_capabilities": [],
-      "missing_capabilities": ["reads_parameter", "writes_configuration"],
+      "missing_capabilities": [
+        "reads_parameter",
+        "writes_configuration"
+      ],
       "unexpected_capabilities": [],
       "candidate_kinds": [],
       "candidate_count": 0,
@@ -36,13 +77,22 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:382979674da66b99f9d6296909cc220a0761cad2147c5a3b1a84fdf32edd7cec",
-      "required_capabilities": ["constructs_request", "selects_operation"],
+      "catalog_id": "discovery-catalog:ddb7950e6a26d9598ce451c88aa5629691f17f8daf17210e778ec51cf3d44482",
+      "required_capabilities": [
+        "constructs_request",
+        "selects_operation"
+      ],
       "forbidden_capabilities": [],
-      "observed_capabilities": ["constructs_request", "selects_operation", "serializes_parameter"],
+      "observed_capabilities": [
+        "constructs_request",
+        "selects_operation",
+        "serializes_parameter"
+      ],
       "missing_capabilities": [],
       "unexpected_capabilities": [],
-      "candidate_kinds": ["request_interface"],
+      "candidate_kinds": [
+        "request_interface"
+      ],
       "candidate_count": 1,
       "evidence_count": 3,
       "open_obligation_count": 0
@@ -55,10 +105,16 @@
       "evidence_tier": "external_lead",
       "status": "acquisition_gap",
       "catalog_id": null,
-      "required_capabilities": ["binds_handler", "mentions_endpoint"],
+      "required_capabilities": [
+        "binds_handler",
+        "mentions_endpoint"
+      ],
       "forbidden_capabilities": [],
       "observed_capabilities": [],
-      "missing_capabilities": ["binds_handler", "mentions_endpoint"],
+      "missing_capabilities": [
+        "binds_handler",
+        "mentions_endpoint"
+      ],
       "unexpected_capabilities": [],
       "candidate_kinds": [],
       "candidate_count": 0,
@@ -72,13 +128,22 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:8a06827650b679bac7fc9aa60728e716b2f969888b5e6985a6c71be5bebe7880",
-      "required_capabilities": ["constructs_request", "selects_operation"],
+      "catalog_id": "discovery-catalog:0a8391cb2a3253fa68e85a05883293165b9048b1a10f91309e507e5505d428d1",
+      "required_capabilities": [
+        "constructs_request",
+        "selects_operation"
+      ],
       "forbidden_capabilities": [],
-      "observed_capabilities": ["constructs_request", "selects_operation", "serializes_parameter"],
+      "observed_capabilities": [
+        "constructs_request",
+        "selects_operation",
+        "serializes_parameter"
+      ],
       "missing_capabilities": [],
       "unexpected_capabilities": [],
-      "candidate_kinds": ["request_interface"],
+      "candidate_kinds": [
+        "request_interface"
+      ],
       "candidate_count": 1,
       "evidence_count": 4,
       "open_obligation_count": 0
@@ -90,8 +155,11 @@
       "role": "development",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:507d251c5eba2f4f7f65375b52b6150a70c1fc37d7fdedaf65a0e4b0f4168a51",
-      "required_capabilities": ["binds_handler", "constructs_request"],
+      "catalog_id": "discovery-catalog:bb90b9c6fa341704bfcf0fd5da72ee1131fc90daaa913cc6c3aa5086e30fcab1",
+      "required_capabilities": [
+        "binds_handler",
+        "constructs_request"
+      ],
       "forbidden_capabilities": [],
       "observed_capabilities": [
         "binds_handler",
@@ -128,8 +196,14 @@
       "contract_verified_count": 1,
       "coverage_gap_count": 0,
       "acquisition_gap_count": 0,
-      "observed_capabilities": ["constructs_request", "selects_operation", "serializes_parameter"],
-      "candidate_kinds": ["request_interface"],
+      "observed_capabilities": [
+        "constructs_request",
+        "selects_operation",
+        "serializes_parameter"
+      ],
+      "candidate_kinds": [
+        "request_interface"
+      ],
       "open_obligation_count": 0
     },
     {
@@ -163,15 +237,29 @@
     },
     {
       "architecture_category": "hnap_soap",
-      "status": "contract_only",
-      "sample_count": 1,
+      "status": "coverage_gap",
+      "sample_count": 2,
       "real_firmware_verified_count": 0,
       "derived_firmware_verified_count": 0,
       "contract_verified_count": 1,
-      "coverage_gap_count": 0,
+      "coverage_gap_count": 1,
       "acquisition_gap_count": 0,
-      "observed_capabilities": ["constructs_request", "selects_operation", "serializes_parameter"],
-      "candidate_kinds": ["request_interface"],
+      "observed_capabilities": [
+        "binds_handler",
+        "constructs_request",
+        "maps_namespace",
+        "reads_configuration",
+        "reads_parameter",
+        "selects_operation",
+        "serializes_parameter",
+        "writes_configuration"
+      ],
+      "candidate_kinds": [
+        "request_interface",
+        "script_source",
+        "state_access",
+        "web_configuration"
+      ],
       "open_obligation_count": 0
     },
     {

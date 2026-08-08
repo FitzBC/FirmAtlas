@@ -1,0 +1,97 @@
+{
+  "schema_version": "firmatlas.mapping.sample-summary/v1alpha1",
+  "firmware": {
+    "vendor": "D-Link",
+    "model": "DAP-3520 A1",
+    "version": "1.17-rc047",
+    "artifact_sha256": "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9"
+  },
+  "source_inventory": {
+    "inventory_sha256": "e6b0cfd9e5fed74302986e179ea23de8d9817198c2b361ee946a90e501e91334",
+    "coverage_status": "partial",
+    "observed_entries": 757,
+    "diagnostic": "inventory.symlink_escape"
+  },
+  "catalog": {
+    "catalog_id": "discovery-catalog:9604de198465109760e1a5ccfc8b8030885ab918c3eb586187a73418ae84521e",
+    "coverage_status": "partial",
+    "source_inventory_coverage_status": "partial",
+    "candidate_count": 273,
+    "parameter_count": 1,
+    "evidence_count": 288,
+    "open_obligation_count": 0,
+    "seed_input_count": 0
+  },
+  "producer_results": [
+    {
+      "source_path": "etc/templates/httpd/httpd.php",
+      "sha256": "2ffdadc17fbbe376e91c6657b1b99a54342f93a53c464df0a2089c14751069f9",
+      "size": 3170,
+      "producer": "web-configuration-producer",
+      "producer_version": "0.2.0",
+      "coverage_status": "completed",
+      "detected_format": "proprietary_httpd",
+      "finding_count": 5,
+      "evidence_count": 12
+    },
+    {
+      "source_path": "www/home_sys.php",
+      "sha256": "6cbcc5238037e2897863cb245077ecb1fbd2c4fba333a737eca44305a6f0dfac",
+      "size": 7810,
+      "producer": "script-backend-producer",
+      "producer_version": "0.2.0",
+      "coverage_status": "completed",
+      "state_access_counts": {"query": 27, "set": 1},
+      "evidence_count": 28
+    },
+    {
+      "source_path": "www/__action.php",
+      "sha256": "79b77c6921c33f4c41d67d26cba7811bff5211f43270220f17e70f06aa76b439",
+      "size": 22814,
+      "producer": "script-backend-producer",
+      "producer_version": "0.2.0",
+      "coverage_status": "completed",
+      "selector_values": ["__sample", "st_logs", "sys_setting", "tool_admin", "tool_sntp"],
+      "state_access_counts": {
+        "query": 106,
+        "query_encrypted": 2,
+        "set": 128,
+        "set_encrypted": 2
+      },
+      "evidence_count": 248
+    }
+  ],
+  "architecture_chain": [
+    {
+      "relation": "maps_namespace",
+      "from": "/HNAP1",
+      "to": "/www/HNAP1",
+      "construct": "proprietary_httpd.alias_location"
+    },
+    {
+      "relation": "binds_handler",
+      "from": "/HNAP1",
+      "to": "/usr/sbin/hnap",
+      "handler_extension": "hnap",
+      "construct": "proprietary_httpd.external"
+    },
+    {
+      "relation": "dispatches_operation",
+      "from": "PHP page POST",
+      "to": "www/__action.php",
+      "selector": "ACTION_POST",
+      "construct": "php.xgi_action_selector"
+    },
+    {
+      "relation": "accesses_state_tree",
+      "from": "www/__action.php",
+      "to": "XGI configuration tree",
+      "operations": ["query", "query_encrypted", "set", "set_encrypted"]
+    }
+  ],
+  "interpretation": {
+    "architecture_subtype": "hybrid_hnap_xgi_dispatcher",
+    "confidence_boundary": "Deterministic static bindings are supported; shared code origin and runtime reachability are not asserted.",
+    "why_not_verified": "The selected producers completed, but the parent source inventory remains partial because absolute firmware symlinks were recorded without being followed."
+  }
+}

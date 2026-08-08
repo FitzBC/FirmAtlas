@@ -191,7 +191,7 @@ class DiscoveryCatalogRepository:
     @staticmethod
     def _catalog_summary(row: sqlite3.Row) -> dict:
         keys = set(row.keys())
-        return {
+        summary = {
             key: row[key] for key in (
                 "catalog_id", "schema_version", "firmware_artifact_sha256",
                 "source_inventory_sha256", "coverage_status", "scheduler_termination",
@@ -199,6 +199,12 @@ class DiscoveryCatalogRepository:
                 "association_count", "open_obligation_count",
             ) if key in keys
         }
+        if "document_json" in keys:
+            document = json.loads(row["document_json"])
+            summary["source_inventory_coverage_status"] = document.get(
+                "source_inventory_coverage_status", "completed"
+            )
+        return summary
 
     def get_catalog(self, catalog_id: str) -> Optional[dict]:
         with self._lock:
@@ -285,6 +291,9 @@ class DiscoveryCatalogRepository:
             "catalog": {
                 "catalog_id": catalog_id,
                 "coverage_status": document["coverage_status"],
+                "source_inventory_coverage_status": document.get(
+                    "source_inventory_coverage_status", "completed"
+                ),
                 "scheduler_termination": document.get("scheduler_termination"),
             },
             "candidate": candidate,

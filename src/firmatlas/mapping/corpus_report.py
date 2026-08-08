@@ -233,10 +233,10 @@ def _category_result(category: str, samples: tuple) -> CorpusCategoryResult:
         status = CorpusSampleStatus.VERIFIED
     elif derived_count:
         status = CorpusSampleStatus.DERIVED_ONLY
-    elif contract_count:
-        status = CorpusSampleStatus.CONTRACT_ONLY
     elif coverage_gap_count:
         status = CorpusSampleStatus.COVERAGE_GAP
+    elif contract_count:
+        status = CorpusSampleStatus.CONTRACT_ONLY
     else:
         status = CorpusSampleStatus.ACQUISITION_GAP
     return CorpusCategoryResult(

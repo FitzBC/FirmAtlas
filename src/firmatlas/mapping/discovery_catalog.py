@@ -132,12 +132,15 @@ class DiscoveryCatalogInput:
     batches: Tuple[DiscoveryProducerBatch, ...]
     correlation: Optional[FrontendNativeCorrelationResult] = None
     scheduler: Optional[ObligationSchedulerResult] = None
+    source_inventory_coverage_status: CoverageStatus = CoverageStatus.COMPLETED
 
     def __post_init__(self) -> None:
         if not _SHA256.fullmatch(self.firmware_artifact_sha256):
             raise ValueError("firmware_artifact_sha256 must be a lowercase SHA-256")
         if not _SHA256.fullmatch(self.source_inventory_sha256):
             raise ValueError("source_inventory_sha256 must be a lowercase SHA-256")
+        if not isinstance(self.source_inventory_coverage_status, CoverageStatus):
+            raise ValueError("source_inventory_coverage_status must be a CoverageStatus")
         identities = tuple((x.producer_kind, x.scope) for x in self.batches)
         if len(identities) != len(set(identities)):
             raise ValueError("duplicate discovery producer batch")
@@ -195,6 +198,7 @@ class DiscoveryCatalog:
     firmware_artifact_sha256: str
     source_inventory_sha256: str
     coverage_status: CoverageStatus
+    source_inventory_coverage_status: CoverageStatus
     candidates: Tuple[DiscoveryCandidate, ...]
     parameters: Tuple[DiscoveryParameter, ...]
     evidence_atoms: Tuple[EvidenceAtom, ...]
@@ -212,6 +216,9 @@ class DiscoveryCatalog:
             "firmware_artifact_sha256": self.firmware_artifact_sha256,
             "source_inventory_sha256": self.source_inventory_sha256,
             "coverage_status": self.coverage_status.value,
+            "source_inventory_coverage_status": (
+                self.source_inventory_coverage_status.value
+            ),
             "seed_input_count": self.seed_input_count,
             "candidates": [
                 {**asdict(x), "candidate_kind": x.candidate_kind.value,
@@ -245,6 +252,7 @@ def _catalog_id(
         "schema_version": DISCOVERY_CATALOG_SCHEMA_VERSION,
         "firmware": value.firmware_artifact_sha256,
         "inventory": value.source_inventory_sha256,
+        "inventory_coverage": value.source_inventory_coverage_status.value,
         "candidates": [asdict(x) for x in candidates],
         "parameters": [asdict(x) for x in parameters],
         "evidence_ids": [x.evidence_id for x in evidence_atoms],
@@ -558,9 +566,14 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
         ):
             raise ValueError("catalog parameter requires known evidence")
     coverage = tuple(coverage)
-    incomplete = any(
-        x.required and x.status not in {CoverageStatus.COMPLETED, CoverageStatus.NOT_APPLICABLE}
-        for x in coverage
+    incomplete = (
+        value.source_inventory_coverage_status is not CoverageStatus.COMPLETED
+        or any(
+            x.required
+            and x.status
+            not in {CoverageStatus.COMPLETED, CoverageStatus.NOT_APPLICABLE}
+            for x in coverage
+        )
     )
     return DiscoveryCatalog(
         catalog_id=_catalog_id(
@@ -572,6 +585,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
         coverage_status=(
             CoverageStatus.PARTIAL if incomplete else CoverageStatus.COMPLETED
         ),
+        source_inventory_coverage_status=value.source_inventory_coverage_status,
         candidates=candidates,
         parameters=parameters,
         evidence_atoms=evidence_atoms,

@@ -94,23 +94,22 @@ IndexNames { index.hnap }
 
 `hybrid_hnap_dispatcher_plus_php_xgi_page_controllers`。
 
-这仍是“待 Producer 结构化”的证据假设，不是从 `/HNAP1` 路径风格直接
-断言后端同源。下一轮需要新增 proprietary httpd/PHP-XGI 证据 Producer，
-再把结果送入 Discovery Catalog。
+M1-11A 已将该假设结构化为 proprietary httpd/PHP-XGI Producer 结果并送入
+Discovery Catalog；这仍不是从 `/HNAP1` 路径风格直接断言后端同源。Catalog
+继承本轮 Inventory 的 partial coverage，因此没有把局部 Producer 成功抬高为
+整机 verified。
 
 ## 6. 为什么仍是进行中
 
 - 仓库固定 Dockerfile 尚未在正确配置全局代理的 Docker daemon 上完成
   独立重建与摘要复核；当前成功的是等价源码提交的本地 ARM64 验证镜像；
 - DAP-3520 的安全 Inventory 因绝对符号链接保持 partial；
-- HNAP/XGI 绑定尚未进入专用 Producer 与完整 Catalog，因此 M1-11
-  `hnap_soap` 类别仍不能晋级 `verified`。
+- HNAP/XGI 绑定已进入专用 Producer 与 partial Catalog；M1-11
+  `hnap_soap` 仍不能晋级 `verified` 的原因是父 Inventory coverage，而非缺少
+  选中文件的确定性事实。
 
 ## 7. 下一步
 
-1. 为 proprietary httpd `Alias/Location/External` 与 PHP/XGI
-   `query/set/ACTION_POST` 建立确定性 Producer；
-2. 用 DAP-3520 当前 Artifact/Inventory 身份发布真实 Discovery Catalog；
-3. 明确“固件根绝对 symlink”只记录、不跟随时的 coverage 政策，保持安全
+1. 明确“固件根绝对 symlink”只记录、不跟随时的 coverage 政策，保持安全
    前提下区分危险逃逸与预期 chroot 链接；
-4. 重建仓库正式镜像并记录发布摘要，然后再评估 M1-02B 是否可标记已验证。
+2. 重建仓库正式镜像并记录发布摘要，然后再评估 M1-02B 是否可标记已验证。

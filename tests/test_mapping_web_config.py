@@ -24,6 +24,79 @@ def _source(path: str, content: bytes) -> SourceArtifactEntry:
 
 
 class WebConfigurationProducerContractTests(unittest.TestCase):
+    def test_proprietary_httpd_control_binds_alias_to_root_and_external_handler(self):
+        content = b"""<? require('/etc/templates/troot.php'); ?>
+Server {
+  Virtual {
+    Control {
+      Alias /HNAP1
+      Location /www/HNAP1
+      External {
+        /usr/sbin/hnap { hnap }
+      }
+      IndexNames { index.hnap }
+    }
+  }
+}
+"""
+
+        result = discover_web_configuration(
+            _source("etc/templates/httpd/httpd.php", content), content
+        )
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual("proprietary_httpd", result.detected_format)
+        self.assertEqual(
+            [
+                (
+                    WebConfigFindingKind.NAMESPACE_MAPPING,
+                    "/HNAP1",
+                    "/www/HNAP1",
+                    "alias",
+                    None,
+                ),
+                (
+                    WebConfigFindingKind.NAMESPACE_MAPPING,
+                    "/HNAP1",
+                    "/usr/sbin/hnap",
+                    "external_handler",
+                    "hnap",
+                ),
+            ],
+            [
+                (
+                    item.kind,
+                    item.namespace,
+                    item.value,
+                    item.qualifier,
+                    item.related_value,
+                )
+                for item in result.findings
+            ],
+        )
+        self.assertEqual(
+            {"maps_namespace", "binds_handler"},
+            {item.capability for item in result.evidence_atoms},
+        )
+
+    def test_dynamic_php_text_does_not_masquerade_as_static_httpd_configuration(self):
+        content = b'''<?
+echo <<<CFG
+Control {
+ Alias /fake
+ Location /www/fake
+}
+CFG;
+?>'''
+
+        result = discover_web_configuration(
+            _source("etc/templates/httpd/generated.php", content), content
+        )
+
+        self.assertEqual(CoverageStatus.NOT_APPLICABLE, result.coverage_status)
+        self.assertIsNone(result.detected_format)
+        self.assertEqual((), result.findings)
+
     def test_nginx_server_and_location_blocks_preserve_scope(self):
         content = b"""http {
   server {
@@ -42,7 +115,8 @@ class WebConfigurationProducerContractTests(unittest.TestCase):
         self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
         self.assertEqual("nginx", result.detected_format)
         self.assertEqual(
-            {"nginx", "posix_shell"}, set(result.supported_formats)
+            {"nginx", "posix_shell", "proprietary_httpd"},
+            set(result.supported_formats),
         )
         self.assertEqual(
             [
@@ -309,6 +383,40 @@ enabled_nginx=true
         ):
             for atom in result.evidence_atoms:
                 self.assertTrue(replay_evidence(atom, source, content))
+
+    def test_actual_dap3520_httpd_template_replays_hnap_binding(self):
+        base = Path(
+            "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027"
+        )
+        roots = list(base.glob(
+            "*.ZIP.extracted/_*.bin.extracted/squashfs-root"
+        ))
+        if not roots:
+            self.skipTest("local DAP-3520 representative sample is unavailable")
+        path = roots[0] / "etc/templates/httpd/httpd.php"
+        content = path.read_bytes()
+        self.assertEqual(
+            "2ffdadc17fbbe376e91c6657b1b99a54342f93a53c464df0a2089c14751069f9",
+            hashlib.sha256(content).hexdigest(),
+        )
+        source = _source("etc/templates/httpd/httpd.php", content)
+
+        result = discover_web_configuration(source, content)
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(5, len(result.findings))
+        hnap = [item for item in result.findings if item.namespace == "/HNAP1"]
+        self.assertEqual(
+            [
+                ("/www/HNAP1", "alias", None),
+                ("/usr/sbin/hnap", "external_handler", "hnap"),
+            ],
+            [(item.value, item.qualifier, item.related_value) for item in hnap],
+        )
+        self.assertEqual(12, len(result.evidence_atoms))
+        self.assertTrue(
+            all(replay_evidence(atom, source, content) for atom in result.evidence_atoms)
+        )
 
 
 if __name__ == "__main__":
