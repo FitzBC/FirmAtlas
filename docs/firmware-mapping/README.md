@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-07 义务调度与固定点终止已验证；下一项为 M1-08 无 seed 候选目录
+> 当前状态：M1-08 无 seed 候选目录已验证；下一项为 M1-09 查询与最小 UI 接入
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -62,6 +62,7 @@
 | [M1-06B 文本后端 Producer 记录](./progress/2026-08-09-m1-06b-script-backend-producer.md) | ASP/PHP/LuCI/Shell CGI 参数、分发、状态访问与保守路由边界 | 后端语法、能力或覆盖合同变化时 |
 | [M1-06C Frontend/Native 关联记录](./progress/2026-08-09-m1-06c-frontend-native-correlation.md) | 精确候选关联、负面对照与可调度深分析义务 | 关联规则、身份或义务合同变化时 |
 | [M1-07 义务调度记录](./progress/2026-08-09-m1-07-obligation-scheduler.md) | 稳定队列、Adapter 隔离、预算和固定点终止 | 调度策略、义务合同或终止语义变化时 |
+| [M1-08 无 seed 候选目录记录](./progress/2026-08-09-m1-08-discovery-catalog.md) | 多 Producer 投影、覆盖账本、参数、关联、固定点与 AC9 端到端输出 | 目录 schema、投影或发布不变量变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -119,16 +120,16 @@ M1 工作项：
 | M1-02A | 冻结隔离 Binwalk worker 合同与派生制品谱系 | 已验证 | M1-02 | 8 fake worker contract tests + versioned result fixture |
 | M1-02B | 实现生产 Binwalk worker 并回放原始固件镜像 | 未开始 | M1-02A | container isolation + pinned toolchain + raw image replay |
 | M1-03 | 建立不可变 `EvidenceAtom` 与来源定位 | 已验证 | M1-01/02 | 8 capture/replay tests + AC9 exact-span replay |
-| M1-04 | HTML/Form/JS 请求构造证据生产器 | 已验证 | M1-02/03 | 13 producer tests + AC9 full-source replay + HNAP/CGI fixtures |
+| M1-04 | HTML/Form/JS 请求构造证据生产器 | 已验证 | M1-02/03 | 14 producer tests + AC9 JS/ASP replay + HNAP/CGI fixtures |
 | M1-05 | Web 配置、docroot、rewrite、启动项证据生产器 | 已验证 | M1-02/03 | 11 contract tests + AC9 nginx/startup replay + full regression |
 | M1-06A | ELF Native Shallow 证据生产器 | 已验证 | M1-02/03/04 | 8 contract tests + AC9 httpd/dhttpd replay + full regression |
 | M1-06B | PHP/ASP/Lua/Shell/CGI 文本后端证据生产器 | 已验证 | M1-02/03 | 12 contract tests + D-Link DSL ASP/Shell CGI replay + full regression |
 | M1-06C | Frontend/Native 候选关联与深分析义务 | 已验证 | M1-04/06A | 11 contract tests + AC9 7/7 correlation + full regression |
 | M1-07 | 线索调度与固定点终止 | 已验证 | M1-04/05/06A/06B/06C | 13 contract tests + AC9 14-open-obligation fixed point + full regression |
-| M1-08 | 发布候选目录、覆盖账本和未决义务 | 未开始 | M1-07 | no-seed end-to-end fixture |
+| M1-08 | 发布候选目录、覆盖账本和未决义务 | 已验证 | M1-07 | 11 contract tests + AC9 395-candidate no-seed replay + full regression |
 | M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 未开始 | M1-08 | API/browser regression |
 
-**下一项建议**：进入 M1-08，把 Producer coverage、candidate association、固定点原因与开放义务组装为无 seed 候选目录。Native Deep Adapter 的 anchor/xref 请求继续以 M1-06C obligation 为输入。M1-02B 可使用 Binwalk，但必须在生产隔离 worker 和固定工具链中执行，不能进入主分析进程。
+**下一项建议**：进入 M1-09，为目录、参数、覆盖和开放义务提供持久化查询与最小 UI 纵向接入。Native Deep Adapter 的 anchor/xref 请求继续以 M1-06C obligation 为输入。M1-02B 可使用 Binwalk，但必须在生产隔离 worker 和固定工具链中执行，不能进入主分析进程。
 
 ## 7. 跨会话无缝工作协议
 

@@ -1,0 +1,512 @@
+"""Publish a stable, evidence-backed cold-start discovery catalog."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+from enum import Enum
+import hashlib
+import json
+import re
+from typing import Optional, Tuple
+
+from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom
+from .frontend import FrontendProducerResult
+from .web_config import WebConfigProducerResult
+from .script_backend import ScriptBackendProducerResult
+from .native import NativeProducerResult
+from .correlation import FrontendNativeCorrelationResult
+from .scheduler import (
+    ObligationSchedulerResult,
+    SchedulerObligation,
+    SchedulerTermination,
+    normalize_scheduler_obligations,
+)
+
+
+DISCOVERY_CATALOG_SCHEMA_VERSION = "firmatlas.mapping.discovery-catalog/v1alpha1"
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
+
+
+class DiscoveryProducerKind(str, Enum):
+    FRONTEND = "frontend"
+    WEB_CONFIGURATION = "web_configuration"
+    SCRIPT_BACKEND = "script_backend"
+    NATIVE = "native"
+    CORRELATION = "correlation"
+    SCHEDULER = "scheduler"
+
+
+class DiscoveryCandidateKind(str, Enum):
+    REQUEST_INTERFACE = "request_interface"
+    WEB_CONFIGURATION = "web_configuration"
+    SCRIPT_SOURCE = "script_source"
+    SCRIPT_ROUTE = "script_route"
+    CGI_PROGRAM = "cgi_program"
+    STATE_ACCESS = "state_access"
+    TEMPLATE_READ = "template_read"
+    NATIVE_HINT = "native_hint"
+    CANDIDATE_ASSOCIATION = "candidate_association"
+
+
+class DiscoveryClaimStatus(str, Enum):
+    CANDIDATE = "candidate"
+    SUPPORTED = "supported"
+
+
+@dataclass(frozen=True)
+class DiscoveryProducerBatch:
+    producer_kind: DiscoveryProducerKind
+    producer: AnalyzerIdentity
+    scope: str
+    results: tuple
+    required: bool = True
+
+    @classmethod
+    def frontend(
+        cls, results: Tuple[FrontendProducerResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("frontend-request-producer", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.FRONTEND, producer, scope, results)
+
+    @classmethod
+    def web_configuration(
+        cls, results: Tuple[WebConfigProducerResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("web-configuration-producer", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.WEB_CONFIGURATION, producer, scope, results)
+
+    @classmethod
+    def script_backend(
+        cls, results: Tuple[ScriptBackendProducerResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("script-backend-producer", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.SCRIPT_BACKEND, producer, scope, results)
+
+    @classmethod
+    def native(
+        cls, results: Tuple[NativeProducerResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-shallow-producer", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.NATIVE, producer, scope, results)
+
+    def __post_init__(self) -> None:
+        if not self.scope.strip() or not self.producer.name.strip():
+            raise ValueError("producer batch requires scope and producer identity")
+
+
+@dataclass(frozen=True)
+class DiscoveryCatalogInput:
+    firmware_artifact_sha256: str
+    source_inventory_sha256: str
+    batches: Tuple[DiscoveryProducerBatch, ...]
+    correlation: Optional[FrontendNativeCorrelationResult] = None
+    scheduler: Optional[ObligationSchedulerResult] = None
+
+    def __post_init__(self) -> None:
+        if not _SHA256.fullmatch(self.firmware_artifact_sha256):
+            raise ValueError("firmware_artifact_sha256 must be a lowercase SHA-256")
+        if not _SHA256.fullmatch(self.source_inventory_sha256):
+            raise ValueError("source_inventory_sha256 must be a lowercase SHA-256")
+        identities = tuple((x.producer_kind, x.scope) for x in self.batches)
+        if len(identities) != len(set(identities)):
+            raise ValueError("duplicate discovery producer batch")
+
+
+@dataclass(frozen=True)
+class DiscoveryCandidate:
+    candidate_id: str
+    candidate_kind: DiscoveryCandidateKind
+    canonical_identity: str
+    claim_status: DiscoveryClaimStatus
+    source_path: str
+    source_construct: str
+    evidence_ids: Tuple[str, ...]
+    attributes: Tuple[Tuple[str, str], ...] = ()
+
+
+@dataclass(frozen=True)
+class DiscoveryParameter:
+    parameter_id: str
+    owner_ref: str
+    name: str
+    namespace: str
+    literal_value: Optional[str]
+    selector_values: Tuple[str, ...]
+    is_operation_selector: bool
+    source_construct: str
+    evidence_ids: Tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DiscoveryCoverage:
+    scope: str
+    producer_kind: DiscoveryProducerKind
+    producer: str
+    producer_version: str
+    status: CoverageStatus
+    required: bool
+    processed_result_count: int
+    diagnostic: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class DiscoveryAssociation:
+    association_id: str
+    frontend_candidate_id: str
+    native_hint_id: str
+    match_basis: str
+    evidence_ids: Tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DiscoveryCatalog:
+    catalog_id: str
+    firmware_artifact_sha256: str
+    source_inventory_sha256: str
+    coverage_status: CoverageStatus
+    candidates: Tuple[DiscoveryCandidate, ...]
+    parameters: Tuple[DiscoveryParameter, ...]
+    evidence_atoms: Tuple[EvidenceAtom, ...]
+    coverage: Tuple[DiscoveryCoverage, ...]
+    associations: Tuple[DiscoveryAssociation, ...] = ()
+    open_obligations: Tuple[SchedulerObligation, ...] = ()
+    scheduler_termination: Optional[SchedulerTermination] = None
+    seed_input_count: int = 0
+    schema_version: str = DISCOVERY_CATALOG_SCHEMA_VERSION
+
+    def to_dict(self) -> dict:
+        return {
+            "schema_version": self.schema_version,
+            "catalog_id": self.catalog_id,
+            "firmware_artifact_sha256": self.firmware_artifact_sha256,
+            "source_inventory_sha256": self.source_inventory_sha256,
+            "coverage_status": self.coverage_status.value,
+            "seed_input_count": self.seed_input_count,
+            "candidates": [
+                {**asdict(x), "candidate_kind": x.candidate_kind.value,
+                 "claim_status": x.claim_status.value}
+                for x in self.candidates
+            ],
+            "parameters": [asdict(x) for x in self.parameters],
+            "evidence_atoms": [x.to_dict() for x in self.evidence_atoms],
+            "coverage": [
+                {**asdict(x), "producer_kind": x.producer_kind.value,
+                 "status": x.status.value}
+                for x in self.coverage
+            ],
+            "associations": [asdict(x) for x in self.associations],
+            "open_obligations": [
+                {**asdict(x), "status": x.status.value}
+                for x in self.open_obligations
+            ],
+            "scheduler_termination": (
+                self.scheduler_termination.value if self.scheduler_termination else None
+            ),
+        }
+
+
+def _catalog_id(
+    value: DiscoveryCatalogInput, candidates: tuple, parameters: tuple,
+    evidence_atoms: tuple, coverage: tuple, associations: tuple,
+    obligations: tuple, termination: Optional[SchedulerTermination],
+) -> str:
+    payload = {
+        "schema_version": DISCOVERY_CATALOG_SCHEMA_VERSION,
+        "firmware": value.firmware_artifact_sha256,
+        "inventory": value.source_inventory_sha256,
+        "candidates": [asdict(x) for x in candidates],
+        "parameters": [asdict(x) for x in parameters],
+        "evidence_ids": [x.evidence_id for x in evidence_atoms],
+        "coverage": [asdict(x) for x in coverage],
+        "associations": [asdict(x) for x in associations],
+        "obligations": [asdict(x) for x in obligations],
+        "scheduler_termination": termination.value if termination else None,
+    }
+    encoded = json.dumps(
+        payload, separators=(",", ":"), sort_keys=True,
+        default=lambda item: item.value,
+    ).encode()
+    return "discovery-catalog:{}".format(hashlib.sha256(encoded).hexdigest())
+
+
+def _stable_id(prefix: str, *values: str) -> str:
+    encoded = json.dumps(values, separators=(",", ":")).encode()
+    return "{}:{}".format(prefix, hashlib.sha256(encoded).hexdigest())
+
+
+def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog:
+    """Project versioned producer batches into one deterministic no-seed catalog."""
+
+    candidates = []
+    parameters = []
+    evidence = {}
+    coverage = []
+    associations = []
+    for batch in sorted(value.batches, key=lambda x: (x.producer_kind.value, x.scope)):
+        statuses = []
+        for result in batch.results:
+            if result.producer != batch.producer:
+                raise ValueError("producer result identity does not match its batch")
+            statuses.append(result.coverage_status)
+            for atom in result.evidence_atoms:
+                existing = evidence.get(atom.evidence_id)
+                if existing is not None and existing != atom:
+                    raise ValueError("conflicting evidence identity")
+                evidence[atom.evidence_id] = atom
+            if batch.producer_kind is DiscoveryProducerKind.FRONTEND:
+                for item in result.candidates:
+                    candidates.append(DiscoveryCandidate(
+                        item.candidate_id,
+                        DiscoveryCandidateKind.REQUEST_INTERFACE,
+                        item.endpoint,
+                        DiscoveryClaimStatus.CANDIDATE,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        tuple(
+                            (key, str(raw)) for key, raw in (
+                                ("endpoint_shape", item.endpoint_shape.value),
+                                ("request_role", item.request_role.value),
+                                ("method", item.method),
+                                ("representation", item.representation),
+                            ) if raw is not None
+                        ),
+                    ))
+                for item in result.parameters:
+                    parameters.append(DiscoveryParameter(
+                        item.parameter_id, item.request_candidate_id, item.name,
+                        item.namespace.value, item.literal_value,
+                        (item.literal_value,) if item.literal_value is not None else (),
+                        item.is_operation_selector, item.source_construct,
+                        item.evidence_ids,
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.WEB_CONFIGURATION:
+                for item in result.findings:
+                    candidates.append(DiscoveryCandidate(
+                        item.finding_id,
+                        DiscoveryCandidateKind.WEB_CONFIGURATION,
+                        item.value,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        tuple(
+                            (key, str(raw)) for key, raw in (
+                                ("finding_kind", item.kind.value),
+                                ("namespace", item.namespace),
+                                ("qualifier", item.qualifier),
+                                ("related_value", item.related_value),
+                            ) if raw is not None
+                        ),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.SCRIPT_BACKEND:
+                has_facts = any((
+                    result.entries, result.routes, result.parameters,
+                    result.state_accesses, result.template_reads,
+                ))
+                source_id = _stable_id("script-source", result.source_path)
+                if has_facts:
+                    source_evidence = tuple(dict.fromkeys(
+                        evidence_id
+                        for collection in (
+                            result.entries, result.routes, result.parameters,
+                            result.state_accesses, result.template_reads,
+                        )
+                        for fact in collection
+                        for evidence_id in fact.evidence_ids
+                    ))
+                    candidates.append(DiscoveryCandidate(
+                        source_id, DiscoveryCandidateKind.SCRIPT_SOURCE,
+                        result.source_path, DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        result.language.value if result.language else "unknown",
+                        source_evidence,
+                        (("language", result.language.value),) if result.language else (),
+                    ))
+                for item in result.routes:
+                    candidates.append(DiscoveryCandidate(
+                        item.route_id, DiscoveryCandidateKind.SCRIPT_ROUTE,
+                        item.route, DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path, item.source_construct, item.evidence_ids,
+                        tuple((key, str(raw)) for key, raw in (
+                            ("method", item.method), ("handler", item.handler),
+                        ) if raw is not None),
+                    ))
+                for item in result.entries:
+                    candidates.append(DiscoveryCandidate(
+                        item.entry_id, DiscoveryCandidateKind.CGI_PROGRAM,
+                        result.source_path, DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path, item.source_construct, item.evidence_ids,
+                        (("entry_kind", item.kind.value),),
+                    ))
+                for item in result.parameters:
+                    parameters.append(DiscoveryParameter(
+                        item.parameter_id, source_id, item.name,
+                        item.namespace.value, None, item.selector_values,
+                        bool(item.selector_values), item.source_construct,
+                        item.evidence_ids,
+                    ))
+                for item in result.state_accesses:
+                    identity = "|".join(
+                        value or "" for value in (
+                            item.operation, item.object_name, item.field_name,
+                            item.parameter_name,
+                        )
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        item.access_id, DiscoveryCandidateKind.STATE_ACCESS,
+                        identity, DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path, item.source_construct, item.evidence_ids,
+                        tuple((key, str(raw)) for key, raw in (
+                            ("operation", item.operation),
+                            ("object_name", item.object_name),
+                            ("field_name", item.field_name),
+                            ("parameter_name", item.parameter_name),
+                        ) if raw is not None),
+                    ))
+                for item in result.template_reads:
+                    candidates.append(DiscoveryCandidate(
+                        item.read_id, DiscoveryCandidateKind.TEMPLATE_READ,
+                        "{}|{}".format(item.object_name, item.field_name),
+                        DiscoveryClaimStatus.SUPPORTED, result.source_path,
+                        item.source_construct, item.evidence_ids,
+                        (("object_name", item.object_name), ("field_name", item.field_name)),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE:
+                for item in result.hints:
+                    candidates.append(DiscoveryCandidate(
+                        item.hint_id, DiscoveryCandidateKind.NATIVE_HINT,
+                        item.value, DiscoveryClaimStatus.CANDIDATE,
+                        result.source_path, item.source_construct, item.evidence_ids,
+                        tuple((key, str(raw)) for key, raw in (
+                            ("hint_kind", item.kind.value),
+                            ("detected_format", result.detected_format),
+                            ("bitness", result.bitness),
+                            ("endianness", result.endianness),
+                            ("machine", result.machine),
+                        ) if raw is not None),
+                    ))
+        if not statuses:
+            status = CoverageStatus.FAILED if batch.required else CoverageStatus.NOT_APPLICABLE
+            diagnostic = "required_batch_has_no_results" if batch.required else None
+        elif all(x is CoverageStatus.COMPLETED for x in statuses):
+            status, diagnostic = CoverageStatus.COMPLETED, None
+        else:
+            status = CoverageStatus.PARTIAL
+            diagnostic = "one or more producer results were incomplete"
+        coverage.append(DiscoveryCoverage(
+            batch.scope, batch.producer_kind, batch.producer.name,
+            batch.producer.version, status, batch.required, len(batch.results), diagnostic,
+        ))
+    candidate_ids = {item.candidate_id for item in candidates}
+    if value.correlation is not None:
+        for item in value.correlation.associations:
+            if item.frontend_candidate_id not in candidate_ids:
+                raise ValueError("correlation references unknown frontend candidate")
+            if item.native_hint_id not in candidate_ids:
+                raise ValueError("correlation references unknown native hint")
+            association = DiscoveryAssociation(
+                item.association_id, item.frontend_candidate_id, item.native_hint_id,
+                item.match_basis.value, item.evidence_ids,
+            )
+            associations.append(association)
+            candidates.append(DiscoveryCandidate(
+                item.association_id, DiscoveryCandidateKind.CANDIDATE_ASSOCIATION,
+                "{}|{}".format(item.frontend_candidate_id, item.native_hint_id),
+                DiscoveryClaimStatus.CANDIDATE, item.native_source_path,
+                item.rule_version, item.evidence_ids,
+                (("match_basis", item.match_basis.value),),
+            ))
+            candidate_ids.add(item.association_id)
+        coverage.append(DiscoveryCoverage(
+            "catalog/correlation", DiscoveryProducerKind.CORRELATION,
+            "frontend-native-correlation", value.correlation.rule_version,
+            value.correlation.coverage_status, True, 1,
+            "; ".join(x.message for x in value.correlation.diagnostics) or None,
+        ))
+    if value.scheduler is not None:
+        obligations = value.scheduler.open_obligations
+        termination = value.scheduler.termination
+        coverage.append(DiscoveryCoverage(
+            "catalog/scheduler", DiscoveryProducerKind.SCHEDULER,
+            "obligation-scheduler", value.scheduler.schema_version,
+            value.scheduler.coverage_status, True, 1,
+            "; ".join(x.message for x in value.scheduler.diagnostics) or None,
+        ))
+    elif value.correlation is not None:
+        obligations = normalize_scheduler_obligations(value.correlation.obligations)
+        termination = None
+    else:
+        obligations = ()
+        termination = None
+    for item in obligations:
+        if item.target_ref not in candidate_ids:
+            raise ValueError("obligation references unknown catalog candidate")
+    candidate_map = {}
+    for item in candidates:
+        existing = candidate_map.get(item.candidate_id)
+        if existing is not None and existing != item:
+            raise ValueError("conflicting candidate identity")
+        candidate_map[item.candidate_id] = item
+    candidates = tuple(sorted(candidate_map.values(), key=lambda x: x.candidate_id))
+    parameter_map = {}
+    for item in parameters:
+        existing = parameter_map.get(item.parameter_id)
+        if existing is not None and existing != item:
+            raise ValueError("conflicting parameter identity")
+        parameter_map[item.parameter_id] = item
+    parameters = tuple(sorted(parameter_map.values(), key=lambda x: x.parameter_id))
+    evidence_atoms = tuple(evidence[key] for key in sorted(evidence))
+    evidence_ids = set(evidence)
+    candidate_ids = {item.candidate_id for item in candidates}
+    for item in candidates:
+        if not item.evidence_ids:
+            raise ValueError("catalog candidate requires evidence")
+        if any(identity not in evidence_ids for identity in item.evidence_ids):
+            raise ValueError("catalog candidate references unknown evidence")
+    for item in parameters:
+        if item.owner_ref not in candidate_ids:
+            raise ValueError("catalog parameter references unknown owner")
+        if not item.evidence_ids or any(
+            identity not in evidence_ids for identity in item.evidence_ids
+        ):
+            raise ValueError("catalog parameter requires known evidence")
+    coverage = tuple(coverage)
+    incomplete = any(
+        x.required and x.status not in {CoverageStatus.COMPLETED, CoverageStatus.NOT_APPLICABLE}
+        for x in coverage
+    )
+    return DiscoveryCatalog(
+        catalog_id=_catalog_id(
+            value, candidates, parameters, evidence_atoms, coverage,
+            tuple(associations), tuple(obligations), termination,
+        ),
+        firmware_artifact_sha256=value.firmware_artifact_sha256,
+        source_inventory_sha256=value.source_inventory_sha256,
+        coverage_status=(
+            CoverageStatus.PARTIAL if incomplete else CoverageStatus.COMPLETED
+        ),
+        candidates=candidates,
+        parameters=parameters,
+        evidence_atoms=evidence_atoms,
+        coverage=coverage,
+        associations=tuple(sorted(associations, key=lambda x: x.association_id)),
+        open_obligations=tuple(obligations),
+        scheduler_termination=termination,
+    )

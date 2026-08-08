@@ -146,6 +146,8 @@ Script Backend Producer 已覆盖厂商 ASP、PHP、LuCI Lua 与 POSIX Shell CGI
 
 Obligation Scheduler 已将 route/handler 等未决能力变成确定性、预算受控的工作队列：每个义务与 Adapter 组合最多尝试一次，异常可降级，新增义务可去重，并明确区分 `fixed_point` 与 `budget_exhausted`。AC9 discover 回放在不启用高成本分析器时保留全部 14 个开放义务，而不是返回空成功；过程输出见 [M1-07 样例](./docs/firmware-mapping/samples/m1-07-obligation-scheduler-summary.json)。
 
+Discovery Catalog 通过单一 Interface 组装 Frontend、配置、脚本、Native、关联和调度结果，同时验证 EvidenceAtom、参数归属与义务目标。AC9 无 seed 回放现恢复 395 个候选、6 个参数、398 个证据原子和 16 个开放义务；其中新增的固件升级接口被识别为 `POST /cgi-bin/upgrade + multipart_form + upgradeFile`，并与 `bin/httpd` 的完整 endpoint literal 精确关联。过程输出见 [M1-08 样例](./docs/firmware-mapping/samples/m1-08-ac9-discovery-catalog-summary.json)。
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 
@@ -218,8 +220,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend 与 ELF Native Shallow Producer、frontend/native 候选关联义务 |
-| **Next** | 无样例线索调度与固定点终止、Native route/handler 深绑定、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend 与 ELF Native Shallow Producer、frontend/native 候选关联、固定点调度与无 seed Discovery Catalog |
+| **Next** | Discovery Catalog 持久化查询与最小 UI、Native route/handler 深绑定、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

@@ -288,6 +288,22 @@ var pageModel = R.pageModel({});
             {item.namespace for item in result.parameters},
         )
 
+    def test_html_multipart_form_preserves_upload_representation(self):
+        content = b'''<form method="POST" action="/cgi-bin/upgrade" enctype="multipart/form-data">
+<input type="file" name="upgradeFile">
+</form>'''
+        source = SourceArtifactEntry(
+            canonical_path="webroot/simple_upgrade.asp",
+            original_path="webroot/simple_upgrade.asp", kind="file",
+            size=len(content), content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(1, len(result.candidates))
+        self.assertEqual("/cgi-bin/upgrade", result.candidates[0].endpoint)
+        self.assertEqual("multipart_form", result.candidates[0].representation)
+        self.assertEqual(["upgradeFile"], [x.name for x in result.parameters])
+
     def test_invalid_utf8_is_failed_coverage_not_a_false_empty_result(self):
         content = b"var route = \xff;"
         source = SourceArtifactEntry(

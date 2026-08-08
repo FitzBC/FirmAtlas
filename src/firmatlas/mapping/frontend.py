@@ -158,11 +158,18 @@ class _HtmlFormParser(HTMLParser):
                 return
             attributes = {name.lower(): value for name, value in attrs}
             method = (attributes.get("method") or "GET").upper()
+            enctype = (attributes.get("enctype") or "").lower()
+            representation = (
+                "multipart_form"
+                if enctype == "multipart/form-data"
+                else "form_urlencoded"
+            )
             self._current = {
                 "endpoint": action[0],
                 "start": action[1],
                 "end": action[2],
                 "method": method,
+                "representation": representation,
                 "parameters": [],
             }
             return
@@ -202,7 +209,7 @@ class _HtmlFormParser(HTMLParser):
                 self._current["end"],
                 role,
                 method,
-                "form_urlencoded",
+                self._current["representation"],
                 tuple(self._current["parameters"]),
             )
         )
@@ -829,7 +836,7 @@ def _request_literals(content: bytes, source_path: str) -> tuple:
                 parameters,
             )
         )
-    if source_path.lower().endswith((".htm", ".html", ".xhtml")):
+    if source_path.lower().endswith((".htm", ".html", ".xhtml", ".asp", ".php")):
         for (
             endpoint,
             start_byte,

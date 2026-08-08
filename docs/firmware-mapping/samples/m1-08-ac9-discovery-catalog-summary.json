@@ -1,0 +1,54 @@
+{
+  "schema_version": "firmatlas.mapping.discovery-catalog-sample/v1alpha1",
+  "catalog_schema_version": "firmatlas.mapping.discovery-catalog/v1alpha1",
+  "observation_date": "2026-08-09",
+  "sample_kind": "real_firmware_no_seed_end_to_end",
+  "firmware": "Tenda AC9",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "source_inventory_sha256": "f425a98b9b7f4143a3b6b979631abe0715e3fc03773a656e1ee4455716ca8b4d",
+  "catalog_id": "discovery-catalog:7c1f91fc18537969d474974e5ec81566ccae4f69bb228c2f865029d46a0d658a",
+  "seed_input_count": 0,
+  "inputs": {
+    "frontend_sources": 3,
+    "web_configuration_sources": 2,
+    "script_backend_sources": 1,
+    "native_sources": 2,
+    "correlation_results": 1,
+    "scheduler_results": 1
+  },
+  "result": {
+    "coverage_status": "completed",
+    "candidate_count": 395,
+    "parameter_count": 6,
+    "evidence_atom_count": 398,
+    "association_count": 8,
+    "open_obligation_count": 16,
+    "scheduler_termination": "fixed_point",
+    "candidate_kinds": {
+      "request_interface": 8,
+      "web_configuration": 8,
+      "native_hint": 371,
+      "candidate_association": 8
+    }
+  },
+  "selected_architecture": {
+    "listener": "8180",
+    "fastcgi_namespace": "/cgi-bin/luci/",
+    "fastcgi_upstream": "127.0.0.1:8188",
+    "fastcgi_program": "/usr/bin/app_data_center",
+    "upgrade_request": {
+      "endpoint": "/cgi-bin/upgrade",
+      "method": "POST",
+      "representation": "multipart_form",
+      "parameter": "upgradeFile",
+      "native_match": "exact_endpoint",
+      "native_source": "bin/httpd"
+    }
+  },
+  "interpretation": [
+    "The catalog is generated from firmware artifacts only; no request seed, PoC, CVE text, or traffic is required.",
+    "Configuration, request, Native hint, and association identities remain distinct even when their values overlap.",
+    "Completed discover coverage does not resolve the 16 route-registration and handler-binding obligations.",
+    "The ASP script backend batch completed with zero supported backend facts; its HTML multipart form is still recovered by the Frontend Producer."
+  ]
+}

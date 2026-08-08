@@ -36,7 +36,7 @@ discover_frontend_requests(source_entry, source_bytes, policy)
 
 ## 3. TDD 记录
 
-13 条公开 Interface 测试覆盖：
+14 条公开 Interface 测试覆盖：
 
 1. `R.pageModel` read/write candidate；
 2. 注释与字符串误报隔离；
@@ -51,6 +51,7 @@ discover_frontend_requests(source_entry, source_bytes, policy)
 11. 重复调用合并候选并保留多处证据；
 12. `R.moduleModel.getSubmitData` 与唯一 setUrl 绑定；
 13. 文档样例持续区分真实源与合成 fixture。
+14. `.asp/.php` 模板中的 HTML multipart Form 保留上传表示与 file 参数。
 
 红阶段和真实回放实际发现：
 
@@ -87,11 +88,15 @@ discover_frontend_requests(source_entry, source_bytes, policy)
 
 这两项是合成合同 fixture，只证明身份模型与 Producer 行为，不计入真实固件召回率。D-Link/Totolink Firmware Artifact 尚未摄取，不能提前写成真实样本验证。
 
+### 4.3 M1-08 样本驱动增量
+
+AC9 `webroot_ro/simple_upgrade.asp` 证明 HTML Form 还存在于服务器模板中。Producer 现恢复 `POST /cgi-bin/upgrade`、`multipart_form` 和 `upgradeFile`，并在 M1-08 与 `bin/httpd` 的完整 endpoint literal 形成 candidate association。该修正不把 ASP 模板调用当脚本后端实现。
+
 ## 5. 回归与发布证据
 
 | 门禁 | 结果 |
 | --- | --- |
-| Frontend Producer contract | 13/13 通过 |
+| Frontend Producer contract | 14/14 通过 |
 | Mapping extraction/inventory/evidence/frontend/snapshot | 61/61 通过 |
 | 后端全量 | `make test`，121/121 通过 |
 | 前端测试 | Vitest 16/16 通过 |
