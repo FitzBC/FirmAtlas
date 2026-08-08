@@ -1,0 +1,39 @@
+{
+  "schema_version": "firmatlas.mapping.extraction/v1alpha1",
+  "sample_kind": "deterministic_fake_worker",
+  "parent_artifact_sha256": "ec4d577ee88cfc72af6589309da85d67feaf32ffabc78e5e705d77c2a5712036",
+  "status": "success",
+  "tool": {
+    "name": "binwalk",
+    "version": "3.1.0"
+  },
+  "execution": {
+    "argv": [
+      "binwalk",
+      "-Me",
+      "/input/firmware.bin"
+    ],
+    "enforced_limits": [
+      "no_network",
+      "output_bytes",
+      "output_files",
+      "wall_time"
+    ],
+    "execution_fingerprint": "6ae0b2535fa3c5a50054c98b96f44c9445f2f1435a489672cac0873b724b751d"
+  },
+  "derived_inventory": {
+    "inventory_sha256": "505f845d6b22579f912de82193d97edf169b0bac2cb5cd8afdec255eddb4094f",
+    "coverage_status": "completed",
+    "entries": [
+      {
+        "canonical_path": "extractions/squashfs-root/www/index.js",
+        "sha256": "415ecfc6c9bab4eb66c79c6d5796ec247859aca5fe672913f8a9f5d506028edf"
+      }
+    ]
+  },
+  "limitations": [
+    "The worker is deterministic test double, not a local Binwalk process.",
+    "No raw firmware image was extracted in this replay.",
+    "Production container isolation and pinned external extractors remain M1-02B."
+  ]
+}

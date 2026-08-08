@@ -130,6 +130,8 @@ make mapping-inventory ROOT=/path/to/extracted-root
 
 输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。当前内置归档遍历以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装解包尚未接入，输入必须是已解包目录。
 
+原始固件解包将使用 Binwalk，但 Binwalk 只允许在隔离 extraction worker 中运行。当前仓库已经冻结父制品摘要、工具身份、`binwalk -Me` 命令证据、资源限制证明、派生 Inventory 和失败诊断的版本化合同；生产 worker 与真实原始镜像回放尚未完成，不能把该合同理解为本机已经提供 Binwalk 解包命令。
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 

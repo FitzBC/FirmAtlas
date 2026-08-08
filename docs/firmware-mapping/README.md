@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-02 已验证；下一项为 M1-02A Binwalk 隔离解包 Adapter
+> 当前状态：M1-02A worker 合同已验证；下一项为 M1-02B 生产 Binwalk worker 与原始镜像回放
 > 最近更新：2026-08-08
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -54,6 +54,7 @@
 | [M0 设计基线记录](./progress/2026-08-08-m0-design-baseline.md) | 本轮研究、证据和决策记录 | 此记录只追加勘误，不重写历史 |
 | [M1-01 Snapshot 合同记录](./progress/2026-08-08-m1-01-snapshot-contract.md) | 合同、TDD 证据、AC9 重放和未决义务 | 回归、修订或发布状态变化时 |
 | [M1-02 源制品清单记录](./progress/2026-08-08-m1-02-source-inventory.md) | 安全不变量、TDD、完整 AC9 rootfs 回放 | 回归、样本或发布状态变化时 |
+| [M1-02A Binwalk worker 合同记录](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) | 隔离边界、派生制品谱系与失败语义 | worker 合同或生产 Adapter 变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -84,7 +85,7 @@ flowchart LR
 | 里程碑 | 状态 | 核心产物 | 出口门 | 证据记录 |
 | --- | --- | --- | --- | --- |
 | M0 设计基线 | 已验证 | 理论、领域、架构、集成、评测和协作设计 | 文档互链、领域一致性、本地回归、GitHub 发布；本次不部署 | [M0 记录](./progress/2026-08-08-m0-design-baseline.md) |
-| M1 冷启动发现 | 进行中 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | [M1-01](./progress/2026-08-08-m1-01-snapshot-contract.md) / [M1-02](./progress/2026-08-08-m1-02-source-inventory.md) |
+| M1 冷启动发现 | 进行中 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | [M1-01](./progress/2026-08-08-m1-01-snapshot-contract.md) / [M1-02](./progress/2026-08-08-m1-02-source-inventory.md) / [M1-02A](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) |
 | M2 身份与参数 | 未开始 | Interface/Operation/Parameter 身份及别名、约束 | 共享端点正确拆分，参数有来源与 namespace | 待创建 |
 | M3 Native 绑定 | 未开始 | route/handler/getter/call-site 定向绑定 | Native 失败不阻断部分快照，义务清晰 | 待创建 |
 | M4 通信架构恢复 | 未开始 | 执行主体、接口、解析、状态和响应关系图 | 标注集上的关键节点和路径达到门限 | 待创建 |
@@ -108,7 +109,8 @@ M1 工作项：
 | --- | --- | --- | --- | --- |
 | M1-01 | 建立版本化 `FirmwareMappingSnapshot` 最小合同 | 已验证 | M0 | schema contract tests + Tenda AC9 replay |
 | M1-02 | 建立安全、可复现的制品文件清单 | 已验证 | M1-01 | archive/symlink/budget fixtures + AC9 full-root replay |
-| M1-02A | 建立隔离 Binwalk 解包 Adapter 与派生制品谱系 | 未开始 | M1-02 | fake worker contract + available-environment raw image replay |
+| M1-02A | 冻结隔离 Binwalk worker 合同与派生制品谱系 | 已验证 | M1-02 | 8 fake worker contract tests + versioned result fixture |
+| M1-02B | 实现生产 Binwalk worker 并回放原始固件镜像 | 未开始 | M1-02A | container isolation + pinned toolchain + raw image replay |
 | M1-03 | 建立不可变 `EvidenceAtom` 与来源定位 | 未开始 | M1-01 | replay and provenance tests |
 | M1-04 | HTML/Form/JS 请求构造证据生产器 | 未开始 | M1-02/03 | annotated frontend fixtures |
 | M1-05 | Web 配置、docroot、rewrite、启动项证据生产器 | 未开始 | M1-02/03 | config fixtures |
@@ -117,7 +119,7 @@ M1 工作项：
 | M1-08 | 发布候选目录、覆盖账本和未决义务 | 未开始 | M1-07 | no-seed end-to-end fixture |
 | M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 未开始 | M1-08 | API/browser regression |
 
-**下一项建议**：M1-02A。用 Binwalk 作为首个生产解包 Adapter，但必须由隔离 worker 执行，不将外部进程调用混入 Inventory Implementation。本机当前没有 `binwalk` 可执行文件，因此先以 fake worker 冻结合同，真实原始镜像回放必须等可用环境。
+**下一项建议**：M1-02B。以已冻结的 `FirmwareExtractor.extract(request) -> ExtractionResult` 合同实现生产 Binwalk worker。必须固定 Binwalk 与外部 extractor 版本、禁用网络并限制时长、输出文件数和输出字节；本机当前没有 `binwalk` 可执行文件，真实原始镜像回放仍未验证。
 
 ## 7. 跨会话无缝工作协议
 

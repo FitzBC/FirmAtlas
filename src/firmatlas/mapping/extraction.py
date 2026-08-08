@@ -123,6 +123,13 @@ class ExtractionResult:
         }
 
 
+class FirmwareExtractor(Protocol):
+    """Port implemented by firmware extraction orchestrators."""
+
+    def extract(self, request: ExtractionRequest) -> ExtractionResult:
+        ...
+
+
 def _sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
