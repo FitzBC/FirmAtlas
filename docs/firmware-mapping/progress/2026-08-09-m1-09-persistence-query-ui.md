@@ -57,7 +57,7 @@ CLI 提供 `mapping publish-catalog` 和 `mapping list-catalogs`。Console 新�
 | `py_compile` / `git diff --check` | 通过 |
 | `satc_cloud` | 不适用；通信测绘工作按用户明确范围暂不执行 SSH 部署 |
 
-Git revision 在提交封版后记入本文件的后续 closure commit；本记录中的验证结果对应同一工作树内容。上述部署例外不扩大到 FirmAtlas 的其他功能。
+已验证实现 revision：`af13698a5f1951744f9861139b1591446619a126`。本 closure 只回填 revision，不修改已验证代码。上述部署例外不扩大到 FirmAtlas 的其他功能。
 
 ## 6. 下一步
 
