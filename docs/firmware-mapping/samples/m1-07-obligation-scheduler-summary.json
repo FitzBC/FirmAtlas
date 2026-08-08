@@ -1,0 +1,35 @@
+{
+  "schema_version": "firmatlas.mapping.scheduler-sample/v1alpha1",
+  "scheduler_schema_version": "firmatlas.mapping.scheduler-result/v1alpha1",
+  "observation_date": "2026-08-09",
+  "sample_kind": "real_ac9_correlation_obligation_replay",
+  "firmware": "Tenda AC9",
+  "input": {
+    "source_milestone": "M1-06C",
+    "candidate_associations": 7,
+    "obligations": 14,
+    "capability_counts": {
+      "registers_route": 7,
+      "binds_handler": 7
+    },
+    "candidate_analyzers": ["native-deep", "runtime"]
+  },
+  "policy": {
+    "name": "discover",
+    "registered_analyzers": [],
+    "reason": "High-cost Native Deep and runtime adapters are intentionally unavailable in the M1 discover pass."
+  },
+  "result": {
+    "termination": "fixed_point",
+    "coverage_status": "completed",
+    "attempts": 0,
+    "resolved_obligations": 0,
+    "open_obligations": 14,
+    "diagnostic": "no_eligible_analyzer"
+  },
+  "interpretation": [
+    "Completed means the scheduler exhausted all eligible work under this policy; it does not mean route bindings are resolved.",
+    "All 14 obligations remain explicit inputs for a later Native Deep or authorized runtime pass.",
+    "No model, decompiler, firmware code, or Binwalk process is executed by the scheduler."
+  ]
+}

@@ -144,6 +144,8 @@ Frontend/Native Correlation Module 通过大小写敏感的完整 endpoint 或�
 
 Script Backend Producer 已覆盖厂商 ASP、PHP、LuCI Lua 与 POSIX Shell CGI 的确定性语法，可区分请求参数、operation selector、显式 route、CGI program、配置状态访问与模板状态读取。D-Link DSL 真实样本已恢复 `admPass1 → Account_Entry0.web_passwd/console_passwd → commit`，同时保持空 `hnap.asp` 为零事实、Shell CGI 为“程序但非已注册路由”；过程输出见 [M1-06B 样例](./docs/firmware-mapping/samples/m1-06b-script-backend-summary.json)。
 
+Obligation Scheduler 已将 route/handler 等未决能力变成确定性、预算受控的工作队列：每个义务与 Adapter 组合最多尝试一次，异常可降级，新增义务可去重，并明确区分 `fixed_point` 与 `budget_exhausted`。AC9 discover 回放在不启用高成本分析器时保留全部 14 个开放义务，而不是返回空成功；过程输出见 [M1-07 样例](./docs/firmware-mapping/samples/m1-07-obligation-scheduler-summary.json)。
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 

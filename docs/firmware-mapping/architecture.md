@@ -130,6 +130,8 @@ priority = expected_information_gain
 
 该表达用于调度研究，不作为实体真实性分数。
 
+M1-07 Scheduler 的公开 Interface 是 `run_obligation_scheduler(initial_obligations, analyzers, policy)`。它以 `(obligation_id, analyzer_name)` 为幂等尝试身份，按 priority/identity 稳定选择，隔离 Adapter 异常和冲突输出，并在没有可执行组合时发布 `fixed_point`。开放义务不妨碍“调度 coverage completed”；它们必须保留在结果中。step 或 obligation 预算耗尽则是 `partial + budget_exhausted`。Scheduler 不读取源码，也不直接运行 Native 工具、模型、固件或 Binwalk。
+
 ### S4 定向绑定
 
 根据前序锚点执行 route/handler/xref 分析，避免对所有二进制无差别深反编译。文本侧或 Native 侧单独成功时允许发布部分结果。
