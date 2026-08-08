@@ -1,7 +1,7 @@
 # M1-02：安全、确定性源制品清单
 
 > 工作项：M1-02
-> 状态：进行中
+> 状态：已验证
 > 日期：2026-08-08
 > 发布范围：本地回归、样本回放、Git 提交与推送；按用户当前指示不部署 SSH
 
@@ -95,7 +95,7 @@ AC9 三个关键制品摘要与 M1-01 人工重放一致。带 `.tar` 后缀但�
 | 前端测试 / 生产构建 | Vitest 16/16 通过；TypeScript 检查和 Vite build 通过 |
 | 本地 API / 前端烟雾 | 临时 SQLite 下 health 200、FirmAtlas HTML 200、overview 200 |
 | Tenda AC9 完整 rootfs replay | 1,038/1,038，digest 与关键条目已记录 |
-| Git revision / push | 待回填 |
+| Git revision / push | 实现修订 `c8c7fc8`；与本关闭记录一并推送 `main` |
 | SSH deployment | 不适用（用户当前范围） |
 
 ## 8. 下一动作

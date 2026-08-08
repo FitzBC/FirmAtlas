@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-02 安全源制品清单正在回归与发布
+> 当前状态：M1-02 已验证；下一项为 M1-02A Binwalk 隔离解包 Adapter
 > 最近更新：2026-08-08
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -107,7 +107,7 @@ M1 工作项：
 | ID | 工作项 | 状态 | 依赖 | 验收证据 |
 | --- | --- | --- | --- | --- |
 | M1-01 | 建立版本化 `FirmwareMappingSnapshot` 最小合同 | 已验证 | M0 | schema contract tests + Tenda AC9 replay |
-| M1-02 | 建立安全、可复现的制品文件清单 | 进行中 | M1-01 | archive/symlink/budget fixtures + AC9 full-root replay |
+| M1-02 | 建立安全、可复现的制品文件清单 | 已验证 | M1-01 | archive/symlink/budget fixtures + AC9 full-root replay |
 | M1-02A | 建立隔离 Binwalk 解包 Adapter 与派生制品谱系 | 未开始 | M1-02 | fake worker contract + available-environment raw image replay |
 | M1-03 | 建立不可变 `EvidenceAtom` 与来源定位 | 未开始 | M1-01 | replay and provenance tests |
 | M1-04 | HTML/Form/JS 请求构造证据生产器 | 未开始 | M1-02/03 | annotated frontend fixtures |
