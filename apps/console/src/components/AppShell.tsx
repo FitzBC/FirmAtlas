@@ -5,6 +5,7 @@ import {
   FileSearch,
   Gauge,
   RadioTower,
+  Waypoints,
   Settings2,
   ShieldCheck,
 } from 'lucide-react'
@@ -13,8 +14,8 @@ import type { ReactNode } from 'react'
 interface AppShellProps {
   children: ReactNode
   onOpenSettings: () => void
-  activeView: 'intelligence' | 'firmware' | 'semantic'
-  onNavigate: (view: 'intelligence' | 'firmware' | 'semantic') => void
+  activeView: 'intelligence' | 'firmware' | 'semantic' | 'mapping'
+  onNavigate: (view: 'intelligence' | 'firmware' | 'semantic' | 'mapping') => void
 }
 
 const navigation = [
@@ -22,6 +23,7 @@ const navigation = [
   { label: '漏洞情报', icon: RadioTower, view: 'intelligence' as const },
   { label: '固件资产', icon: Boxes, view: 'firmware' as const },
   { label: '语义洞察', icon: FileSearch, view: 'semantic' as const },
+  { label: '通信测绘', icon: Waypoints, view: 'mapping' as const },
 ]
 
 export function AppShell({ children, onOpenSettings, activeView, onNavigate }: AppShellProps) {

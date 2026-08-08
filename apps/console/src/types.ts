@@ -257,6 +257,60 @@ export interface FirmwareCandidatePage {
   has_next: boolean
 }
 
+export interface MappingCatalogSummary {
+  catalog_id: string
+  schema_version: string
+  firmware_artifact_sha256: string
+  source_inventory_sha256: string
+  coverage_status: string
+  scheduler_termination: string | null
+  published_at: string
+  candidate_count: number
+  parameter_count: number
+  association_count: number
+  open_obligation_count: number
+}
+
+export interface MappingCandidate {
+  candidate_id: string
+  candidate_kind: string
+  canonical_identity: string
+  claim_status: string
+  source_path: string
+  source_construct: string
+  evidence_ids: string[]
+  attributes: Array<[string, string]>
+  parameter_count: number
+  association_count: number
+  open_obligation_count: number
+}
+
+export interface MappingCandidateDetail {
+  catalog: { catalog_id: string; coverage_status: string; scheduler_termination: string | null }
+  candidate: MappingCandidate
+  parameters: Array<{
+    parameter_id: string; name: string; namespace: string; literal_value: string | null
+    selector_values: string[]; is_operation_selector: boolean; source_construct: string
+  }>
+  associations: Array<{
+    association_id: string; frontend_candidate_id: string; native_hint_id: string
+    match_basis: string; evidence_ids: string[]
+  }>
+  open_obligations: Array<{ obligation_id: string; target_ref: string; status: string; reason: string }>
+  evidence_atoms: Array<{
+    evidence_id: string; predicate: string; object_value: string; capability: string
+    source_span: { artifact_path: string; locator: string }
+  }>
+  coverage: Array<{ scope: string; producer_kind: string; producer: string; status: string }>
+}
+
+export interface MappingCandidatePage {
+  items: MappingCandidate[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export interface SemanticInterfaceObservation {
   value: string
   kind: string

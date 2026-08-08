@@ -148,6 +148,18 @@ Obligation Scheduler 已将 route/handler 等未决能力变成确定性、预�
 
 Discovery Catalog 通过单一 Interface 组装 Frontend、配置、脚本、Native、关联和调度结果，同时验证 EvidenceAtom、参数归属与义务目标。AC9 无 seed 回放现恢复 395 个候选、6 个参数、398 个证据原子和 16 个开放义务；其中新增的固件升级接口被识别为 `POST /cgi-bin/upgrade + multipart_form + upgradeFile`，并与 `bin/httpd` 的完整 endpoint literal 精确关联。过程输出见 [M1-08 样例](./docs/firmware-mapping/samples/m1-08-ac9-discovery-catalog-summary.json)。
 
+Discovery Catalog 现在可不可变地发布到 SQLite，并通过“通信测绘”工作区按目录版本、候选类型、接口 token 和来源构造查询。页面采用目录 → 候选 → 证据详情的稳定三级布局，详情同步展示参数、跨层关联、EvidenceAtom 定位、覆盖账本和开放义务；浏览器只读取服务端投影，不重新推断事实。
+
+```bash
+# 发布 Producer/Scheduler 生成的完整目录 JSON；同一内容可安全重跑
+PYTHONPATH=src python3 -m firmatlas mapping publish-catalog \
+  --database var/firmatlas.db path/to/discovery-catalog.json
+
+# 查看已发布目录及候选/参数/关联/未决义务计数
+PYTHONPATH=src python3 -m firmatlas mapping list-catalogs \
+  --database var/firmatlas.db
+```
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 
@@ -216,12 +228,26 @@ make firmware-refresh
 
 </details>
 
+<details>
+<summary><b>通信测绘目录查询 API</b></summary>
+
+| API | 用途 |
+| --- | --- |
+| `GET /api/mappings/catalogs` | 查询不可变目录版本及候选、参数、关联和未决义务计数 |
+| `GET /api/mappings/catalogs/{catalog_id}` | 读取完整版本化 Discovery Catalog 文档 |
+| `GET /api/mappings/catalogs/{catalog_id}/candidates` | 按 `q`、`kind` 和分页参数查询候选投影 |
+| `GET /api/mappings/catalogs/{catalog_id}/candidates/{candidate_id}` | 聚合参数、EvidenceAtom、关联、覆盖与开放义务 |
+
+`q` 会规范化路径分隔符和 CamelCase token，因此 `online dev` 能命中 `/goform/SetOnlineDevName`。目录发布是内容寻址且幂等的；同一 `catalog_id` 对应不同内容会被拒绝。
+
+</details>
+
 ## 当前状态与路线图
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend 与 ELF Native Shallow Producer、frontend/native 候选关联、固定点调度与无 seed Discovery Catalog |
-| **Next** | Discovery Catalog 持久化查询与最小 UI、Native route/handler 深绑定、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend 与 ELF Native Shallow Producer、frontend/native 候选关联、固定点调度、无 seed Discovery Catalog、SQLite 不可变发布/查询与三级通信测绘 UI |
+| **Next** | Native route/handler 深绑定、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

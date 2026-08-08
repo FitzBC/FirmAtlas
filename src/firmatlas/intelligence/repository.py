@@ -13,6 +13,8 @@ import threading
 from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
 from urllib.parse import urlsplit
 
+from firmatlas.mapping.repository import DiscoveryCatalogRepository
+
 from .models import RelevanceDecision, RelevancePolicy, VulnerabilityRecord
 from .semantic import (
     INTERFACE_SUBTYPE_VERSION,
@@ -55,10 +57,27 @@ class IntelligenceRepository:
         self._connection.execute("PRAGMA temp_store = MEMORY")
         self._connection.execute("PRAGMA cache_size = -131072")
         self._lock = threading.RLock()
+        self._mapping_catalogs: Optional[DiscoveryCatalogRepository] = None
         self.migrate()
+
+    @property
+    def database(self) -> str:
+        """Database location for read-model adapters sharing this application store."""
+        return self._database
+
+    @property
+    def mapping_catalogs(self) -> DiscoveryCatalogRepository:
+        """Lazily expose the mapping read model without coupling its schema here."""
+        with self._lock:
+            if self._mapping_catalogs is None:
+                self._mapping_catalogs = DiscoveryCatalogRepository(self._database)
+            return self._mapping_catalogs
 
     def close(self) -> None:
         with self._lock:
+            if self._mapping_catalogs is not None:
+                self._mapping_catalogs.close()
+                self._mapping_catalogs = None
             self._connection.close()
 
     @contextmanager

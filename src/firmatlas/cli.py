@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 import logging
+from pathlib import Path
 from typing import Optional, Sequence
 
 from .domain import (
@@ -116,6 +117,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="derive explainable sample links from affected product version claims",
     )
     _database_argument(link_parser)
+    mapping = subparsers.add_parser(
+        "mapping", help="publish and inspect evidence-backed discovery catalogs"
+    )
+    mapping_subparsers = mapping.add_subparsers(
+        dest="mapping_command", required=True
+    )
+    publish_parser = mapping_subparsers.add_parser(
+        "publish-catalog", help="publish a versioned discovery catalog JSON document"
+    )
+    _database_argument(publish_parser)
+    publish_parser.add_argument("document", help="path to a discovery catalog JSON file")
+    list_parser = mapping_subparsers.add_parser(
+        "list-catalogs", help="list published discovery catalog summaries"
+    )
+    _database_argument(list_parser)
     args = parser.parse_args(argv)
 
     if args.command == "demo-report":
@@ -184,6 +200,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 result = FirmwareVersionLinker(repository).rebuild()
                 print(json.dumps(result, ensure_ascii=False, indent=2))
                 return 0
+        finally:
+            repository.close()
+    if args.command == "mapping":
+        from .mapping.repository import DiscoveryCatalogRepository
+
+        repository = DiscoveryCatalogRepository(args.database)
+        try:
+            if args.mapping_command == "publish-catalog":
+                document = json.loads(Path(args.document).read_text(encoding="utf-8"))
+                result = repository.publish_dict(document)
+            else:
+                result = repository.list_catalogs()
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
         finally:
             repository.close()
     return 2

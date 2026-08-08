@@ -11,6 +11,7 @@ import { VulnerabilityFeed } from './components/VulnerabilityFeed'
 import { SemanticAnalysisWorkspace } from './components/SemanticAnalysisWorkspace'
 import { SemanticModelDrawer } from './components/SemanticModelDrawer'
 import { FirmwareCandidateDrawer, FirmwareCatalogWorkspace } from './components/FirmwareCatalogWorkspace'
+import { MappingCatalogWorkspace } from './components/MappingCatalogWorkspace'
 import { useIntelligence } from './hooks/useIntelligence'
 import { formatRelativeTime } from './lib/format'
 import type { FirmwareCandidateDetail, IntelligenceFilters, Vulnerability } from './types'
@@ -34,7 +35,7 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [syncStarting, setSyncStarting] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
-  const [activeView, setActiveView] = useState<'intelligence' | 'firmware' | 'semantic'>('intelligence')
+  const [activeView, setActiveView] = useState<'intelligence' | 'firmware' | 'semantic' | 'mapping'>('intelligence')
   const [firmwareQuery, setFirmwareQuery] = useState('')
   const [modelSettingsOpen, setModelSettingsOpen] = useState(false)
   const [semanticRefreshKey, setSemanticRefreshKey] = useState(0)
@@ -109,7 +110,7 @@ export function App() {
     setActiveView('firmware')
   }
 
-  const navigate = (view: 'intelligence' | 'firmware' | 'semantic') => {
+  const navigate = (view: 'intelligence' | 'firmware' | 'semantic' | 'mapping') => {
     setInvestigation([])
     setActiveView(view)
   }
@@ -122,7 +123,9 @@ export function App() {
       activeView={activeView}
       onNavigate={navigate}
     >
-      {activeView === 'semantic' ? (
+      {activeView === 'mapping' ? (
+        <MappingCatalogWorkspace />
+      ) : activeView === 'semantic' ? (
         <SemanticAnalysisWorkspace
           key={semanticRefreshKey}
           onConfigureModel={() => setModelSettingsOpen(true)}

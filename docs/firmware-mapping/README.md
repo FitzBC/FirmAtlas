@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-08 无 seed 候选目录已验证；下一项为 M1-09 查询与最小 UI 接入
+> 当前状态：M1-09 持久化查询与最小 UI 已验证；下一项为 M1-10 Native route/handler 深绑定 Adapter
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -63,6 +63,7 @@
 | [M1-06C Frontend/Native 关联记录](./progress/2026-08-09-m1-06c-frontend-native-correlation.md) | 精确候选关联、负面对照与可调度深分析义务 | 关联规则、身份或义务合同变化时 |
 | [M1-07 义务调度记录](./progress/2026-08-09-m1-07-obligation-scheduler.md) | 稳定队列、Adapter 隔离、预算和固定点终止 | 调度策略、义务合同或终止语义变化时 |
 | [M1-08 无 seed 候选目录记录](./progress/2026-08-09-m1-08-discovery-catalog.md) | 多 Producer 投影、覆盖账本、参数、关联、固定点与 AC9 端到端输出 | 目录 schema、投影或发布不变量变化时 |
+| [M1-09 持久化查询与 UI 记录](./progress/2026-08-09-m1-09-persistence-query-ui.md) | SQLite 不可变发布、HTTP 查询、CLI 和目录三级工作区 | 查询投影、发布冲突或 UI 下钻语义变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -127,7 +128,8 @@ M1 工作项：
 | M1-06C | Frontend/Native 候选关联与深分析义务 | 已验证 | M1-04/06A | 11 contract tests + AC9 7/7 correlation + full regression |
 | M1-07 | 线索调度与固定点终止 | 已验证 | M1-04/05/06A/06B/06C | 13 contract tests + AC9 14-open-obligation fixed point + full regression |
 | M1-08 | 发布候选目录、覆盖账本和未决义务 | 已验证 | M1-07 | 11 contract tests + AC9 395-candidate no-seed replay + full regression |
-| M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 未开始 | M1-08 | API/browser regression |
+| M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 已验证 | M1-08 | repository/API tests + React test + browser regression |
+| M1-10 | Native route/handler 深绑定 Adapter | 未开始 | M1-09 | representative binary + obligation closure regression |
 
 **下一项建议**：进入 M1-09，为目录、参数、覆盖和开放义务提供持久化查询与最小 UI 纵向接入。Native Deep Adapter 的 anchor/xref 请求继续以 M1-06C obligation 为输入。M1-02B 可使用 Binwalk，但必须在生产隔离 worker 和固定工具链中执行，不能进入主分析进程。
 

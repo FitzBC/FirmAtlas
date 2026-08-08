@@ -1,4 +1,5 @@
 import json
+import hashlib
 from pathlib import Path
 import tempfile
 import threading
@@ -12,6 +13,14 @@ from firmatlas.intelligence.repository import IntelligenceRepository
 from firmatlas.intelligence.sample_data import demo_records
 from firmatlas.intelligence.service import IntelligenceService
 from http.server import ThreadingHTTPServer
+from firmatlas.mapping import (
+    DiscoveryCatalogInput,
+    DiscoveryProducerBatch,
+    SourceArtifactEntry,
+    assemble_discovery_catalog,
+    discover_frontend_requests,
+)
+from firmatlas.mapping.repository import DiscoveryCatalogRepository
 
 
 class IntelligenceApiTests(unittest.TestCase):
@@ -22,7 +31,11 @@ class IntelligenceApiTests(unittest.TestCase):
         for record in demo_records()[:2]:
             self.repository.upsert(record, classifier.classify(record, policy))
         service = IntelligenceService(self.repository)
-        self.server = ThreadingHTTPServer(("127.0.0.1", 0), create_handler(service))
+        self.mapping_repository = DiscoveryCatalogRepository(":memory:")
+        self.server = ThreadingHTTPServer(
+            ("127.0.0.1", 0),
+            create_handler(service, mapping_repository=self.mapping_repository),
+        )
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
 
@@ -30,6 +43,7 @@ class IntelligenceApiTests(unittest.TestCase):
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=2)
+        self.mapping_repository.close()
         self.repository.close()
 
     def get(self, path):
@@ -74,6 +88,41 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual(200, vendor_status)
         self.assertEqual(1, vendor_feed["total"])
         self.assertEqual("Hikvision", vendor_feed["items"][0]["vendor"])
+
+    def test_mapping_catalog_routes_expose_search_and_evidence_detail(self) -> None:
+        content = b'''var submitStr = "mac=" + mac + "&devName=" + name;
+        $.post("/goform/SetOnlineDevName", submitStr, callback);'''
+        source = SourceArtifactEntry(
+            canonical_path="webroot/js/online.js", original_path="webroot/js/online.js",
+            kind="file", size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+        frontend = discover_frontend_requests(source, content)
+        catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
+            "1" * 64, "2" * 64,
+            (DiscoveryProducerBatch.frontend((frontend,), "webroot/**/*.js"),),
+        ))
+        self.mapping_repository.publish(catalog)
+
+        list_status, catalogs = self.get("/api/mappings/catalogs")
+        search_status, candidates = self.get(
+            "/api/mappings/catalogs/{}/candidates?q=online%20dev&kind=request_interface".format(
+                catalog.catalog_id
+            )
+        )
+        candidate_id = candidates["items"][0]["candidate_id"]
+        detail_status, detail = self.get(
+            "/api/mappings/catalogs/{}/candidates/{}".format(
+                catalog.catalog_id, candidate_id
+            )
+        )
+
+        self.assertEqual(200, list_status)
+        self.assertEqual(1, catalogs["total"])
+        self.assertEqual(200, search_status)
+        self.assertEqual("/goform/SetOnlineDevName", candidates["items"][0]["canonical_identity"])
+        self.assertEqual(200, detail_status)
+        self.assertEqual({"mac", "devName"}, {x["name"] for x in detail["parameters"]})
 
     def test_updates_relevance_policy_through_api(self) -> None:
         status, result = self.put(

@@ -134,6 +134,8 @@ M1-07 Scheduler 的公开 Interface 是 `run_obligation_scheduler(initial_obliga
 
 M1-08 Discovery Catalog 的公开 Interface 是 `assemble_discovery_catalog(DiscoveryCatalogInput)`。它把版本化 Producer Batch、Correlation 和 Scheduler 投影到一个稳定目录，验证所有 candidate/parameter/evidence/association/obligation 引用，并发布 coverage ledger 与 `seed_input_count=0`。不同能力的候选不因 canonical value 相同而合并；Producer 专属的 method、representation、namespace、upstream、language、hint kind 和 machine 进入稳定 attributes。required batch 缺失是 failed coverage，不能是空成功。
 
+M1-09 的持久化 Adapter 是 `DiscoveryCatalogRepository`。它将完整目录 JSON 作为不可变、内容摘要校验的发布对象保存，同时生成可重建的候选查询投影；投影不产生新主张。重复发布相同文档是幂等操作，同一 `catalog_id` 若内容摘要不同则拒绝。候选详情从同一目录文档聚合参数、EvidenceAtom、关联、Coverage Ledger 与开放义务，避免 UI 侧再次推断。SQLite 表使用 `mapping_discovery_*` 命名空间，与情报/固件目录共享数据库文件但保持独立 Module 边界。
+
 ### S4 定向绑定
 
 根据前序锚点执行 route/handler/xref 分析，避免对所有二进制无差别深反编译。文本侧或 Native 侧单独成功时允许发布部分结果。

@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any, Dict, Tuple
 from urllib.parse import parse_qs, unquote, urlparse
 
+from firmatlas.mapping.repository import DiscoveryCatalogRepository
+
 from .repository import IntelligenceRepository
 from .service import IntelligenceService, SyncAlreadyRunning
 from .semantic_service import (
@@ -32,8 +34,10 @@ def create_handler(
     service: IntelligenceService,
     semantic_service: SemanticAnalysisService = None,
     static_dir: str = None,
+    mapping_repository: DiscoveryCatalogRepository = None,
 ):
     semantic = semantic_service or SemanticAnalysisService(service.repository)
+    mappings = mapping_repository or service.repository.mapping_catalogs
     static_root = Path(static_dir).resolve() if static_dir else None
 
     class IntelligenceHandler(BaseHTTPRequestHandler):
@@ -110,6 +114,38 @@ def create_handler(
             query = parse_qs(parsed.query)
             if method == "GET" and path == "/api/health":
                 return HTTPStatus.OK, {"status": "ok"}
+            if method == "GET" and path == "/api/mappings/catalogs":
+                page_size = max(1, min(_integer(query, "page_size", 30), 100))
+                page = max(1, _integer(query, "page", 1))
+                return HTTPStatus.OK, mappings.list_catalogs(
+                    limit=page_size, offset=(page - 1) * page_size,
+                )
+            mapping_prefix = "/api/mappings/catalogs/"
+            if method == "GET" and path.startswith(mapping_prefix):
+                remainder = path[len(mapping_prefix):]
+                catalog_segment, separator, nested = remainder.partition("/candidates")
+                catalog_id = unquote(catalog_segment.rstrip("/"))
+                if separator and nested:
+                    candidate = mappings.get_candidate(
+                        catalog_id, unquote(nested.lstrip("/"))
+                    )
+                    if not candidate:
+                        raise ApiError(HTTPStatus.NOT_FOUND, "mapping candidate not found")
+                    return HTTPStatus.OK, candidate
+                if separator:
+                    page_size = max(1, min(_integer(query, "page_size", 30), 100))
+                    page = max(1, _integer(query, "page", 1))
+                    if not mappings.get_catalog(catalog_id):
+                        raise ApiError(HTTPStatus.NOT_FOUND, "mapping catalog not found")
+                    return HTTPStatus.OK, mappings.query_candidates(
+                        catalog_id, query=_one(query, "q"),
+                        candidate_kind=_one(query, "kind"), limit=page_size,
+                        offset=(page - 1) * page_size,
+                    )
+                catalog = mappings.get_catalog(catalog_id)
+                if not catalog:
+                    raise ApiError(HTTPStatus.NOT_FOUND, "mapping catalog not found")
+                return HTTPStatus.OK, catalog
             if method == "GET" and path == "/api/intelligence/overview":
                 return HTTPStatus.OK, service.repository.overview()
             if method == "GET" and path == "/api/intelligence/statistics":

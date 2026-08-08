@@ -21,6 +21,9 @@ import type {
   FirmwareCandidatePage,
   FirmwareCandidateDetail,
   FirmwareCandidate,
+  MappingCatalogSummary,
+  MappingCandidatePage,
+  MappingCandidateDetail,
 } from '../types'
 
 interface Envelope<T> {
@@ -164,5 +167,24 @@ export const intelligenceApi = {
   firmwareSamplesForVulnerability: (identifier: string, signal?: AbortSignal) =>
     request<{ identifier: string; items: FirmwareCandidate[]; total: number }>(
       `/api/firmware/vulnerabilities/${encodeURIComponent(identifier)}/samples`, { signal },
+    ),
+  mappingCatalogs: (signal?: AbortSignal) =>
+    request<{ items: MappingCatalogSummary[]; total: number; limit: number; offset: number }>(
+      '/api/mappings/catalogs?page_size=50', { signal },
+    ),
+  mappingCandidates: (
+    catalogId: string, filters: { query?: string; kind?: string }, signal?: AbortSignal,
+  ) => {
+    const params = new URLSearchParams({ page_size: '100' })
+    if (filters.query) params.set('q', filters.query)
+    if (filters.kind) params.set('kind', filters.kind)
+    return request<MappingCandidatePage>(
+      `/api/mappings/catalogs/${encodeURIComponent(catalogId)}/candidates?${params}`, { signal },
+    )
+  },
+  mappingCandidate: (catalogId: string, candidateId: string, signal?: AbortSignal) =>
+    request<MappingCandidateDetail>(
+      `/api/mappings/catalogs/${encodeURIComponent(catalogId)}/candidates/${encodeURIComponent(candidateId)}`,
+      { signal },
     ),
 }

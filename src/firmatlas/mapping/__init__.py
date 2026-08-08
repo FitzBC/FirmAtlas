@@ -138,6 +138,7 @@ from .extraction import (
     WorkerExecution,
     WorkerExtractionRequest,
 )
+from .repository import CatalogConflictError, DiscoveryCatalogRepository
 
 __all__ = (
     "AnalyzerIdentity",
@@ -256,4 +257,6 @@ __all__ = (
     "ToolIdentity",
     "WorkerExecution",
     "WorkerExtractionRequest",
+    "CatalogConflictError",
+    "DiscoveryCatalogRepository",
 )
