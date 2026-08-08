@@ -67,4 +67,4 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
 - 本地 `GET /api/health` 返回 200，生产前端文档 GET 返回 200；
 - 本轮没有 UI 行为变化，浏览器交互验收不适用。
 
-通信测绘专项按用户明确范围不执行 SSH 部署。Git 实现修订在封版后追加。
+实现修订为 `c1317a0`。通信测绘专项按用户明确范围不执行 SSH 部署。
