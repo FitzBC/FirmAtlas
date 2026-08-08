@@ -138,6 +138,8 @@ Frontend Request Producer 已能从声明范围内的 HTML Form、Tenda `R.pageM
 
 Web Configuration Producer 已能从 nginx 配置和直接 POSIX shell 启动项恢复 listener、docroot、namespace mapping、auth requirement 与 service start finding。AC9 的真实配置回放确认了 `:8180 → /cgi-bin/luci/ → 127.0.0.1:8188 → app_data_center`，并明确保留 `/goform/*` 与主 `dhttpd/httpd` binding 为未知；完整中间输出见 [M1-05 样例](./docs/firmware-mapping/samples/m1-05-web-configuration-summary.json)。
 
+Native Shallow Producer 已能直接解析 ELF32/ELF64 metadata、printable route/server spans 与动态符号表，并为每条 hint 保存可回放二进制 EvidenceAtom。AC9 `httpd` 对 M1-04 的 6 个 action component 全部提供精确字符串佐证，而 `dhttpd` 为 0/6；这只用于选择深分析目标，不按名称猜测 handler binding。对照结果见 [M1-06A 样例](./docs/firmware-mapping/samples/m1-06a-native-shallow-summary.json)。
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 
@@ -210,8 +212,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend 与 nginx/启动项证据 Producer |
-| **Next** | 脚本后端与 Native route/handler 绑定、无样例线索调度、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项与 ELF Native Shallow 证据 Producer |
+| **Next** | frontend/native 候选关联义务、脚本后端与 Native route/handler 绑定、无样例线索调度、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

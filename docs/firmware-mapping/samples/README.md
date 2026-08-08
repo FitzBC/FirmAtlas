@@ -12,6 +12,7 @@
 - [Tenda AC9：M1-03 精确 EvidenceAtom](./tenda-ac9-m1-evidence-atoms.json)：从完整 `static_route.js` 回放出的字节、行列、摘要和稳定证据身份。
 - [M1-04 Frontend Producer 中间输出](./m1-04-frontend-producer-summary.json)：两份 AC9 真实源文件与 HNAP/共享 CGI 合同 fixture 的请求、参数和 selector 对比。
 - [M1-05 Web Configuration Producer 中间输出](./m1-05-web-configuration-summary.json)：AC9 真实 nginx 配置与启动脚本恢复出的 listener、docroot、FastCGI namespace 和服务链。
+- [M1-06A Native Shallow Producer 中间输出](./m1-06a-native-shallow-summary.json)：AC9 `httpd/dhttpd` 的 ELF route-token、symbol 与 server hint 对照及未决 binding。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -62,6 +63,7 @@
 - 本地解包提示：`../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root`；
 - 已核验前端：`static_route.js`、`online_list.js`；
 - 已核验 Native：32-bit ARM stripped `bin/httpd`；
+- 已自动回放 Native shallow：`httpd` 354 hints / 357 evidence，6 个选定 frontend action component 全部精确命中；`dhttpd` 0/6；
 - 已核验 Web 配置链：nginx `:8180`、`/cgi-bin/luci/ → 127.0.0.1:8188`、`spawn-fcgi → app_data_center`；
 - 可观察接口：`SetStaticRouteCfg`、`SetOnlineDevName`；
 - 可观察参数：`list`、`mac`、`devName`。

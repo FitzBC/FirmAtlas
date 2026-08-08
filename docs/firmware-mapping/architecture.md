@@ -161,6 +161,8 @@ M1-04 Frontend Producer 当前声明的能力范围是 `R.pageModel`、`R.module
 
 M1-05 Web Configuration Producer 的公开 Interface 是 `discover_web_configuration(source_entry, source_bytes, policy)`。当前声明支持 nginx 配置与直接 POSIX shell 的 `nginx`/`spawn-fcgi` 启动形式，发布 listener、document root、namespace mapping、auth requirement 和 service start finding。配置事实与 frontend candidate 保持不同身份；只有后续身份解析取得兼容 scope 与独立 binding 证据后才能合并。`completed` 只表示声明格式和构造执行完成，不表示任意 Web server 配置或 shell 控制流均已恢复。
 
+M1-06A Native Shallow Producer 的公开 Interface 是 `discover_native_hints(source_entry, source_bytes, policy)`。Implementation 直接读取 ELF section 与 dynamic symbol table，并从受控 printable spans 发布 endpoint literal、route token、symbol 与 server hint。普通字符串扫描排除 ELF string-table 区域，避免把链接符号重复误判为 route token。该 Producer 只用于候选召回和深分析调度；名字相似或同一制品中的字符串与符号不能产生 `binds_handler` 关系。
+
 ## 6. 模型使用边界
 
 模型适合：

@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-05 Web 配置证据 Producer 已验证；下一项为 M1-06 脚本/Native 后端入口证据
+> 当前状态：M1-06A Native Shallow Producer 已验证；下一项为 frontend/native 候选关联义务合同
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -58,6 +58,7 @@
 | [M1-03 EvidenceAtom 记录](./progress/2026-08-08-m1-03-replayable-evidence.md) | 类型化 Span、稳定身份、回放与 AC9 实证 | 证据合同或 Producer 输入变化时 |
 | [M1-04 Frontend Producer 记录](./progress/2026-08-09-m1-04-frontend-request-producer.md) | 请求形状、参数、selector、覆盖与跨架构 fixture | 前端语法或候选合同变化时 |
 | [M1-05 Web 配置 Producer 记录](./progress/2026-08-09-m1-05-web-configuration-producer.md) | nginx、启动项、监听、namespace、认证与 AC9 实证 | 配置格式、语义或覆盖合同变化时 |
+| [M1-06A Native Shallow 记录](./progress/2026-08-09-m1-06a-native-shallow-producer.md) | ELF string/symbol hint、误报控制与 AC9 httpd/dhttpd 对照 | Native hint 合同、规则或格式变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -118,11 +119,12 @@ M1 工作项：
 | M1-04 | HTML/Form/JS 请求构造证据生产器 | 已验证 | M1-02/03 | 13 producer tests + AC9 full-source replay + HNAP/CGI fixtures |
 | M1-05 | Web 配置、docroot、rewrite、启动项证据生产器 | 已验证 | M1-02/03 | 11 contract tests + AC9 nginx/startup replay + full regression |
 | M1-06 | PHP/ASP/Lua/Shell/CGI 文本后端证据生产器 | 未开始 | M1-02/03 | script backend fixtures |
+| M1-06A | ELF Native Shallow 证据生产器 | 已验证 | M1-02/03/04 | 8 contract tests + AC9 httpd/dhttpd replay + full regression |
 | M1-07 | 线索调度与固定点终止 | 未开始 | M1-04/05/06 | determinism/budget tests |
 | M1-08 | 发布候选目录、覆盖账本和未决义务 | 未开始 | M1-07 | no-seed end-to-end fixture |
 | M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 未开始 | M1-08 | API/browser regression |
 
-**下一项建议**：M1-06。优先从 AC9 `dhttpd/httpd`、脚本与参数 getter 中解释 `/goform/*` 的 route/dispatcher/handler 绑定；没有足够静态证据时发布 Native 深分析义务。M1-02B 使用 Binwalk 的生产隔离 worker 在可用容器运行时出现后继续验证。
+**下一项建议**：建立 frontend endpoint component 与 Native route-token 的确定性候选关联及 `route→handler` 深分析义务，仍不按名称生成 binding；随后实现 M1-06B 文本后端 Producer。M1-02B 使用 Binwalk 的生产隔离 worker 在可用容器运行时出现后继续验证。
 
 ## 7. 跨会话无缝工作协议
 

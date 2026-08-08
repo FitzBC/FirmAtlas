@@ -1,0 +1,132 @@
+{
+  "schema_version": "firmatlas.mapping.native-shallow-sample/v1alpha1",
+  "producer_version": "0.1.0",
+  "results": [
+    {
+      "label": "Tenda AC9 httpd",
+      "sample_kind": "real_firmware_binary",
+      "source": "bin/httpd",
+      "source_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+      "processed_bytes": 982880,
+      "coverage_status": "completed",
+      "format": "ELF32 little-endian ARM",
+      "hint_count": 354,
+      "evidence_count": 357,
+      "hint_kinds": {
+        "server_hint": 2,
+        "endpoint_literal": 26,
+        "route_token": 148,
+        "symbol": 178
+      },
+      "selected_hints": [
+        {
+          "kind": "route_token",
+          "value": "GetStaticRouteCfg",
+          "locator": "binary:bytes=874272-874289"
+        },
+        {
+          "kind": "route_token",
+          "value": "SetStaticRouteCfg",
+          "locator": "binary:bytes=874292-874309"
+        },
+        {
+          "kind": "route_token",
+          "value": "SetOnlineDevName",
+          "locator": "binary:bytes=874584-874600"
+        },
+        {
+          "kind": "route_token",
+          "value": "getOnlineList",
+          "locator": "binary:bytes=874088-874101"
+        },
+        {
+          "kind": "route_token",
+          "value": "setBlackRule",
+          "locator": "binary:bytes=874668-874680"
+        },
+        {
+          "kind": "route_token",
+          "value": "delBlackRule",
+          "locator": "binary:bytes=874684-874696"
+        },
+        {
+          "kind": "symbol",
+          "value": "formGetRouteStatic",
+          "locator": "binary:bytes=18189-18207"
+        },
+        {
+          "kind": "symbol",
+          "value": "fromSetRouteStatic",
+          "locator": "binary:bytes=20517-20535"
+        },
+        {
+          "kind": "symbol",
+          "value": "formSetDeviceName",
+          "locator": "binary:bytes=21790-21807"
+        },
+        {
+          "kind": "server_hint",
+          "value": "/webroot",
+          "locator": "binary:bytes=862964-862972"
+        }
+      ]
+    },
+    {
+      "label": "Tenda AC9 dhttpd",
+      "sample_kind": "real_firmware_binary",
+      "source": "bin/dhttpd",
+      "source_sha256": "df31d8a86065c2292d6281e16653c6f0d61474265befc9ad55f4860532dad79b",
+      "processed_bytes": 212948,
+      "coverage_status": "completed",
+      "format": "ELF32 little-endian ARM",
+      "hint_count": 17,
+      "evidence_count": 18,
+      "hint_kinds": {
+        "server_hint": 1,
+        "endpoint_literal": 5,
+        "route_token": 4,
+        "symbol": 7
+      },
+      "selected_hints": [
+        {
+          "kind": "server_hint",
+          "value": "/webroot"
+        }
+      ]
+    }
+  ],
+  "cross_producer_observations": [
+    {
+      "frontend_candidates": [
+        "goform/GetStaticRouteCfg",
+        "goform/SetStaticRouteCfg",
+        "goform/SetOnlineDevName",
+        "goform/getOnlineList?",
+        "goform/setBlackRule",
+        "goform/delBlackRule"
+      ],
+      "native_artifact": "bin/httpd",
+      "status": "exact_component_corroboration",
+      "explanation": "Every selected frontend action component occurs as an exact replayable route-token hint in httpd. This prioritizes httpd for deep analysis but does not establish route registration or handler binding."
+    },
+    {
+      "native_artifact": "bin/dhttpd",
+      "status": "no_selected_component_corroboration",
+      "explanation": "The selected frontend action components were not emitted from dhttpd under the declared shallow producer contract. This is not proof that dhttpd cannot participate at runtime."
+    },
+    {
+      "candidate_symbols": [
+        "formGetRouteStatic",
+        "fromSetRouteStatic",
+        "formSetDeviceName"
+      ],
+      "status": "unresolved_binding",
+      "explanation": "Names are independent symbol hints. A route-to-symbol relation requires xref, route table, relocation, decompilation, or runtime evidence."
+    }
+  ],
+  "limitations": [
+    "Route-token classification is a bounded shallow heuristic, not a route registry parser.",
+    "Dynamic string-table values are excluded from ordinary route-token classification and processed through the ELF symbol table.",
+    "Completed coverage means declared ELF32/ELF64 string and dynamic-symbol passes completed, not that Native control flow was recovered."
+  ]
+}

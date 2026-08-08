@@ -50,6 +50,15 @@ from .inventory import (
     SourceInventory,
     build_inventory,
 )
+from .native import (
+    NATIVE_RESULT_SCHEMA_VERSION,
+    NativeDiagnostic,
+    NativeHint,
+    NativeHintKind,
+    NativePolicy,
+    NativeProducerResult,
+    discover_native_hints,
+)
 from .web_config import (
     WEB_CONFIG_RESULT_SCHEMA_VERSION,
     WebConfigDiagnostic,
@@ -117,6 +126,13 @@ __all__ = (
     "SourceArtifactEntry",
     "SourceInventory",
     "build_inventory",
+    "NATIVE_RESULT_SCHEMA_VERSION",
+    "NativeDiagnostic",
+    "NativeHint",
+    "NativeHintKind",
+    "NativePolicy",
+    "NativeProducerResult",
+    "discover_native_hints",
     "WEB_CONFIG_RESULT_SCHEMA_VERSION",
     "WebConfigDiagnostic",
     "WebConfigFinding",
