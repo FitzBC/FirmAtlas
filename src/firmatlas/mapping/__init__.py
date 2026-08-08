@@ -50,6 +50,15 @@ from .inventory import (
     SourceInventory,
     build_inventory,
 )
+from .web_config import (
+    WEB_CONFIG_RESULT_SCHEMA_VERSION,
+    WebConfigDiagnostic,
+    WebConfigFinding,
+    WebConfigFindingKind,
+    WebConfigPolicy,
+    WebConfigProducerResult,
+    discover_web_configuration,
+)
 from .extraction import (
     EXTRACTION_SCHEMA_VERSION,
     BinwalkExtractor,
@@ -108,6 +117,13 @@ __all__ = (
     "SourceArtifactEntry",
     "SourceInventory",
     "build_inventory",
+    "WEB_CONFIG_RESULT_SCHEMA_VERSION",
+    "WebConfigDiagnostic",
+    "WebConfigFinding",
+    "WebConfigFindingKind",
+    "WebConfigPolicy",
+    "WebConfigProducerResult",
+    "discover_web_configuration",
     "EXTRACTION_SCHEMA_VERSION",
     "BinwalkExtractor",
     "ExtractionDiagnostic",

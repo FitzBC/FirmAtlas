@@ -1,0 +1,118 @@
+{
+  "schema_version": "firmatlas.mapping.web-configuration-sample/v1alpha1",
+  "producer_version": "0.1.0",
+  "results": [
+    {
+      "label": "Tenda AC9 nginx.conf",
+      "sample_kind": "real_firmware_source",
+      "source": "etc_ro/nginx/conf/nginx.conf",
+      "source_sha256": "66d18e21c0224ae7f738f8b97a7d4bc699669cd695e8f0432b7f8d3f54ac3663",
+      "coverage_status": "completed",
+      "processed_bytes": 2888,
+      "detected_format": "nginx",
+      "finding_count": 5,
+      "evidence_count": 5,
+      "findings": [
+        {
+          "kind": "listener",
+          "namespace": null,
+          "value": "8180",
+          "qualifier": null,
+          "related_value": null,
+          "source_construct": "nginx.listen"
+        },
+        {
+          "kind": "document_root",
+          "namespace": "/",
+          "value": "/etc/nginx/conf",
+          "qualifier": null,
+          "related_value": null,
+          "source_construct": "nginx.root"
+        },
+        {
+          "kind": "namespace_mapping",
+          "namespace": "/cgi-bin/luci/",
+          "value": "127.0.0.1:8188",
+          "qualifier": "fastcgi",
+          "related_value": null,
+          "source_construct": "nginx.fastcgi_pass"
+        },
+        {
+          "kind": "namespace_mapping",
+          "namespace": "/download/",
+          "value": "/var/etc/upan/",
+          "qualifier": "internal_alias",
+          "related_value": null,
+          "source_construct": "nginx.alias"
+        },
+        {
+          "kind": "document_root",
+          "namespace": "/50x.html",
+          "value": "html",
+          "qualifier": null,
+          "related_value": null,
+          "source_construct": "nginx.root"
+        }
+      ],
+      "diagnostics": []
+    },
+    {
+      "label": "Tenda AC9 nginx_init.sh",
+      "sample_kind": "real_firmware_source",
+      "source": "etc_ro/nginx/conf/nginx_init.sh",
+      "source_sha256": "c1e33c019efab0ac120c99c0abf8b66bbbdb6b64ba2ea855abcace257195b9a1",
+      "coverage_status": "completed",
+      "processed_bytes": 138,
+      "detected_format": "posix_shell",
+      "finding_count": 3,
+      "evidence_count": 3,
+      "findings": [
+        {
+          "kind": "service_start",
+          "namespace": null,
+          "value": "nginx",
+          "qualifier": null,
+          "related_value": "/var/nginx",
+          "source_construct": "posix_shell.nginx"
+        },
+        {
+          "kind": "service_start",
+          "namespace": null,
+          "value": "/usr/bin/app_data_center",
+          "qualifier": "fastcgi",
+          "related_value": "127.0.0.1:8188",
+          "source_construct": "posix_shell.spawn-fcgi"
+        },
+        {
+          "kind": "listener",
+          "namespace": null,
+          "value": "127.0.0.1:8188",
+          "qualifier": "fastcgi",
+          "related_value": "/usr/bin/app_data_center",
+          "source_construct": "posix_shell.spawn-fcgi"
+        }
+      ],
+      "diagnostics": []
+    }
+  ],
+  "cross_producer_observations": [
+    {
+      "frontend_scope": "goform/*",
+      "configuration_scope": "/cgi-bin/luci/ and /download/",
+      "status": "unresolved",
+      "explanation": "The AC9 nginx evidence does not map the frontend goform candidates. No route or handler identity is merged from path style alone."
+    },
+    {
+      "configuration_scope": "/cgi-bin/luci/",
+      "upstream": "127.0.0.1:8188",
+      "service": "/usr/bin/app_data_center",
+      "status": "supported_chain",
+      "explanation": "nginx fastcgi_pass and spawn-fcgi independently converge on the same listener; backend route extraction remains a later obligation."
+    }
+  ],
+  "limitations": [
+    "Completed coverage is limited to declared nginx directives and direct POSIX shell invocations.",
+    "Configuration facts do not prove that a frontend candidate is registered by a backend handler.",
+    "The main goform-serving dhttpd/httpd runtime remains unresolved and requires startup or Native evidence."
+  ]
+}

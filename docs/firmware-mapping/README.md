@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-04 前端请求构造 Producer 已验证；下一项为 M1-05 Web 配置证据 Producer
+> 当前状态：M1-05 Web 配置证据 Producer 已验证；下一项为 M1-06 脚本/Native 后端入口证据
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -57,6 +57,7 @@
 | [M1-02A Binwalk worker 合同记录](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) | 隔离边界、派生制品谱系与失败语义 | worker 合同或生产 Adapter 变化时 |
 | [M1-03 EvidenceAtom 记录](./progress/2026-08-08-m1-03-replayable-evidence.md) | 类型化 Span、稳定身份、回放与 AC9 实证 | 证据合同或 Producer 输入变化时 |
 | [M1-04 Frontend Producer 记录](./progress/2026-08-09-m1-04-frontend-request-producer.md) | 请求形状、参数、selector、覆盖与跨架构 fixture | 前端语法或候选合同变化时 |
+| [M1-05 Web 配置 Producer 记录](./progress/2026-08-09-m1-05-web-configuration-producer.md) | nginx、启动项、监听、namespace、认证与 AC9 实证 | 配置格式、语义或覆盖合同变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -115,13 +116,13 @@ M1 工作项：
 | M1-02B | 实现生产 Binwalk worker 并回放原始固件镜像 | 未开始 | M1-02A | container isolation + pinned toolchain + raw image replay |
 | M1-03 | 建立不可变 `EvidenceAtom` 与来源定位 | 已验证 | M1-01/02 | 8 capture/replay tests + AC9 exact-span replay |
 | M1-04 | HTML/Form/JS 请求构造证据生产器 | 已验证 | M1-02/03 | 13 producer tests + AC9 full-source replay + HNAP/CGI fixtures |
-| M1-05 | Web 配置、docroot、rewrite、启动项证据生产器 | 未开始 | M1-02/03 | config fixtures |
+| M1-05 | Web 配置、docroot、rewrite、启动项证据生产器 | 已验证 | M1-02/03 | 11 contract tests + AC9 nginx/startup replay + full regression |
 | M1-06 | PHP/ASP/Lua/Shell/CGI 文本后端证据生产器 | 未开始 | M1-02/03 | script backend fixtures |
 | M1-07 | 线索调度与固定点终止 | 未开始 | M1-04/05/06 | determinism/budget tests |
 | M1-08 | 发布候选目录、覆盖账本和未决义务 | 未开始 | M1-07 | no-seed end-to-end fixture |
 | M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 未开始 | M1-08 | API/browser regression |
 
-**下一项建议**：M1-05。恢复 Web server 配置中的 docroot、rewrite、auth zone、CGI 映射和监听线索，与 M1-04 前端候选交叉验证，但不直接合并身份。M1-02B 生产 Binwalk worker 在可用隔离运行时出现后并行恢复，当前仍未验证。
+**下一项建议**：M1-06。优先从 AC9 `dhttpd/httpd`、脚本与参数 getter 中解释 `/goform/*` 的 route/dispatcher/handler 绑定；没有足够静态证据时发布 Native 深分析义务。M1-02B 使用 Binwalk 的生产隔离 worker 在可用容器运行时出现后继续验证。
 
 ## 7. 跨会话无缝工作协议
 

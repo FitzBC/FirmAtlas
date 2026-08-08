@@ -11,6 +11,7 @@
 - [Binwalk worker 合同中间输出](./binwalk-worker-contract-summary.json)：确定性 fake 证明父制品、命令证据和派生 Inventory 的谱系，不代表真实固件已解包。
 - [Tenda AC9：M1-03 精确 EvidenceAtom](./tenda-ac9-m1-evidence-atoms.json)：从完整 `static_route.js` 回放出的字节、行列、摘要和稳定证据身份。
 - [M1-04 Frontend Producer 中间输出](./m1-04-frontend-producer-summary.json)：两份 AC9 真实源文件与 HNAP/共享 CGI 合同 fixture 的请求、参数和 selector 对比。
+- [M1-05 Web Configuration Producer 中间输出](./m1-05-web-configuration-summary.json)：AC9 真实 nginx 配置与启动脚本恢复出的 listener、docroot、FastCGI namespace 和服务链。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -61,6 +62,7 @@
 - 本地解包提示：`../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root`；
 - 已核验前端：`static_route.js`、`online_list.js`；
 - 已核验 Native：32-bit ARM stripped `bin/httpd`；
+- 已核验 Web 配置链：nginx `:8180`、`/cgi-bin/luci/ → 127.0.0.1:8188`、`spawn-fcgi → app_data_center`；
 - 可观察接口：`SetStaticRouteCfg`、`SetOnlineDevName`；
 - 可观察参数：`list`、`mac`、`devName`。
 
@@ -110,7 +112,8 @@ Tier C 同时是样本获取工作队列。没有固件制品前，只能验证�
 
 ## 6. 当前缺口
 
-- 只有 Tenda AC9 已在本地完成源文件级人工回放与自动完整 rootfs Inventory；
+- 只有 Tenda AC9 已在本地完成源文件级人工回放、自动完整 rootfs Inventory、Frontend 与 nginx/启动项 Producer 回放；
+- AC9 `/goform/*` 未被 nginx 配置覆盖，主 `dhttpd/httpd` 的启动与 route binding 仍未知；
 - 其他候选尚未由新 Mapping Module 自动解包和分析；
 - 当前类别来自漏洞文本路径规则，尚未由真实 dispatcher/binding 证据校准；
 - Native 函数、参数 getter 和 route binding 尚未建立真值；

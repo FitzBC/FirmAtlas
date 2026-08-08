@@ -136,6 +136,8 @@ Inventory 条目现在可以通过统一的证据捕获 Interface 转换为 `fir
 
 Frontend Request Producer 已能从声明范围内的 HTML Form、Tenda `R.pageModel/R.moduleModel` 和 jQuery `getJSON/post/ajax` 构造中恢复请求候选、方法、表示形式、参数与 operation selector，并以 EvidenceAtom 输出。它区分动态 URL 的 literal prefix、合并重复调用身份但保留多处证据；AC9、HNAP 与共享 CGI 的对比输出见 [M1-04 样例](./docs/firmware-mapping/samples/m1-04-frontend-producer-summary.json)。
 
+Web Configuration Producer 已能从 nginx 配置和直接 POSIX shell 启动项恢复 listener、docroot、namespace mapping、auth requirement 与 service start finding。AC9 的真实配置回放确认了 `:8180 → /cgi-bin/luci/ → 127.0.0.1:8188 → app_data_center`，并明确保留 `/goform/*` 与主 `dhttpd/httpd` binding 为未知；完整中间输出见 [M1-05 样例](./docs/firmware-mapping/samples/m1-05-web-configuration-summary.json)。
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 
@@ -208,8 +210,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单 |
-| **Next** | 类型化证据定位、无样例线索发现、固件上传与 SHA-256 制品去重、隔离递归解包、文件系统与组件 SBOM、服务与监听端口测绘 |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend 与 nginx/启动项证据 Producer |
+| **Next** | 脚本后端与 Native route/handler 绑定、无样例线索调度、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。
