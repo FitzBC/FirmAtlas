@@ -9,6 +9,7 @@
 - [Tenda AC9：M1 Snapshot 人工证据重放](./tenda-ac9-m1-walkthrough.md)；
 - [Tenda AC9：M1-02 完整 rootfs 清单](./tenda-ac9-m1-inventory-walkthrough.md)。
 - [Binwalk worker 合同中间输出](./binwalk-worker-contract-summary.json)：确定性 fake 证明父制品、命令证据和派生 Inventory 的谱系，不代表真实固件已解包。
+- [M1-02B Binwalk 真实回放](./m1-02b-binwalk-real-replay-summary.json)：固定 Binwalk v3.1.0 本地验证镜像的 DIR-882 零产物负例与 DAP-3520 757-entry HNAP/PHP-XGI 正例；后者因安全 symlink 诊断保持 partial。
 - [Tenda AC9：M1-03 精确 EvidenceAtom](./tenda-ac9-m1-evidence-atoms.json)：从完整 `static_route.js` 回放出的字节、行列、摘要和稳定证据身份。
 - [M1-04 Frontend Producer 中间输出](./m1-04-frontend-producer-summary.json)：两份 AC9 真实源文件与 HNAP/共享 CGI 合同 fixture 的请求、参数和 selector 对比。
 - [M1-05 Web Configuration Producer 中间输出](./m1-05-web-configuration-summary.json)：AC9 真实 nginx 配置与启动脚本恢复出的 listener、docroot、FastCGI namespace 和服务链。
@@ -86,6 +87,14 @@
 - `hnap.asp`：零字节负面对照，不从文件名创造 HNAP endpoint。
 
 该样本补齐脚本后端类别，当前作为 development/cross-architecture contract 样本。
+
+**D-Link DAP-3520 A1 / HNAP + PHP-XGI hybrid**
+
+- 原始 Artifact SHA-256：`0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9`；
+- 当前隔离 Binwalk v3.1.0 回放恢复 757 个 Inventory 条目；
+- `httpd.php` 明确绑定 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap`；
+- 普通管理页使用 `ACTION_POST → __action.php → query/set` 的 PHP-XGI 配置链；
+- 当前因绝对固件 symlink 安全诊断和缺少专用 HNAP/XGI Producer 保持 coverage gap，不计入 verified 类别。
 
 ### Tier B：平台已有固件候选
 

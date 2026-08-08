@@ -138,6 +138,7 @@ from .extraction import (
     WorkerExecution,
     WorkerExtractionRequest,
 )
+from .container_worker import ContainerBinwalkConfig, ContainerBinwalkWorker
 from .repository import CatalogConflictError, DiscoveryCatalogRepository
 from .native_deep import (
     NATIVE_DEEP_RESULT_SCHEMA_VERSION,
@@ -292,6 +293,8 @@ __all__ = (
     "ToolIdentity",
     "WorkerExecution",
     "WorkerExtractionRequest",
+    "ContainerBinwalkConfig",
+    "ContainerBinwalkWorker",
     "CatalogConflictError",
     "DiscoveryCatalogRepository",
     "NATIVE_DEEP_RESULT_SCHEMA_VERSION",

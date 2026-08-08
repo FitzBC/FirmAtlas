@@ -128,9 +128,9 @@ make mapping-example
 make mapping-inventory ROOT=/path/to/extracted-root
 ```
 
-输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。当前内置归档遍历以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装解包尚未接入，输入必须是已解包目录。
+输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。内置 Inventory 仍只读取已解包目录并以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装由独立 Container Extraction Worker 处理，不能把原始固件直接交给此命令。
 
-原始固件解包将使用 Binwalk，但 Binwalk 只允许在隔离 extraction worker 中运行。当前仓库已经冻结父制品摘要、工具身份、`binwalk -Me` 命令证据、资源限制证明、派生 Inventory 和失败诊断的版本化合同；生产 worker 与真实原始镜像回放尚未完成，不能把该合同理解为本机已经提供 Binwalk 解包命令。
+原始固件解包使用 Binwalk，但 Binwalk 只允许在隔离 extraction worker 中运行。当前仓库已经实现只接受固定镜像摘要的 `ContainerBinwalkWorker`，强制禁网、只读根/输入、能力清空、`no-new-privileges`、PID/CPU/内存、输出和日志预算，并保留父制品、工具、命令、派生 Inventory 与失败诊断谱系。真实 DAP-3520 回放恢复了 757 个条目和 `/HNAP1 → /usr/sbin/hnap`、PHP-XGI 页面控制器证据；DIR-882 的零产物回放则被明确标为 `extraction.no_output`。固定发布镜像重建与 HNAP/XGI Catalog 仍在进行中，详见 [M1-02B 记录](./docs/firmware-mapping/progress/2026-08-09-m1-02b-container-binwalk-worker.md)。
 
 Inventory 条目现在可以通过统一的证据捕获 Interface 转换为 `firmatlas.mapping.evidence/v1alpha1` EvidenceAtom。文本与二进制证据都会校验源文件摘要、精确字节选区及选区摘要；文本另外保存可回放的 UTF-8 行列。真实 Tenda AC9 中间结果见 [M1-03 EvidenceAtom 样例](./docs/firmware-mapping/samples/tenda-ac9-m1-evidence-atoms.json)。
 
@@ -257,8 +257,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend、ELF Native Shallow 与 ARM32 PIC Deep Producer、frontend/native 候选关联、固定点调度、无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
-| **Next** | HNAP/共享 CGI/Native-only 真实固件覆盖、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend、ELF Native Shallow 与 ARM32 PIC Deep Producer、frontend/native 候选关联、固定点调度、无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
+| **Next** | DAP-3520 HNAP/PHP-XGI 专用 Producer 与完整 Catalog、共享 CGI/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

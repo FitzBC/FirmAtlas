@@ -31,6 +31,7 @@ class ExtractionStatus(str, Enum):
 class ToolIdentity:
     name: str
     version: str
+    image_digest: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -70,6 +71,10 @@ class WorkerExecution:
     stdout: str
     stderr: str
     enforced_limits: Tuple[str, ...]
+    launcher_argv: Tuple[str, ...] = ()
+    stdout_truncated: bool = False
+    stderr_truncated: bool = False
+    limit_exceeded: Optional[str] = None
 
 
 class ExtractionWorker(Protocol):
@@ -111,6 +116,15 @@ class ExtractionResult:
                 "timed_out": self.execution.timed_out,
                 "argv": list(self.execution.argv),
                 "enforced_limits": list(self.execution.enforced_limits),
+                "launcher_argv_sha256": hashlib.sha256(
+                    json.dumps(
+                        self.execution.launcher_argv,
+                        separators=(",", ":"),
+                    ).encode("utf-8")
+                ).hexdigest(),
+                "stdout_truncated": self.execution.stdout_truncated,
+                "stderr_truncated": self.execution.stderr_truncated,
+                "limit_exceeded": self.execution.limit_exceeded,
                 "stdout_sha256": hashlib.sha256(
                     self.execution.stdout.encode("utf-8")
                 ).hexdigest(),
@@ -149,10 +163,18 @@ def _execution_fingerprint(
         "enforced_limits": sorted(execution.enforced_limits),
         "exit_code": execution.exit_code,
         "stderr_sha256": hashlib.sha256(execution.stderr.encode("utf-8")).hexdigest(),
+        "stderr_truncated": execution.stderr_truncated,
         "stdout_sha256": hashlib.sha256(execution.stdout.encode("utf-8")).hexdigest(),
+        "stdout_truncated": execution.stdout_truncated,
         "timed_out": execution.timed_out,
-        "tool": {"name": tool.name, "version": tool.version},
+        "tool": {
+            "name": tool.name,
+            "version": tool.version,
+            "image_digest": tool.image_digest,
+        },
     }
+    if execution.limit_exceeded is not None:
+        payload["limit_exceeded"] = execution.limit_exceeded
     encoded = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode(
         "utf-8"
     )
@@ -323,6 +345,24 @@ class BinwalkExtractor:
             )
 
         inventory = build_inventory(destination, request.policy.inventory_policy)
+        if inventory.observed_count == 0:
+            return ExtractionResult(
+                parent_artifact_sha256=request.artifact_sha256,
+                status=ExtractionStatus.FAILED,
+                tool=tool,
+                execution_fingerprint=fingerprint,
+                execution=execution,
+                policy=request.policy,
+                inventory=inventory,
+                diagnostics=(
+                    ExtractionDiagnostic(
+                        code="extraction.no_output",
+                        message=(
+                            "Binwalk completed without producing derived artifacts"
+                        ),
+                    ),
+                ),
+            )
         status = (
             ExtractionStatus.SUCCESS
             if inventory.coverage_status is CoverageStatus.COMPLETED

@@ -55,6 +55,7 @@
 | [M1-01 Snapshot 合同记录](./progress/2026-08-08-m1-01-snapshot-contract.md) | 合同、TDD 证据、AC9 重放和未决义务 | 回归、修订或发布状态变化时 |
 | [M1-02 源制品清单记录](./progress/2026-08-08-m1-02-source-inventory.md) | 安全不变量、TDD、完整 AC9 rootfs 回放 | 回归、样本或发布状态变化时 |
 | [M1-02A Binwalk worker 合同记录](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) | 隔离边界、派生制品谱系与失败语义 | worker 合同或生产 Adapter 变化时 |
+| [M1-02B Container Binwalk 记录](./progress/2026-08-09-m1-02b-container-binwalk-worker.md) | 固定工具链、容器强制边界、真实原始固件正负回放 | 生产镜像、解包策略或真实样本变化时 |
 | [M1-03 EvidenceAtom 记录](./progress/2026-08-08-m1-03-replayable-evidence.md) | 类型化 Span、稳定身份、回放与 AC9 实证 | 证据合同或 Producer 输入变化时 |
 | [M1-04 Frontend Producer 记录](./progress/2026-08-09-m1-04-frontend-request-producer.md) | 请求形状、参数、selector、覆盖与跨架构 fixture | 前端语法或候选合同变化时 |
 | [M1-05 Web 配置 Producer 记录](./progress/2026-08-09-m1-05-web-configuration-producer.md) | nginx、启动项、监听、namespace、认证与 AC9 实证 | 配置格式、语义或覆盖合同变化时 |
@@ -97,7 +98,7 @@ flowchart LR
 | 里程碑 | 状态 | 核心产物 | 出口门 | 证据记录 |
 | --- | --- | --- | --- | --- |
 | M0 设计基线 | 已验证 | 理论、领域、架构、集成、评测和协作设计 | 文档互链、领域一致性、本地回归、GitHub 发布；本次不部署 | [M0 记录](./progress/2026-08-08-m0-design-baseline.md) |
-| M1 冷启动发现 | 进行中 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | [M1-01](./progress/2026-08-08-m1-01-snapshot-contract.md) / [M1-02](./progress/2026-08-08-m1-02-source-inventory.md) / [M1-02A](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) / [M1-03](./progress/2026-08-08-m1-03-replayable-evidence.md) / [M1-04](./progress/2026-08-09-m1-04-frontend-request-producer.md) |
+| M1 冷启动发现 | 进行中 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | [M1-01](./progress/2026-08-08-m1-01-snapshot-contract.md) / [M1-02](./progress/2026-08-08-m1-02-source-inventory.md) / [M1-02A](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) / [M1-02B](./progress/2026-08-09-m1-02b-container-binwalk-worker.md) / [M1-03](./progress/2026-08-08-m1-03-replayable-evidence.md) / [M1-04](./progress/2026-08-09-m1-04-frontend-request-producer.md) |
 | M2 身份与参数 | 未开始 | Interface/Operation/Parameter 身份及别名、约束 | 共享端点正确拆分，参数有来源与 namespace | 待创建 |
 | M3 Native 绑定 | 未开始 | route/handler/getter/call-site 定向绑定 | Native 失败不阻断部分快照，义务清晰 | 待创建 |
 | M4 通信架构恢复 | 未开始 | 执行主体、接口、解析、状态和响应关系图 | 标注集上的关键节点和路径达到门限 | 待创建 |
@@ -122,7 +123,7 @@ M1 工作项：
 | M1-01 | 建立版本化 `FirmwareMappingSnapshot` 最小合同 | 已验证 | M0 | schema contract tests + Tenda AC9 replay |
 | M1-02 | 建立安全、可复现的制品文件清单 | 已验证 | M1-01 | archive/symlink/budget fixtures + AC9 full-root replay |
 | M1-02A | 冻结隔离 Binwalk worker 合同与派生制品谱系 | 已验证 | M1-02 | 8 fake worker contract tests + versioned result fixture |
-| M1-02B | 实现生产 Binwalk worker 并回放原始固件镜像 | 未开始 | M1-02A | container isolation + pinned toolchain + raw image replay |
+| M1-02B | 实现生产 Binwalk worker 并回放原始固件镜像 | 进行中 | M1-02A | 19 contract tests + pinned local v3.1.0 image + DIR-882 negative/DAP-3520 757-entry replay；正式镜像重建待完成 |
 | M1-03 | 建立不可变 `EvidenceAtom` 与来源定位 | 已验证 | M1-01/02 | 8 capture/replay tests + AC9 exact-span replay |
 | M1-04 | HTML/Form/JS 请求构造证据生产器 | 已验证 | M1-02/03 | 14 producer tests + AC9 JS/ASP replay + HNAP/CGI fixtures |
 | M1-05 | Web 配置、docroot、rewrite、启动项证据生产器 | 已验证 | M1-02/03 | 11 contract tests + AC9 nginx/startup replay + full regression |
@@ -136,7 +137,7 @@ M1 工作项：
 | M1-10B | ARM PIC call-site/decompiler Adapter | 已验证 | M1-10A | 12 contract tests + AC9 5/5 binding + 10/10 obligation closure + browser regression |
 | M1-11 | 代表性架构 corpus 出口门 | 进行中 | M1-04/06B/10B | `/goform`、共享 CGI、HNAP/SOAP、脚本后端、Native-only 的可重复 coverage report；当前 `partial` |
 
-**下一项建议**：继续 M1-11，优先取得一个可校验原始 Firmware Artifact 的 HNAP 或共享 CGI 样本，并通过生产 Extraction Worker 建立谱系后发布 Catalog；随后补 Native-only 样本。M1-02B 可使用 Binwalk，但必须在生产隔离 worker 和固定工具链中执行，不能进入主分析进程。
+**下一项建议**：继续 M1-11。已取得并通过隔离 Worker 回放 DAP-3520 HNAP/PHP-XGI 原始样本，下一步为 proprietary httpd `Alias/Location/External` 和 PHP-XGI `ACTION_POST/query/set` 建立 Producer、发布 Catalog，并明确绝对固件 symlink 的安全 coverage 政策；随后补共享 CGI 与 Native-only 样本。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
 
 ## 7. 跨会话无缝工作协议
 

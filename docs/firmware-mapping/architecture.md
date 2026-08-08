@@ -103,6 +103,9 @@ flowchart TD
 - 原始固件由隔离 Extraction Worker 中的 Binwalk Adapter 识别和解包；
 - Binwalk 只生成带父子摘要、工具版本和执行诊断的 Derived Artifact，不直接发布测绘事实；
 - Inventory Module 只读取隔离 worker 的输出目录，不在自身 Implementation 中启动 Binwalk；
+- 生产 Container Adapter 只接受固定 `sha256:` 镜像身份，并强制禁网、只读根、只读输入、能力清空、`no-new-privileges`、PID/CPU/内存和有界日志；
+- wall time、派生文件数与派生字节是监督预算；worker 退出后必须再次复核，快速退出不能绕过预算；
+- 退出码 0 但零派生产物属于 `extraction.no_output`，不能发布空成功；
 - 不信任扩展名；
 - 规范路径并保留原始路径；
 - 处理 symlink、hardlink、archive member；

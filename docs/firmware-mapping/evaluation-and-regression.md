@@ -152,6 +152,8 @@ PIC call-site Profile 还需覆盖：单一二参数调用不足以推断 regist
 
 代表性 corpus gate 必须把证据层级作为一等字段：旧 Binwalk 派生目录、合成 fixture 与漏洞线索不得计入 real-firmware verified 数量。每个样本显式声明 required/forbidden Evidence Capability；Artifact SHA 不匹配、coverage 非 completed、能力缺失/越界或任一开放义务都必须降为 coverage gap。未提供任何样本的 required category 也必须出现在报告中并标记 acquisition gap，不能从聚合结果消失。
 
+原始固件 Extraction 另设正负门限：容器命令退出 0 但派生文件数为 0 必须是 `extraction.no_output`，不能计为成功；非零/超时若保留安全派生产物可返回 partial；进程成功但 Inventory 有 symlink、文件数、字节或归档深度诊断时，Extraction 最高为 partial。真实样本记录必须绑定 Artifact SHA、Binwalk 版本、镜像摘要、执行指纹、Inventory SHA 与预算，不能只保存截图或终端文本。
+
 ### 6.3 Module contract tests
 
 所有主要行为通过 `FirmwareMapper` Interface 测试：

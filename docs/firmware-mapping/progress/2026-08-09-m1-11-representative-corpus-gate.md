@@ -36,7 +36,7 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
 | 类别 | 当前状态 | 解释 |
 | --- | --- | --- |
 | `form_handler` | `verified` | AC9 真实制品身份；374 candidates、392 evidence、0 open obligations，包含 `constructs_request` 与 `binds_handler` |
-| `hnap_soap` | `contract_only` | HNAP/SOAPAction fixture 证明 operation selector 身份，不是固件召回证据 |
+| `hnap_soap` | `coverage_gap` | DAP-3520 原始 Artifact 已通过隔离 Binwalk v3.1.0 回放并给出 `/HNAP1 → /usr/sbin/hnap` 配置证据，但 Inventory 因绝对固件 symlink 保持 partial，且尚缺 HNAP/XGI 专用 Producer Catalog；fixture 仍只证明 selector 合同 |
 | `cgi_gateway` | `contract_only` | shared CGI/topicurl fixture 证明共享端点拆分，不是固件召回证据 |
 | `script_backend` | `coverage_gap` | D-Link DSL 旧 Binwalk 派生源码已有 Producer 结果，但缺原始制品身份绑定后的 Catalog |
 | `native_only` | `acquisition_gap` | 尚缺不依赖前端候选的可校验原始样本 |
@@ -51,10 +51,10 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
 
 ## 5. 下一步
 
-1. 用生产隔离 Binwalk Worker 摄取一个原始 HNAP 或共享 CGI 固件，固定工具版本与派生谱系；
-2. 发布其完整 Discovery Catalog，使对应类别从 `contract_only` 晋级或暴露真实误差；
-3. 选择一个前端缺失的 Native-only 原始固件，验证无 frontend seed 的发现链；
-4. 三个缺口全部关闭后再运行 M1-GATE，不因当前已有 AC9 成功而提前标记 M1 完成。
+1. 用 DAP-3520 当前 Artifact/Inventory 谱系实现 proprietary httpd HNAP 与 PHP-XGI Producer，并发布完整 Discovery Catalog；
+2. 在不跟随宿主逃逸链接的前提下，区分固件 chroot 绝对 symlink 与真正越界，决定能否把安全 Inventory 晋级 completed；
+3. 摄取一个原始共享 CGI 固件，并选择一个前端缺失的 Native-only 原始固件；
+4. 三个缺口全部关闭后再运行 M1-GATE，不因当前已有 AC9 或 DAP-3520 路径证据而提前标记 M1 完成。
 
 ## 6. 本轮验证
 

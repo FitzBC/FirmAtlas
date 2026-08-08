@@ -1,0 +1,85 @@
+{
+  "schema_version": "firmatlas.mapping.extraction-replay-summary/v1alpha1",
+  "recorded_at": "2026-08-09",
+  "worker": {
+    "adapter": "ContainerBinwalkWorker",
+    "tool": "binwalk",
+    "tool_version": "3.1.0",
+    "source_commit": "4fdab3d464d97b68e0af9088df3f9e2e1545b21c",
+    "validation_image_digest": "sha256:a22e83ed3465eea9a009a33b01a68233253dc420bcad2b791a48c80444f0880a",
+    "validation_image_scope": "local-arm64-validation",
+    "release_recipe": "containers/binwalk/Dockerfile",
+    "isolation": [
+      "network=none",
+      "read_only_root",
+      "read_only_input",
+      "cap_drop=ALL",
+      "no_new_privileges",
+      "pids_limit=128",
+      "memory=2g",
+      "cpus=2.0",
+      "bounded_logs"
+    ]
+  },
+  "policy": {
+    "max_seconds": 600,
+    "max_output_files": 20000,
+    "max_output_bytes": 536870912
+  },
+  "replays": [
+    {
+      "sample_id": "dlink-dir882-1.10b02-negative",
+      "source_hint": "../iot_seedintelligentanalysis/iot_seedsgeneration/固件分析报告/UCRF/固件/Dlink DIR-882/DIR882A1_FW110B02.bin",
+      "artifact_sha256": "33ec7f190b590f95f922cb361098e5ce0cda4af0c093be62d58046106b6ddfac",
+      "status": "failed",
+      "execution_fingerprint": "85bbd8a1f51c68f581140bd135f74f53658e3e1457285395cbbe8ae5d6e9004c",
+      "observed_count": 0,
+      "diagnostics": ["extraction.no_output"],
+      "interpretation": "A zero exit with no derived files is an explicit failed result, not a successful extraction."
+    },
+    {
+      "sample_id": "dlink-dap3520-1.17-rc047-hnap-xgi",
+      "source_hint": "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/DAP-3520_FW_v117-rc047.bin",
+      "artifact_sha256": "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9",
+      "status": "partial_success",
+      "execution_fingerprint": "5e2dbf73d6a5ac1824fdf3abec7d49e6989aca8738e46ab2a1042c6fd2df8a84",
+      "exit_code": 0,
+      "timed_out": false,
+      "inventory_sha256": "e6b0cfd9e5fed74302986e179ea23de8d9817198c2b361ee946a90e501e91334",
+      "inventory_coverage": "partial",
+      "observed_count": 757,
+      "processed_count": 757,
+      "processed_bytes": 18911673,
+      "inventory_diagnostics": ["inventory.symlink_escape"],
+      "rootfs_counts": {
+        "regular_files": 636,
+        "php_files": 374,
+        "symlinks": 118
+      },
+      "communication_evidence": [
+        {
+          "path": "etc/templates/httpd/httpd.php",
+          "content_sha256": "2ffdadc17fbbe376e91c6657b1b99a54342f93a53c464df0a2089c14751069f9",
+          "line_start": 101,
+          "line_end": 106,
+          "claim": "/HNAP1 is mapped to /www/HNAP1 and delegated to /usr/sbin/hnap as an external hnap handler."
+        },
+        {
+          "path": "www/home_sys.php",
+          "content_sha256": "6cbcc5238037e2897863cb245077ecb1fbd2c4fba333a737eca44305a6f0dfac",
+          "line_start": 8,
+          "line_end": 20,
+          "claim": "Page POST actions delegate to a shared action include and commit path."
+        },
+        {
+          "path": "www/__action.php",
+          "content_sha256": "79b77c6921c33f4c41d67d26cba7811bff5211f43270220f17e70f06aa76b439",
+          "claim": "Shared PHP/XGI action controller is present as a separate backend dispatch layer."
+        }
+      ],
+      "architecture_hypothesis": "hybrid_hnap_dispatcher_plus_php_xgi_page_controllers",
+      "promotion_status": "coverage_gap",
+      "promotion_blocker": "The safe inventory remains partial because absolute firmware symlinks are recorded but not followed; a dedicated HNAP/XGI producer catalog is also still required."
+    }
+  ]
+}

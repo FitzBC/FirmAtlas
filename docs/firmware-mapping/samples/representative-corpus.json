@@ -30,6 +30,29 @@
       "evidence_basis": "local frontend files plus ARM httpd string table"
     },
     {
+      "sample_id": "dlink-dap3520-hnap-xgi-validation",
+      "vendor": "D-Link",
+      "model": "DAP-3520 A1",
+      "firmware_candidate_id": "firmemuhub:BM-2024-00027",
+      "availability": "raw_extracted_partial",
+      "local_source_hint": "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/DAP-3520_FW_v117-rc047.bin",
+      "artifact_sha256": "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9",
+      "category": "hnap_soap",
+      "subtype": "hybrid_hnap_xgi_dispatcher",
+      "anchors": [
+        "/HNAP1",
+        "/www/HNAP1",
+        "/usr/sbin/hnap",
+        "ACTION_POST",
+        "query()",
+        "set()"
+      ],
+      "role": "cross-architecture-validation",
+      "target_milestones": ["M1", "M2", "M4"],
+      "evidence_basis": "current isolated Binwalk v3.1.0 replay plus exact httpd.php and PHP/XGI controller evidence",
+      "coverage_note": "757 entries recovered; safe inventory is partial because absolute firmware symlinks are not followed"
+    },
+    {
       "sample_id": "tenda-ac18-goform-family-validation",
       "vendor": "Tenda",
       "model": "AC18",

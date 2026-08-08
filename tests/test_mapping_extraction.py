@@ -104,6 +104,33 @@ class EscapingSymlinkWorker(SuccessfulFakeBinwalkWorker):
         return execution
 
 
+class TruncatedLogBinwalkWorker(SuccessfulFakeBinwalkWorker):
+    def extract(self, request):
+        execution = super().extract(request)
+        return WorkerExecution(
+            exit_code=execution.exit_code,
+            timed_out=execution.timed_out,
+            argv=execution.argv,
+            stdout=execution.stdout,
+            stderr=execution.stderr,
+            enforced_limits=execution.enforced_limits,
+            stdout_truncated=True,
+        )
+
+
+class EmptySuccessfulBinwalkWorker(SuccessfulFakeBinwalkWorker):
+    def extract(self, request):
+        self.requests.append(request)
+        return WorkerExecution(
+            exit_code=0,
+            timed_out=False,
+            argv=("binwalk", "-Me", "/input/firmware.bin"),
+            stdout="no recognized signatures",
+            stderr="",
+            enforced_limits=("no_network", "output_bytes", "output_files", "wall_time"),
+        )
+
+
 class BinwalkExtractorContractTests(unittest.TestCase):
     def test_successful_extraction_links_worker_evidence_to_a_source_inventory(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -309,6 +336,49 @@ class BinwalkExtractorContractTests(unittest.TestCase):
             self.assertIn(
                 "inventory.symlink_escape",
                 [diagnostic.code for diagnostic in result.inventory.diagnostics],
+            )
+
+    def test_execution_fingerprint_attests_log_truncation_state(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            artifact = root / "firmware.bin"
+            artifact.write_bytes(b"firmware-image")
+            request_fields = {
+                "artifact_path": artifact,
+                "artifact_sha256": hashlib.sha256(b"firmware-image").hexdigest(),
+            }
+
+            complete = BinwalkExtractor(SuccessfulFakeBinwalkWorker()).extract(
+                ExtractionRequest(destination=root / "complete", **request_fields)
+            )
+            truncated = BinwalkExtractor(TruncatedLogBinwalkWorker()).extract(
+                ExtractionRequest(destination=root / "truncated", **request_fields)
+            )
+
+            self.assertNotEqual(
+                complete.execution_fingerprint,
+                truncated.execution_fingerprint,
+            )
+
+    def test_zero_exit_without_derived_artifacts_is_not_reported_as_success(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            artifact = root / "firmware.bin"
+            artifact.write_bytes(b"firmware-image")
+
+            result = BinwalkExtractor(EmptySuccessfulBinwalkWorker()).extract(
+                ExtractionRequest(
+                    artifact_path=artifact,
+                    artifact_sha256=hashlib.sha256(b"firmware-image").hexdigest(),
+                    destination=root / "derived",
+                )
+            )
+
+            self.assertEqual(ExtractionStatus.FAILED, result.status)
+            self.assertEqual(0, result.inventory.observed_count)
+            self.assertEqual(
+                ["extraction.no_output"],
+                [diagnostic.code for diagnostic in result.diagnostics],
             )
 
 
