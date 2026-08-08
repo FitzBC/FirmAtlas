@@ -1,0 +1,132 @@
+{
+  "schema_version": "firmatlas.mapping.correlation-sample/v1alpha1",
+  "correlation_schema_version": "firmatlas.mapping.correlation-result/v1alpha1",
+  "rule_version": "frontend-native-exact/v1",
+  "sample_kind": "real_firmware_cross_producer_replay",
+  "firmware": "Tenda AC9",
+  "inputs": {
+    "frontend_sources": [
+      "webroot_ro/js/static_route.js",
+      "webroot_ro/js/online_list.js"
+    ],
+    "native_sources": [
+      "bin/httpd",
+      "bin/dhttpd"
+    ],
+    "frontend_candidate_count": 7,
+    "native_hint_count": 371
+  },
+  "result": {
+    "coverage_status": "completed",
+    "association_count": 7,
+    "obligation_count": 14,
+    "unmatched_frontend_count": 0,
+    "associations": [
+      {
+        "frontend_endpoint": "goform/GetStaticRouteCfg",
+        "native_source": "bin/httpd",
+        "native_hint": "GetStaticRouteCfg",
+        "match_basis": "exact_component",
+        "status": "candidate",
+        "evidence_count": 2,
+        "required_capabilities": [
+          "registers_route",
+          "binds_handler"
+        ]
+      },
+      {
+        "frontend_endpoint": "goform/SetStaticRouteCfg",
+        "native_source": "bin/httpd",
+        "native_hint": "SetStaticRouteCfg",
+        "match_basis": "exact_component",
+        "status": "candidate",
+        "evidence_count": 2,
+        "required_capabilities": [
+          "registers_route",
+          "binds_handler"
+        ]
+      },
+      {
+        "frontend_endpoint": "goform/getOnlineList?",
+        "native_source": "bin/httpd",
+        "native_hint": "getOnlineList",
+        "match_basis": "exact_component",
+        "status": "candidate",
+        "evidence_count": 3,
+        "required_capabilities": [
+          "registers_route",
+          "binds_handler"
+        ]
+      },
+      {
+        "frontend_endpoint": "goform/setBlackRule",
+        "native_source": "bin/httpd",
+        "native_hint": "setBlackRule",
+        "match_basis": "exact_component",
+        "status": "candidate",
+        "evidence_count": 2,
+        "required_capabilities": [
+          "registers_route",
+          "binds_handler"
+        ]
+      },
+      {
+        "frontend_endpoint": "goform/SetOnlineDevName",
+        "native_source": "bin/httpd",
+        "native_hint": "SetOnlineDevName",
+        "match_basis": "exact_component",
+        "status": "candidate",
+        "evidence_count": 2,
+        "required_capabilities": [
+          "registers_route",
+          "binds_handler"
+        ]
+      },
+      {
+        "frontend_endpoint": "goform/getBlackRuleList?",
+        "native_source": "bin/httpd",
+        "native_hint": "getBlackRuleList",
+        "match_basis": "exact_component",
+        "status": "candidate",
+        "evidence_count": 2,
+        "required_capabilities": [
+          "registers_route",
+          "binds_handler"
+        ]
+      },
+      {
+        "frontend_endpoint": "goform/delBlackRule",
+        "native_source": "bin/httpd",
+        "native_hint": "delBlackRule",
+        "match_basis": "exact_component",
+        "status": "candidate",
+        "evidence_count": 2,
+        "required_capabilities": [
+          "registers_route",
+          "binds_handler"
+        ]
+      }
+    ]
+  },
+  "negative_controls": [
+    {
+      "source": "bin/dhttpd",
+      "association_count": 0,
+      "interpretation": "No selected exact route-token match; this lowers scheduling priority but does not prove runtime non-participation."
+    },
+    {
+      "symbol_examples": [
+        "formGetRouteStatic",
+        "fromSetRouteStatic",
+        "formSetDeviceName"
+      ],
+      "binding_count": 0,
+      "interpretation": "Lexical similarity is not accepted as handler binding evidence."
+    }
+  ],
+  "limitations": [
+    "An exact component match is a deterministic candidate association, not route-registration proof.",
+    "Every matched candidate remains blocked on registers_route and binds_handler capabilities.",
+    "Literal-prefix frontend endpoints cannot produce exact-endpoint associations."
+  ]
+}

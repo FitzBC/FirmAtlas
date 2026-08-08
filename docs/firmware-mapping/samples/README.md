@@ -13,6 +13,7 @@
 - [M1-04 Frontend Producer 中间输出](./m1-04-frontend-producer-summary.json)：两份 AC9 真实源文件与 HNAP/共享 CGI 合同 fixture 的请求、参数和 selector 对比。
 - [M1-05 Web Configuration Producer 中间输出](./m1-05-web-configuration-summary.json)：AC9 真实 nginx 配置与启动脚本恢复出的 listener、docroot、FastCGI namespace 和服务链。
 - [M1-06A Native Shallow Producer 中间输出](./m1-06a-native-shallow-summary.json)：AC9 `httpd/dhttpd` 的 ELF route-token、symbol 与 server hint 对照及未决 binding。
+- [M1-06C Frontend/Native Correlation 中间输出](./m1-06c-frontend-native-correlation-summary.json)：AC9 7 个 frontend candidate 与 Native hint 的精确候选关联、负面对照和 14 个深分析义务。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

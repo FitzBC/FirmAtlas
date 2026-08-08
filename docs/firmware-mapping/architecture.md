@@ -163,6 +163,8 @@ M1-05 Web Configuration Producer 的公开 Interface 是 `discover_web_configura
 
 M1-06A Native Shallow Producer 的公开 Interface 是 `discover_native_hints(source_entry, source_bytes, policy)`。Implementation 直接读取 ELF section 与 dynamic symbol table，并从受控 printable spans 发布 endpoint literal、route token、symbol 与 server hint。普通字符串扫描排除 ELF string-table 区域，避免把链接符号重复误判为 route token。该 Producer 只用于候选召回和深分析调度；名字相似或同一制品中的字符串与符号不能产生 `binds_handler` 关系。
 
+M1-06C Correlation Module 的公开 Interface 是 `correlate_frontend_native(frontend_results, native_results, policy)`。它只使用 exact endpoint 或 case-sensitive exact action component 形成 candidate association，稳定去重并传播上游 coverage；不读取源文件、不调用模型、不比较 symbol 名称。匹配结果产生 `registers_route/binds_handler` 义务，未匹配 frontend 结果产生 `registers_route` 义务，因此关联层提供调度线索但不越权发布实现关系。
+
 ## 6. 模型使用边界
 
 模型适合：
