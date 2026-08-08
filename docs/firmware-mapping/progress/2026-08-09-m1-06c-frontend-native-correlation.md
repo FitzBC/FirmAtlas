@@ -71,7 +71,8 @@ correlate_frontend_native(frontend_results, native_results, policy)
 | 后端全量 | `make test`，151/151 通过 |
 | 前端测试与构建 | Vitest 16/16、TypeScript 与 Vite build 通过 |
 | 本地 API/UI smoke | 临时 SQLite 下 health、overview、构建首页均 HTTP 200 |
-| Git revision / push | 待本记录提交后回填 |
+| 实现修订 | `79a051f` |
+| GitHub push | 随本里程碑关闭提交一并验证 |
 | SSH deployment | 不适用（用户当前测绘范围） |
 
 ## 5. 下一动作
