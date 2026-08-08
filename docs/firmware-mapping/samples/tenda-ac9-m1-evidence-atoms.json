@@ -1,0 +1,66 @@
+{
+  "schema_version": "firmatlas.mapping.evidence-sample/v1alpha1",
+  "sample": "Tenda AC9",
+  "source_inventory_sha256": "f425a98b9b7f4143a3b6b979631abe0715e3fc03773a656e1ee4455716ca8b4d",
+  "source": {
+    "canonical_path": "webroot_ro/js/static_route.js",
+    "size": 11206,
+    "content_sha256": "9bd1ff64ac59189812d29fefe565984c7f58ac68358003e15a1e3fa71a15482b"
+  },
+  "evidence_atoms": [
+    {
+      "evidence_id": "evidence:2c33fb57f240701749124abf435a5471c19e7a9c67a71b1c69548a351ec46571",
+      "subject_ref": "interface-candidate:goform-getstaticroutecfg",
+      "predicate": "constructs_request",
+      "object_value": "goform/GetStaticRouteCfg",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/static_route.js",
+        "artifact_sha256": "9bd1ff64ac59189812d29fefe565984c7f58ac68358003e15a1e3fa71a15482b",
+        "locator": "text_utf8:bytes=431-455;lines=18:14-18:38",
+        "span_kind": "text_utf8",
+        "start_byte": 431,
+        "end_byte": 455,
+        "excerpt_sha256": "54a76800528a2f3c1d29af00db6a548640722970b88ece1009e1b2cb654ca741",
+        "start_line": 18,
+        "start_column": 14,
+        "end_line": 18,
+        "end_column": 38
+      },
+      "producer": "frontend-javascript-string-index",
+      "producer_version": "0.1.0",
+      "observation_kind": "direct_static",
+      "capability": "constructs_request",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:1f6c92c0d699daed9ebfa2dfc58c108d6be215765be32ec1cda17a1d4a179f9a",
+      "subject_ref": "interface-candidate:goform-setstaticroutecfg",
+      "predicate": "constructs_request",
+      "object_value": "goform/SetStaticRouteCfg",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/static_route.js",
+        "artifact_sha256": "9bd1ff64ac59189812d29fefe565984c7f58ac68358003e15a1e3fa71a15482b",
+        "locator": "text_utf8:bytes=472-496;lines=19:14-19:38",
+        "span_kind": "text_utf8",
+        "start_byte": 472,
+        "end_byte": 496,
+        "excerpt_sha256": "47463eeb6d636dbf4eebc8a1c02120d6b474150e1044724d64df71d5b0cd1347",
+        "start_line": 19,
+        "start_column": 14,
+        "end_line": 19,
+        "end_column": 38
+      },
+      "producer": "frontend-javascript-string-index",
+      "producer_version": "0.1.0",
+      "observation_kind": "direct_static",
+      "capability": "constructs_request",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    }
+  ],
+  "replay": {
+    "verified_count": 2,
+    "result": "all excerpts matched source bytes and typed locators"
+  }
+}

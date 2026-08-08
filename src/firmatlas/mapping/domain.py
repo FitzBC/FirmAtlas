@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional, Tuple
 
 
 SNAPSHOT_SCHEMA_VERSION = "firmatlas.mapping.snapshot/v1alpha1"
+EVIDENCE_SCHEMA_VERSION = "firmatlas.mapping.evidence/v1alpha1"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -37,6 +38,11 @@ class ObservationKind(str, Enum):
     MODEL_SUGGESTED = "model_suggested"
     RUNTIME_OBSERVED = "runtime_observed"
     HUMAN_ASSERTED = "human_asserted"
+
+
+class SpanKind(str, Enum):
+    TEXT_UTF8 = "text_utf8"
+    BINARY = "binary"
 
 
 class CoverageStatus(str, Enum):
@@ -87,6 +93,30 @@ class EvidenceSpan:
     artifact_path: str
     artifact_sha256: str
     locator: str
+    span_kind: Optional[SpanKind] = None
+    start_byte: Optional[int] = None
+    end_byte: Optional[int] = None
+    excerpt_sha256: Optional[str] = None
+    start_line: Optional[int] = None
+    start_column: Optional[int] = None
+    end_line: Optional[int] = None
+    end_column: Optional[int] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return _primitive(asdict(self))
+
+    @classmethod
+    def from_dict(cls, value: Dict[str, Any]) -> "EvidenceSpan":
+        return cls(
+            **{
+                **value,
+                "span_kind": (
+                    SpanKind(value["span_kind"])
+                    if value.get("span_kind")
+                    else None
+                ),
+            }
+        )
 
 
 @dataclass(frozen=True)
@@ -101,6 +131,30 @@ class EvidenceAtom:
     observation_kind: ObservationKind
     capability: str
     confidence: float
+    schema_version: str = EVIDENCE_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        if self.schema_version != EVIDENCE_SCHEMA_VERSION:
+            raise ValueError("unsupported evidence schema_version")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return _primitive(asdict(self))
+
+    @classmethod
+    def from_dict(cls, value: Dict[str, Any]) -> "EvidenceAtom":
+        return cls(
+            evidence_id=value["evidence_id"],
+            subject_ref=value["subject_ref"],
+            predicate=value["predicate"],
+            object_value=value["object_value"],
+            source_span=EvidenceSpan.from_dict(value["source_span"]),
+            producer=value["producer"],
+            producer_version=value["producer_version"],
+            observation_kind=ObservationKind(value["observation_kind"]),
+            capability=value["capability"],
+            confidence=value["confidence"],
+            schema_version=value.get("schema_version", EVIDENCE_SCHEMA_VERSION),
+        )
 
 
 @dataclass(frozen=True)
@@ -322,18 +376,7 @@ class FirmwareMappingSnapshot:
     @classmethod
     def from_dict(cls, value: Dict[str, Any]) -> "FirmwareMappingSnapshot":
         evidence_atoms = tuple(
-            EvidenceAtom(
-                evidence_id=item["evidence_id"],
-                subject_ref=item["subject_ref"],
-                predicate=item["predicate"],
-                object_value=item["object_value"],
-                source_span=EvidenceSpan(**item["source_span"]),
-                producer=item["producer"],
-                producer_version=item["producer_version"],
-                observation_kind=ObservationKind(item["observation_kind"]),
-                capability=item["capability"],
-                confidence=item["confidence"],
-            )
+            EvidenceAtom.from_dict(item)
             for item in value.get("evidence_atoms", ())
         )
         entities = tuple(
