@@ -139,6 +139,17 @@ from .extraction import (
     WorkerExtractionRequest,
 )
 from .repository import CatalogConflictError, DiscoveryCatalogRepository
+from .native_deep import (
+    NATIVE_DEEP_RESULT_SCHEMA_VERSION,
+    NativeDeepDiagnostic,
+    NativeDeepPolicy,
+    NativeDeepResult,
+    NativeRouteAnchor,
+    NativeRouteBinding,
+    NativeRouteTableProfile,
+    discover_native_route_bindings,
+    native_deep_scheduler_analyzer,
+)
 
 __all__ = (
     "AnalyzerIdentity",
@@ -259,4 +270,13 @@ __all__ = (
     "WorkerExtractionRequest",
     "CatalogConflictError",
     "DiscoveryCatalogRepository",
+    "NATIVE_DEEP_RESULT_SCHEMA_VERSION",
+    "NativeDeepDiagnostic",
+    "NativeDeepPolicy",
+    "NativeDeepResult",
+    "NativeRouteAnchor",
+    "NativeRouteBinding",
+    "NativeRouteTableProfile",
+    "discover_native_route_bindings",
+    "native_deep_scheduler_analyzer",
 )

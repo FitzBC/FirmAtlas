@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-09 持久化查询与最小 UI 已验证；下一项为 M1-10 Native route/handler 深绑定 Adapter
+> 当前状态：M1-10A Native Deep 命名路由表 Adapter 已验证；下一项为 M1-10B ARM PIC call-site Adapter
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -64,6 +64,7 @@
 | [M1-07 义务调度记录](./progress/2026-08-09-m1-07-obligation-scheduler.md) | 稳定队列、Adapter 隔离、预算和固定点终止 | 调度策略、义务合同或终止语义变化时 |
 | [M1-08 无 seed 候选目录记录](./progress/2026-08-09-m1-08-discovery-catalog.md) | 多 Producer 投影、覆盖账本、参数、关联、固定点与 AC9 端到端输出 | 目录 schema、投影或发布不变量变化时 |
 | [M1-09 持久化查询与 UI 记录](./progress/2026-08-09-m1-09-persistence-query-ui.md) | SQLite 不可变发布、HTTP 查询、CLI 和目录三级工作区 | 查询投影、发布冲突或 UI 下钻语义变化时 |
+| [M1-10A Native Deep 路由表记录](./progress/2026-08-09-m1-10a-native-deep-route-table.md) | 命名 route table Profile、三段证据链、Scheduler 关闭和 AC9 负例 | Native Deep Profile、证据门限或义务关闭语义变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -129,9 +130,10 @@ M1 工作项：
 | M1-07 | 线索调度与固定点终止 | 已验证 | M1-04/05/06A/06B/06C | 13 contract tests + AC9 14-open-obligation fixed point + full regression |
 | M1-08 | 发布候选目录、覆盖账本和未决义务 | 已验证 | M1-07 | 11 contract tests + AC9 395-candidate no-seed replay + full regression |
 | M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 已验证 | M1-08 | repository/API tests + React test + browser regression |
-| M1-10 | Native route/handler 深绑定 Adapter | 未开始 | M1-09 | representative binary + obligation closure regression |
+| M1-10A | Native 命名 route-table 深绑定 Adapter | 已验证 | M1-09 | 10 contract tests + synthetic ARM ELF + AC9 negative control + obligation closure |
+| M1-10B | ARM PIC call-site/decompiler Adapter | 未开始 | M1-10A | AC9 registration call-site evidence + false-binding controls |
 
-**下一项建议**：进入 M1-09，为目录、参数、覆盖和开放义务提供持久化查询与最小 UI 纵向接入。Native Deep Adapter 的 anchor/xref 请求继续以 M1-06C obligation 为输入。M1-02B 可使用 Binwalk，但必须在生产隔离 worker 和固定工具链中执行，不能进入主分析进程。
+**下一项建议**：进入 M1-10B，以 M1-06C obligation 和 M1-10A 的证据合同为输入，实现隔离的 ARM PIC call-site/decompiler Adapter；必须证明 route 参数与 handler 引用进入同一注册调用。M1-02B 可使用 Binwalk，但必须在生产隔离 worker 和固定工具链中执行，不能进入主分析进程。
 
 ## 7. 跨会话无缝工作协议
 

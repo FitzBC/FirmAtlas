@@ -17,6 +17,7 @@
 - [M1-06B Script Backend Producer 中间输出](./m1-06b-script-backend-summary.json)：D-Link DSL 真实 ASP、空 HNAP 占位与 Shell CGI 的参数—状态链和保守路由边界。
 - [M1-07 Obligation Scheduler 中间输出](./m1-07-obligation-scheduler-summary.json)：AC9 14 个 route/handler 义务在 discover 策略下的零高成本执行固定点与开放工作保留。
 - [M1-08 AC9 Discovery Catalog 中间输出](./m1-08-ac9-discovery-catalog-summary.json)：三份前端/模板、配置、脚本、Native、关联和调度结果组装出的 395 个无 seed 候选、参数、覆盖与开放义务。
+- [M1-10 Native Deep route-table 中间输出](./m1-10-native-deep-route-table-summary.json)：ARM ELF `{route_ptr, handler_ptr}` 正例的三段证据链、Scheduler 义务关闭、Catalog 投影，以及 AC9 无可信命名表的真实负面对照。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

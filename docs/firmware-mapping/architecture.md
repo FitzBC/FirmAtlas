@@ -136,6 +136,8 @@ M1-08 Discovery Catalog 的公开 Interface 是 `assemble_discovery_catalog(Disc
 
 M1-09 的持久化 Adapter 是 `DiscoveryCatalogRepository`。它将完整目录 JSON 作为不可变、内容摘要校验的发布对象保存，同时生成可重建的候选查询投影；投影不产生新主张。重复发布相同文档是幂等操作，同一 `catalog_id` 若内容摘要不同则拒绝。候选详情从同一目录文档聚合参数、EvidenceAtom、关联、Coverage Ledger 与开放义务，避免 UI 侧再次推断。SQLite 表使用 `mapping_discovery_*` 命名空间，与情报/固件目录共享数据库文件但保持独立 Module 边界。
 
+M1-10A 的 Native Deep Interface 是 `discover_native_route_bindings(source, content, anchors, profile, policy)`。首个 Adapter 只解析版本化 Profile 允许的命名 ELF route-table section，要求 route pointer 指向 allocated/non-executable 字符串、handler pointer 指向 allocated/executable section，并发布 route literal、registration entry、handler entry 三段 EvidenceAtom。`native_deep_scheduler_analyzer(result)` 只按 exact target/capability 消费这些 proof。普通 `.data` 指针对、字符串/符号共现和不可执行 handler 地址均不能关闭义务。
+
 ### S4 定向绑定
 
 根据前序锚点执行 route/handler/xref 分析，避免对所有二进制无差别深反编译。文本侧或 Native 侧单独成功时允许发布部分结果。

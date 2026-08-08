@@ -1,0 +1,81 @@
+{
+  "schema_version": "firmatlas.mapping.native-deep-sample-summary/v1alpha1",
+  "recorded_at": "2026-08-09",
+  "adapter": {
+    "producer": "native-deep-route-table",
+    "version": "0.1.0",
+    "profile": "named-route-handler-pairs/v1",
+    "table_sections": [".routes", ".route_table", ".webs_routes"],
+    "layout": ["route_pointer", "handler_pointer"]
+  },
+  "positive_fixture": {
+    "artifact": "fixture://route-table",
+    "artifact_sha256": "b34b7df8eecbfd34f4e63d57318abad926cf98d961bee4b9aaf76e342c6d8218",
+    "bytes": 332,
+    "machine": "ARM ELF32 little-endian",
+    "anchor": "SetOnlineDevName",
+    "target_ref": "frontend-native-association:online-name",
+    "binding": {
+      "binding_id": "native-route-binding:b907ae9854ee52f389588ae362d9cc2d3c496433aa4c2327687c70f7c60a75c8",
+      "registration_address": "0x00003000",
+      "handler_identity": "fixture://route-table@0x00001000",
+      "claim_status": "supported"
+    },
+    "evidence_chain": [
+      {
+        "capability": "mentions_endpoint",
+        "locator": "binary:bytes=104-120",
+        "interpretation": "The route token is directly present in allocated non-executable ELF data."
+      },
+      {
+        "capability": "registers_route",
+        "locator": "binary:bytes=124-132",
+        "interpretation": "The trusted table entry route slot points to the route token address."
+      },
+      {
+        "capability": "binds_handler",
+        "locator": "binary:bytes=124-132",
+        "interpretation": "The same trusted entry handler slot points into an allocated executable section."
+      }
+    ],
+    "scheduler": {
+      "input_obligations": ["registers_route", "binds_handler"],
+      "resolved": 2,
+      "open": 0
+    },
+    "catalog": {
+      "published_candidate_kinds": ["native_route_binding", "native_handler"],
+      "queryable_from_original_association": true
+    }
+  },
+  "negative_controls": [
+    {
+      "case": "handler points into non-executable rodata",
+      "result": "no binding",
+      "diagnostic": "handler_target_not_executable"
+    },
+    {
+      "case": "route and handler-like names exist without a profiled table entry",
+      "result": "no binding and no deep evidence"
+    },
+    {
+      "case": "pointer pair occurs in an untrusted .data__ section",
+      "result": "section is not scanned"
+    }
+  ],
+  "actual_tenda_ac9": {
+    "artifact": "bin/httpd",
+    "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+    "bytes": 982880,
+    "coverage_status": "completed",
+    "bindings": 0,
+    "evidence_atoms": 0,
+    "interpretation": "AC9 exposes route strings and exported handler symbols but has no trusted named route-table section. The conservative profile therefore leaves its route/handler obligations open; a call-site/decompiler Adapter is required."
+  },
+  "safety_invariants": [
+    "String or symbol name similarity never closes an obligation.",
+    "The route table section name and pointer layout are part of the versioned profile.",
+    "Every handler pointer must resolve into allocated executable ELF memory.",
+    "Every published proof retains a replayable binary span and artifact digest."
+  ]
+}

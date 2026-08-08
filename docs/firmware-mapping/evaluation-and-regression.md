@@ -146,6 +146,8 @@
 
 每个 producer 使用小型真实语法 fixture，断言其 EvidenceAtom，而不是内部 AST 或中间 JSON。包含正常、混淆、损坏、编码和资源预算案例。
 
+Native Deep fixture 还必须同时包含结构化正例与误绑定负例：route literal、注册表项和 executable handler 三段证据缺一不可；普通 `.data`、非可执行 handler、仅字符串/符号共现以及不受信 section 均不得关闭调度义务。真实固件在当前 Profile 不支持时应记录 completed coverage 与 0 binding，不能跨过证据门限猜测关系。
+
 ### 6.3 Module contract tests
 
 所有主要行为通过 `FirmwareMapper` Interface 测试：

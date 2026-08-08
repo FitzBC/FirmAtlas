@@ -122,13 +122,26 @@ class DiscoveryCatalogRepository:
             parameters = document.get("parameters", [])
             associations = document.get("associations", [])
             obligations = document.get("open_obligations", [])
+            deep_candidates = [
+                item for item in document.get("candidates", [])
+                if dict(item.get("attributes", [])).get("target_ref")
+            ]
             for candidate in document.get("candidates", []):
                 candidate_id = candidate["candidate_id"]
+                candidate_target = dict(candidate.get("attributes", [])).get("target_ref")
                 touching = [
                     item for item in associations
-                    if candidate_id in (item.get("frontend_candidate_id"), item.get("native_hint_id"))
+                    if candidate_id in (
+                        item.get("frontend_candidate_id"), item.get("native_hint_id")
+                    ) or item.get("association_id") == candidate_target
                 ]
                 association_ids = {item.get("association_id") for item in touching}
+                related_deep = [
+                    item for item in deep_candidates
+                    if item.get("candidate_id") != candidate_id
+                    and dict(item.get("attributes", [])).get("target_ref")
+                    in ({candidate_id} | association_ids)
+                ]
                 open_count = sum(
                     item.get("target_ref") == candidate_id
                     or item.get("target_ref") in association_ids
@@ -152,7 +165,7 @@ class DiscoveryCatalogRepository:
                         candidate["source_path"], candidate["source_construct"],
                         _search_text(searchable),
                         sum(x.get("owner_ref") == candidate_id for x in parameters),
-                        len(touching), open_count, _encoded(candidate),
+                        len(touching) + len(related_deep), open_count, _encoded(candidate),
                     ),
                 )
         return {"catalog_id": catalog_id, "created": True, "content_sha256": digest}
@@ -246,17 +259,27 @@ class DiscoveryCatalogRepository:
         document = json.loads(document_row["document_json"])
         candidate = self._candidate_projection(row)
         evidence_ids = set(candidate.get("evidence_ids", []))
+        candidate_target = dict(candidate.get("attributes", [])).get("target_ref")
         associations = [
             item for item in document.get("associations", [])
-            if candidate_id in (item.get("frontend_candidate_id"), item.get("native_hint_id"))
+            if candidate_id in (
+                item.get("association_id"), item.get("frontend_candidate_id"),
+                item.get("native_hint_id"),
+            ) or item.get("association_id") == candidate_target
         ]
         association_ids = {item.get("association_id") for item in associations}
+        related_targets = {candidate_id, *association_ids}
+        related_candidates = [
+            item for item in document.get("candidates", [])
+            if item.get("candidate_id") != candidate_id
+            and dict(item.get("attributes", [])).get("target_ref") in related_targets
+        ]
         obligations = [
             item for item in document.get("open_obligations", [])
             if item.get("target_ref") == candidate_id or item.get("target_ref") in association_ids
         ]
         parameters = [x for x in document.get("parameters", []) if x.get("owner_ref") == candidate_id]
-        for item in parameters + associations:
+        for item in parameters + associations + related_candidates:
             evidence_ids.update(item.get("evidence_ids", []))
         return {
             "catalog": {
@@ -267,6 +290,7 @@ class DiscoveryCatalogRepository:
             "candidate": candidate,
             "parameters": parameters,
             "associations": associations,
+            "related_candidates": related_candidates,
             "open_obligations": obligations,
             "evidence_atoms": [
                 x for x in document.get("evidence_atoms", []) if x.get("evidence_id") in evidence_ids

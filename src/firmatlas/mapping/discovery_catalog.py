@@ -14,6 +14,7 @@ from .frontend import FrontendProducerResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
+from .native_deep import NativeDeepResult
 from .correlation import FrontendNativeCorrelationResult
 from .scheduler import (
     ObligationSchedulerResult,
@@ -32,6 +33,7 @@ class DiscoveryProducerKind(str, Enum):
     WEB_CONFIGURATION = "web_configuration"
     SCRIPT_BACKEND = "script_backend"
     NATIVE = "native"
+    NATIVE_DEEP = "native_deep"
     CORRELATION = "correlation"
     SCHEDULER = "scheduler"
 
@@ -45,6 +47,8 @@ class DiscoveryCandidateKind(str, Enum):
     STATE_ACCESS = "state_access"
     TEMPLATE_READ = "template_read"
     NATIVE_HINT = "native_hint"
+    NATIVE_ROUTE_BINDING = "native_route_binding"
+    NATIVE_HANDLER = "native_handler"
     CANDIDATE_ASSOCIATION = "candidate_association"
 
 
@@ -104,6 +108,17 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("native-shallow-producer", "0.1.0")
         )
         return cls(DiscoveryProducerKind.NATIVE, producer, scope, results)
+
+    @classmethod
+    def native_deep(
+        cls, results: Tuple[NativeDeepResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-deep-route-table", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.NATIVE_DEEP, producer, scope, results)
 
     def __post_init__(self) -> None:
         if not self.scope.strip() or not self.producer.name.strip():
@@ -258,6 +273,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
     evidence = {}
     coverage = []
     associations = []
+    native_deep_target_refs = set()
     for batch in sorted(value.batches, key=lambda x: (x.producer_kind.value, x.scope)):
         statuses = []
         for result in batch.results:
@@ -402,6 +418,42 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("machine", result.machine),
                         ) if raw is not None),
                     ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE_DEEP:
+                for item in result.bindings:
+                    native_deep_target_refs.add(item.target_ref)
+                    common_attributes = (
+                        ("target_ref", item.target_ref),
+                        ("profile", result.profile),
+                        ("registration_address", "0x{:x}".format(item.registration_address)),
+                        ("handler_address", "0x{:x}".format(item.handler_address)),
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        item.binding_id,
+                        DiscoveryCandidateKind.NATIVE_ROUTE_BINDING,
+                        item.route_token,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        (*common_attributes, ("handler_identity", item.handler_identity)),
+                    ))
+                    handler_id = _stable_id(
+                        "native-handler", result.source_path, item.handler_identity
+                    )
+                    handler_evidence = tuple(
+                        evidence_id for evidence_id in item.evidence_ids
+                        if evidence[evidence_id].capability == "binds_handler"
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        handler_id,
+                        DiscoveryCandidateKind.NATIVE_HANDLER,
+                        item.handler_identity,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        item.source_construct,
+                        handler_evidence,
+                        (*common_attributes, ("route_token", item.route_token)),
+                    ))
         if not statuses:
             status = CoverageStatus.FAILED if batch.required else CoverageStatus.NOT_APPLICABLE
             diagnostic = "required_batch_has_no_results" if batch.required else None
@@ -440,6 +492,8 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
             value.correlation.coverage_status, True, 1,
             "; ".join(x.message for x in value.correlation.diagnostics) or None,
         ))
+    if any(target not in candidate_ids for target in native_deep_target_refs):
+        raise ValueError("native deep binding references unknown catalog candidate")
     if value.scheduler is not None:
         obligations = value.scheduler.open_obligations
         termination = value.scheduler.termination

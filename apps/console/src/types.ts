@@ -296,6 +296,7 @@ export interface MappingCandidateDetail {
     association_id: string; frontend_candidate_id: string; native_hint_id: string
     match_basis: string; evidence_ids: string[]
   }>
+  related_candidates: MappingCandidate[]
   open_obligations: Array<{ obligation_id: string; target_ref: string; status: string; reason: string }>
   evidence_atoms: Array<{
     evidence_id: string; predicate: string; object_value: string; capability: string

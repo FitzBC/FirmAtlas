@@ -7,6 +7,7 @@ import type { MappingCandidate, MappingCandidateDetail, MappingCatalogSummary } 
 const kinds = [
   ['', '全部能力'], ['request_interface', '请求接口'], ['web_configuration', 'Web 配置'],
   ['script_route', '脚本路由'], ['native_hint', '原生提示'],
+  ['native_route_binding', 'Native 绑定'], ['native_handler', 'Native Handler'],
   ['candidate_association', '跨层关联'],
 ] as const
 
@@ -127,11 +128,16 @@ function CandidateRow({ candidate, active, onClick }: { candidate: MappingCandid
 
 function CandidateEvidence({ detail }: { detail: MappingCandidateDetail }) {
   const item = detail.candidate
+  const title = item.candidate_kind === 'candidate_association'
+    ? '跨层候选关联'
+    : item.canonical_identity
   return <article className="detail-enter max-h-[640px] overflow-y-auto p-5 sm:p-6">
-    <div className="eyebrow"><FileCode2 size={12} /> Evidence detail</div><h2 className="mt-3 break-all font-mono text-lg font-semibold text-white">{item.canonical_identity}</h2><p className="mt-2 break-all text-xs text-slate-600">{item.source_path} · {item.source_construct}</p>
-    <div className="mt-5 grid grid-cols-3 gap-2">{[['参数', detail.parameters.length], ['关联', detail.associations.length], ['未决', detail.open_obligations.length]].map(([label, value]) => <div key={label} className="rounded-xl border border-white/[0.06] bg-black/20 p-3"><div className="text-[9px] text-slate-600">{label}</div><div className="mt-1 text-lg font-semibold text-slate-200">{value}</div></div>)}</div>
+    <div className="eyebrow"><FileCode2 size={12} /> Evidence detail</div><h2 className="mt-3 break-all font-mono text-lg font-semibold text-white">{title}</h2><p className="mt-2 break-all text-xs text-slate-600">{item.source_path} · {item.source_construct}</p>
+    {item.candidate_kind === 'candidate_association' && <p className="mt-2 break-all font-mono text-[9px] leading-4 text-slate-700">{item.canonical_identity}</p>}
+    <div className="mt-5 grid grid-cols-3 gap-2">{[['参数', detail.parameters.length], ['关联', detail.associations.length + detail.related_candidates.length], ['未决', detail.open_obligations.length]].map(([label, value]) => <div key={label} className="rounded-xl border border-white/[0.06] bg-black/20 p-3"><div className="text-[9px] text-slate-600">{label}</div><div className="mt-1 text-lg font-semibold text-slate-200">{value}</div></div>)}</div>
     <EvidenceSection title="参数与操作选择器">{detail.parameters.length ? detail.parameters.map((parameter) => <div key={parameter.parameter_id} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"><div className="font-mono text-xs text-cyan">{parameter.name}</div><div className="mt-1 text-[10px] text-slate-600">{parameter.namespace}{parameter.is_operation_selector ? ' · operation selector' : ''}{parameter.literal_value ? ` · ${parameter.literal_value}` : ''}</div></div>) : <Muted />}</EvidenceSection>
     <EvidenceSection title="跨层关联">{detail.associations.length ? detail.associations.map((association) => <div key={association.association_id} className="rounded-lg border border-signal/10 bg-signal/[0.035] p-3 text-xs text-slate-400"><span className="text-signal">{association.match_basis}</span><div className="mt-1 break-all font-mono text-[9px] text-slate-600">{association.native_hint_id}</div></div>) : <Muted />}</EvidenceSection>
+    <EvidenceSection title="已验证 Native 绑定">{detail.related_candidates.length ? detail.related_candidates.map((related) => <div key={related.candidate_id} className="rounded-lg border border-cyan/15 bg-cyan/[0.035] p-3"><div className="flex items-center justify-between gap-3"><span className="font-mono text-xs text-cyan">{related.canonical_identity}</span><span className="text-[9px] uppercase tracking-[0.1em] text-signal">{related.claim_status}</span></div><div className="mt-1 break-all text-[9px] text-slate-600">{related.candidate_kind.replaceAll('_', ' ')} · {related.source_construct}</div></div>) : <Muted />}</EvidenceSection>
     <EvidenceSection title="原始证据位置">{detail.evidence_atoms.map((atom) => <div key={atom.evidence_id} className="rounded-lg border border-white/[0.06] p-3"><div className="text-[10px] text-slate-400">{atom.capability}</div><div className="mt-1 break-all font-mono text-[9px] leading-5 text-slate-600">{atom.source_span.artifact_path} · {atom.source_span.locator}</div></div>)}</EvidenceSection>
   </article>
 }

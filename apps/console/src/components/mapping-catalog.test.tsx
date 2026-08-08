@@ -22,7 +22,13 @@ const detail: MappingCandidateDetail = {
   catalog: { catalog_id: catalog.catalog_id, coverage_status: 'completed', scheduler_termination: 'fixed_point' },
   candidate,
   parameters: [{ parameter_id: 'p:1', name: 'devName', namespace: 'form', literal_value: null, selector_values: [], is_operation_selector: false, source_construct: 'form_urlencoded' }],
-  associations: [], open_obligations: [],
+  associations: [],
+  related_candidates: [{
+    ...candidate, candidate_id: 'native-binding:1', candidate_kind: 'native_route_binding',
+    canonical_identity: 'SetOnlineDevName', claim_status: 'supported',
+    source_path: 'bin/httpd', source_construct: 'elf.named-route-handler-pairs/v1:.routes',
+  }],
+  open_obligations: [],
   evidence_atoms: [{ evidence_id: 'ev:1', predicate: 'constructs', object_value: candidate.canonical_identity, capability: 'constructs_request', source_span: { artifact_path: candidate.source_path, locator: 'text:1' } }],
   coverage: [{ scope: 'webroot/**/*.js', producer_kind: 'frontend', producer: 'frontend-request-producer', status: 'completed' }],
 }
@@ -44,4 +50,6 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   fireEvent.click(screen.getByRole('button', { name: /查看候选/ }))
   expect(await screen.findByText('devName')).toBeInTheDocument()
   expect(screen.getByText('constructs_request')).toBeInTheDocument()
+  expect(screen.getByText('已验证 Native 绑定')).toBeInTheDocument()
+  expect(screen.getByText('SetOnlineDevName')).toBeInTheDocument()
 })
