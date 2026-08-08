@@ -29,6 +29,19 @@ from .inventory import (
     SourceInventory,
     build_inventory,
 )
+from .extraction import (
+    EXTRACTION_SCHEMA_VERSION,
+    BinwalkExtractor,
+    ExtractionDiagnostic,
+    ExtractionPolicy,
+    ExtractionRequest,
+    ExtractionResult,
+    ExtractionStatus,
+    ExtractionWorker,
+    ToolIdentity,
+    WorkerExecution,
+    WorkerExtractionRequest,
+)
 
 __all__ = (
     "AnalyzerIdentity",
@@ -56,4 +69,15 @@ __all__ = (
     "SourceArtifactEntry",
     "SourceInventory",
     "build_inventory",
+    "EXTRACTION_SCHEMA_VERSION",
+    "BinwalkExtractor",
+    "ExtractionDiagnostic",
+    "ExtractionPolicy",
+    "ExtractionRequest",
+    "ExtractionResult",
+    "ExtractionStatus",
+    "ExtractionWorker",
+    "ToolIdentity",
+    "WorkerExecution",
+    "WorkerExtractionRequest",
 )
