@@ -1,0 +1,219 @@
+{
+  "schema_version": "firmatlas.mapping.frontend-sample/v1alpha1",
+  "producer_version": "0.1.0",
+  "results": [
+    {
+      "label": "Tenda AC9 static_route.js",
+      "sample_kind": "real_firmware_source",
+      "source": "webroot_ro/js/static_route.js",
+      "source_sha256": "9bd1ff64ac59189812d29fefe565984c7f58ac68358003e15a1e3fa71a15482b",
+      "coverage_status": "completed",
+      "processed_bytes": 11206,
+      "candidate_count": 2,
+      "parameter_count": 1,
+      "evidence_count": 3,
+      "candidates": [
+        {
+          "endpoint": "goform/GetStaticRouteCfg",
+          "endpoint_shape": "exact_literal",
+          "role": "read",
+          "method": null,
+          "representation": null,
+          "source_construct": "R.pageModel.getUrl",
+          "evidence_count": 1
+        },
+        {
+          "endpoint": "goform/SetStaticRouteCfg",
+          "endpoint_shape": "exact_literal",
+          "role": "write",
+          "method": null,
+          "representation": null,
+          "source_construct": "R.pageModel.setUrl",
+          "evidence_count": 1
+        }
+      ],
+      "parameters": [
+        {
+          "request_endpoint": "goform/SetStaticRouteCfg",
+          "name": "list",
+          "namespace": "form",
+          "literal_value": null,
+          "operation_selector": false,
+          "evidence_count": 1
+        }
+      ],
+      "diagnostics": []
+    },
+    {
+      "label": "Tenda AC9 online_list.js",
+      "sample_kind": "real_firmware_source",
+      "source": "webroot_ro/js/online_list.js",
+      "source_sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87",
+      "coverage_status": "completed",
+      "processed_bytes": 15385,
+      "candidate_count": 5,
+      "parameter_count": 4,
+      "evidence_count": 10,
+      "candidates": [
+        {
+          "endpoint": "goform/getOnlineList?",
+          "endpoint_shape": "literal_prefix",
+          "role": "read",
+          "method": "GET",
+          "representation": "json",
+          "source_construct": "jQuery.getJSON",
+          "evidence_count": 2
+        },
+        {
+          "endpoint": "goform/setBlackRule",
+          "endpoint_shape": "exact_literal",
+          "role": "write",
+          "method": "POST",
+          "representation": "form_urlencoded",
+          "source_construct": "jQuery.post",
+          "evidence_count": 1
+        },
+        {
+          "endpoint": "goform/SetOnlineDevName",
+          "endpoint_shape": "exact_literal",
+          "role": "write",
+          "method": "POST",
+          "representation": "form_urlencoded",
+          "source_construct": "jQuery.post",
+          "evidence_count": 1
+        },
+        {
+          "endpoint": "goform/getBlackRuleList?",
+          "endpoint_shape": "literal_prefix",
+          "role": "read",
+          "method": "GET",
+          "representation": "json",
+          "source_construct": "jQuery.getJSON",
+          "evidence_count": 1
+        },
+        {
+          "endpoint": "goform/delBlackRule",
+          "endpoint_shape": "exact_literal",
+          "role": "write",
+          "method": "POST",
+          "representation": "form_urlencoded",
+          "source_construct": "jQuery.post",
+          "evidence_count": 1
+        }
+      ],
+      "parameters": [
+        {
+          "request_endpoint": "goform/setBlackRule",
+          "name": "mac",
+          "namespace": "form",
+          "literal_value": null,
+          "operation_selector": false,
+          "evidence_count": 1
+        },
+        {
+          "request_endpoint": "goform/SetOnlineDevName",
+          "name": "mac",
+          "namespace": "form",
+          "literal_value": null,
+          "operation_selector": false,
+          "evidence_count": 1
+        },
+        {
+          "request_endpoint": "goform/SetOnlineDevName",
+          "name": "devName",
+          "namespace": "form",
+          "literal_value": null,
+          "operation_selector": false,
+          "evidence_count": 1
+        },
+        {
+          "request_endpoint": "goform/delBlackRule",
+          "name": "mac",
+          "namespace": "form",
+          "literal_value": null,
+          "operation_selector": false,
+          "evidence_count": 1
+        }
+      ],
+      "diagnostics": []
+    },
+    {
+      "label": "HNAP/SOAPAction contract fixture",
+      "sample_kind": "synthetic_contract_fixture",
+      "source": "fixtures/hnap.js",
+      "source_sha256": "1c83ac497de85dd8a8034292bd4c195d67bbd0c437be24a3bf7578d1e54315e2",
+      "coverage_status": "completed",
+      "processed_bytes": 182,
+      "candidate_count": 1,
+      "parameter_count": 1,
+      "evidence_count": 3,
+      "candidates": [
+        {
+          "endpoint": "/HNAP1",
+          "endpoint_shape": "exact_literal",
+          "role": "write",
+          "method": "POST",
+          "representation": "xml",
+          "source_construct": "jQuery.ajax",
+          "evidence_count": 1
+        }
+      ],
+      "parameters": [
+        {
+          "request_endpoint": "/HNAP1",
+          "name": "SOAPAction",
+          "namespace": "header",
+          "literal_value": "http://purenetworks.com/HNAP1/GetDeviceSettings",
+          "operation_selector": true,
+          "evidence_count": 2
+        }
+      ],
+      "diagnostics": []
+    },
+    {
+      "label": "shared CGI JSON selector contract fixture",
+      "sample_kind": "synthetic_contract_fixture",
+      "source": "fixtures/shared-cgi.js",
+      "source_sha256": "7862e33f3d98c87d9542404cfa4ad839336135c7180b7e36dd98577a7114598e",
+      "coverage_status": "completed",
+      "processed_bytes": 173,
+      "candidate_count": 1,
+      "parameter_count": 2,
+      "evidence_count": 4,
+      "candidates": [
+        {
+          "endpoint": "/cgi-bin/cstecgi.cgi",
+          "endpoint_shape": "exact_literal",
+          "role": "write",
+          "method": "POST",
+          "representation": "json",
+          "source_construct": "jQuery.ajax",
+          "evidence_count": 1
+        }
+      ],
+      "parameters": [
+        {
+          "request_endpoint": "/cgi-bin/cstecgi.cgi",
+          "name": "topicurl",
+          "namespace": "json",
+          "literal_value": "setting/setLanCfg",
+          "operation_selector": true,
+          "evidence_count": 2
+        },
+        {
+          "request_endpoint": "/cgi-bin/cstecgi.cgi",
+          "name": "lanIp",
+          "namespace": "json",
+          "literal_value": null,
+          "operation_selector": false,
+          "evidence_count": 1
+        }
+      ],
+      "diagnostics": []
+    }
+  ],
+  "limitations": [
+    "Synthetic HNAP/CGI fixtures validate identity shape but are not firmware recall evidence.",
+    "Frontend constructs do not prove backend route registration or handler binding."
+  ]
+}
