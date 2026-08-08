@@ -1,4 +1,4 @@
-.PHONY: test demo seed-demo mapping-example api intelligence-bootstrap intelligence-update firmware-catalog-sync firmware-version-link firmware-refresh web-install web-dev web-build deploy deploy-with-data
+.PHONY: test demo seed-demo mapping-example mapping-inventory api intelligence-bootstrap intelligence-update firmware-catalog-sync firmware-version-link firmware-refresh web-install web-dev web-build deploy deploy-with-data
 
 test:
 	PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -11,6 +11,10 @@ seed-demo:
 
 mapping-example:
 	PYTHONPATH=src python3 -m firmatlas.mapping validate-snapshot tests/fixtures/mapping/tenda_ac9_m1_snapshot.json
+
+mapping-inventory:
+	@test -n "$(ROOT)" || { echo "Usage: make mapping-inventory ROOT=/path/to/extracted-root" >&2; exit 2; }
+	PYTHONPATH=src python3 -m firmatlas.mapping inventory "$(ROOT)"
 
 api:
 	PYTHONPATH=src python3 -m firmatlas intelligence serve

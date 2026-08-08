@@ -100,6 +100,9 @@ flowchart TD
 
 ### S0 制品清单
 
+- 原始固件由隔离 Extraction Worker 中的 Binwalk Adapter 识别和解包；
+- Binwalk 只生成带父子摘要、工具版本和执行诊断的 Derived Artifact，不直接发布测绘事实；
+- Inventory Module 只读取隔离 worker 的输出目录，不在自身 Implementation 中启动 Binwalk；
 - 不信任扩展名；
 - 规范路径并保留原始路径；
 - 处理 symlink、hardlink、archive member；
@@ -199,6 +202,7 @@ src/firmatlas/mapping/
 │   └── runtime.py
 └── adapters/              # 跨真实 Seam 的 Adapter
     ├── persistence.py
+    ├── binwalk_extractor.py
     ├── ghidra_worker.py
     └── model_provider.py
 ```

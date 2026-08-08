@@ -1,9 +1,9 @@
 # M1-01：版本化 Firmware Mapping Snapshot 合同
 
-> 工作项：M1-01  
-> 状态：进行中  
-> 日期：2026-08-08  
-> 发布状态：等待本地全量回归、Git 修订和 `satc_cloud` 核验
+> 工作项：M1-01
+> 状态：已验证
+> 日期：2026-08-08
+> 发布状态：Git 修订已推送；SSH 部署按当前用户范围不适用
 
 ## 1. 结果与范围
 
@@ -79,7 +79,7 @@
 | 后端全量测试 | `make test`，75/75 通过 |
 | 前端测试与生产构建 | Vitest 16/16 通过；TypeScript 检查与 Vite build 通过 |
 | 本地 API/前端烟雾 | 临时 SQLite 下 health 200、FirmAtlas HTML 200、overview 200 |
-| Git revision / push | 待回填 |
-| `satc_cloud` release / health / frontend / behavior | 待回填 |
+| Git revision / push | `8aa790e`，已推送 `main` |
+| `satc_cloud` release / health / frontend / behavior | 不适用；后续用户将通信测绘相关功能明确调整为暂不需要 SSH 部署 |
 
-在最后一项通过前，M1-01 状态保持“进行中”。
+曾尝试部署该修订，脚本因远端 linger 未启用而安全拒绝，之后 SSH 连接在密钥交换前关闭。该失败保留为历史证据；本记录最终依据用户后续明确范围将远端标为不适用。

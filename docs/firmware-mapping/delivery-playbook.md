@@ -76,6 +76,8 @@ docs/firmware-mapping/
 
 常规发布不得使用 `make deploy-with-data`。只有明确需要替换远端情报数据库并具有备份/恢复计划时才允许。
 
+如果用户在当前目标中明确限定某类研究功能“暂不需要 SSH 部署”，该范围内工作项可以在本地全量回归、样本回放、文档、提交和推送后标记已验证；progress 必须将远端标为“不适用（当前用户范围）”。这不改变仓库对其他功能的默认部署规则，也不能被后续会话默认扩大。
+
 ## 3. Definition of Done
 
 一个工作项完成需要：
@@ -90,8 +92,8 @@ docs/firmware-mapping/
 - [ ] README/设计/领域/研究文档按影响更新；
 - [ ] progress 记录含命令和结果；
 - [ ] intended revision 已提交并推送；
-- [ ] 从干净工作树完成 `make deploy`；
-- [ ] satc_cloud revision、health、frontend 和行为 endpoint 已核验；
+- [ ] 从干净工作树完成 `make deploy`，或 progress 已记录用户明确的暂不部署范围；
+- [ ] satc_cloud revision、health、frontend 和行为 endpoint 已核验，或远端项已按上述范围标为不适用；
 - [ ] 主控状态和下一动作已更新；
 - [ ] 未解决问题转换为明确 Obligation 或后续工作项。
 

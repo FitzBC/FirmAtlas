@@ -21,6 +21,14 @@ from .domain import (
     SnapshotStatus,
     UnresolvedObligation,
 )
+from .inventory import (
+    INVENTORY_SCHEMA_VERSION,
+    InventoryDiagnostic,
+    InventoryPolicy,
+    SourceArtifactEntry,
+    SourceInventory,
+    build_inventory,
+)
 
 __all__ = (
     "AnalyzerIdentity",
@@ -42,4 +50,10 @@ __all__ = (
     "SNAPSHOT_SCHEMA_VERSION",
     "SnapshotStatus",
     "UnresolvedObligation",
+    "InventoryPolicy",
+    "INVENTORY_SCHEMA_VERSION",
+    "InventoryDiagnostic",
+    "SourceArtifactEntry",
+    "SourceInventory",
+    "build_inventory",
 )

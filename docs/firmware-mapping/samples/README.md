@@ -4,6 +4,11 @@
 > 数据观察日期：2026-08-08  
 > 机器可读清单：[representative-corpus.json](./representative-corpus.json)
 
+已发布的样本过程说明：
+
+- [Tenda AC9：M1 Snapshot 人工证据重放](./tenda-ac9-m1-walkthrough.md)；
+- [Tenda AC9：M1-02 完整 rootfs 清单](./tenda-ac9-m1-inventory-walkthrough.md)。
+
 ## 1. 为什么不能只选“最容易跑通”的样本
 
 接口测绘工具最容易在 `/goform/<Action>` 上获得漂亮结果，但这会把“路径就是操作”的特殊情况误当成通用规律。基线必须同时覆盖共享 endpoint、selector、脚本控制器、Native route table、现代 API、SOAP/XML 和前端缺失场景。
@@ -102,10 +107,9 @@ Tier C 同时是样本获取工作队列。没有固件制品前，只能验证�
 
 ## 6. 当前缺口
 
-- 只有 Tenda AC9 已在本地完成源文件级人工回放；
+- 只有 Tenda AC9 已在本地完成源文件级人工回放与自动完整 rootfs Inventory；
 - 其他候选尚未由新 Mapping Module 自动解包和分析；
 - 当前类别来自漏洞文本路径规则，尚未由真实 dispatcher/binding 证据校准；
 - Native 函数、参数 getter 和 route binding 尚未建立真值；
 - 缺少跨厂商 OEM/代码血缘明确标注；
 - 数据许可和论文再分发范围仍需逐样本核查。
-

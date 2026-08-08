@@ -1,0 +1,42 @@
+{
+  "schema_version": "firmatlas.mapping.inventory.summary/v1alpha1",
+  "sample_candidate_id": "firmemuhub:BM-2024-00012",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "inventory_schema_version": "firmatlas.mapping.inventory/v1alpha1",
+  "inventory_sha256": "f425a98b9b7f4143a3b6b979631abe0715e3fc03773a656e1ee4455716ca8b4d",
+  "coverage_status": "completed",
+  "observed_count": 1038,
+  "processed_count": 1038,
+  "processed_bytes": 73075984,
+  "expanded_bytes": 0,
+  "diagnostic_codes": [],
+  "kind_counts": {
+    "file": 1038
+  },
+  "key_entries": [
+    {
+      "canonical_path": "webroot_ro/js/static_route.js",
+      "size": 11206,
+      "content_sha256": "9bd1ff64ac59189812d29fefe565984c7f58ac68358003e15a1e3fa71a15482b"
+    },
+    {
+      "canonical_path": "webroot_ro/js/online_list.js",
+      "size": 15385,
+      "content_sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87"
+    },
+    {
+      "canonical_path": "bin/httpd",
+      "size": 982880,
+      "content_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b"
+    },
+    {
+      "canonical_path": "_init.extracted/57145.tar",
+      "size": 14619,
+      "content_sha256": "cc7f5916ff0c208db02b65cd872fdbfa80eb8b691928172f43a2a5323db3fa8b"
+    }
+  ],
+  "notes": [
+    "This is an extracted-root inventory, not raw firmware extraction.",
+    "The .tar-suffixed key entry is not recognized as ZIP content and remains a regular file; suffixes do not determine archive identity."
+  ]
+}
