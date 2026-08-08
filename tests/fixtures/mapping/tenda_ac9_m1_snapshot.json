@@ -1,0 +1,287 @@
+{
+  "schema_version": "firmatlas.mapping.snapshot/v1alpha1",
+  "snapshot_id": "mapping:tenda-ac9:m1-manual-replay",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "source_inventory_sha256": "84747a51473b826ea2207396f5677dc39786cfc5bd0603f515ae135c923513f0",
+  "status": "partial_success",
+  "policy": {
+    "name": "m1-manual-evidence-replay",
+    "mode": "discover",
+    "allow_model": false,
+    "allow_runtime": false
+  },
+  "budget": {
+    "max_files": 3,
+    "max_bytes": 268435456,
+    "max_seconds": 300,
+    "max_deep_targets": 0
+  },
+  "analyzers": [
+    {
+      "name": "manual-replay/frontend-javascript",
+      "version": "m1.0"
+    },
+    {
+      "name": "manual-replay/native-strings",
+      "version": "m1.0"
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "evidence_id": "ev-static-route-request",
+      "subject_ref": "interface:goform-set-static-route",
+      "predicate": "constructs_request",
+      "object_value": "goform/SetStaticRouteCfg",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/static_route.js",
+        "artifact_sha256": "9bd1ff64ac59189812d29fefe565984c7f58ac68358003e15a1e3fa71a15482b",
+        "locator": "lines:18-19"
+      },
+      "producer": "manual-replay/frontend-javascript",
+      "producer_version": "m1.0",
+      "observation_kind": "direct_static",
+      "capability": "constructs_request",
+      "confidence": 1.0
+    },
+    {
+      "evidence_id": "ev-static-route-list",
+      "subject_ref": "parameter:goform-set-static-route:list",
+      "predicate": "serializes",
+      "object_value": "list=<network>,<mask>,<gateway>,<wan>~...",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/static_route.js",
+        "artifact_sha256": "9bd1ff64ac59189812d29fefe565984c7f58ac68358003e15a1e3fa71a15482b",
+        "locator": "lines:35-67"
+      },
+      "producer": "manual-replay/frontend-javascript",
+      "producer_version": "m1.0",
+      "observation_kind": "direct_static",
+      "capability": "serializes_parameter",
+      "confidence": 1.0
+    },
+    {
+      "evidence_id": "ev-online-name-request",
+      "subject_ref": "interface:goform-set-online-dev-name",
+      "predicate": "constructs_request",
+      "object_value": "goform/SetOnlineDevName",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/online_list.js",
+        "artifact_sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87",
+        "locator": "lines:282-293"
+      },
+      "producer": "manual-replay/frontend-javascript",
+      "producer_version": "m1.0",
+      "observation_kind": "direct_static",
+      "capability": "constructs_request",
+      "confidence": 1.0
+    },
+    {
+      "evidence_id": "ev-online-name-mac",
+      "subject_ref": "parameter:goform-set-online-dev-name:mac",
+      "predicate": "serializes",
+      "object_value": "mac=<macAddress>",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/online_list.js",
+        "artifact_sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87",
+        "locator": "lines:282-283"
+      },
+      "producer": "manual-replay/frontend-javascript",
+      "producer_version": "m1.0",
+      "observation_kind": "direct_static",
+      "capability": "serializes_parameter",
+      "confidence": 1.0
+    },
+    {
+      "evidence_id": "ev-online-name-dev-name",
+      "subject_ref": "parameter:goform-set-online-dev-name:devName",
+      "predicate": "serializes",
+      "object_value": "devName=encodeURIComponent(<newName>)",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/online_list.js",
+        "artifact_sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87",
+        "locator": "lines:282-283"
+      },
+      "producer": "manual-replay/frontend-javascript",
+      "producer_version": "m1.0",
+      "observation_kind": "direct_static",
+      "capability": "serializes_parameter",
+      "confidence": 1.0
+    },
+    {
+      "evidence_id": "ev-native-static-route-name",
+      "subject_ref": "handler-candidate:SetStaticRouteCfg",
+      "predicate": "mentions_handler_name",
+      "object_value": "SetStaticRouteCfg",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "locator": "strings-window:route-table:3924"
+      },
+      "producer": "manual-replay/native-strings",
+      "producer_version": "m1.0",
+      "observation_kind": "direct_static",
+      "capability": "mentions_handler_name",
+      "confidence": 0.9
+    },
+    {
+      "evidence_id": "ev-native-online-name",
+      "subject_ref": "handler-candidate:SetOnlineDevName",
+      "predicate": "mentions_handler_name",
+      "object_value": "SetOnlineDevName",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "locator": "strings-window:route-table:3924"
+      },
+      "producer": "manual-replay/native-strings",
+      "producer_version": "m1.0",
+      "observation_kind": "direct_static",
+      "capability": "mentions_handler_name",
+      "confidence": 0.9
+    }
+  ],
+  "entities": [
+    {
+      "entity_id": "interface:goform-set-static-route",
+      "entity_kind": "exposed_interface",
+      "canonical_identity": "http|/goform/SetStaticRouteCfg|POST|form",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-static-route-request"]
+    },
+    {
+      "entity_id": "parameter:goform-set-static-route:list",
+      "entity_kind": "parameter_identity",
+      "canonical_identity": "interface:goform-set-static-route|form|list|request",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-static-route-list"]
+    },
+    {
+      "entity_id": "interface:goform-set-online-dev-name",
+      "entity_kind": "exposed_interface",
+      "canonical_identity": "http|/goform/SetOnlineDevName|POST|form",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-online-name-request"]
+    },
+    {
+      "entity_id": "parameter:goform-set-online-dev-name:mac",
+      "entity_kind": "parameter_identity",
+      "canonical_identity": "interface:goform-set-online-dev-name|form|mac|request",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-online-name-mac"]
+    },
+    {
+      "entity_id": "parameter:goform-set-online-dev-name:devName",
+      "entity_kind": "parameter_identity",
+      "canonical_identity": "interface:goform-set-online-dev-name|form|devName|request",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-online-name-dev-name"]
+    },
+    {
+      "entity_id": "handler-candidate:SetStaticRouteCfg",
+      "entity_kind": "handler_identity",
+      "canonical_identity": "bin/httpd|string-symbol|SetStaticRouteCfg",
+      "claim_status": "unknown",
+      "evidence_ids": ["ev-native-static-route-name"]
+    },
+    {
+      "entity_id": "handler-candidate:SetOnlineDevName",
+      "entity_kind": "handler_identity",
+      "canonical_identity": "bin/httpd|string-symbol|SetOnlineDevName",
+      "claim_status": "unknown",
+      "evidence_ids": ["ev-native-online-name"]
+    }
+  ],
+  "relations": [
+    {
+      "relation_id": "rel-static-route-accepts-list",
+      "source_ref": "interface:goform-set-static-route",
+      "predicate": "accepts",
+      "target_ref": "parameter:goform-set-static-route:list",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-static-route-list"]
+    },
+    {
+      "relation_id": "rel-online-name-accepts-mac",
+      "source_ref": "interface:goform-set-online-dev-name",
+      "predicate": "accepts",
+      "target_ref": "parameter:goform-set-online-dev-name:mac",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-online-name-mac"]
+    },
+    {
+      "relation_id": "rel-online-name-accepts-dev-name",
+      "source_ref": "interface:goform-set-online-dev-name",
+      "predicate": "accepts",
+      "target_ref": "parameter:goform-set-online-dev-name:devName",
+      "claim_status": "supported",
+      "evidence_ids": ["ev-online-name-dev-name"]
+    }
+  ],
+  "coverage": [
+    {
+      "scope": "webroot_ro/js/static_route.js",
+      "capability": "constructs_request+serializes_parameter",
+      "status": "completed",
+      "producer": "manual-replay/frontend-javascript",
+      "producer_version": "m1.0",
+      "required": true,
+      "diagnostic": null
+    },
+    {
+      "scope": "webroot_ro/js/online_list.js",
+      "capability": "constructs_request+serializes_parameter",
+      "status": "completed",
+      "producer": "manual-replay/frontend-javascript",
+      "producer_version": "m1.0",
+      "required": true,
+      "diagnostic": null
+    },
+    {
+      "scope": "bin/httpd",
+      "capability": "mentions_handler_name",
+      "status": "completed",
+      "producer": "manual-replay/native-strings",
+      "producer_version": "m1.0",
+      "required": true,
+      "diagnostic": null
+    },
+    {
+      "scope": "bin/httpd",
+      "capability": "binds_handler+reads_parameter",
+      "status": "skipped_by_policy",
+      "producer": "native-decompiler",
+      "producer_version": "not-run",
+      "required": false,
+      "diagnostic": "M1 worked example stops before Native xref and decompilation"
+    }
+  ],
+  "unresolved_obligations": [
+    {
+      "obligation_id": "obl-bind-static-route-handler",
+      "target_ref": "interface:goform-set-static-route",
+      "required_capability": "binds_handler",
+      "reason": "Matching frontend and Native names do not prove route-to-handler binding",
+      "priority": 95,
+      "candidate_analyzers": ["native-route-binding"],
+      "status": "open"
+    },
+    {
+      "obligation_id": "obl-bind-online-name-handler",
+      "target_ref": "interface:goform-set-online-dev-name",
+      "required_capability": "binds_handler",
+      "reason": "Matching frontend and Native names do not prove route-to-handler binding",
+      "priority": 95,
+      "candidate_analyzers": ["native-route-binding"],
+      "status": "open"
+    },
+    {
+      "obligation_id": "obl-parse-static-route-list",
+      "target_ref": "parameter:goform-set-static-route:list",
+      "required_capability": "deserializes_parameter",
+      "reason": "Frontend serialization reveals a tuple list, but backend parsing and constraints remain unknown",
+      "priority": 80,
+      "candidate_analyzers": ["native-parameter-flow", "model-evidence-adjudicator"],
+      "status": "open"
+    }
+  ]
+}

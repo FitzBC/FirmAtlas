@@ -1,8 +1,8 @@
 # 固件通信测绘引擎主控文档
 
 > 文档 ID：FM-MASTER
-> 当前阶段：M0 设计基线
-> 当前状态：设计基线已完成本地回归并发布到代码仓库；按本次明确范围不部署 SSH 服务器
+> 当前阶段：M1 冷启动发现
+> 当前状态：M1-01 版本化 Snapshot 合同正在回归与发布
 > 最近更新：2026-08-08
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -48,9 +48,12 @@
 | [领域与证据模型](./domain-and-evidence-model.md) | 实体、身份、关系、状态和不变量 | 领域语义或持久化合同改变时 |
 | [模块与分析架构](./architecture.md) | 深模块、Interface、Seam、Adapter、流水线和目录组织 | 模块职责或依赖方向改变时 |
 | [FirmAtlas 集成设计](./firmatlas-integration.md) | 数据、任务、查询、UI 和旧能力迁移方式 | 集成合同或用户工作流改变时 |
+| [大模型与 MiniMax 接入](./model-reasoning.md) | 模型义务、证据门限、Adapter、安全和评测 | 模型任务、供应商或策略改变时 |
 | [评测与回归体系](./evaluation-and-regression.md) | 数据集、指标、回归矩阵和发布门禁 | 测试范围、数据切分或指标改变时 |
 | [交付与协作手册](./delivery-playbook.md) | 里程碑、跨会话工作模式、记录模板和完成定义 | 交付流程或里程碑改变时 |
 | [M0 设计基线记录](./progress/2026-08-08-m0-design-baseline.md) | 本轮研究、证据和决策记录 | 此记录只追加勘误，不重写历史 |
+| [M1-01 Snapshot 合同记录](./progress/2026-08-08-m1-01-snapshot-contract.md) | 合同、TDD 证据、AC9 重放和未决义务 | 回归、修订或发布状态变化时 |
+| [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
 仓库级领域词汇以 [`CONTEXT.md`](../../CONTEXT.md) 为准。本文档中的术语若与其冲突，必须先修改领域词汇并记录理由，不能在局部文档中创造同义词。
@@ -80,7 +83,7 @@ flowchart LR
 | 里程碑 | 状态 | 核心产物 | 出口门 | 证据记录 |
 | --- | --- | --- | --- | --- |
 | M0 设计基线 | 已验证 | 理论、领域、架构、集成、评测和协作设计 | 文档互链、领域一致性、本地回归、GitHub 发布；本次不部署 | [M0 记录](./progress/2026-08-08-m0-design-baseline.md) |
-| M1 冷启动发现 | 未开始 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | 待创建 |
+| M1 冷启动发现 | 进行中 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | [M1-01 记录](./progress/2026-08-08-m1-01-snapshot-contract.md) |
 | M2 身份与参数 | 未开始 | Interface/Operation/Parameter 身份及别名、约束 | 共享端点正确拆分，参数有来源与 namespace | 待创建 |
 | M3 Native 绑定 | 未开始 | route/handler/getter/call-site 定向绑定 | Native 失败不阻断部分快照，义务清晰 | 待创建 |
 | M4 通信架构恢复 | 未开始 | 执行主体、接口、解析、状态和响应关系图 | 标注集上的关键节点和路径达到门限 | 待创建 |
@@ -102,7 +105,7 @@ M1 工作项：
 
 | ID | 工作项 | 状态 | 依赖 | 验收证据 |
 | --- | --- | --- | --- | --- |
-| M1-01 | 建立版本化 `FirmwareMappingSnapshot` 最小合同 | 未开始 | M0 | schema contract tests |
+| M1-01 | 建立版本化 `FirmwareMappingSnapshot` 最小合同 | 进行中 | M0 | schema contract tests + Tenda AC9 replay |
 | M1-02 | 建立安全、可复现的制品文件清单 | 未开始 | M1-01 | archive/symlink/budget fixtures |
 | M1-03 | 建立不可变 `EvidenceAtom` 与来源定位 | 未开始 | M1-01 | replay and provenance tests |
 | M1-04 | HTML/Form/JS 请求构造证据生产器 | 未开始 | M1-02/03 | annotated frontend fixtures |

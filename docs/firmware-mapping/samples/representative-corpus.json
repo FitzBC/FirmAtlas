@@ -1,0 +1,154 @@
+{
+  "corpus_version": "firmatlas.mapping.corpus/m1.0",
+  "recorded_at": "2026-08-08",
+  "source": "FirmAtlas semantic observations and firmware candidate catalog",
+  "rules": {
+    "vulnerability_text_is_not_firmware_truth": true,
+    "target_poc_must_be_withheld_for_cold_start": true,
+    "path_style_is_only_a_weak_wire_feature": true
+  },
+  "samples": [
+    {
+      "sample_id": "tenda-ac9-goform-dev",
+      "vendor": "Tenda",
+      "model": "AC9",
+      "firmware_candidate_id": "firmemuhub:BM-2024-00012",
+      "availability": "locally_extracted",
+      "local_source_hint": "../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root",
+      "artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+      "category": "form_handler",
+      "subtype": "goform_camel_registry",
+      "anchors": [
+        "/goform/SetStaticRouteCfg",
+        "/goform/SetOnlineDevName",
+        "list",
+        "mac",
+        "devName"
+      ],
+      "role": "development",
+      "target_milestones": ["M1", "M2", "M3", "M4"],
+      "evidence_basis": "local frontend files plus ARM httpd string table"
+    },
+    {
+      "sample_id": "tenda-ac18-goform-family-validation",
+      "vendor": "Tenda",
+      "model": "AC18",
+      "firmware_candidate_id": "wustl:3805bdff1c730e906e57a1c74da97e1d13f98896d90cc0b67a30cab9d7108361",
+      "availability": "catalog_candidate",
+      "category": "form_handler",
+      "subtype": "goform_camel_registry",
+      "anchors": [
+        "/goform/SetOnlineDevName",
+        "/goform/SetStaticRouteCfg",
+        "/goform/SetPptpServerCfg"
+      ],
+      "role": "same-vendor-validation",
+      "target_milestones": ["M1", "M2", "M5"],
+      "evidence_basis": "exact-version firmware candidate and vulnerability semantic observations"
+    },
+    {
+      "sample_id": "dlink-dir846-hnap-validation",
+      "vendor": "D-Link",
+      "model": "DIR-846 A1",
+      "firmware_candidate_id": "firmemuhub:BM-2024-00009",
+      "availability": "catalog_candidate",
+      "category": "hnap_soap",
+      "subtype": "hnap_envelope_dispatcher",
+      "anchors": ["/HNAP1", "SOAPAction"],
+      "role": "cross-architecture-validation",
+      "target_milestones": ["M1", "M2", "M4"],
+      "evidence_basis": "curated firmware candidate and CVE-2019-17510"
+    },
+    {
+      "sample_id": "dlink-dir823g-hnap-holdout",
+      "vendor": "D-Link",
+      "model": "DIR-823G",
+      "firmware_candidate_id": "firmemuhub:BM-2024-00083",
+      "availability": "catalog_candidate",
+      "category": "hnap_soap",
+      "subtype": "hnap_envelope_dispatcher",
+      "anchors": ["/HNAP1", "/HNAP1/SetAccessPointMode"],
+      "role": "holdout",
+      "target_milestones": ["M2", "M5", "M6"],
+      "evidence_basis": "curated versioned candidate with multiple historical CVEs"
+    },
+    {
+      "sample_id": "totolink-x5000r-shared-cgi",
+      "vendor": "Totolink",
+      "model": "X5000R",
+      "firmware_candidate_id": null,
+      "availability": "vulnerability_only",
+      "category": "cgi_gateway",
+      "subtype": "shared_cgi_dispatcher",
+      "anchors": ["/cgi-bin/cstecgi.cgi"],
+      "role": "acquisition-gap",
+      "target_milestones": ["M1", "M2"],
+      "evidence_basis": "CVE-2023-6612 semantic observation; firmware artifact still required"
+    },
+    {
+      "sample_id": "nextu-fleta-boafrm",
+      "vendor": "nextu",
+      "model": "fleta ax1500",
+      "firmware_candidate_id": null,
+      "availability": "vulnerability_only",
+      "category": "management_route",
+      "subtype": "boafrm_handler_registry",
+      "anchors": ["/boafrm/formFilter"],
+      "role": "architecture-coverage",
+      "target_milestones": ["M1", "M3"],
+      "evidence_basis": "CVE-2024-46546 semantic observation; firmware artifact still required"
+    },
+    {
+      "sample_id": "dlink-dar7000-php",
+      "vendor": "D-Link",
+      "model": "DAR-7000",
+      "firmware_candidate_id": null,
+      "availability": "vulnerability_only",
+      "category": "web_action",
+      "subtype": "namespaced_page_controller",
+      "anchors": ["/sysmanage/updatelib.php", "/importexport.php"],
+      "role": "script-backend-coverage",
+      "target_milestones": ["M1", "M2", "M6"],
+      "evidence_basis": "CVE-2023-5146 and CVE-2023-44693 semantic observations"
+    },
+    {
+      "sample_id": "circle-config-api",
+      "vendor": "Circle Media",
+      "model": "Circle",
+      "firmware_candidate_id": null,
+      "availability": "vulnerability_only",
+      "category": "resource_api",
+      "subtype": "namespaced_api_router",
+      "anchors": ["/api/CONFIG/restore"],
+      "role": "modern-api-coverage",
+      "target_milestones": ["M1", "M2"],
+      "evidence_basis": "CVE-2017-2890 semantic observation; firmware artifact still required"
+    },
+    {
+      "sample_id": "tplink-vn020-upnp-control",
+      "vendor": "TP-Link",
+      "model": "VN020 F3v(T)",
+      "firmware_candidate_id": null,
+      "availability": "vulnerability_only",
+      "category": "hnap_soap",
+      "subtype": "upnp_service_control",
+      "anchors": ["/control/WANIPConnection"],
+      "role": "non-hnap-soap-coverage",
+      "target_milestones": ["M1", "M2", "M4"],
+      "evidence_basis": "CVE-2024-12342 semantic observation; firmware artifact still required"
+    },
+    {
+      "sample_id": "wavlink-nu516u1-cgi",
+      "vendor": "Wavlink",
+      "model": "NU516U1",
+      "firmware_candidate_id": null,
+      "availability": "vulnerability_only",
+      "category": "cgi_gateway",
+      "subtype": "cgi_executable_registry",
+      "anchors": ["/cgi-bin/firewall.cgi"],
+      "role": "cgi-executable-coverage",
+      "target_milestones": ["M1", "M2", "M3"],
+      "evidence_basis": "CVE-2025-10959 semantic observation; firmware artifact still required"
+    }
+  ]
+}

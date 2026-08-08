@@ -1,4 +1,4 @@
-.PHONY: test demo seed-demo api intelligence-bootstrap intelligence-update firmware-catalog-sync firmware-version-link firmware-refresh web-install web-dev web-build deploy deploy-with-data
+.PHONY: test demo seed-demo mapping-example api intelligence-bootstrap intelligence-update firmware-catalog-sync firmware-version-link firmware-refresh web-install web-dev web-build deploy deploy-with-data
 
 test:
 	PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -8,6 +8,9 @@ demo:
 
 seed-demo:
 	PYTHONPATH=src python3 -m firmatlas intelligence seed-demo
+
+mapping-example:
+	PYTHONPATH=src python3 -m firmatlas.mapping validate-snapshot tests/fixtures/mapping/tenda_ac9_m1_snapshot.json
 
 api:
 	PYTHONPATH=src python3 -m firmatlas intelligence serve
