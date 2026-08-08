@@ -78,6 +78,10 @@ Discovery Catalog 新增 `native_deep` Producer Batch，以及 `native_route_bin
 
 提交前双轴审查额外补强了三项边界：route literal 使用独立 EvidenceAtom；Scheduler 接收结果前重新校验完整三段证明；64-bit handler identity 使用指针宽度格式化。实现 revision 在提交后追加，历史记录不回写成预知 revision。
 
+- 实现 revision：`584a299`（已推送至 `origin/main`）
+- 浏览器验证目录：`discovery-catalog:c1b9c8d0a23528269ea6b5e2a28811df8b2b06b0a567d4d1dd1e86b4a04c630c`
+- 行为 API：Catalog/Candidate/Native Filter/Deep Detail 请求均返回 HTTP 200；从 `native_route_binding` 详情可反向取得父级 association 与 sibling handler。
+
 ## 7. 下一步
 
 M1-10B 建立隔离 Native Deep Worker 输出合同，并实现 ARM PIC call-site Adapter。AC9 的目标不是按 `formSetDeviceName` 名称猜测，而是定位注册调用点，证明 route 参数与 handler 函数引用进入同一次注册调用；外部反编译工具输出仍须转换为本项目 EvidenceAtom 后才能关闭义务。
