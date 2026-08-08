@@ -138,6 +138,8 @@ M1-09 的持久化 Adapter 是 `DiscoveryCatalogRepository`。它将完整目录
 
 M1-10A 的 Native Deep Interface 是 `discover_native_route_bindings(source, content, anchors, profile, policy)`。首个 Adapter 只解析版本化 Profile 允许的命名 ELF route-table section，要求 route pointer 指向 allocated/non-executable 字符串、handler pointer 指向 allocated/executable section，并发布 route literal、registration entry、handler entry 三段 EvidenceAtom。`native_deep_scheduler_analyzer(result)` 只按 exact target/capability 消费这些 proof。普通 `.data` 指针对、字符串/符号共现和不可执行 handler 地址均不能关闭义务。
 
+M1-10B 在同一 Native Deep Module 增加 `discover_arm_pic_callsite_bindings(source, content, anchors, profile, policy)`。ARM32 Profile 验证函数内 PIC `.got` 基址、route relative literal、handler `R_ARM_GLOB_DAT` relocation、`r0/r1` 参数数据流与紧随其后的 `BL`；只有同一 callee 至少形成两个独立 route/handler 对时才把它识别为 registrar。当前规则可直接从原始 ELF 确定性验证，因此没有引入外部反编译 Worker；复杂控制流、间接调用和其他 ISA 后续再通过候选 Worker Adapter 接入，但仍必须由核心 Validator 重放原始字节。
+
 ### S4 定向绑定
 
 根据前序锚点执行 route/handler/xref 分析，避免对所有二进制无差别深反编译。文本侧或 Native 侧单独成功时允许发布部分结果。

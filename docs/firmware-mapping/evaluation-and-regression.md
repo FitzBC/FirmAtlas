@@ -148,6 +148,8 @@
 
 Native Deep fixture 还必须同时包含结构化正例与误绑定负例：route literal、注册表项和 executable handler 三段证据缺一不可；普通 `.data`、非可执行 handler、仅字符串/符号共现以及不受信 section 均不得关闭调度义务。真实固件在当前 Profile 不支持时应记录 completed coverage 与 0 binding，不能跨过证据门限猜测关系。
 
+PIC call-site Profile 还需覆盖：单一二参数调用不足以推断 registrar、错误 relocation type、错误参数寄存器、无法建立 GOT 基址、非 executable symbol、跨调用拼接和篡改 Worker/Result proof。真实样本回归必须同时断言 route、handler、callsite、registrar、同组规模和 Scheduler 精确关闭数量，不能只断言“发现大于零”。
+
 ### 6.3 Module contract tests
 
 所有主要行为通过 `FirmwareMapper` Interface 测试：

@@ -152,6 +152,8 @@ Discovery Catalog 现在可不可变地发布到 SQLite，并通过“通信测�
 
 Native Deep 的首个保守 Adapter 已支持命名 ELF `{route_ptr, handler_ptr}` 注册表：只有 route pointer、表项位置和 executable handler pointer 同时成立时，才发布 `native_route_binding` / `native_handler` 并关闭调度义务。合成 ARM ELF 展示了完整三段证据链；真实 AC9 因没有受信命名表保持 0 binding，明确转交后续 ARM PIC call-site Adapter。中间结果见 [M1-10 样例](./docs/firmware-mapping/samples/m1-10-native-deep-route-table-summary.json)。
 
+ARM32 PIC Adapter 进一步从原始 ELF 验证 `.got` 基址、`R_ARM_GLOB_DAT`、`r0/r1` 参数装载与共同 `BL` registrar。真实 Tenda AC9 `online_list.js` 的 5 个接口已全部绑定到 5 个导出 handler，10/10 深分析义务关闭；这些绑定共享一个包含 131 个独立 route/handler 对的 registrar，形成可查询的后端注册架构信号。中间结果见 [M1-10B AC9 样例](./docs/firmware-mapping/samples/m1-10b-ac9-arm-pic-callsite-summary.json)。
+
 ```bash
 # 发布 Producer/Scheduler 生成的完整目录 JSON；同一内容可安全重跑
 PYTHONPATH=src python3 -m firmatlas mapping publish-catalog \

@@ -141,12 +141,14 @@ from .extraction import (
 from .repository import CatalogConflictError, DiscoveryCatalogRepository
 from .native_deep import (
     NATIVE_DEEP_RESULT_SCHEMA_VERSION,
+    ArmPicCallsiteProfile,
     NativeDeepDiagnostic,
     NativeDeepPolicy,
     NativeDeepResult,
     NativeRouteAnchor,
     NativeRouteBinding,
     NativeRouteTableProfile,
+    discover_arm_pic_callsite_bindings,
     discover_native_route_bindings,
     native_deep_scheduler_analyzer,
 )
@@ -271,12 +273,14 @@ __all__ = (
     "CatalogConflictError",
     "DiscoveryCatalogRepository",
     "NATIVE_DEEP_RESULT_SCHEMA_VERSION",
+    "ArmPicCallsiteProfile",
     "NativeDeepDiagnostic",
     "NativeDeepPolicy",
     "NativeDeepResult",
     "NativeRouteAnchor",
     "NativeRouteBinding",
     "NativeRouteTableProfile",
+    "discover_arm_pic_callsite_bindings",
     "discover_native_route_bindings",
     "native_deep_scheduler_analyzer",
 )

@@ -421,12 +421,23 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_DEEP:
                 for item in result.bindings:
                     native_deep_target_refs.add(item.target_ref)
-                    common_attributes = (
+                    common_attributes = [
                         ("target_ref", item.target_ref),
                         ("profile", result.profile),
                         ("registration_address", "0x{:x}".format(item.registration_address)),
                         ("handler_address", "0x{:x}".format(item.handler_address)),
-                    )
+                    ]
+                    if item.handler_symbol is not None:
+                        common_attributes.append(("handler_symbol", item.handler_symbol))
+                    if item.registrar_address is not None:
+                        common_attributes.append((
+                            "registrar_address", "0x{:x}".format(item.registrar_address)
+                        ))
+                    if item.registrar_pair_count is not None:
+                        common_attributes.append((
+                            "registrar_pair_count", str(item.registrar_pair_count)
+                        ))
+                    common_attributes = tuple(common_attributes)
                     candidates.append(DiscoveryCandidate(
                         item.binding_id,
                         DiscoveryCandidateKind.NATIVE_ROUTE_BINDING,
@@ -438,11 +449,16 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                         (*common_attributes, ("handler_identity", item.handler_identity)),
                     ))
                     handler_id = _stable_id(
-                        "native-handler", result.source_path, item.handler_identity
+                        "native-handler",
+                        result.source_path,
+                        item.handler_identity,
+                        item.binding_id,
                     )
                     handler_evidence = tuple(
                         evidence_id for evidence_id in item.evidence_ids
-                        if evidence[evidence_id].capability == "binds_handler"
+                        if evidence[evidence_id].capability in {
+                            "resolves_handler_symbol", "binds_handler",
+                        }
                     )
                     candidates.append(DiscoveryCandidate(
                         handler_id,

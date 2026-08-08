@@ -1,0 +1,127 @@
+{
+  "schema_version": "firmatlas.mapping.arm-pic-callsite-sample-summary/v1alpha1",
+  "recorded_at": "2026-08-09",
+  "profile": {
+    "name": "arm32-pic-r0-r1-bl/v1",
+    "architecture": "ARM32 little-endian ELF",
+    "route_argument": "r0",
+    "handler_argument": "r1",
+    "call_instruction": "BL",
+    "handler_relocation": "R_ARM_GLOB_DAT",
+    "minimum_independent_registrar_pairs": 2
+  },
+  "synthetic_fixture": {
+    "bytes": 1340,
+    "sha256": "1b1cd4052bed7ead02487311187383cfd44db5b17edc949ac2c4b16fe889705b",
+    "registrar_pairs": 2,
+    "expected_binding": {
+      "route": "SetOnlineDevName",
+      "handler_symbol": "formSetDeviceName",
+      "handler_address": "0x00001100",
+      "callsite_address": "0x00001024",
+      "registrar_address": "0x00001200"
+    }
+  },
+  "actual_tenda_ac9": {
+    "native_artifact": {
+      "path": "bin/httpd",
+      "sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+      "bytes": 982880
+    },
+    "frontend_artifact": {
+      "path": "webroot_ro/js/online_list.js",
+      "sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87"
+    },
+    "pic_got_base": "0x000fd3b8",
+    "registrar_address": "0x00017134",
+    "registrar_pair_count": 131,
+    "bindings": [
+      {
+        "route": "getOnlineList",
+        "handler_symbol": "formGetOnlineList",
+        "handler_address": "0x0005ecf4",
+        "callsite_address": "0x00042788",
+        "evidence_locators": [
+          "binary:bytes=874088-874101",
+          "binary:bytes=237920-237928",
+          "binary:bytes=23524-23532",
+          "binary:bytes=239472-239500"
+        ]
+      },
+      {
+        "route": "SetOnlineDevName",
+        "handler_symbol": "formSetDeviceName",
+        "handler_address": "0x00060ee8",
+        "callsite_address": "0x00042aec",
+        "evidence_locators": [
+          "binary:bytes=874584-874600",
+          "binary:bytes=237920-237928",
+          "binary:bytes=25140-25148",
+          "binary:bytes=240340-240368"
+        ]
+      },
+      {
+        "route": "setBlackRule",
+        "handler_symbol": "formAddMacfilterRule",
+        "handler_address": "0x000c1bd8",
+        "callsite_address": "0x00042b78",
+        "evidence_locators": [
+          "binary:bytes=874668-874680",
+          "binary:bytes=237920-237928",
+          "binary:bytes=24332-24340",
+          "binary:bytes=240480-240508"
+        ]
+      },
+      {
+        "route": "delBlackRule",
+        "handler_symbol": "formDelMacfilterRule",
+        "handler_address": "0x000c3278",
+        "callsite_address": "0x00042b94",
+        "evidence_locators": [
+          "binary:bytes=874684-874696",
+          "binary:bytes=237920-237928",
+          "binary:bytes=24820-24828",
+          "binary:bytes=240508-240536"
+        ]
+      },
+      {
+        "route": "getBlackRuleList",
+        "handler_symbol": "formGetMacfilterRuleList",
+        "handler_address": "0x000c483c",
+        "callsite_address": "0x00042bb0",
+        "evidence_locators": [
+          "binary:bytes=874700-874716",
+          "binary:bytes=237920-237928",
+          "binary:bytes=24652-24660",
+          "binary:bytes=240536-240564"
+        ]
+      }
+    ],
+    "vertical_slice": {
+      "frontend_candidates": 5,
+      "native_shallow_hints": 354,
+      "candidate_associations": 5,
+      "input_obligations": 10,
+      "deep_bindings": 5,
+      "resolved_obligations": 10,
+      "open_obligations": 0,
+      "catalog_id": "discovery-catalog:c823e7e941423791bbdbb9c933a8dc9530184c68a82f46d1e7823cb10a526113",
+      "catalog_candidates": 374,
+      "catalog_evidence_atoms": 392
+    }
+  },
+  "evidence_capabilities": [
+    "mentions_endpoint",
+    "establishes_pic_base",
+    "resolves_handler_symbol",
+    "registers_route",
+    "binds_handler"
+  ],
+  "negative_controls": [
+    "A single two-argument call is insufficient to infer a registrar.",
+    "A handler reference without an allowed relocation does not bind.",
+    "A handler moved into a register other than r1 does not bind.",
+    "An unresolved PIC base does not bind the route.",
+    "A tampered handler relocation proof is rejected before Scheduler use."
+  ]
+}
