@@ -19,6 +19,7 @@
 - [M1-08 AC9 Discovery Catalog 中间输出](./m1-08-ac9-discovery-catalog-summary.json)：三份前端/模板、配置、脚本、Native、关联和调度结果组装出的 395 个无 seed 候选、参数、覆盖与开放义务。
 - [M1-10 Native Deep route-table 中间输出](./m1-10-native-deep-route-table-summary.json)：ARM ELF `{route_ptr, handler_ptr}` 正例的三段证据链、Scheduler 义务关闭、Catalog 投影，以及 AC9 无可信命名表的真实负面对照。
 - [M1-10B AC9 ARM PIC call-site 中间输出](./m1-10b-ac9-arm-pic-callsite-summary.json)：从 `online_list.js` 的 5 个接口关联到 `httpd` 的 5 个 handler、共同 131-pair registrar、五段证据链和 10/10 义务关闭。
+- [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；当前 gate 为 `partial`，不把合同 fixture 或漏洞线索冒充真实固件覆盖。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

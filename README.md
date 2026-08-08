@@ -154,6 +154,13 @@ Native Deep 的首个保守 Adapter 已支持命名 ELF `{route_ptr, handler_ptr
 
 ARM32 PIC Adapter 进一步从原始 ELF 验证 `.got` 基址、`R_ARM_GLOB_DAT`、`r0/r1` 参数装载与共同 `BL` registrar。真实 Tenda AC9 `online_list.js` 的 5 个接口已全部绑定到 5 个导出 handler，10/10 深分析义务关闭；这些绑定共享一个包含 131 个独立 route/handler 对的 registrar，形成可查询的后端注册架构信号。中间结果见 [M1-10B AC9 样例](./docs/firmware-mapping/samples/m1-10b-ac9-arm-pic-callsite-summary.json)。
 
+代表性 corpus gate 会把真实固件、旧解包派生源码、合成合同 fixture 与外部漏洞线索分层统计，只有带预期 Firmware Artifact SHA-256、覆盖完成、能力满足且无开放义务的真实目录才能把架构类别标为 `verified`。当前报告如实为 `partial`：AC9 `/goform` 已验证，HNAP/共享 CGI 仍是合同级，脚本后端和 Native-only 分别保留发布与样本缺口。可重复生成并与[机器可读报告](./docs/firmware-mapping/samples/m1-11-representative-corpus-report.json)比较：
+
+```bash
+PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
+  --ac9-root /path/to/tenda-ac9/squashfs-root
+```
+
 ```bash
 # 发布 Producer/Scheduler 生成的完整目录 JSON；同一内容可安全重跑
 PYTHONPATH=src python3 -m firmatlas mapping publish-catalog \
@@ -250,8 +257,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend 与 ELF Native Shallow Producer、frontend/native 候选关联、固定点调度、无 seed Discovery Catalog、SQLite 不可变发布/查询与三级通信测绘 UI |
-| **Next** | Native route/handler 深绑定、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend、ELF Native Shallow 与 ARM32 PIC Deep Producer、frontend/native 候选关联、固定点调度、无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
+| **Next** | HNAP/共享 CGI/Native-only 真实固件覆盖、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

@@ -150,6 +150,8 @@ Native Deep fixture 还必须同时包含结构化正例与误绑定负例：rou
 
 PIC call-site Profile 还需覆盖：单一二参数调用不足以推断 registrar、错误 relocation type、错误参数寄存器、无法建立 GOT 基址、非 executable symbol、跨调用拼接和篡改 Worker/Result proof。真实样本回归必须同时断言 route、handler、callsite、registrar、同组规模和 Scheduler 精确关闭数量，不能只断言“发现大于零”。
 
+代表性 corpus gate 必须把证据层级作为一等字段：旧 Binwalk 派生目录、合成 fixture 与漏洞线索不得计入 real-firmware verified 数量。每个样本显式声明 required/forbidden Evidence Capability；Artifact SHA 不匹配、coverage 非 completed、能力缺失/越界或任一开放义务都必须降为 coverage gap。未提供任何样本的 required category 也必须出现在报告中并标记 acquisition gap，不能从聚合结果消失。
+
 ### 6.3 Module contract tests
 
 所有主要行为通过 `FirmwareMapper` Interface 测试：

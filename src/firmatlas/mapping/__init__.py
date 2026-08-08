@@ -152,6 +152,18 @@ from .native_deep import (
     discover_native_route_bindings,
     native_deep_scheduler_analyzer,
 )
+from .corpus_report import (
+    CORPUS_REPORT_SCHEMA_VERSION,
+    CorpusCategoryResult,
+    CorpusEvidenceTier,
+    CorpusGateStatus,
+    CorpusReport,
+    CorpusReportInput,
+    CorpusSampleInput,
+    CorpusSampleResult,
+    CorpusSampleStatus,
+    build_corpus_report,
+)
 
 __all__ = (
     "AnalyzerIdentity",
@@ -258,6 +270,16 @@ __all__ = (
     "DiscoveryProducerBatch",
     "DiscoveryProducerKind",
     "assemble_discovery_catalog",
+    "CORPUS_REPORT_SCHEMA_VERSION",
+    "CorpusCategoryResult",
+    "CorpusEvidenceTier",
+    "CorpusGateStatus",
+    "CorpusReport",
+    "CorpusReportInput",
+    "CorpusSampleInput",
+    "CorpusSampleResult",
+    "CorpusSampleStatus",
+    "build_corpus_report",
     "EXTRACTION_SCHEMA_VERSION",
     "BinwalkExtractor",
     "ExtractionDiagnostic",
