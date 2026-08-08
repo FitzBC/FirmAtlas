@@ -70,6 +70,9 @@ FORM admPass1
 | 后端全量 | `make test`，163/163 通过 |
 | 前端测试与构建 | Vitest 16/16、TypeScript 与 Vite build 通过 |
 | JSON validation | `python3 -m json.tool` 通过 |
+| 本地 API/UI smoke | 临时 SQLite 下 health、overview、构建首页均 HTTP 200 |
+| 实现修订 | `475e433` |
+| GitHub push | 随本里程碑关闭提交一并验证 |
 | SSH deployment | 不适用（用户当前测绘范围） |
 
 ## 5. 下一动作
