@@ -132,6 +132,8 @@ make mapping-inventory ROOT=/path/to/extracted-root
 
 原始固件解包将使用 Binwalk，但 Binwalk 只允许在隔离 extraction worker 中运行。当前仓库已经冻结父制品摘要、工具身份、`binwalk -Me` 命令证据、资源限制证明、派生 Inventory 和失败诊断的版本化合同；生产 worker 与真实原始镜像回放尚未完成，不能把该合同理解为本机已经提供 Binwalk 解包命令。
 
+Inventory 条目现在可以通过统一的证据捕获 Interface 转换为 `firmatlas.mapping.evidence/v1alpha1` EvidenceAtom。文本与二进制证据都会校验源文件摘要、精确字节选区及选区摘要；文本另外保存可回放的 UTF-8 行列。真实 Tenda AC9 中间结果见 [M1-03 EvidenceAtom 样例](./docs/firmware-mapping/samples/tenda-ac9-m1-evidence-atoms.json)。
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 

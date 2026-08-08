@@ -51,6 +51,14 @@ classDiagram
 
 定位信息必须足以在相同输入和工具版本下回放。只保存截断摘要而没有原始位置，不构成可回放证据。
 
+M1-03 冻结的首版类型化 Span 支持：
+
+- `text_utf8`：半开字节区间、1-based 行列区间、规范 locator 和选区 SHA-256；
+- `binary`：半开字节区间、规范 locator 和选区 SHA-256，不伪造文本行列；
+- 旧 M1 人工 fixture 的自由 locator 仅用于向后读取，不能由新 Producer 发布，也不能通过 `replay_evidence` 验证。
+
+`capture_evidence` 必须同时验证 SourceArtifactEntry 的类型、大小和内容摘要。`replay_evidence` 只有在路径、制品摘要、字节区间、选区摘要、行列和 locator 全部一致时才返回原始选区。
+
 ### 2.3 EvidenceAtom
 
 建议最小合同：
@@ -90,6 +98,8 @@ EvidenceAtom
 - `reaches_sensitive_behavior`。
 
 证据能力是晋级规则的输入。例如描述中出现 `/goform/x` 可以支撑 `mentions_endpoint`，不能支撑 `binds_handler`。
+
+独立 EvidenceAtom 合同版本为 `firmatlas.mapping.evidence/v1alpha1`。新证据 ID 由合同版本、Source Span、最小主张和 Producer 身份规范化派生；本地绝对 root、mtime 和显示摘录不参与身份。`direct_static` 文本主张的 `object_value` 必须真实出现在选区中，防止把推断包装成直接观察。
 
 ### 2.4 MappingEntity
 
