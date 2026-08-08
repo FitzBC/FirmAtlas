@@ -75,7 +75,7 @@ Scheduler 与 Discovery Catalog 继续消费 M1-10A 的 `NativeDeepResult`，调
 - 真实 AC9 Catalog：374 candidates、5 associations、0 open obligations；
 - 浏览器验收确认 `SetOnlineDevName -> formSetDeviceName @ 0x60ee8`、registrar `0x17134`、131 pairs 以及 PIC/call-site/relocation 原始证据均可见；控制台无 warning/error。
 
-临时浏览器验收目录为 `discovery-catalog:a3e7a97f9000950b30bd5f9781c66bca44ee4189214116f61c1165011773cb72`。通信测绘功能按用户明确范围不执行 SSH 部署；实现修订在 Git 封版后追加。
+临时浏览器验收目录为 `discovery-catalog:a3e7a97f9000950b30bd5f9781c66bca44ee4189214116f61c1165011773cb72`。实现修订为 `d4eddbc`。通信测绘功能按用户明确范围不执行 SSH 部署。
 
 ## 6. 下一步
 
