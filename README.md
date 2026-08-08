@@ -196,6 +196,7 @@ make firmware-refresh
 
 | 文档 | 内容 |
 | --- | --- |
+| [通信测绘引擎主控文档](./docs/firmware-mapping/README.md) | 无样例冷启动、线索传播、模块设计、当前里程碑与跨会话进度 |
 | [领域词汇](./CONTEXT.md) | 固件版本、文件、候选、制品和漏洞命中的统一语义 |
 | [总体架构](./docs/architecture.md) | 模块边界、数据流和部署视图 |
 | [产品范围](./docs/product-scope.md) | 能力边界、阶段目标和路线图 |
@@ -203,6 +204,7 @@ make firmware-refresh
 | [情报源与同步策略](./docs/intelligence-sources.md) | 官方来源、刷新策略与证据保留 |
 | [情报采集实现](./docs/intelligence-acquisition.md) | NVD/CISA KEV 增量与全量同步机制 |
 | [固件样本来源研究](./docs/research-firmware-sample-sources.md) | 来源清单、完整性验证和质量异常 |
+| [历史漏洞固件研究构想](./docs/research-idea-historical-firmware-vulnerability-knowledge.md) | 通信结构、历史案例、漏洞机制和后续论文方向 |
 
 ## 仓库结构
 
