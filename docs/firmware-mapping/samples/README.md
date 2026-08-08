@@ -14,6 +14,7 @@
 - [M1-05 Web Configuration Producer 中间输出](./m1-05-web-configuration-summary.json)：AC9 真实 nginx 配置与启动脚本恢复出的 listener、docroot、FastCGI namespace 和服务链。
 - [M1-06A Native Shallow Producer 中间输出](./m1-06a-native-shallow-summary.json)：AC9 `httpd/dhttpd` 的 ELF route-token、symbol 与 server hint 对照及未决 binding。
 - [M1-06C Frontend/Native Correlation 中间输出](./m1-06c-frontend-native-correlation-summary.json)：AC9 7 个 frontend candidate 与 Native hint 的精确候选关联、负面对照和 14 个深分析义务。
+- [M1-06B Script Backend Producer 中间输出](./m1-06b-script-backend-summary.json)：D-Link DSL 真实 ASP、空 HNAP 占位与 Shell CGI 的参数—状态链和保守路由边界。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -71,6 +72,16 @@
 
 它是开发样本，不进入最终无泄漏测试结果。
 
+**D-Link DSL2877AL / vendor ASP + Shell CGI**
+
+- 平台候选：`BM-2024-00096`；
+- 本地来源：已有 Binwalk 派生 `squashfs-root`，本轮未把它冒充生产 worker 证明；
+- `mt_admin.asp`：恢复 `button_type=1` selector、`admPass1` 和 6 次配置状态访问；
+- `ad_routing.cgi`：识别为 Shell CGI program，但不从目录位置声明 route；
+- `hnap.asp`：零字节负面对照，不从文件名创造 HNAP endpoint。
+
+该样本补齐脚本后端类别，当前作为 development/cross-architecture contract 样本。
+
 ### Tier B：平台已有固件候选
 
 - Tenda AC18：同厂商 goform 家族验证；
@@ -115,7 +126,7 @@ Tier C 同时是样本获取工作队列。没有固件制品前，只能验证�
 
 ## 6. 当前缺口
 
-- 只有 Tenda AC9 已在本地完成源文件级人工回放、自动完整 rootfs Inventory、Frontend 与 nginx/启动项 Producer 回放；
+- Tenda AC9 已完成 Inventory、Frontend、nginx/启动项、Native Shallow 与候选关联回放；D-Link DSL2877AL 已完成首轮 Script Backend 回放；
 - AC9 `/goform/*` 未被 nginx 配置覆盖，主 `dhttpd/httpd` 的启动与 route binding 仍未知；
 - 其他候选尚未由新 Mapping Module 自动解包和分析；
 - 当前类别来自漏洞文本路径规则，尚未由真实 dispatcher/binding 证据校准；

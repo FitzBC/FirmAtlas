@@ -1,0 +1,82 @@
+{
+  "schema_version": "firmatlas.mapping.sample-summary/v1alpha1",
+  "milestone": "M1-06B",
+  "producer_schema": "firmatlas.mapping.script-backend-result/v1alpha1",
+  "observation_date": "2026-08-09",
+  "source_context": {
+    "candidate": "BM-2024-00096",
+    "firmware": "DSL2877AL A1 FW1.00.19AU 20161003",
+    "lineage": "pre-existing Binwalk-derived squashfs-root",
+    "note": "This replay consumes extracted files; it does not attest a current production Extraction Worker run."
+  },
+  "real_replays": [
+    {
+      "path": "boaroot/cgi-bin/MAINTENANCE/mt_admin.asp",
+      "sha256": "81b558bca257c14d430e18ad158ab0defd9f95e01259f0b9e14b1839ff2c1680",
+      "bytes": 6006,
+      "language": "vendor_asp",
+      "coverage_status": "completed",
+      "counts": {
+        "entries": 0,
+        "routes": 0,
+        "parameters": 2,
+        "state_accesses": 6,
+        "template_reads": 1,
+        "evidence_atoms": 11
+      },
+      "parameters": [
+        {"name": "button_type", "namespace": "form", "selector_values": ["1"]},
+        {"name": "admPass1", "namespace": "form", "selector_values": []}
+      ],
+      "selected_state_chain": [
+        {"operation": "set", "object": "Account_Entry0", "field": "web_passwd", "parameter": "admPass1"},
+        {"operation": "set", "object": "Account_Entry0", "field": "console_passwd", "parameter": "admPass1"},
+        {"operation": "commit", "object": "Account_Entry0", "field": null, "parameter": null}
+      ]
+    },
+    {
+      "path": "boaroot/cgi-bin/hnap.asp",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "language": "vendor_asp",
+      "coverage_status": "completed",
+      "counts": {
+        "entries": 0,
+        "routes": 0,
+        "parameters": 0,
+        "state_accesses": 0,
+        "template_reads": 0,
+        "evidence_atoms": 0
+      },
+      "interpretation": "Empty placeholder; no endpoint implementation is invented from its filename."
+    },
+    {
+      "path": "boaroot/cgi-bin/get/ADVANCED/ad_routing.cgi",
+      "sha256": "95604beb2c022ba802af602fd8f9a74b66c2e99f3d31dc0508955d540857256d",
+      "bytes": 6463,
+      "language": "shell_cgi",
+      "coverage_status": "completed",
+      "counts": {
+        "entries": 1,
+        "routes": 0,
+        "parameters": 0,
+        "state_accesses": 0,
+        "template_reads": 0,
+        "evidence_atoms": 1
+      },
+      "interpretation": "The shebang proves a CGI program shape, not a registered or externally exposed URL."
+    }
+  ],
+  "contract_fixtures": [
+    {"architecture": "PHP Slim-style route", "facts": ["explicit route", "HTTP method", "handler", "form parameter", "header"]},
+    {"architecture": "LuCI dispatcher", "facts": ["composed route", "call target", "request parameter"]},
+    {"architecture": "POSIX Shell CGI", "facts": ["CGI program", "CGI environment reads"]}
+  ],
+  "negative_controls": [
+    "Comments do not publish backend facts.",
+    "An ASP filename does not declare a route.",
+    "A CGI program does not declare registers_route.",
+    "Template state reads do not become HTTP parameters.",
+    "Empty files remain completed zero-fact results rather than false implementations."
+  ]
+}

@@ -142,6 +142,8 @@ Native Shallow Producer 已能直接解析 ELF32/ELF64 metadata、printable rout
 
 Frontend/Native Correlation Module 通过大小写敏感的完整 endpoint 或末段 action component 精确匹配生成 candidate association，并自动创建 `registers_route/binds_handler` 未决义务。AC9 两份前端源与 `httpd/dhttpd` 联合回放得到 7/7 candidate、全部指向 `httpd`、0 个名称猜测 binding；过程输出见 [M1-06C 样例](./docs/firmware-mapping/samples/m1-06c-frontend-native-correlation-summary.json)。
 
+Script Backend Producer 已覆盖厂商 ASP、PHP、LuCI Lua 与 POSIX Shell CGI 的确定性语法，可区分请求参数、operation selector、显式 route、CGI program、配置状态访问与模板状态读取。D-Link DSL 真实样本已恢复 `admPass1 → Account_Entry0.web_passwd/console_passwd → commit`，同时保持空 `hnap.asp` 为零事实、Shell CGI 为“程序但非已注册路由”；过程输出见 [M1-06B 样例](./docs/firmware-mapping/samples/m1-06b-script-backend-summary.json)。
+
 <details>
 <summary><b>同步完整 NVD 情报</b></summary>
 
@@ -214,8 +216,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项与 ELF Native Shallow Producer、frontend/native 候选关联义务 |
-| **Next** | 脚本后端 Producer、Native route/handler 深绑定、无样例线索调度、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性清单、可回放 EvidenceAtom、声明范围内的 Frontend、nginx/启动项、Script Backend 与 ELF Native Shallow Producer、frontend/native 候选关联义务 |
+| **Next** | 无样例线索调度与固定点终止、Native route/handler 深绑定、固件上传与 SHA-256 制品去重、生产 Binwalk 隔离 worker、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。
