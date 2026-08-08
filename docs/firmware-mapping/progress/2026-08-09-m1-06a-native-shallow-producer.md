@@ -62,7 +62,8 @@ Producer 只支持 `mentions_endpoint`、`declares_symbol`、`server_hint`，不
 | 后端全量 | `make test`，140/140 通过 |
 | 前端测试与构建 | Vitest 16/16、TypeScript 与 Vite build 通过 |
 | 本地 API/UI smoke | 临时 SQLite 下 health、overview、构建首页均 HTTP 200 |
-| Git revision / push | 待本记录提交后回填 |
+| 实现修订 | `d05119a` |
+| GitHub push | 随本里程碑关闭提交一并验证 |
 | SSH deployment | 不适用（用户当前测绘范围） |
 
 ## 6. 已知边界与下一动作
