@@ -83,7 +83,8 @@ M1-04 在同一 AC9 固件恢复的是 `goform/GetStaticRouteCfg`、`goform/SetS
 | 前端测试 | Vitest 16/16 通过 |
 | TypeScript / 生产构建 | 两组 `tsc --noEmit` 与 Vite build 通过 |
 | 本地 API/UI smoke | 临时 SQLite 下 health、overview、构建首页均 HTTP 200 |
-| Git revision / push | 待本记录提交后回填 |
+| 实现修订 | `85fda01` |
+| GitHub push | 随本里程碑关闭提交一并验证 |
 | SSH deployment | 不适用（用户当前测绘范围） |
 
 ## 6. 已知边界
