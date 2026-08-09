@@ -193,6 +193,14 @@ from .native_value_flow import (
     MipsParameterStateFlow,
     discover_mips_handler_value_flows,
 )
+from .analysis_run import (
+    MAPPING_ANALYSIS_RUN_SCHEMA_VERSION,
+    MappingAnalysisRequest,
+    MappingAnalysisRun,
+    MappingAnalysisStage,
+    MappingSourcePlanEntry,
+    analyze_extracted_root,
+)
 from .native_nested_dispatch import (
     MIPS_NESTED_DISPATCH_RESULT_SCHEMA_VERSION,
     MipsNestedDispatchAnchor,
@@ -455,6 +463,12 @@ __all__ = (
     "NativeUbusRegistrationProfile",
     "NativeUbusRegistrationResult",
     "discover_native_ubus_registrations",
+    "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
+    "MappingAnalysisRequest",
+    "MappingAnalysisRun",
+    "MappingAnalysisStage",
+    "MappingSourcePlanEntry",
+    "analyze_extracted_root",
     "MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION",
     "MipsHandlerValueFlowDiagnostic",
     "MipsHandlerValueFlowPolicy",

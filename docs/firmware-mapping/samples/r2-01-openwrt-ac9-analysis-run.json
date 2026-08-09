@@ -1,0 +1,54 @@
+{
+  "schema_version": "firmatlas.mapping.ac9-analysis-run-report/v1alpha1",
+  "sample_role": "real-extracted-root-one-command-analysis",
+  "firmware_artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
+  "analysis_run_id": "mapping-analysis-run:fd1c9cbe3343578f0be42a8839a4283f8242bb29345087a9c4b7a64b0c29ce3d",
+  "catalog_id": "discovery-catalog:f17f5d3ffdd443c1e260ee6ef56c4c3d6141c7aef20ff3858dddd211b3b00781",
+  "coverage_status": "partial",
+  "inventory_coverage_status": "completed",
+  "source_inventory_sha256": "56cd8353346ef3a27692b21cfebccf311482b69f3ff3022b0ed799f81f232720",
+  "source_plan_count": 269,
+  "analyzer_input_distribution": {
+    "frontend": 84,
+    "native": 156,
+    "script_backend": 27,
+    "web_configuration": 2
+  },
+  "stages": [
+    {"name": "inventory", "coverage_status": "completed", "input_count": 1103, "output_count": 1103, "diagnostics": []},
+    {"name": "source_plan", "coverage_status": "completed", "input_count": 1103, "output_count": 269, "diagnostics": []},
+    {"name": "frontend", "coverage_status": "partial", "input_count": 84, "output_count": 74, "diagnostics": ["frontend.luci_rpc_operation_template"]},
+    {"name": "web_configuration", "coverage_status": "completed", "input_count": 2, "output_count": 7, "diagnostics": []},
+    {"name": "script_backend", "coverage_status": "completed", "input_count": 27, "output_count": 10, "diagnostics": []},
+    {"name": "native", "coverage_status": "completed", "input_count": 156, "output_count": 612, "diagnostics": []},
+    {"name": "scheduler", "coverage_status": "completed", "input_count": 100, "output_count": 100, "diagnostics": ["no_eligible_analyzer"]},
+    {"name": "catalog", "coverage_status": "partial", "input_count": 269, "output_count": 720, "diagnostics": ["one or more producer results were incomplete", "candidate correlation used one or more incomplete producer results", "open obligations remain but no unattempted eligible analyzer is available"]}
+  ],
+  "catalog_summary": {
+    "candidate_count": 720,
+    "parameter_count": 220,
+    "evidence_count": 1105,
+    "association_count": 22,
+    "open_obligation_count": 100,
+    "scheduler_termination": "fixed_point",
+    "candidate_kind_distribution": {
+      "candidate_association": 22,
+      "native_hint": 612,
+      "request_interface": 74,
+      "script_route": 2,
+      "script_source": 3,
+      "web_configuration": 7
+    }
+  },
+  "representative_candidates": [
+    {"identity": "ubus://hostapd.{dynamic}/del_client", "kind": "request_interface", "status": "candidate", "source_path": "www/luci-static/resources/network.js", "evidence_count": 1},
+    {"identity": "ubus://file/read", "kind": "request_interface", "status": "candidate", "source_path": "www/luci-static/resources/fs.js", "evidence_count": 1},
+    {"identity": "ubus://luci/getFeatures", "kind": "request_interface", "status": "candidate", "source_path": "www/luci-static/resources/luci.js", "evidence_count": 1},
+    {"identity": "ubus://file/read", "kind": "request_interface", "status": "candidate", "source_path": "www/luci-static/resources/protocol/dhcp.js", "evidence_count": 1}
+  ],
+  "interpretation": {
+    "supported": "one public AnalyzeRun interface inventories the root, selects sources, runs four producer families, correlates candidates, reaches a scheduler fixed point, and publishes an immutable catalog",
+    "partial_reason": "a bounded dynamic LuCI ubus object template remains unresolved; the run preserves this as coverage and open obligations",
+    "not_claimed": "native deep handler recovery, runtime reachability, vulnerability, or complete non-HTTP protocol coverage"
+  }
+}

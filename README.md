@@ -130,6 +130,16 @@ make mapping-example
 make mapping-inventory ROOT=/path/to/extracted-root
 ```
 
+对已解包 rootfs 执行统一冷启动测绘并保存完整运行清单：
+
+```bash
+PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
+  --artifact-sha256 <original-firmware-sha256> \
+  --output mapping-analysis-run.json
+```
+
+该入口会自动建立 Source Plan，运行 Frontend、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。真实 OpenWrt AC9 中间报告见 [R2-01 AnalyzeRun](./docs/firmware-mapping/samples/r2-01-openwrt-ac9-analysis-run.json)。
+
 输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。Inventory v1alpha2 会在固件 chroot 内解析绝对与链式 symlink，但不会经链接打开或散列目标；普通缺失、循环、深度耗尽和越界仍进入 coverage ledger。内置 Inventory 只读取已解包目录并以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装由独立 Container Extraction Worker 处理，不能把原始固件直接交给此命令。
 
 原始固件解包使用 Binwalk，但 Binwalk 只允许在隔离 extraction worker 中运行。当前仓库已经实现只接受固定镜像摘要的 `ContainerBinwalkWorker`，强制禁网、只读根/输入、能力清空、`no-new-privileges`、PID/CPU/内存、输出和日志预算，并保留父制品、工具、命令、派生 Inventory 与失败诊断谱系。真实 DAP-3520 选定 rootfs 的 v1alpha2 重放处理 753 个节点并达到 completed，发布包含 `/HNAP1 → /usr/sbin/hnap` 和 PHP-XGI 页面控制器的 completed Catalog；DIR-882 的零产物回放则被明确标为 `extraction.no_output`。固定发布镜像重建仍在进行中，详见 [M1-02B 记录](./docs/firmware-mapping/progress/2026-08-09-m1-02b-container-binwalk-worker.md)和 [M1-13 记录](./docs/firmware-mapping/progress/2026-08-09-m1-13-chroot-symlink-inventory.md)。

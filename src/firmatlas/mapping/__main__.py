@@ -10,6 +10,7 @@ from typing import Optional, Sequence
 
 from .domain import FirmwareMappingSnapshot, ObligationStatus
 from .inventory import InventoryPolicy, build_inventory
+from .analysis_run import MappingAnalysisRequest, analyze_extracted_root
 
 
 def _summary(snapshot: FirmwareMappingSnapshot) -> dict:
@@ -92,6 +93,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--max-archive-depth", type=int, default=defaults.max_archive_depth
     )
     inventory.add_argument("--sample-limit", type=int, default=10)
+    analyze = subparsers.add_parser(
+        "analyze-root",
+        help="run deterministic cold-start mapping against an extracted firmware root",
+    )
+    analyze.add_argument("root")
+    analyze.add_argument("--artifact-sha256", required=True)
+    analyze.add_argument("--output", required=True)
+    analyze.add_argument("--max-files", type=int, default=defaults.max_files)
+    analyze.add_argument(
+        "--max-total-bytes", type=int, default=defaults.max_total_bytes
+    )
+    analyze.add_argument("--max-file-bytes", type=int, default=defaults.max_file_bytes)
+    analyze.add_argument(
+        "--max-expanded-bytes", type=int, default=defaults.max_expanded_bytes
+    )
+    analyze.add_argument(
+        "--max-archive-depth", type=int, default=defaults.max_archive_depth
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -99,6 +118,35 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if args.sample_limit < 0:
                 raise ValueError("sample-limit must be nonnegative")
             result = _inventory_summary(args.root, args)
+        elif args.command == "analyze-root":
+            run = analyze_extracted_root(MappingAnalysisRequest(
+                root=Path(args.root),
+                firmware_artifact_sha256=args.artifact_sha256,
+                inventory_policy=InventoryPolicy(
+                    max_files=args.max_files,
+                    max_total_bytes=args.max_total_bytes,
+                    max_file_bytes=args.max_file_bytes,
+                    max_expanded_bytes=args.max_expanded_bytes,
+                    max_archive_depth=args.max_archive_depth,
+                ),
+            ))
+            output = Path(args.output)
+            output.write_text(
+                json.dumps(run.to_dict(), ensure_ascii=False, indent=2, sort_keys=True)
+                + "\n",
+                encoding="utf-8",
+            )
+            result = {
+                "schema_version": run.schema_version,
+                "analysis_run_id": run.analysis_run_id,
+                "catalog_id": run.catalog.catalog_id,
+                "coverage_status": run.coverage_status.value,
+                "candidate_count": len(run.catalog.candidates),
+                "parameter_count": len(run.catalog.parameters),
+                "evidence_count": len(run.catalog.evidence_atoms),
+                "open_obligation_count": len(run.catalog.open_obligations),
+                "output": str(output),
+            }
         else:
             payload = json.loads(Path(args.path).read_text(encoding="utf-8"))
             snapshot = FirmwareMappingSnapshot.from_dict(payload)

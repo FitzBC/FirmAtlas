@@ -170,6 +170,8 @@ Tier C 同时是样本获取工作队列。没有固件制品前，只能验证�
 
 ## 5. 每轮样本验证流程
 
+R2 已新增完整 rootfs 的统一编排回放：[OpenWrt AC9 AnalyzeRun](./r2-01-openwrt-ac9-analysis-run.json)。它从 1103 个 Inventory 节点自动选择 269 个 producer 输入，发布 720 candidates、220 parameters、1105 EvidenceAtom 与 100 条保留义务，并记录每阶段 coverage。
+
 1. 冻结 Sample Candidate ID、下载证据和目标角色；
 2. 下载并登记 Firmware Artifact，不信任文件名版本；
 3. 在不提供接口清单的条件下运行 discover；
