@@ -12,6 +12,7 @@ from typing import Optional, Tuple
 from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom
 from .frontend import FrontendProducerResult
 from .parameter_clue import FrontendParameterClueIndex
+from .response_fixture import ResponseFixtureResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -50,6 +51,7 @@ class DiscoveryProducerKind(str, Enum):
     SCHEDULER = "scheduler"
     UBUS_BACKEND = "ubus_backend"
     PARAMETER_CLUE = "parameter_clue"
+    RESPONSE_FIXTURE = "response_fixture"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -74,6 +76,7 @@ class DiscoveryCandidateKind(str, Enum):
     UBUS_BACKEND_BINDING = "ubus_backend_binding"
     UBUS_ACCESS_GRANT = "ubus_access_grant"
     PARAMETER_CLUE_ASSESSMENT = "parameter_clue_assessment"
+    RESPONSE_FIXTURE_CONTRACT = "response_fixture_contract"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -110,6 +113,17 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("frontend-parameter-clue", "0.2.0")
         )
         return cls(DiscoveryProducerKind.PARAMETER_CLUE, producer, scope, results)
+
+    @classmethod
+    def response_fixture(
+        cls, results: Tuple[ResponseFixtureResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("response-fixture-producer", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.RESPONSE_FIXTURE, producer, scope, results)
 
     @classmethod
     def web_configuration(
@@ -473,6 +487,61 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                                 separators=(",", ":"),
                             )),
                         ),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.RESPONSE_FIXTURE:
+                if result.endpoint_clue is None or result.binding_status is None:
+                    continue
+                candidate_id = _stable_id(
+                    "response-fixture-contract",
+                    result.source_path,
+                    result.endpoint_clue,
+                )
+                normalized_endpoint = result.endpoint_clue.split("?", 1)[0].lstrip("/")
+                matched_requests = tuple(
+                    item
+                    for item in candidates
+                    if (
+                        item.candidate_kind is DiscoveryCandidateKind.REQUEST_INTERFACE
+                        and item.canonical_identity.split("?", 1)[0].lstrip("/")
+                        == normalized_endpoint
+                    )
+                )
+                proof_ids = tuple(dict.fromkeys((
+                    *(atom.evidence_id for atom in result.evidence_atoms),
+                    *(
+                        evidence_id
+                        for request in matched_requests
+                        for evidence_id in request.evidence_ids
+                    ),
+                )))
+                candidates.append(DiscoveryCandidate(
+                    candidate_id,
+                    DiscoveryCandidateKind.RESPONSE_FIXTURE_CONTRACT,
+                    result.endpoint_clue,
+                    DiscoveryClaimStatus.CANDIDATE,
+                    result.source_path,
+                    result.schema_version,
+                    proof_ids,
+                    (
+                        ("binding_status", result.binding_status.value),
+                        ("open_obligation", result.open_obligation),
+                        ("frontend_request_refs", json.dumps(
+                            [item.candidate_id for item in matched_requests],
+                            separators=(",", ":"),
+                        )),
+                    ),
+                ))
+                for item in result.fields:
+                    parameters.append(DiscoveryParameter(
+                        item.field_id,
+                        candidate_id,
+                        item.json_pointer,
+                        "response_json_pointer",
+                        None,
+                        (),
+                        False,
+                        result.schema_version,
+                        item.evidence_ids,
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.WEB_CONFIGURATION:
                 for item in result.findings:

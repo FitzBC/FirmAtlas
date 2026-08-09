@@ -31,6 +31,10 @@ from .parameter_clue import (
     ParameterCluePolicy,
     trace_frontend_parameter_clues,
 )
+from .response_fixture import (
+    ResponseFixturePolicy,
+    discover_response_fixture,
+)
 from .native import discover_native_hints
 from .native_deep import (
     ArmPicCallsiteProfile,
@@ -73,7 +77,8 @@ _AUTO_V1_ANALYZERS = _BASE_ANALYZERS + (
 )
 _AUTO_V2_ANALYZERS = _AUTO_V1_ANALYZERS + ("frontend_asset_graph",)
 _AUTO_V5_ANALYZERS = _AUTO_V2_ANALYZERS + ("arm_pic_registrar", "set_difference")
-_AUTO_ANALYZERS = _AUTO_V5_ANALYZERS + ("parameter_clue",)
+_AUTO_V6_ANALYZERS = _AUTO_V5_ANALYZERS + ("parameter_clue",)
+_AUTO_ANALYZERS = _AUTO_V6_ANALYZERS + ("response_fixture",)
 
 
 @dataclass(frozen=True)
@@ -93,7 +98,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v6", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v7", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v6(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v6", _AUTO_V6_ANALYZERS)
 
     @classmethod
     def auto_v5(cls) -> "MappingAnalysisProfile":
@@ -129,7 +138,11 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v6", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v7", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v6(cls) -> "MappingAnalyzerRegistry":
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v6", _AUTO_V6_ANALYZERS)
 
     @classmethod
     def builtin_v5(cls) -> "MappingAnalyzerRegistry":
@@ -173,6 +186,7 @@ class MappingAnalyzerRegistry:
             "script_backend": discover_script_backend,
             "native": discover_native_hints,
             "native_ubus_registration": discover_native_ubus_registrations,
+            "response_fixture": discover_response_fixture,
         }
         if analyzer_name not in self.analyzer_names or analyzer_name not in analyzers:
             raise ValueError("source analyzer is unavailable: {}".format(analyzer_name))
@@ -180,6 +194,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V6 = MappingAnalyzerRegistry.builtin_v6()
 BUILTIN_ANALYZER_REGISTRY_V5 = MappingAnalyzerRegistry.builtin_v5()
 BUILTIN_ANALYZER_REGISTRY_V4 = MappingAnalyzerRegistry.builtin_v4()
 BUILTIN_ANALYZER_REGISTRY_V3 = MappingAnalyzerRegistry.builtin_v3()
@@ -194,6 +209,7 @@ class MappingAnalysisRequest:
     inventory_policy: InventoryPolicy = InventoryPolicy()
     profile: MappingAnalysisProfile = MappingAnalysisProfile.auto()
     parameter_clue_policy: ParameterCluePolicy = ParameterCluePolicy()
+    response_fixture_policy: ResponseFixturePolicy = ResponseFixturePolicy()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "root", Path(self.root))
@@ -301,6 +317,13 @@ def _classify(
         or lowered.startswith("usr/share/rpcd/acl.d/")
     ):
         kinds.append("ubus_backend")
+    if (
+        "response_fixture" in enabled
+        and suffix == ".txt"
+        and "goform" in pure.parts
+        and content.lstrip().startswith((b"{", b"["))
+    ):
+        kinds.append("response_fixture")
     return tuple(kinds)
 
 
@@ -400,10 +423,16 @@ def analyze_extracted_root(
     )
     frontend_policy = FrontendPolicy(
         enable_inline_form_literal=(
-            request.profile.profile_id == "firmatlas.mapping.profile/auto-v6"
+            request.profile.profile_id in {
+                "firmatlas.mapping.profile/auto-v6",
+                "firmatlas.mapping.profile/auto-v7",
+            }
         ),
         enable_tenda_get_set_data=(
-            request.profile.profile_id == "firmatlas.mapping.profile/auto-v6"
+            request.profile.profile_id in {
+                "firmatlas.mapping.profile/auto-v6",
+                "firmatlas.mapping.profile/auto-v7",
+            }
         ),
     )
     frontend_graph = None
@@ -456,6 +485,13 @@ def analyze_extracted_root(
             parameter_clue_artifacts,
             request.parameter_clue_policy,
         )
+    response_fixtures = tuple(
+        discover_response_fixture(
+            source, content, request.response_fixture_policy
+        )
+        for source, content, kinds in selected
+        if "response_fixture" in kinds
+    )
     web = tuple(
         registry.analyze_source("web_configuration", source, content)
         for source, content, kinds in selected if "web_configuration" in kinds
@@ -584,7 +620,11 @@ def analyze_extracted_root(
                     for source, content, kinds in selected if "native" in kinds
                 )
                 if request.profile.profile_id
-                in {"firmatlas.mapping.profile/auto-v5", "firmatlas.mapping.profile/auto-v6"}
+                in {
+                    "firmatlas.mapping.profile/auto-v5",
+                    "firmatlas.mapping.profile/auto-v6",
+                    "firmatlas.mapping.profile/auto-v7",
+                }
                 else ()
             )
             set_difference = attribute_frontend_native_set_difference(
@@ -593,7 +633,11 @@ def analyze_extracted_root(
                 attribution_artifacts,
                 SetDifferencePolicy.route_aware(
                     frontend_auxiliary_only=request.profile.profile_id
-                    in {"firmatlas.mapping.profile/auto-v5", "firmatlas.mapping.profile/auto-v6"}
+                    in {
+                        "firmatlas.mapping.profile/auto-v5",
+                        "firmatlas.mapping.profile/auto-v6",
+                        "firmatlas.mapping.profile/auto-v7",
+                    }
                 ),
             )
     initial_obligations = (
@@ -614,6 +658,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.parameter_clue,
             (parameter_clues,) if parameter_clues is not None else (),
             "auto:parameter-clue",
+        ))
+    if "response_fixture" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.response_fixture,
+            response_fixtures,
+            "auto:response-fixture",
         ))
     if "arm_pic_callsite" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -682,6 +732,12 @@ def analyze_extracted_root(
             len(parameter_clues.assessments) if parameter_clues is not None else 0,
             parameter_clues.diagnostics
             if parameter_clues is not None else ("frontend asset graph unavailable",),
+        ))
+    if "response_fixture" in request.profile.enabled_analyzers:
+        stages.insert(5, _stage(
+            "response_fixture",
+            response_fixtures,
+            sum(len(item.fields) for item in response_fixtures),
         ))
     if "native_ubus_registration" in request.profile.enabled_analyzers:
         stages.append(_stage(

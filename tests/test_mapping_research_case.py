@@ -247,7 +247,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][0]
 
         self.assertTrue(corpus["validation"]["paper_ready"])
-        self.assertEqual(9, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(10, corpus["validation"]["evidence_line_count"])
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
             [case["claims"][index]["status"] for index in (2, 3, 4)],
@@ -261,6 +261,27 @@ class ResearchCaseTests(unittest.TestCase):
             list(case["stages"][3]["resolves_obligations"]),
         )
         self.assertIn("formSetDeviceName", case["claims"][4]["statement"])
+
+    def test_ac9_dlna_case_preserves_fixture_daemon_split_as_open(self) -> None:
+        corpus = build_research_case_corpus()
+        case = corpus["cases"][2]
+
+        self.assertEqual("tenda-ac9-dlna-fixture-daemon-split", case["case_key"])
+        self.assertEqual(3, corpus["validation"]["case_count"])
+        self.assertEqual(
+            ["supported", "supported", "supported", "unresolved"],
+            [claim["status"] for claim in case["claims"]],
+        )
+        self.assertEqual(
+            "open",
+            case["obligations"][0]["status"],
+        )
+        frontend = [
+            item for item in case["evidence"]
+            if item["kind"] == "frontend_request"
+        ]
+        self.assertEqual(1, len(frontend))
+        self.assertEqual("constructs_request", frontend[0]["capability"])
 
     def test_real_ac9_case_evidence_replays_from_current_producers(self) -> None:
         root = Path(

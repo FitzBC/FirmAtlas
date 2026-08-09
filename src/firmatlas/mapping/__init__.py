@@ -67,6 +67,14 @@ from .parameter_clue import (
     ParameterCluePolicy,
     trace_frontend_parameter_clues,
 )
+from .response_fixture import (
+    RESPONSE_FIXTURE_SCHEMA_VERSION,
+    ResponseFixtureBindingStatus,
+    ResponseFixtureField,
+    ResponseFixturePolicy,
+    ResponseFixtureResult,
+    discover_response_fixture,
+)
 from .inventory import (
     INVENTORY_SCHEMA_VERSION,
     InventoryDiagnostic,
@@ -205,6 +213,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V6,
     BUILTIN_ANALYZER_REGISTRY_V5,
     BUILTIN_ANALYZER_REGISTRY_V1,
     BUILTIN_ANALYZER_REGISTRY_V2,
@@ -333,6 +342,12 @@ from .research_case import (
 )
 
 __all__ = (
+    "RESPONSE_FIXTURE_SCHEMA_VERSION",
+    "ResponseFixtureBindingStatus",
+    "ResponseFixtureField",
+    "ResponseFixturePolicy",
+    "ResponseFixtureResult",
+    "discover_response_fixture",
     "FrontendParameterClueAssessment",
     "FrontendParameterClueIndex",
     "ParameterClueArtifact",
@@ -511,6 +526,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V6",
     "BUILTIN_ANALYZER_REGISTRY_V5",
     "BUILTIN_ANALYZER_REGISTRY_V1",
     "BUILTIN_ANALYZER_REGISTRY_V2",

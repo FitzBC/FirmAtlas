@@ -40,6 +40,10 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             (root / "www/status.php").write_text(
                 '<?php $mode = $_POST["mode"]; ?>', encoding="utf-8"
             )
+            (root / "www/goform").mkdir()
+            (root / "www/goform/GetStatus.txt").write_text(
+                '{"status":"ready"}', encoding="utf-8"
+            )
             (root / "etc/nginx").mkdir(parents=True)
             (root / "etc/nginx/nginx.conf").write_text(
                 'server { listen 80; root /www; }', encoding="utf-8"
@@ -62,13 +66,23 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "web_configuration",
                 "script_backend", "native", "native_ubus_registration",
                 "arm_pic_callsite", "arm_pic_registrar", "set_difference",
-                "parameter_clue", "ubus_backend", "scheduler", "catalog",
+                "parameter_clue", "response_fixture", "ubus_backend",
+                "scheduler", "catalog",
             },
             {stage.stage_name for stage in first.stages},
         )
         self.assertEqual(
             SchedulerTermination.FIXED_POINT,
             first.catalog.scheduler_termination,
+        )
+        self.assertIn(
+            "goform/GetStatus",
+            {
+                item.canonical_identity
+                for item in first.catalog.candidates
+                if item.candidate_kind
+                is DiscoveryCandidateKind.RESPONSE_FIXTURE_CONTRACT
+            },
         )
         self.assertIn(
             "/admin/apply",
@@ -181,9 +195,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v6", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v7", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v6",
+            "firmatlas.mapping.analyzer-registry/builtin-v7",
             result.analyzer_registry_id,
         )
 

@@ -208,7 +208,27 @@ oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则�
 history-guided analyzer development 和 obligation 状态迁移。限制是未验证运行时、漏洞存在、
 可利用性或跨版本代码谱系；历史记录本身也可能省略参数或 method。
 
-## 5. 后续案例准入触发器
+## 5. AC9 DLNA：响应契约和执行归属是两层事实
+
+R2-07 对 `GetDlnaCfg/SetDlnaCfg/refreshDLNA` 的完整 Native 辅助范围没有发现精确 route token；R2-09 又从 Tenda wrapper 恢复 `expandDlnaFile` 与请求参数，但同样没有 route registration。继续检查整根固件后发现，`webroot_ro/goform/` 内保存了 `GetDlnaCfg.txt`、`SetDlnaCfg.txt` 和 `expandDlnaFile.txt` 等合法 JSON 响应样例。它们可以恢复 `/dlnaEn`、`/deviceName`、`/scanList`、`/subfileList/*/fileName`、`/selectedFlag` 等响应字段，却不能证明这些文件由运行时 Web 服务读取，更不能凭文件名发明 handler。
+
+```mermaid
+flowchart LR
+    UI["dlna.js requests"] --> F["goform JSON fixtures"]
+    F -->|"declares response shape"| O["Open: route / handler owner"]
+    R["rcS: /var/etc/upan"] --> N["nginx: internal /download alias"]
+    R --> C["netctrl: USB mount"]
+    H["httpd: dlna.en / deviceName"] --> D["minidlna"]
+    T["time_check"] -->|"monitor / restart"| D
+    N -. "separate architecture clues" .-> O
+    D -. "does not prove goform binding" .-> O
+```
+
+这构成一个有价值的未解决案例：一条证据线证明前端请求与响应形状，另一条独立证据线证明 USB 媒体挂载、nginx 下载 alias、`httpd` DLNA 状态字符串和 `time_check → minidlna` 监测角色，但没有证据把两条线连接成 route→handler。反事实错误包括把 fixture 文件名当注册表、把 `minidlna` 进程存在当作所有 DLNA UI 操作的 handler，以及因缺少 Native route text 而丢弃可恢复的响应协议字段。
+
+论文可用它展示负向完整性结论、response-contract/execution-ownership 分层，以及更深分析增加架构信息却不关闭核心义务的案例。限制是当前静态缺失不能区分死 UI、版本错配、哈希分发、生成式注册或缺失的条件组件；也没有运行时启动、请求、认证或漏洞结论。机器记录 `tenda-ac9-dlna-fixture-daemon-split` 已进入 corpus，义务 `obligation:dlna-handler-owner` 保持 open。
+
+## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：
 
@@ -224,7 +244,7 @@ history-guided analyzer development 和 obligation 状态迁移。限制是未�
 准入不是要求案例必须成功解决。一个证据充分、局限明确且仍然 open 的案例同样
 有研究价值；但不得把 open 写成 supported。
 
-## 6. 案例模板
+## 7. 案例模板
 
 每个案例至少包含：
 

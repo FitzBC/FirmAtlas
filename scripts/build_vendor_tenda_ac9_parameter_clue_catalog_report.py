@@ -8,7 +8,7 @@ from collections import Counter
 import json
 
 from firmatlas.mapping import (
-    BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V6,
     DiscoveryCandidateKind,
     MappingAnalysisProfile,
 )
@@ -31,8 +31,8 @@ def build() -> dict:
         load_historical_expectations,
     )
     run = analyze_extracted_root(MappingAnalysisRequest(
-        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto()
-    ), registry=BUILTIN_ANALYZER_REGISTRY)
+        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v6()
+    ), registry=BUILTIN_ANALYZER_REGISTRY_V6)
     hidden = build_potential_hidden_interface_index(run.catalog)
     expectations = load_historical_expectations(json.loads(
         EXPECTATIONS.read_text(encoding="utf-8")

@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import argparse
 import json
+from pathlib import Path
 
 from firmatlas.mapping import (
     CaseClaim,
@@ -22,6 +24,9 @@ from firmatlas.mapping import (
 AC9_FIRMWARE_SHA256 = "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296"
 HTTPD_SHA256 = "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b"
 X5000R_FIRMWARE_SHA256 = "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9"
+AC9_R2_10_REPORT = Path(
+    "docs/firmware-mapping/samples/r2-10-vendor-tenda-ac9-response-fixtures.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -992,8 +997,157 @@ def build_x5000r_shared_cgi_case():
     ))
 
 
+def build_ac9_dlna_fixture_split_case():
+    """Preserve the unresolved split between UI contract and daemon architecture."""
+
+    report = json.loads(AC9_R2_10_REPORT.read_text(encoding="utf-8"))
+    atoms = (
+        *report["dlna_response_fixture_evidence"],
+        *report["dlna_architecture_evidence"],
+    )
+    selected = []
+    for atom in atoms:
+        source_path = atom["source_span"]["artifact_path"]
+        capability = atom["capability"]
+        if (
+            source_path == "webroot_ro/js/dlna.js"
+            and capability == "constructs_request"
+            and "expandDlnaFile" in atom["object_value"]
+        ) or source_path == "webroot_ro/goform/expandDlnaFile.txt" \
+                or capability in {
+                    "prepares_media_mount",
+                    "aliases_media_download",
+                    "reads_dlna_state",
+                    "monitors_media_daemon",
+                }:
+            selected.append(atom)
+    evidence = tuple(
+        CaseEvidenceReference(
+            atom["evidence_id"],
+            (
+                CaseEvidenceKind.FRONTEND_REQUEST
+                if atom["producer"] == "frontend-request-producer"
+                else CaseEvidenceKind.RESPONSE_FIXTURE
+                if atom["producer"] == "response-fixture-producer"
+                else CaseEvidenceKind.WEB_CONFIGURATION
+                if atom["source_span"]["artifact_path"].startswith("etc_ro/")
+                else CaseEvidenceKind.NATIVE_HINT
+            ),
+            atom["source_span"]["artifact_path"],
+            atom["source_span"]["artifact_sha256"],
+            atom["source_span"]["locator"],
+            atom["capability"],
+            "{}@{}".format(atom["producer"], atom["producer_version"]),
+        )
+        for atom in selected
+    )
+    by_capability = {}
+    for item in evidence:
+        by_capability.setdefault(item.capability, []).append(item.evidence_ref)
+    frontend_refs = tuple(by_capability["constructs_request"])
+    fixture_refs = tuple(
+        item.evidence_ref for item in evidence
+        if item.kind is CaseEvidenceKind.RESPONSE_FIXTURE
+    )
+    architecture_refs = tuple(
+        item.evidence_ref for item in evidence
+        if item.capability in {
+            "prepares_media_mount",
+            "aliases_media_download",
+            "reads_dlna_state",
+            "monitors_media_daemon",
+        }
+    )
+    return build_research_case(ResearchCaseInput(
+        case_key="tenda-ac9-dlna-fixture-daemon-split",
+        title="Tenda AC9: DLNA response fixtures without a proven goform handler",
+        firmware_artifact_sha256=AC9_FIRMWARE_SHA256,
+        architecture_tags=(
+            "frontend_response_fixture",
+            "unresolved_goform_binding",
+            "minidlna_supervisor",
+            "usb_media_mount",
+        ),
+        research_question=(
+            "Do bundled DLNA request code and JSON response fixtures prove that "
+            "the analyzed firmware registers the corresponding goform handlers?"
+        ),
+        evidence=evidence,
+        claims=(
+            CaseClaim(
+                "claim:dlna-frontend-request",
+                "The UI constructs the expandDlnaFile request.",
+                frontend_refs,
+            ),
+            CaseClaim(
+                "claim:dlna-response-contract",
+                "A bundled JSON fixture declares the expandDlnaFile response shape.",
+                fixture_refs,
+            ),
+            CaseClaim(
+                "claim:dlna-daemon-architecture",
+                "Independent static evidence establishes media mount preparation, "
+                "nginx download aliasing, httpd DLNA state text, and minidlna monitoring.",
+                architecture_refs,
+            ),
+            CaseClaim(
+                "claim:dlna-handler-owner",
+                "No exact Native registration or handler binding currently connects "
+                "the frontend/fixture contract to a goform execution path.",
+                (*frontend_refs, *fixture_refs, *architecture_refs),
+                CaseClaimStatus.UNRESOLVED,
+            ),
+        ),
+        stages=(
+            CaseStage(
+                "stage:dlna-frontend", 1,
+                "Recover the request while leaving backend ownership open.",
+                ("claim:dlna-frontend-request",),
+                creates_obligations=("obligation:dlna-handler-owner",),
+            ),
+            CaseStage(
+                "stage:dlna-response-fixture", 2,
+                "Recover response fields as fixture-declared clues, not runtime facts.",
+                ("claim:dlna-response-contract",),
+            ),
+            CaseStage(
+                "stage:dlna-daemon-architecture", 3,
+                "Recover the independent media mount and daemon supervision branch.",
+                ("claim:dlna-daemon-architecture", "claim:dlna-handler-owner"),
+            ),
+        ),
+        obligations=(
+            CaseObligation(
+                "obligation:dlna-handler-owner",
+                "Locate or reject a route registration and handler for the DLNA goform operations.",
+                "binds_handler",
+                CaseObligationStatus.OPEN,
+            ),
+        ),
+        counterfactuals=(
+            "Treating a response fixture filename as a route table would invent a handler binding.",
+            "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
+            "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
+        ),
+        paper_uses=(
+            "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
+            "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
+            "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
+        ),
+        limitations=(
+            "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
+            "The fixture may be development data and does not establish runtime response values.",
+            "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
+        ),
+    ))
+
+
 def build_research_case_corpus() -> dict:
-    cases = (build_ac9_split_web_stack_case(), build_x5000r_shared_cgi_case())
+    cases = (
+        build_ac9_split_web_stack_case(),
+        build_x5000r_shared_cgi_case(),
+        build_ac9_dlna_fixture_split_case(),
+    )
     validation = validate_research_case_corpus(cases)
     return {
         "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
@@ -1003,7 +1157,16 @@ def build_research_case_corpus() -> dict:
 
 
 def main() -> int:
-    print(json.dumps(build_research_case_corpus(), ensure_ascii=False, indent=2))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    payload = json.dumps(
+        build_research_case_corpus(), ensure_ascii=False, indent=2
+    ) + "\n"
+    if args.output is None:
+        print(payload, end="")
+    else:
+        args.output.write_text(payload, encoding="utf-8")
     return 0
 
 

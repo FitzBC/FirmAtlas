@@ -29,10 +29,58 @@ from firmatlas.mapping import (
     ParameterClueArtifact,
     ParameterClueArtifactRole,
     trace_frontend_parameter_clues,
+    discover_response_fixture,
 )
 
 
 class DiscoveryCatalogContractTests(unittest.TestCase):
+    def test_response_fixture_batch_publishes_candidate_response_parameters(self):
+        content = b'{"dlnaEn":"1","deviceList":[{"fileName":"usb"}]}'
+        source = self.source("webroot_ro/goform/GetDlnaCfg.txt", content)
+        fixture = discover_response_fixture(source, content)
+        frontend_content = b'$.getJSON("/goform/GetDlnaCfg", callback);'
+        frontend = discover_frontend_requests(
+            self.source("webroot_ro/js/dlna.js", frontend_content),
+            frontend_content,
+        )
+
+        result = assemble_discovery_catalog(DiscoveryCatalogInput(
+            firmware_artifact_sha256="1" * 64,
+            source_inventory_sha256="2" * 64,
+            batches=(
+                DiscoveryProducerBatch.frontend((frontend,), "web/js"),
+                DiscoveryProducerBatch.response_fixture((fixture,), "web/goform/*.txt"),
+            ),
+        ))
+
+        candidate = next(
+            item for item in result.candidates
+            if item.candidate_kind.value == "response_fixture_contract"
+        )
+        self.assertEqual(
+            "response_fixture_contract", candidate.candidate_kind.value
+        )
+        self.assertEqual("goform/GetDlnaCfg", candidate.canonical_identity)
+        self.assertEqual("candidate", candidate.claim_status.value)
+        self.assertEqual(
+            "fixture_declared", dict(candidate.attributes)["binding_status"]
+        )
+        self.assertEqual(
+            json.dumps([frontend.candidates[0].candidate_id], separators=(",", ":")),
+            dict(candidate.attributes)["frontend_request_refs"],
+        )
+        self.assertEqual(
+            ["/deviceList", "/deviceList/*/fileName", "/dlnaEn"],
+            [item.name for item in result.parameters],
+        )
+        self.assertEqual(
+            {"response_json_pointer"},
+            {item.namespace for item in result.parameters},
+        )
+        self.assertEqual(
+            {candidate.candidate_id}, {item.owner_ref for item in result.parameters}
+        )
+
     def test_parameter_clue_batch_publishes_positive_and_negative_assessments(self):
         frontend_content = b'''var pageModel=R.pageModel({setUrl:"/save"});
 var moduleModel=R.moduleModel({getSubmitData:function(){return "name="+n+"&mode="+m;}});'''

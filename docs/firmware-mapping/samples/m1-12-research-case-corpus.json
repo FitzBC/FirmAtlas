@@ -1176,13 +1176,363 @@
         "The service-assembly Profile proves the shipped initialization and configuration chain, not that a particular boot completed or that the process and listeners were observed live.",
         "A missing observed frontend reference does not distinguish a hidden client, direct API, dead code, version skew, or runtime-only registration without additional evidence."
       ]
+    },
+    {
+      "case_id": "research-case:50159a27cea9864902f926709ae2c8e08aa0acd8a70e0868fbf575c7079db5dc",
+      "schema_version": "firmatlas.mapping.research-case/v1alpha1",
+      "case_key": "tenda-ac9-dlna-fixture-daemon-split",
+      "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
+      "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+      "architecture_tags": [
+        "frontend_response_fixture",
+        "unresolved_goform_binding",
+        "minidlna_supervisor",
+        "usb_media_mount"
+      ],
+      "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers?",
+      "evidence": [
+        {
+          "evidence_ref": "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=588-600;lines=22:14-22:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0997150397e185c0ec3e56c9c957ea2646eacfc1cbcdb90aaedfa89198f1f034",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=315-327;lines=13:14-13:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=470-482;lines=18:14-18:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0e9b164c05f972248018dd5f67fd5b60ca21e2d22556b85dca0a2d87ac8d254b",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=551-563;lines=21:14-21:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:1c4ef4042b3271134e31f4b74c3309be46839ca8f7fe62c6e0e13bada6b620c0",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=234-246;lines=10:14-10:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:2be8cabc3ac8346904c1fc87bc736d06b82609b1b58aa7507b9acfa728eaad4d",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=49-57;lines=4:14-4:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:3ad08032db9895aad3e835b9725599f69f106c54486292e1596c1ecccebc08a0",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=167-175;lines=8:14-8:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4243dc13572525dd8be26949093db95ce478247d8e9c83cfa69eb7efad06b703",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=520-528;lines=20:14-20:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:436ce7ddc7154cc89547d317d8222e5f478540ac3bc690a619e0c63d4c753bf9",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=117-129;lines=6:14-6:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:448607bd874b573c7ed6dc930093e04dbcb42e330340ba3af6d09f49738b1e0d",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=284-292;lines=12:14-12:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:475c30c1ce3f49cef3d48a0b8f042b27843e2ac45b1c7d4488499ddc58e4c8d4",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=80-92;lines=5:14-5:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4d51084bb5f8f2894ea014d3cb7657a9ea2e5c81676041e0a458d14416223f68",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=351-363;lines=14:14-14:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:50e57cd60a076cfe830551092e440cd8e3bdc474273d5297374472cca96ff78b",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=433-445;lines=17:14-17:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:644f900fd987b461ed746fcb97e9192c3f61c7c279f18d205dbe52ad476e7e6f",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=198-210;lines=9:14-9:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:89a6ec1a45a9527f9a101fcf9c881af076020fce5054d6362f51f3f0f5f720d1",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=0-1;lines=1:1-1:2",
+          "capability": "observes_fixture_endpoint",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=4043-4065;lines=113:31-113:53",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:b4dc620966cd2cb3821992747bcde8608ad42e04819ae5d5308eac2fb2d80fb0",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=402-410;lines=16:14-16:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:f22c8296a16b7891bed007de4a970f1465e712b1aaabfd3c5903e9a763961d49",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=8-19;lines=2:6-2:17",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:b8bd263c2d1f1138b69416a5b690c13ee88c30f25be69c78e17f505066675934",
+          "kind": "web_configuration",
+          "source_path": "etc_ro/init.d/rcS",
+          "source_artifact_sha256": "f77e4a67f220c70222b254c94b915710535f02680b11c91e7bfa1aa4e0f09551",
+          "locator": "text_utf8:bytes=256-269;lines=16:10-16:23",
+          "capability": "prepares_media_mount",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:a91ac0adceb329031f0138e1a02e904b98c3be19d2b694b848af01ad06c9ae07",
+          "kind": "web_configuration",
+          "source_path": "etc_ro/nginx/conf/nginx.conf",
+          "source_artifact_sha256": "66d18e21c0224ae7f738f8b97a7d4bc699669cd695e8f0432b7f8d3f54ac3663",
+          "locator": "text_utf8:bytes=1096-1110;lines=56:10-56:24",
+          "capability": "aliases_media_download",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:eb542224a941cff16d8d415c4c11d2aa07ab214b1ab056cbe483694195816289",
+          "kind": "native_hint",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951924-951931",
+          "capability": "reads_dlna_state",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78",
+          "kind": "native_hint",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=96365-96373",
+          "capability": "monitors_media_daemon",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:dlna-frontend-request",
+          "statement": "The UI constructs the expandDlnaFile request.",
+          "evidence_refs": [
+            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-response-contract",
+          "statement": "A bundled JSON fixture declares the expandDlnaFile response shape.",
+          "evidence_refs": [
+            "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
+            "evidence:0997150397e185c0ec3e56c9c957ea2646eacfc1cbcdb90aaedfa89198f1f034",
+            "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
+            "evidence:0e9b164c05f972248018dd5f67fd5b60ca21e2d22556b85dca0a2d87ac8d254b",
+            "evidence:1c4ef4042b3271134e31f4b74c3309be46839ca8f7fe62c6e0e13bada6b620c0",
+            "evidence:2be8cabc3ac8346904c1fc87bc736d06b82609b1b58aa7507b9acfa728eaad4d",
+            "evidence:3ad08032db9895aad3e835b9725599f69f106c54486292e1596c1ecccebc08a0",
+            "evidence:4243dc13572525dd8be26949093db95ce478247d8e9c83cfa69eb7efad06b703",
+            "evidence:436ce7ddc7154cc89547d317d8222e5f478540ac3bc690a619e0c63d4c753bf9",
+            "evidence:448607bd874b573c7ed6dc930093e04dbcb42e330340ba3af6d09f49738b1e0d",
+            "evidence:475c30c1ce3f49cef3d48a0b8f042b27843e2ac45b1c7d4488499ddc58e4c8d4",
+            "evidence:4d51084bb5f8f2894ea014d3cb7657a9ea2e5c81676041e0a458d14416223f68",
+            "evidence:50e57cd60a076cfe830551092e440cd8e3bdc474273d5297374472cca96ff78b",
+            "evidence:644f900fd987b461ed746fcb97e9192c3f61c7c279f18d205dbe52ad476e7e6f",
+            "evidence:89a6ec1a45a9527f9a101fcf9c881af076020fce5054d6362f51f3f0f5f720d1",
+            "evidence:b4dc620966cd2cb3821992747bcde8608ad42e04819ae5d5308eac2fb2d80fb0",
+            "evidence:f22c8296a16b7891bed007de4a970f1465e712b1aaabfd3c5903e9a763961d49"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-daemon-architecture",
+          "statement": "Independent static evidence establishes media mount preparation, nginx download aliasing, httpd DLNA state text, and minidlna monitoring.",
+          "evidence_refs": [
+            "evidence:b8bd263c2d1f1138b69416a5b690c13ee88c30f25be69c78e17f505066675934",
+            "evidence:a91ac0adceb329031f0138e1a02e904b98c3be19d2b694b848af01ad06c9ae07",
+            "evidence:eb542224a941cff16d8d415c4c11d2aa07ab214b1ab056cbe483694195816289",
+            "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-handler-owner",
+          "statement": "No exact Native registration or handler binding currently connects the frontend/fixture contract to a goform execution path.",
+          "evidence_refs": [
+            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+            "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
+            "evidence:0997150397e185c0ec3e56c9c957ea2646eacfc1cbcdb90aaedfa89198f1f034",
+            "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
+            "evidence:0e9b164c05f972248018dd5f67fd5b60ca21e2d22556b85dca0a2d87ac8d254b",
+            "evidence:1c4ef4042b3271134e31f4b74c3309be46839ca8f7fe62c6e0e13bada6b620c0",
+            "evidence:2be8cabc3ac8346904c1fc87bc736d06b82609b1b58aa7507b9acfa728eaad4d",
+            "evidence:3ad08032db9895aad3e835b9725599f69f106c54486292e1596c1ecccebc08a0",
+            "evidence:4243dc13572525dd8be26949093db95ce478247d8e9c83cfa69eb7efad06b703",
+            "evidence:436ce7ddc7154cc89547d317d8222e5f478540ac3bc690a619e0c63d4c753bf9",
+            "evidence:448607bd874b573c7ed6dc930093e04dbcb42e330340ba3af6d09f49738b1e0d",
+            "evidence:475c30c1ce3f49cef3d48a0b8f042b27843e2ac45b1c7d4488499ddc58e4c8d4",
+            "evidence:4d51084bb5f8f2894ea014d3cb7657a9ea2e5c81676041e0a458d14416223f68",
+            "evidence:50e57cd60a076cfe830551092e440cd8e3bdc474273d5297374472cca96ff78b",
+            "evidence:644f900fd987b461ed746fcb97e9192c3f61c7c279f18d205dbe52ad476e7e6f",
+            "evidence:89a6ec1a45a9527f9a101fcf9c881af076020fce5054d6362f51f3f0f5f720d1",
+            "evidence:b4dc620966cd2cb3821992747bcde8608ad42e04819ae5d5308eac2fb2d80fb0",
+            "evidence:f22c8296a16b7891bed007de4a970f1465e712b1aaabfd3c5903e9a763961d49",
+            "evidence:b8bd263c2d1f1138b69416a5b690c13ee88c30f25be69c78e17f505066675934",
+            "evidence:a91ac0adceb329031f0138e1a02e904b98c3be19d2b694b848af01ad06c9ae07",
+            "evidence:eb542224a941cff16d8d415c4c11d2aa07ab214b1ab056cbe483694195816289",
+            "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78"
+          ],
+          "status": "unresolved"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "stage:dlna-frontend",
+          "order": 1,
+          "interpretation": "Recover the request while leaving backend ownership open.",
+          "claim_ids": [
+            "claim:dlna-frontend-request"
+          ],
+          "creates_obligations": [
+            "obligation:dlna-handler-owner"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-response-fixture",
+          "order": 2,
+          "interpretation": "Recover response fields as fixture-declared clues, not runtime facts.",
+          "claim_ids": [
+            "claim:dlna-response-contract"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-daemon-architecture",
+          "order": 3,
+          "interpretation": "Recover the independent media mount and daemon supervision branch.",
+          "claim_ids": [
+            "claim:dlna-daemon-architecture",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        }
+      ],
+      "obligations": [
+        {
+          "obligation_id": "obligation:dlna-handler-owner",
+          "statement": "Locate or reject a route registration and handler for the DLNA goform operations.",
+          "required_capability": "binds_handler",
+          "status": "open",
+          "closure_evidence_refs": []
+        }
+      ],
+      "counterfactuals": [
+        "Treating a response fixture filename as a route table would invent a handler binding.",
+        "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
+        "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts."
+      ],
+      "paper_uses": [
+        "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
+        "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
+        "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping."
+      ],
+      "limitations": [
+        "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
+        "The fixture may be development data and does not establish runtime response values.",
+        "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made."
+      ]
     }
   ],
   "validation": {
     "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
     "paper_ready": true,
-    "case_count": 2,
-    "evidence_line_count": 9,
+    "case_count": 3,
+    "evidence_line_count": 10,
     "issues": []
   }
 }
