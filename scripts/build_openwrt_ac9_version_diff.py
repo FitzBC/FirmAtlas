@@ -23,6 +23,7 @@ from firmatlas.mapping import (
     correlate_frontend_native,
     discover_frontend_requests,
     discover_native_hints,
+    discover_native_ubus_registrations,
     discover_script_backend,
     discover_ubus_backend_graph,
     discover_web_configuration,
@@ -164,11 +165,23 @@ def build_catalog(version: str, include_ubus_backend: bool = False):
             for path in base.iterdir()
             if path.is_file()
         )
+        ubus_artifacts = tuple(
+            UbusArtifactInput(*_source(root, path)) for path in ubus_paths
+        )
+        native_registrations = tuple(
+            result
+            for item in ubus_artifacts
+            if item.source.canonical_path.startswith("usr/lib/rpcd/")
+            and item.source.canonical_path.endswith(".so")
+            for result in (
+                discover_native_ubus_registrations(item.source, item.content),
+            )
+            if result.registration_coverage_complete
+        )
         ubus_backend = discover_ubus_backend_graph(
             ubus_operation_references_from_frontend(frontends),
-            tuple(
-                UbusArtifactInput(*_source(root, path)) for path in ubus_paths
-            ),
+            ubus_artifacts,
+            native_registrations=native_registrations,
         )
         batches.append(DiscoveryProducerBatch.ubus_backend(
             (ubus_backend,),
@@ -211,6 +224,7 @@ def build_catalog(version: str, include_ubus_backend: bool = False):
             "access_grant_count": len(ubus_backend.access_grants),
             "open_obligation_count": len(ubus_backend.open_obligations),
             "coverage_status": ubus_backend.coverage_status.value,
+            "verified_native_registration_count": len(native_registrations),
         }
     return catalog, summary
 

@@ -174,6 +174,16 @@ from .native_deep import (
     discover_native_route_bindings,
     native_deep_scheduler_analyzer,
 )
+from .native_ubus_registration import (
+    NATIVE_UBUS_REGISTRATION_SCHEMA_VERSION,
+    NativeUbusMethodRegistration,
+    NativeUbusObjectRegistration,
+    NativeUbusRegistrationDiagnostic,
+    NativeUbusRegistrationPolicy,
+    NativeUbusRegistrationProfile,
+    NativeUbusRegistrationResult,
+    discover_native_ubus_registrations,
+)
 from .native_value_flow import (
     MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION,
     MipsHandlerValueFlowDiagnostic,
@@ -437,6 +447,14 @@ __all__ = (
     "discover_mips_inline_route_bindings",
     "discover_native_route_bindings",
     "native_deep_scheduler_analyzer",
+    "NATIVE_UBUS_REGISTRATION_SCHEMA_VERSION",
+    "NativeUbusMethodRegistration",
+    "NativeUbusObjectRegistration",
+    "NativeUbusRegistrationDiagnostic",
+    "NativeUbusRegistrationPolicy",
+    "NativeUbusRegistrationProfile",
+    "NativeUbusRegistrationResult",
+    "discover_native_ubus_registrations",
     "MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION",
     "MipsHandlerValueFlowDiagnostic",
     "MipsHandlerValueFlowPolicy",

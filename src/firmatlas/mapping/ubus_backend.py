@@ -23,6 +23,7 @@ from .domain import (
 from .evidence import EvidenceClaim, SpanSelection, capture_evidence
 from .inventory import SourceArtifactEntry
 from .frontend import FrontendProducerResult
+from .native_ubus_registration import NativeUbusRegistrationResult
 
 
 UBUS_BACKEND_RESULT_SCHEMA_VERSION = "firmatlas.mapping.ubus-backend/v1alpha1"
@@ -37,6 +38,7 @@ class UbusPrincipalKind(str, Enum):
 class UbusBackendBindingStatus(str, Enum):
     STATIC_PLUGIN_DISPATCH = "static_plugin_dispatch"
     NATIVE_PLUGIN_CANDIDATE = "native_plugin_candidate"
+    VERIFIED_NATIVE_REGISTRATION = "verified_native_registration"
 
 
 class UbusAccessMode(str, Enum):
@@ -86,6 +88,7 @@ class UbusBackendBinding:
     status: UbusBackendBindingStatus
     parameter_names: Tuple[str, ...]
     evidence_ids: Tuple[str, ...]
+    handler_identity: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -386,6 +389,7 @@ def _acl_grants(
 def discover_ubus_backend_graph(
     operations: Tuple[UbusOperationReference, ...],
     artifacts: Tuple[UbusArtifactInput, ...],
+    native_registrations: Tuple[NativeUbusRegistrationResult, ...] = (),
 ) -> UbusBackendGraphResult:
     """Map observed logical operations to static backend and ACL evidence.
 
@@ -398,6 +402,21 @@ def discover_ubus_backend_graph(
         raise ValueError("duplicate ubus operation reference")
     for artifact in artifacts:
         _verify_artifact(artifact)
+    artifact_digests = {
+        item.source.canonical_path: item.source.content_sha256 for item in artifacts
+    }
+    for registration in native_registrations:
+        if not registration.registration_coverage_complete:
+            raise ValueError("ubus backend requires completed native registrations")
+        if registration.source_path not in artifact_digests:
+            raise ValueError("native registration source is outside backend artifact scope")
+        if any(
+            atom.source_span.artifact_path != registration.source_path
+            or atom.source_span.artifact_sha256
+            != artifact_digests[registration.source_path]
+            for atom in registration.evidence_atoms
+        ):
+            raise ValueError("native registration evidence does not match backend artifact")
     principals = {}
     bindings = {}
     grants = {}
@@ -545,10 +564,62 @@ def discover_ubus_backend_graph(
                 (marker_atom.evidence_id,),
             )
 
+    for registration in native_registrations:
+        matched = []
+        for obj in registration.objects:
+            methods = {item.method_name: item for item in obj.methods}
+            for operation in operations:
+                method = methods.get(operation.method_name)
+                if operation.object_name == obj.object_name and method is not None:
+                    matched.append((operation, obj, method))
+        if not matched:
+            continue
+        object_names = tuple(sorted({item[1].object_name for item in matched}))
+        principal_id = _stable_id(
+            "ubus-principal", registration.source_path, *object_names
+        )
+        principal_evidence = tuple(sorted({
+            evidence_id
+            for _, obj, _ in matched
+            for evidence_id in obj.evidence_ids
+        }))
+        for atom in registration.evidence_atoms:
+            evidence[atom.evidence_id] = atom
+        principals[principal_id] = UbusBackendPrincipal(
+            principal_id,
+            registration.source_path,
+            UbusPrincipalKind.RPCD_NATIVE_PLUGIN,
+            object_names,
+            principal_evidence,
+        )
+        for operation, obj, method in matched:
+            binding_id = _stable_id(
+                "ubus-backend-binding", operation.operation_ref, principal_id
+            )
+            binding_evidence = tuple(sorted(set(
+                obj.evidence_ids + method.evidence_ids
+            )))
+            bindings[binding_id] = UbusBackendBinding(
+                binding_id,
+                operation.operation_ref,
+                operation.logical_operation,
+                principal_id,
+                UbusBackendBindingStatus.VERIFIED_NATIVE_REGISTRATION,
+                (),
+                binding_evidence,
+                method.handler_identity,
+            )
+            bound[operation.operation_ref] = [
+                UbusBackendBindingStatus.VERIFIED_NATIVE_REGISTRATION
+            ]
+
     obligations = []
     for operation in operations:
         statuses = bound[operation.operation_ref]
-        if UbusBackendBindingStatus.STATIC_PLUGIN_DISPATCH in statuses:
+        if (
+            UbusBackendBindingStatus.STATIC_PLUGIN_DISPATCH in statuses
+            or UbusBackendBindingStatus.VERIFIED_NATIVE_REGISTRATION in statuses
+        ):
             continue
         if UbusBackendBindingStatus.NATIVE_PLUGIN_CANDIDATE in statuses:
             capability = "resolve_ubus_registration_table"

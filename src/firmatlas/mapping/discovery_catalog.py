@@ -744,7 +744,10 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                         item.logical_operation,
                         (
                             DiscoveryClaimStatus.SUPPORTED
-                            if item.status is UbusBackendBindingStatus.STATIC_PLUGIN_DISPATCH
+                            if item.status in {
+                                UbusBackendBindingStatus.STATIC_PLUGIN_DISPATCH,
+                                UbusBackendBindingStatus.VERIFIED_NATIVE_REGISTRATION,
+                            }
                             else DiscoveryClaimStatus.CANDIDATE
                         ),
                         principal_paths[item.principal_id],
@@ -755,6 +758,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("principal_id", item.principal_id),
                             ("binding_status", item.status.value),
                             ("parameter_names", "|".join(item.parameter_names)),
+                            ("handler_identity", item.handler_identity or ""),
                         ),
                     ))
                 for item in result.access_grants:

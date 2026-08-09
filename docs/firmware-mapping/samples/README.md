@@ -99,6 +99,7 @@
 - 18.06.7 恢复 18 条 Lua route；19.07.8 恢复 53 个去重 `ubus://object/method` 逻辑操作（含 1 个动态模板）；
 - 旧版 `/admin/status/realtime/*`、network status 与 flashops 路由消失，同时新版出现 system/network/file/uci/iwinfo/luci-rpc 操作；
 - `hostapd.%s` 已被界定为 `{dynamic}` 操作族，但具体实例与 owner 未解析，使新版 Catalog 为 partial、整体 diff 为 coverage-confounded。
+- 19.07.8 的 4 个 sectionless ARM32 rpcd 插件已从原始 ELF 注册表重放，31 条 LuCI operation 晋级为 verified Native handler binding，30 条 registration obligation 关闭；动态 `hostapd.{dynamic}` owner 仍保持未决。报告见 [M1-26](./m1-26-openwrt-ac9-native-ubus-registration.json)。
 
 该例用于验证“通信架构迁移不能被降维成 URL 增删”。它支持静态迁移假设，但不证明功能等价、补丁因果、漏洞修复或运行时可达。
 

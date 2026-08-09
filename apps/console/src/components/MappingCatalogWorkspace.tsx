@@ -362,6 +362,7 @@ function RelatedCandidateCard({ candidate }: { candidate: MappingCandidate }) {
     <div className="mt-1 break-all text-[9px] text-slate-600">{candidate.candidate_kind.replaceAll('_', ' ')} · {candidate.source_path}</div>
     {attributes.object_pattern && <div className="mt-2 font-mono text-[9px] text-violet-300/70">object {attributes.object_pattern}</div>}
     {attributes.parameter_names && <div className="mt-2 font-mono text-[9px] text-cyan/70">params {attributes.parameter_names}</div>}
+    {attributes.handler_identity && <div className="mt-2 font-mono text-[9px] text-emerald-300/70">handler {attributes.handler_identity}</div>}
   </div>
 }
 

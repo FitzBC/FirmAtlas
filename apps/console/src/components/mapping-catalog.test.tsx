@@ -39,8 +39,8 @@ const detail: MappingCandidateDetail = {
   }, {
     ...candidate, candidate_id: 'ubus-binding:1', candidate_kind: 'ubus_backend_binding',
     canonical_identity: 'ubus://luci/getFeatures', claim_status: 'supported',
-    source_path: 'usr/libexec/rpcd/luci', source_construct: 'static_plugin_dispatch',
-    attributes: [['binding_status', 'static_plugin_dispatch'], ['parameter_names', 'detail']],
+    source_path: 'usr/lib/rpcd/luci.so', source_construct: 'verified_native_registration',
+    attributes: [['binding_status', 'verified_native_registration'], ['handler_identity', 'usr/lib/rpcd/luci.so@0x00001200']],
   }, {
     ...candidate, candidate_id: 'ubus-principal:1', candidate_kind: 'runtime_principal',
     canonical_identity: 'usr/libexec/rpcd/luci', claim_status: 'supported',
@@ -153,6 +153,7 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   expect(screen.getByText('后端执行与访问链')).toBeInTheDocument()
   expect(screen.getByText('SetOnlineDevName')).toBeInTheDocument()
   expect(screen.getByText('rpcd_exec_plugin')).toBeInTheDocument()
+  expect(screen.getByText(/handler usr\/lib\/rpcd\/luci\.so@0x00001200/)).toBeInTheDocument()
   expect(screen.getByText('read · unauthenticated')).toBeInTheDocument()
   expect(screen.getByText('未决分析义务')).toBeInTheDocument()
   expect(screen.getByText('resolve_ubus_runtime_owner')).toBeInTheDocument()

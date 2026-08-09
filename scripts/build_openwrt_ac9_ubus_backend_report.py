@@ -81,6 +81,7 @@ def build_report(database: Optional[str] = None) -> dict:
                 "artifact_path": principals[
                     _attributes(item)["principal_id"]
                 ].source_path,
+                "handler_identity": _attributes(item).get("handler_identity") or None,
             } for item in related_bindings],
             "access_grants": [{
                 "policy_group": _attributes(item).get("policy_group"),
@@ -119,6 +120,11 @@ def build_report(database: Optional[str] = None) -> dict:
                 _attributes(item).get("binding_status") == "native_plugin_candidate"
                 for item in bindings
             ),
+            "verified_native_binding_count": sum(
+                _attributes(item).get("binding_status")
+                == "verified_native_registration"
+                for item in bindings
+            ),
             "access_grant_count": len(grants),
             "runtime_owner_obligation_count": sum(
                 item.required_capability == "resolve_ubus_runtime_owner"
@@ -133,11 +139,12 @@ def build_report(database: Optional[str] = None) -> dict:
         "interpretation_boundary": {
             "supported": (
                 "frontend LuCI declarations, statically enumerable rpcd exec-plugin "
-                "dispatch, native plugin co-occurrence candidates, and rpcd ACL grants"
+                "dispatch, replayable native registration-table handler bindings, "
+                "and rpcd ACL grants"
             ),
             "not_claimed": (
                 "runtime reachability, authentication outcome, vulnerability, or a "
-                "native handler binding without registration-table/callsite evidence"
+                "runtime owner for operations without registration-table evidence"
             ),
         },
     }
