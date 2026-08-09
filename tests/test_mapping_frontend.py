@@ -190,6 +190,56 @@ return this.topicurl="setLanCfg",this.post(data);};'''
             {atom.capability for atom in atoms},
         )
 
+    def test_asset_graph_proves_page_model_post_method_from_framework(self):
+        page = b'''var pageModel=R.pageModel({setUrl:"goform/SetRemoteWebCfg"});
+var moduleModel=R.moduleModel({getSubmitData:function(){
+var data={"remoteIp":$("#remoteIp").val()};return objTostring(data);}});'''
+        framework = b'''this.page=function(pageView,pageModel){
+return {submit:function(){var dataStr=pageModel.getSubmitData();
+$.post(pageModel.setUrl,dataStr,function(str){pageModel.afterSubmit(str);});}};}'''
+        assets = tuple(
+            FrontendAssetInput(
+                SourceArtifactEntry(
+                    path, path, "file", len(content),
+                    hashlib.sha256(content).hexdigest(),
+                ),
+                content,
+            )
+            for path, content in (
+                ("webroot_ro/js/remote_web.js", page),
+                ("webroot_ro/js/libs/public.js", framework),
+            )
+        )
+
+        graph = discover_frontend_asset_graph(assets)
+
+        candidates = [
+            item for result in graph.results for item in result.candidates
+        ]
+        self.assertEqual(1, len(candidates))
+        candidate = candidates[0]
+        self.assertEqual("POST", candidate.method)
+        self.assertEqual("R.pageModel.setUrl.framework", candidate.source_construct)
+        parameters = [
+            item for result in graph.results for item in result.parameters
+        ]
+        self.assertEqual(["remoteIp"], [item.name for item in parameters])
+        self.assertEqual(candidate.candidate_id, parameters[0].request_candidate_id)
+        atoms = [
+            atom for result in graph.results for atom in result.evidence_atoms
+            if atom.subject_ref == candidate.candidate_id
+        ]
+        self.assertEqual(
+            {"webroot_ro/js/remote_web.js", "webroot_ro/js/libs/public.js"},
+            {item.source_span.artifact_path for item in atoms},
+        )
+        binding = next(
+            item for item in graph.bindings
+            if item.symbol == "R.pageModel.setUrl.method"
+        )
+        self.assertEqual("POST", binding.value)
+        self.assertEqual((candidate.candidate_id,), binding.request_candidate_ids)
+
     def test_asset_graph_resolves_custom_request_default_and_payload_variable(self):
         transport = b'''function Transport(){}
 Transport.prototype.request=function(options){

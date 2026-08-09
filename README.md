@@ -139,7 +139,7 @@ PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
   --output mapping-analysis-run.json
 ```
 
-该入口会自动建立 Source Plan，运行 Frontend、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。`--profile base` 可重放 R2-01 基线。首要样本见 [R2-02 原厂 Tenda AC9](./docs/firmware-mapping/samples/r2-02-vendor-tenda-ac9-auto-profile.json)，同硬件 OpenWrt 对照见 [R2-02 OpenWrt AC9](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。
+该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。当前 `auto-v2` 可用框架资源证明页面 `R.pageModel.setUrl` 的 transport method；`auto-v1` 与 `base` 分别保留 R2-02/R2-01 可复现基线。首要样本最新结果见 [R2-04 原厂 Tenda AC9](./docs/firmware-mapping/samples/r2-04-vendor-tenda-ac9-framework-history.json)，同硬件 OpenWrt 对照见 [R2-02 OpenWrt AC9](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。
 
 历史漏洞接口只能在声明版本与当前制品范围明确后用于测绘差异，不能直接当作固件真值：
 
@@ -151,7 +151,7 @@ PYTHONPATH=src python3 -m firmatlas.mapping compare-history /path/to/rootfs \
   --output historical-expectation-diff.json
 ```
 
-输出区分接口/参数/method/dispatcher/coverage/artifact-scope 缺口，并保留 Catalog candidate 与 EvidenceAtom 引用。原厂 AC9 示例见 [R2-03 expectation manifest](./docs/firmware-mapping/samples/r2-03-vendor-tenda-ac9-historical-expectations.json)及[差异报告](./docs/firmware-mapping/samples/r2-03-vendor-tenda-ac9-historical-diff.json)。
+输出区分接口/参数/method/dispatcher/coverage/artifact-scope 缺口，并保留 Catalog candidate 与 EvidenceAtom 引用。原厂 AC9 的 [R2-04 报告](./docs/firmware-mapping/samples/r2-04-vendor-tenda-ac9-framework-history.json)同时固化 13 条结构化 expectation、71 条产品级漏洞全集、30 条当前样本级复现关联和 route→handler 覆盖；产品同名记录不会被自动当作当前版本事实。
 
 输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。Inventory v1alpha2 会在固件 chroot 内解析绝对与链式 symlink，但不会经链接打开或散列目标；普通缺失、循环、深度耗尽和越界仍进入 coverage ledger。内置 Inventory 只读取已解包目录并以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装由独立 Container Extraction Worker 处理，不能把原始固件直接交给此命令。
 

@@ -1415,7 +1415,10 @@ def _html_form_requests(content: bytes) -> tuple:
 
 
 def _request_literals(
-    content: bytes, source_path: str, external_bindings: Optional[dict] = None
+    content: bytes,
+    source_path: str,
+    external_bindings: Optional[dict] = None,
+    page_model_set_method: Optional[str] = None,
 ) -> tuple:
     discoveries = []
     luci_rpc, _, _ = _luci_rpc_declarations(content)
@@ -1460,9 +1463,13 @@ def _request_literals(
                 end_byte,
                 FrontendEndpointShape.EXACT_LITERAL,
                 role,
+                page_model_set_method if key == "setUrl" else None,
                 None,
-                None,
-                "R.pageModel.{}".format(key),
+                (
+                    "R.pageModel.setUrl.framework"
+                    if key == "setUrl" and page_model_set_method
+                    else "R.pageModel.{}".format(key)
+                ),
                 (),
             )
         )
@@ -1472,7 +1479,9 @@ def _request_literals(
     write_indexes = [
         index
         for index, item in enumerate(page_model_discoveries)
-        if item[7] == "R.pageModel.setUrl"
+        if item[7] in {
+            "R.pageModel.setUrl", "R.pageModel.setUrl.framework"
+        }
     ]
     if len(write_indexes) == 1 and module_parameters:
         write_index = write_indexes[0]
@@ -1664,7 +1673,7 @@ def discover_frontend_requests(
             ),
         )
 
-    return _discover_frontend_requests(source, content, policy, None)
+    return _discover_frontend_requests(source, content, policy, None, None)
 
 
 def _discover_frontend_requests(
@@ -1672,6 +1681,7 @@ def _discover_frontend_requests(
     content: bytes,
     policy: FrontendPolicy,
     external_bindings: Optional[dict],
+    page_model_set_method: Optional[str],
 ) -> FrontendProducerResult:
     candidates = {}
     parameter_candidates = {}
@@ -1695,7 +1705,12 @@ def _discover_frontend_requests(
                 "unresolved"
             ).format(template_luci_rpc),
         ))
-    matches = _request_literals(content, source.canonical_path, external_bindings)
+    matches = _request_literals(
+        content,
+        source.canonical_path,
+        external_bindings,
+        page_model_set_method,
+    )
     selected_matches = matches[: policy.max_candidates]
     if len(matches) > len(selected_matches):
         diagnostics.append(
@@ -2002,6 +2017,40 @@ def _request_default_definitions(asset: FrontendAssetInput) -> tuple:
     return tuple(definitions)
 
 
+def _page_model_framework_methods(asset: FrontendAssetInput) -> tuple:
+    """Prove the transport method used by a RouterPage page-model framework."""
+
+    try:
+        asset.content.decode("utf-8")
+    except UnicodeDecodeError:
+        return ()
+    tokens = _tokenize_javascript(asset.content)
+    definitions = []
+    page_prefix = (b"this", b".", b"page", b"=", b"function", b"(")
+    post_prefix = (
+        b"$", b".", b"post", b"(", b"pageModel", b".", b"setUrl", b",",
+    )
+    for index in range(max(0, len(tokens) - len(page_prefix) + 1)):
+        if tuple(item.value for item in tokens[index:index + 6]) != page_prefix:
+            continue
+        parameters_end = _matching_delimiter(tokens, index + 5, b"(", b")")
+        if not any(
+            item.kind == "identifier" and item.value == b"pageModel"
+            for item in tokens[index + 6:parameters_end]
+        ):
+            continue
+        body_open = parameters_end + 1
+        while body_open < len(tokens) and tokens[body_open].value != b"{":
+            body_open += 1
+        if body_open >= len(tokens):
+            continue
+        body_end = _matching_close(tokens, body_open)
+        for cursor in range(body_open + 1, max(body_open + 1, body_end - 7)):
+            if tuple(item.value for item in tokens[cursor:cursor + 8]) == post_prefix:
+                definitions.append(("POST", tokens[cursor + 2]))
+    return tuple(definitions)
+
+
 def _javascript_code_offsets(content: bytes, offsets: tuple) -> set:
     """Return requested offsets that begin in JavaScript code.
 
@@ -2131,6 +2180,7 @@ def discover_frontend_asset_graph(
         for asset in assets
     )
     definitions = {}
+    framework_methods = []
     for asset, result in zip(assets, baseline):
         if result.coverage_status is not CoverageStatus.COMPLETED:
             continue
@@ -2139,6 +2189,8 @@ def discover_frontend_asset_graph(
             *_request_default_definitions(asset),
         ):
             definitions.setdefault(identity, []).append((asset, symbol, token))
+        for method, token in _page_model_framework_methods(asset):
+            framework_methods.append((asset, method, token))
 
     resolved = {}
     diagnostics = []
@@ -2162,17 +2214,37 @@ def discover_frontend_asset_graph(
 
     results = []
     bindings = []
+    framework_method = None
+    if framework_methods:
+        methods = {method for _, method, _ in framework_methods}
+        if len(methods) == 1:
+            framework_method = next(iter(methods))
+        else:
+            diagnostics.append(FrontendDiagnostic(
+                "frontend.page_model_method_conflict",
+                "conflicting page-model framework methods prevented resolution",
+            ))
     for asset, original in zip(assets, baseline):
         external = {
             identity: token.value
             for identity, (definition_asset, _, token) in resolved.items()
             if definition_asset.source.canonical_path != asset.source.canonical_path
         }
-        if not external or original.coverage_status is not CoverageStatus.COMPLETED:
+        applicable_framework = tuple(
+            item for item in framework_methods
+            if item[0].source.canonical_path != asset.source.canonical_path
+        )
+        if (
+            not external and not (framework_method and applicable_framework)
+        ) or original.coverage_status is not CoverageStatus.COMPLETED:
             results.append(original)
             continue
         enriched = _discover_frontend_requests(
-            asset.source, asset.content, policy, external
+            asset.source,
+            asset.content,
+            policy,
+            external,
+            framework_method if applicable_framework else None,
         )
         candidate_identities = {
             _candidate_id(
@@ -2211,6 +2283,50 @@ def discover_frontend_asset_graph(
         candidates = list(enriched.candidates)
         evidence_atoms = {atom.evidence_id: atom for atom in enriched.evidence_atoms}
         for candidate_index, candidate in enumerate(candidates):
+            if candidate.source_construct == "R.pageModel.setUrl.framework":
+                for definition_asset, method, token in applicable_framework:
+                    atom = capture_evidence(
+                        source=definition_asset.source,
+                        content=definition_asset.content,
+                        selection=SpanSelection(
+                            SpanKind.TEXT_UTF8, token.start, token.end
+                        ),
+                        claim=EvidenceClaim(
+                            subject_ref=candidate.candidate_id,
+                            predicate="uses_transport_method",
+                            object_value=method,
+                            observation_kind=ObservationKind.DETERMINISTIC_DERIVED,
+                            capability="resolves_transport_method",
+                            confidence=1.0,
+                        ),
+                        producer=_PRODUCER,
+                    )
+                    evidence_atoms[atom.evidence_id] = atom
+                    candidate = FrontendRequestCandidate(
+                        candidate.candidate_id,
+                        candidate.endpoint,
+                        candidate.endpoint_shape,
+                        candidate.request_role,
+                        candidate.method,
+                        candidate.representation,
+                        candidate.source_construct,
+                        tuple(dict.fromkeys((*candidate.evidence_ids, atom.evidence_id))),
+                    )
+                    candidates[candidate_index] = candidate
+                    bindings.append(FrontendAssetBinding(
+                        _asset_binding_id(
+                            "R.pageModel.setUrl.method",
+                            method,
+                            definition_asset.source.canonical_path,
+                            asset.source.canonical_path,
+                        ),
+                        "R.pageModel.setUrl.method",
+                        method,
+                        definition_asset.source.canonical_path,
+                        asset.source.canonical_path,
+                        (candidate.candidate_id,),
+                        (atom.evidence_id,),
+                    ))
             if candidate.source_construct not in {
                 "shared-cgi.topicurl.cross-resource",
                 "custom.request.cross-resource-default",

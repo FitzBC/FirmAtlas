@@ -167,11 +167,19 @@ dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 只支持 module-model 内的查询串，因此这是 analyzer 语法覆盖缺口，不是固件缺少参数。
 
 加入有界对象键提取后，当前 Catalog 从 79 增至 130 个参数，前三条 obligation 关闭；
-RemoteWeb 的 `remoteIp` 也恢复，但历史记录明确声明 POST，而局部页面只声明 `setUrl`，method
-仍等待 `public.js` 中 page-model framework 调用的跨资源证据。时间线、Catalog Evidence ID、
+RemoteWeb 的 `remoteIp` 也恢复。R2-04 随后从 `public.js` 的
+`$.post(pageModel.setUrl, ...)` 建立跨资源 framework EvidenceAtom，为 31 个 page-model 接口
+证明 POST，关闭最后一个结构化 method gap。时间线、Catalog Evidence ID、
 13 条 expectation 与 exact/out-of-scope 版本依据见
 [R2-03 完整记录](./progress/2026-08-09-r2-03-historical-expectation-diff.md)及
 [机器差异报告](./samples/r2-03-vendor-tenda-ac9-historical-diff.json)。
+
+更深一轮审计没有把 13 条结构化记录当作“全部历史漏洞”：平台中 AC9 产品级分母是 71 条，
+其中 46 条尚无当前语义分析，9 条虽有分析但没有结构化通信事实，3 条只有参数，13 条才能进入
+接口对照。当前 FirmEmuHub 制品另有 30 条高置信 `reproduced_on` 关联；这是样本级事实，不能与
+71 条产品级集合相互替代。13 条历史路由中只有 3 条形成验证过的 route→handler binding；
+精确版本 `SetSambaCfg` 虽有接口和参数，却仍只有 Native route clue，没有 handler binding。
+完整阶段输出见 [R2-04 记录](./progress/2026-08-09-r2-04-ac9-framework-history-audit.md)。
 
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把

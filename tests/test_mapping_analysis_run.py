@@ -57,7 +57,8 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertEqual(CoverageStatus.COMPLETED, first.inventory_coverage_status)
         self.assertEqual(
             {
-                "inventory", "source_plan", "frontend", "web_configuration",
+                "inventory", "source_plan", "frontend", "frontend_asset_graph",
+                "web_configuration",
                 "script_backend", "native", "native_ubus_registration",
                 "arm_pic_callsite", "ubus_backend", "scheduler", "catalog",
             },
@@ -169,7 +170,11 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v1", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v2", result.profile_id)
+        self.assertEqual(
+            "firmatlas.mapping.analyzer-registry/builtin-v2",
+            result.analyzer_registry_id,
+        )
 
     def test_profile_cannot_request_an_analyzer_missing_from_registry(self):
         registry = MappingAnalyzerRegistry(

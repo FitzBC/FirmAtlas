@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V1,
     MappingAnalysisProfile,
     MappingAnalysisRequest,
     analyze_extracted_root,
@@ -25,8 +26,8 @@ def build_report() -> dict:
     run = analyze_extracted_root(MappingAnalysisRequest(
         root=ROOT,
         firmware_artifact_sha256=ARTIFACT_SHA256,
-        profile=MappingAnalysisProfile.auto(),
-    ))
+        profile=MappingAnalysisProfile.auto_v1(),
+    ), registry=BUILTIN_ANALYZER_REGISTRY_V1)
     route_bindings = [
         item for item in run.catalog.candidates
         if item.candidate_kind.value == "native_route_binding"

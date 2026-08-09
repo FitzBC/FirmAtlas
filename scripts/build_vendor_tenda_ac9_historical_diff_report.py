@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V1,
     HistoricalApplicability,
     MappingAnalysisProfile,
     MappingAnalysisRequest,
@@ -30,8 +31,8 @@ def build_report() -> dict:
     run = analyze_extracted_root(MappingAnalysisRequest(
         root=ROOT,
         firmware_artifact_sha256=ARTIFACT_SHA256,
-        profile=MappingAnalysisProfile.auto(),
-    ))
+        profile=MappingAnalysisProfile.auto_v1(),
+    ), registry=BUILTIN_ANALYZER_REGISTRY_V1)
     diff = compare_historical_expectations(run.catalog, expectations)
     exact_entries = tuple(
         item for item in diff.entries

@@ -18,7 +18,11 @@ from .discovery_catalog import (
     assemble_discovery_catalog,
 )
 from .domain import CoverageStatus
-from .frontend import discover_frontend_requests
+from .frontend import (
+    FrontendAssetInput,
+    discover_frontend_asset_graph,
+    discover_frontend_requests,
+)
 from .inventory import InventoryPolicy, SourceArtifactEntry, build_inventory
 from .native import discover_native_hints
 from .native_deep import (
@@ -49,9 +53,10 @@ _SCRIPT_SUFFIXES = frozenset({".php", ".asp", ".lua", ".cgi"})
 _BASE_ANALYZERS = (
     "frontend", "web_configuration", "script_backend", "native",
 )
-_AUTO_ANALYZERS = _BASE_ANALYZERS + (
+_AUTO_V1_ANALYZERS = _BASE_ANALYZERS + (
     "arm_pic_callsite", "native_ubus_registration", "ubus_backend",
 )
+_AUTO_ANALYZERS = _AUTO_V1_ANALYZERS + ("frontend_asset_graph",)
 
 
 @dataclass(frozen=True)
@@ -71,7 +76,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v1", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v2", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v1(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v1", _AUTO_V1_ANALYZERS)
 
 
 @dataclass(frozen=True)
@@ -87,7 +96,13 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v1", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v2", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v1(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v1", _AUTO_V1_ANALYZERS
+        )
 
     def validate_profile(self, profile: MappingAnalysisProfile) -> None:
         missing = set(profile.enabled_analyzers) - set(self.analyzer_names)
@@ -114,6 +129,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V1 = MappingAnalyzerRegistry.builtin_v1()
 
 
 @dataclass(frozen=True)
@@ -320,10 +336,25 @@ def analyze_extracted_root(
         for source, _, kinds in selected
     )
 
-    frontend = tuple(
-        registry.analyze_source("frontend", source, content)
+    frontend_sources = tuple(
+        (source, content)
         for source, content, kinds in selected if "frontend" in kinds
     )
+    frontend_graph = None
+    if (
+        "frontend_asset_graph" in request.profile.enabled_analyzers
+        and frontend_sources
+    ):
+        frontend_graph = discover_frontend_asset_graph(tuple(
+            FrontendAssetInput(source, content)
+            for source, content in frontend_sources
+        ))
+        frontend = frontend_graph.results
+    else:
+        frontend = tuple(
+            registry.analyze_source("frontend", source, content)
+            for source, content in frontend_sources
+        )
     web = tuple(
         registry.analyze_source("web_configuration", source, content)
         for source, content, kinds in selected if "web_configuration" in kinds
@@ -437,6 +468,16 @@ def analyze_extracted_root(
         ),
         _stage("native", native, sum(len(item.hints) for item in native)),
     ]
+    if "frontend_asset_graph" in request.profile.enabled_analyzers:
+        stages.insert(3, MappingAnalysisStage(
+            "frontend_asset_graph",
+            frontend_graph.coverage_status if frontend_graph is not None
+            else CoverageStatus.NOT_APPLICABLE,
+            len(frontend_sources),
+            len(frontend_graph.bindings) if frontend_graph is not None else 0,
+            tuple(item.code for item in frontend_graph.diagnostics)
+            if frontend_graph is not None else ("no frontend sources",),
+        ))
     if "native_ubus_registration" in request.profile.enabled_analyzers:
         stages.append(_stage(
             "native_ubus_registration", native_ubus,
