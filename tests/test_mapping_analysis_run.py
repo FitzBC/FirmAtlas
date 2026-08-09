@@ -170,9 +170,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v2", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v3", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v2",
+            "firmatlas.mapping.analyzer-registry/builtin-v3",
             result.analyzer_registry_id,
         )
 
@@ -207,8 +207,16 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         }
         self.assertTrue({
             "SetOnlineDevName", "setBlackRule", "delBlackRule",
-            "getOnlineList", "getBlackRuleList",
+            "getOnlineList", "getBlackRuleList", "SetSambaCfg",
         } <= routes)
+        samba_handler = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind is DiscoveryCandidateKind.NATIVE_HANDLER
+            and item.canonical_identity == "bin/httpd@0x000a5258"
+        )
+        self.assertEqual(
+            "formSetSambaConf", dict(samba_handler.attributes)["handler_symbol"]
+        )
         stage = next(
             item for item in result.stages if item.stage_name == "arm_pic_callsite"
         )

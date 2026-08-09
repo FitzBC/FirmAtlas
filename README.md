@@ -139,7 +139,7 @@ PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
   --output mapping-analysis-run.json
 ```
 
-该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。当前 `auto-v2` 可用框架资源证明页面 `R.pageModel.setUrl` 的 transport method；`auto-v1` 与 `base` 分别保留 R2-02/R2-01 可复现基线。首要样本最新结果见 [R2-04 原厂 Tenda AC9](./docs/firmware-mapping/samples/r2-04-vendor-tenda-ac9-framework-history.json)，同硬件 OpenWrt 对照见 [R2-02 OpenWrt AC9](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。
+该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。当前 `auto-v3` 同时支持 ARM32 PIC 前向与后向 PC-relative literal pool；`auto-v2` 冻结框架跨资源语义基线，`auto-v1` 与 `base` 分别保留 R2-02/R2-01 基线。首要样本最新结果见 [R2-05 原厂 Tenda AC9](./docs/firmware-mapping/samples/r2-05-vendor-tenda-ac9-bidirectional-pic.json)，同硬件 OpenWrt 对照见 [R2-02 OpenWrt AC9](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。
 
 历史漏洞接口只能在声明版本与当前制品范围明确后用于测绘差异，不能直接当作固件真值：
 

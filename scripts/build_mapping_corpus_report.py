@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    ArmPicCallsiteProfile,
     CorpusEvidenceTier,
     CorpusReportInput,
     CorpusSampleInput,
@@ -111,6 +112,7 @@ def _ac9_catalog(root: Path):
             )
             for association in correlation.associations
         ),
+        ArmPicCallsiteProfile.v1(),
     )
     scheduler = run_obligation_scheduler(
         correlation.obligations, (native_deep_scheduler_analyzer(deep),)

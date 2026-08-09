@@ -28,6 +28,7 @@ from firmatlas.mapping.historical_expectation import (
 from firmatlas.mapping.__main__ import main as mapping_main
 from firmatlas.mapping.analysis_run import (
     BUILTIN_ANALYZER_REGISTRY_V1,
+    BUILTIN_ANALYZER_REGISTRY_V2,
     MappingAnalysisProfile,
     MappingAnalysisRequest,
     analyze_extracted_root,
@@ -210,8 +211,8 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
             firmware_artifact_sha256=(
                 "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296"
             ),
-            profile=MappingAnalysisProfile.auto(),
-        ))
+            profile=MappingAnalysisProfile.auto_v2(),
+        ), registry=BUILTIN_ANALYZER_REGISTRY_V2)
         result = compare_historical_expectations(run.catalog, expectations)
         remote = next(
             item for item in result.entries

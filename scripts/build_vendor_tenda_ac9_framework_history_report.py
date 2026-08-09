@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V2,
     DiscoveryCandidateKind,
     HistoricalVulnerabilityRecord,
     MappingAnalysisProfile,
@@ -29,7 +30,10 @@ VULNERABILITY_SCOPE = Path(
 )
 
 
-def build_report() -> dict:
+def build_report(
+    profile: MappingAnalysisProfile = MappingAnalysisProfile.auto_v2(),
+    registry=BUILTIN_ANALYZER_REGISTRY_V2,
+) -> dict:
     expectations = load_historical_expectations(
         json.loads(EXPECTATIONS.read_text(encoding="utf-8"))
     )
@@ -40,8 +44,8 @@ def build_report() -> dict:
     run = analyze_extracted_root(MappingAnalysisRequest(
         root=ROOT,
         firmware_artifact_sha256=ARTIFACT_SHA256,
-        profile=MappingAnalysisProfile.auto(),
-    ))
+        profile=profile,
+    ), registry=registry)
     diff = compare_historical_expectations(run.catalog, expectations)
     audit = build_historical_vulnerability_audit(diff, records)
     binding_report = compare_historical_route_bindings(

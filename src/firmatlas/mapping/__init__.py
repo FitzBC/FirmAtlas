@@ -196,6 +196,7 @@ from .native_value_flow import (
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
     BUILTIN_ANALYZER_REGISTRY_V1,
+    BUILTIN_ANALYZER_REGISTRY_V2,
     MAPPING_ANALYSIS_RUN_SCHEMA_VERSION,
     MappingAnalysisProfile,
     MappingAnalysisRequest,
@@ -490,6 +491,7 @@ __all__ = (
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
     "BUILTIN_ANALYZER_REGISTRY_V1",
+    "BUILTIN_ANALYZER_REGISTRY_V2",
     "MappingAnalysisProfile",
     "MappingAnalysisRequest",
     "MappingAnalysisRun",

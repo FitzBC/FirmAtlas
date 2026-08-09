@@ -133,7 +133,48 @@ def _arm32_pic_fixture() -> bytes:
     return bytes(payload)
 
 
+def _arm32_negative_literal_pic_fixture() -> bytes:
+    payload = bytearray(_arm32_pic_fixture())
+    section_table_offset = struct.unpack_from("<I", payload, 32)[0]
+    text_offset = struct.unpack_from("<I", payload, section_table_offset + 2 * 40 + 16)[0]
+
+    def put(address: int, value: int) -> None:
+        struct.pack_into("<I", payload, text_offset + address - 0x1000, value & 0xFFFFFFFF)
+
+    for address in range(0x100C, 0x1044, 4):
+        put(address, 0)
+    put(0x1280, 0xE51F3204)  # ldr r3, [pc, #-0x204] -> 0x1084
+    put(0x1284, 0xE0843003)
+    put(0x1288, 0xE1A00003)
+    put(0x128C, 0xE51F320C)  # ldr r3, [pc, #-0x20c] -> 0x1088
+    put(0x1290, 0xE7943003)
+    put(0x1294, 0xE1A01003)
+    put(0x1298, _arm_bl(0x1298, 0x1200))
+    put(0x129C, 0xE51F3218)  # second independent pair
+    put(0x12A0, 0xE0843003)
+    put(0x12A4, 0xE1A00003)
+    put(0x12A8, 0xE51F3220)
+    put(0x12AC, 0xE7943003)
+    put(0x12B0, 0xE1A01003)
+    put(0x12B4, _arm_bl(0x12B4, 0x1200))
+    return bytes(payload)
+
+
 class ArmPicCallsiteContractTests(unittest.TestCase):
+    def test_negative_pc_relative_literal_pool_proves_binding(self):
+        content = _arm32_negative_literal_pic_fixture()
+        source = _source("bin/httpd", content)
+
+        result = discover_arm_pic_callsite_bindings(
+            source, content,
+            (NativeRouteAnchor("association:set-online-name", "SetOnlineDevName"),),
+        )
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(1, len(result.bindings))
+        self.assertEqual(0x1298, result.bindings[0].registration_address)
+        self.assertEqual("formSetDeviceName", result.bindings[0].handler_symbol)
+
     def test_same_callsite_proves_route_and_handler_binding(self):
         content = _arm32_pic_fixture()
         source = _source("bin/httpd", content)
@@ -444,7 +485,7 @@ class ArmPicCallsiteContractTests(unittest.TestCase):
                 for item in deep.bindings
             },
         )
-        self.assertEqual({131}, {item.registrar_pair_count for item in deep.bindings})
+        self.assertEqual({164}, {item.registrar_pair_count for item in deep.bindings})
 
 
 if __name__ == "__main__":

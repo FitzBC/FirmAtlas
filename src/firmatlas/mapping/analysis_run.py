@@ -26,6 +26,7 @@ from .frontend import (
 from .inventory import InventoryPolicy, SourceArtifactEntry, build_inventory
 from .native import discover_native_hints
 from .native_deep import (
+    ArmPicCallsiteProfile,
     NativeRouteAnchor,
     discover_arm_pic_callsite_bindings,
     native_deep_scheduler_analyzer,
@@ -76,6 +77,10 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v3", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v2(cls) -> "MappingAnalysisProfile":
         return cls("firmatlas.mapping.profile/auto-v2", _AUTO_ANALYZERS)
 
     @classmethod
@@ -96,6 +101,10 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v3", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v2(cls) -> "MappingAnalyzerRegistry":
         return cls("firmatlas.mapping.analyzer-registry/builtin-v2", _AUTO_ANALYZERS)
 
     @classmethod
@@ -129,6 +138,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V2 = MappingAnalyzerRegistry.builtin_v2()
 BUILTIN_ANALYZER_REGISTRY_V1 = MappingAnalyzerRegistry.builtin_v1()
 
 
@@ -385,7 +395,13 @@ def analyze_extracted_root(
             )
     native_deep = tuple(
         discover_arm_pic_callsite_bindings(
-            selected_by_path[path][0], selected_by_path[path][1], tuple(anchors)
+            selected_by_path[path][0], selected_by_path[path][1], tuple(anchors),
+            ArmPicCallsiteProfile.v1()
+            if request.profile.profile_id in {
+                "firmatlas.mapping.profile/auto-v1",
+                "firmatlas.mapping.profile/auto-v2",
+            }
+            else ArmPicCallsiteProfile(),
         )
         for path, anchors in sorted(anchors_by_path.items())
         if (

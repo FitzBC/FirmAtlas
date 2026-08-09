@@ -92,6 +92,7 @@
 - 现作为首要典型样本：冻结的 `auto-v1` 基线有 3461 candidates、130 parameters、4025 EvidenceAtom；`auto-v2` 新增跨资源 RouterPage method 证明后有 4056 EvidenceAtom，并自动证明 45 条 ARM PIC route→handler。基线见 [R2-02](./r2-02-vendor-tenda-ac9-auto-profile.json)，最新报告见 [R2-04](./r2-04-vendor-tenda-ac9-framework-history.json)。
 - R2-03 从 13 条版本化历史漏洞 expectation 反推并修复对象载荷参数覆盖缺口：当前目录增至 130 parameters / 4025 EvidenceAtom，exact-artifact 两条均观察到；[expectation manifest](./r2-03-vendor-tenda-ac9-historical-expectations.json) 与[完整差异报告](./r2-03-vendor-tenda-ac9-historical-diff.json)分别保存外部声明和当前固件证据，不能混作漏洞结论。
 - R2-04 用 `public.js` 的 `$.post(pageModel.setUrl, ...)` 为 31 个页面接口提供跨文件 method 证据，13 条结构化 expectation 达到 8 observed / 5 version-out-of-scope。另以 [71 条产品级全集](./r2-04-vendor-tenda-ac9-vulnerability-scope.json)守住分母：13 条可比较接口、3 条仅参数、9 条无结构化通信、46 条尚未语义分析；平台对当前 FirmEmuHub 样本另有 30 条高置信 `reproduced_on` 关联，两者不可混算。13 条历史路由中目前仅 3 条有验证过的 route→handler binding。
+- R2-05 发现 Samba 所在注册块使用 ARM `LDR [PC, -offset]` 回指 literal pool；`auto-v3` 增加双向 PC-relative 解析后，绑定从 45 增至 59、开放义务从 89 降至 61，并证明 `SetSambaCfg → formSetSambaConf`。历史路由 binding 覆盖从 3/13 提升至 5/13；机器输出见 [R2-05](./r2-05-vendor-tenda-ac9-bidirectional-pic.json)。
 
 它是开发样本，不进入最终无泄漏测试结果。
 

@@ -80,11 +80,19 @@ class NativeDeepPolicy:
 
 @dataclass(frozen=True)
 class ArmPicCallsiteProfile:
-    name: str = "arm32-pic-r0-r1-bl/v1"
+    name: str = "arm32-pic-r0-r1-bl/v2"
     min_registrar_pairs: int = 2
     max_pic_base_distance: int = 16 * 1024
     max_route_bytes: int = 256
     relocation_types: Tuple[int, ...] = (_R_ARM_GLOB_DAT,)
+    allow_negative_pc_relative_literals: bool = True
+
+    @classmethod
+    def v1(cls) -> "ArmPicCallsiteProfile":
+        return cls(
+            name="arm32-pic-r0-r1-bl/v1",
+            allow_negative_pc_relative_literals=False,
+        )
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -1018,10 +1026,18 @@ def _scan_arm_pic_candidates(
             offset = section.offset + relative
             words = struct.unpack_from(elf.endian_prefix + "7I", content, offset)
             if not (
-                words[0] & 0xFFFFF000 == 0xE59F3000
+                words[0] & 0xFF7FF000 == 0xE51F3000
+                and (
+                    profile.allow_negative_pc_relative_literals
+                    or words[0] & 0x00800000
+                )
                 and words[1] == 0xE0843003
                 and words[2] == 0xE1A00003
-                and words[3] & 0xFFFFF000 == 0xE59F3000
+                and words[3] & 0xFF7FF000 == 0xE51F3000
+                and (
+                    profile.allow_negative_pc_relative_literals
+                    or words[3] & 0x00800000
+                )
                 and words[4] == 0xE7943003
                 and words[5] == 0xE1A01003
                 and words[6] & 0xFF000000 == 0xEB000000
@@ -1034,10 +1050,18 @@ def _scan_arm_pic_candidates(
             if pic_base is None:
                 continue
             route_delta = _word_at_address(
-                elf, content, address + 8 + (words[0] & 0xFFF)
+                elf, content,
+                address + 8 + (
+                    (words[0] & 0xFFF) if words[0] & 0x00800000
+                    else -(words[0] & 0xFFF)
+                ),
             )
             handler_offset = _word_at_address(
-                elf, content, address + 20 + (words[3] & 0xFFF)
+                elf, content,
+                address + 20 + (
+                    (words[3] & 0xFFF) if words[3] & 0x00800000
+                    else -(words[3] & 0xFFF)
+                ),
             )
             if route_delta is None or handler_offset is None:
                 continue

@@ -181,6 +181,12 @@ RemoteWeb 的 `remoteIp` 也恢复。R2-04 随后从 `public.js` 的
 精确版本 `SetSambaCfg` 虽有接口和参数，却仍只有 Native route clue，没有 handler binding。
 完整阶段输出见 [R2-04 记录](./progress/2026-08-09-r2-04-ac9-framework-history-audit.md)。
 
+R2-05 沿这个未决义务继续检查指令编码，发现旧 Adapter 只接受 `LDR [PC, +offset]`，而 Samba
+注册块用 `LDR [PC, -offset]` 回指前方 literal pool。加入带 profile 版本隔离的双向解析后，
+`SetSambaCfg → formSetSambaConf` 由 relocation、动态符号和同一 registrar callsite 共同证明；
+AC9 已验证绑定从 45 增至 59，历史路由绑定从 3/13 增至 5/13。这个状态迁移证明上一阶段保留
+“字符串不足以绑定”的判断是必要护栏，而不是失败：只有补齐指令级证明后才能晋级。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、
