@@ -134,14 +134,17 @@ MIPS Nested Dispatch Profile 随后证明 `main` 以 `action=upload` 进入上�
 `SESSION_ID → form_get_idx_by_sessionid` 和 HTTP 302 拒绝链；`/advance/config.html`
 进入该门，而 `/cgi-bin/cstecgi.cgi` 不匹配任何 gate。由此“upload 被这一个静态门
 保护”的义务被证据拒绝，但真实服务装配、外部中介、运行时可达与漏洞可利用性仍未
-确认。对
+确认。随后系统从 `sbin/rc:init_router` 进入 `start_services_once → start_httpd`，重放
+`/usr/sbin/lighttpd -f /lighttp/lighttpd.conf` 的 argv 与 `_eval` 调用，再连接
+`:80/:8080 → /www/ → /cgi-bin/ → www/cgi-bin/cstecgi.cgi`，关闭静态服务装配义务；
+真实启动与请求可达仍保持开放。对
 `setLanCfg@0x004209b8`，系统进一步从
 dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 `lanIp→lan_ipaddr`、`lanNetmask→lan_netmask` 两条请求参数—配置状态链，并在
 `0x00420ad8` 的首个条件分支停止；DHCP 分支和敏感 sink 仍未确认。
 
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
-“跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、multipart nested dispatch 关闭、跨二进制保护范围排除、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、真实运行时可达、整体认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
+“跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、multipart nested dispatch 关闭、跨二进制保护范围排除、静态服务装配关闭、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例。完成前端范围后仍有 10 个具备 native registration 和 handler、但没有已观察前端引用的 operation；它们作为“潜在隐藏接口”首个集合持续记录，而不是被自动解释为后门。不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、真实运行时可达、整体认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
 
 ## 3. 后续案例准入触发器
 

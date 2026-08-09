@@ -189,6 +189,18 @@ from .native_request_protection import (
     RequestProtectionStatus,
     discover_mips_request_protection,
 )
+from .native_service_assembly import (
+    MIPS_SERVICE_ASSEMBLY_RESULT_SCHEMA_VERSION,
+    MipsServiceAssembly,
+    MipsServiceAssemblyAnchor,
+    MipsServiceAssemblyDiagnostic,
+    MipsServiceAssemblyPolicy,
+    MipsServiceAssemblyProfile,
+    MipsServiceAssemblyResult,
+    ServiceAssemblyArtifact,
+    StaticAssemblyStatus,
+    discover_mips_service_assembly,
+)
 from .set_difference import (
     SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION,
     AttributionArtifact,

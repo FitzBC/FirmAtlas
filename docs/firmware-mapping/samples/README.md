@@ -29,8 +29,9 @@
 - [M1-18 X5000R frontend/native 集合差异](./m1-18-x5000r-set-difference.json)：将 76 个 Frontend-only 与 14 个 Native-only operation 分为 38/38/3/1/10 五类证据形状，保留精确 token、suffix 变体负例和开放因果义务；进度说明见 [M1-18 记录](../progress/2026-08-09-m1-18-x5000r-set-difference.md)。
 - [M1-19 X5000R 扩展前端范围](./m1-19-x5000r-expanded-frontend.json)：加入 `kr.js`、`wan_ie.html` 与 `advance/config.html`，恢复默认 URL + payload variable 与 multipart 两级 selector，使 operation 从 199 增至 203、范围缺口从 3 降至 0、差集变为 77/11；进度说明见 [M1-19 记录](../progress/2026-08-09-m1-19-x5000r-expanded-frontend.md)。
 - [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；M1-13 重放后上游 Inventory 与 Catalog 均为 completed。
-- [M1-12 通信架构 research-case corpus](./m1-12-research-case-corpus.json)：保存 AC9 split web stack 与 X5000R shared-CGI 的内容寻址证据时间线；X5000R 当前已演进到第 10 阶段，包含差集反向驱动范围扩展、三种请求架构、nested upload dispatch 与请求保护范围排除证明。
+- [M1-12 通信架构 research-case corpus](./m1-12-research-case-corpus.json)：保存 AC9 split web stack 与 X5000R shared-CGI 的内容寻址证据时间线；X5000R 当前已演进到第 11 阶段，包含差集反向驱动范围扩展、三种请求架构、nested upload dispatch、请求保护范围排除与静态服务装配证明。
 - [M1-21 X5000R 请求保护范围](./m1-21-x5000r-request-protection.json)：跨 `usr/sbin/lighttpd` 与 `www/cgi-bin/cstecgi.cgi` 保存 suffix/path gate、SESSION_ID 会话验证、302 enforcement、CGI 排除分类和 nested upload handler 链；进度说明见 [M1-21 记录](../progress/2026-08-09-m1-21-x5000r-request-protection.md)。
+- [M1-22 X5000R 静态服务装配](./m1-22-x5000r-service-assembly.json)：从 `sbin/rc:init_router` 重放 service group、lighttpd argv/config、listener、document root、CGI namespace 与目标 ELF 的十一段证据；进度说明见 [M1-22 记录](../progress/2026-08-09-m1-22-x5000r-service-assembly.md)。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -96,10 +97,12 @@
 - suffix 规范化：`setting/setUploadSetting → setUploadSetting`；
 - 精确注册：`set_handle_t@0x0044a124 → handler@0x0042bf14`；
 - 请求保护：lighttpd 对 `.asp/.html/.htm/config.dat/login.cgi` 进入 `SESSION_ID` 会话门，但 `/cgi-bin/cstecgi.cgi` 被该门排除；
+- 静态服务装配：`init_router → start_services_once → start_httpd → _eval(lighttpd -f lighttpd.conf) → /cgi-bin/ → cstecgi.cgi`；
+- 潜在隐藏接口首个集合：前端覆盖完成后仍有 10 个 operation 具备 native registration、handler 与差集证据，但没有已观察前端引用；
 - 中间报告：[M1-20 Nested Dispatch](./m1-20-x5000r-nested-dispatch.json)；
-- Catalog：696 candidates / 223 parameters / 1673 EvidenceAtom。
+- Catalog：697 candidates / 223 parameters / 1684 EvidenceAtom。
 
-该例用于验证同一物理 CGI 内多层 selector、原生表分发和跨二进制静态保护范围，不能据此断言真实运行时可达、外部授权策略或漏洞可利用性。
+该例用于验证同一物理 CGI 内多层 selector、原生表分发、跨二进制保护范围和静态服务装配。10 个 `no_frontend_reference` 是需要跨固件持续沉淀的“潜在隐藏接口”，但仍可能来自动态/隐藏客户端、废弃代码或其他未纳入范围的调用者，不能据此断言后门、真实运行时可达、外部授权策略或漏洞可利用性。
 
 **D-Link DSL2877AL / vendor ASP + Shell CGI**
 

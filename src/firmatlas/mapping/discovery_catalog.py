@@ -18,6 +18,7 @@ from .native_deep import NativeDeepResult
 from .native_value_flow import MipsHandlerValueFlowResult
 from .native_nested_dispatch import MipsNestedDispatchResult
 from .native_request_protection import MipsRequestProtectionResult
+from .native_service_assembly import MipsServiceAssemblyResult
 from .set_difference import SetDifferenceAttributionResult
 from .correlation import FrontendNativeCorrelationResult
 from .scheduler import (
@@ -41,6 +42,7 @@ class DiscoveryProducerKind(str, Enum):
     NATIVE_VALUE_FLOW = "native_value_flow"
     NATIVE_NESTED_DISPATCH = "native_nested_dispatch"
     NATIVE_REQUEST_PROTECTION = "native_request_protection"
+    NATIVE_SERVICE_ASSEMBLY = "native_service_assembly"
     SET_DIFFERENCE = "set_difference"
     CORRELATION = "correlation"
     SCHEDULER = "scheduler"
@@ -60,6 +62,7 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_PARAMETER_STATE_FLOW = "native_parameter_state_flow"
     NATIVE_NESTED_DISPATCH = "native_nested_dispatch"
     NATIVE_REQUEST_PROTECTION = "native_request_protection"
+    NATIVE_SERVICE_ASSEMBLY = "native_service_assembly"
     SET_DIFFERENCE_ATTRIBUTION = "set_difference_attribution"
     CANDIDATE_ASSOCIATION = "candidate_association"
 
@@ -170,6 +173,22 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.NATIVE_REQUEST_PROTECTION,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def native_service_assembly(
+        cls, results: Tuple[MipsServiceAssemblyResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-mips-service-assembly", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_SERVICE_ASSEMBLY,
             producer,
             scope,
             results,
@@ -340,6 +359,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
     native_deep_target_refs = set()
     native_nested_target_refs = set()
     native_protection_target_refs = set()
+    native_service_target_refs = set()
     for batch in sorted(value.batches, key=lambda x: (x.producer_kind.value, x.scope)):
         statuses = []
         for result in batch.results:
@@ -636,6 +656,49 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             )),
                         ),
                     ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE_SERVICE_ASSEMBLY:
+                for item in result.assemblies:
+                    native_service_target_refs.add(item.target_ref)
+                    candidates.append(DiscoveryCandidate(
+                        item.assembly_id,
+                        DiscoveryCandidateKind.NATIVE_SERVICE_ASSEMBLY,
+                        "{} -> {} -> {}".format(
+                            item.launcher_identity.split("@", 1)[0],
+                            item.server_artifact_path,
+                            item.request_path,
+                        ),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.launcher_identity.split("@", 1)[0],
+                        item.source_construct,
+                        item.evidence_ids,
+                        (
+                            ("target_ref", item.target_ref),
+                            ("assembly_status", item.assembly_status.value),
+                            ("bootstrap_identity", item.bootstrap_identity),
+                            (
+                                "bootstrap_callsite",
+                                "0x{:08x}".format(item.bootstrap_callsite),
+                            ),
+                            ("service_group_identity", item.service_group_identity),
+                            (
+                                "service_group_callsite",
+                                "0x{:08x}".format(item.service_group_callsite),
+                            ),
+                            ("launcher_identity", item.launcher_identity),
+                            ("launch_callsite", "0x{:08x}".format(item.launch_callsite)),
+                            ("launch_arguments", "|".join(item.launch_arguments)),
+                            ("server_artifact_path", item.server_artifact_path),
+                            ("config_artifact_path", item.config_artifact_path),
+                            ("listeners", "|".join(str(value) for value in item.listeners)),
+                            ("document_root", item.document_root),
+                            ("cgi_namespace", item.cgi_namespace),
+                            ("target_artifact_path", item.target_artifact_path),
+                            (
+                                "runtime_reachability_verified",
+                                str(item.runtime_reachability_verified).lower(),
+                            ),
+                        ),
+                    ))
         if not statuses:
             status = CoverageStatus.FAILED if batch.required else CoverageStatus.NOT_APPLICABLE
             diagnostic = "required_batch_has_no_results" if batch.required else None
@@ -721,6 +784,8 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
         raise ValueError("native nested dispatch references unknown catalog candidate")
     if any(target not in candidate_ids for target in native_protection_target_refs):
         raise ValueError("native request protection references unknown catalog candidate")
+    if any(target not in candidate_ids for target in native_service_target_refs):
+        raise ValueError("native service assembly references unknown catalog candidate")
     if value.scheduler is not None:
         obligations = value.scheduler.open_obligations
         termination = value.scheduler.termination

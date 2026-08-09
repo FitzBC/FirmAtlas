@@ -22,6 +22,8 @@
 > `SESSION_ID`、session lookup 和 302 分支可由原始字节重放，因此未触发 Ghidra。
 > stripped 变体隐藏函数边界或会话流时，再使用相邻项目思路编写 headless candidate script。
 
+> M1-22 触发审计：`init_router`、`start_services_once`、`start_httpd` 均为 bounded exported symbol，GOT/direct call、argv pointer table、`memcpy → _eval` 参数流及配置文本均可从原始制品确定性重放，因此未触发 Ghidra。stripped init chain、computed argv 或间接 service factory 才进入 Candidate Worker。
+
 AC9 当前 ARM PIC 注册模式已由小型确定性 Validator 从原始 ELF 字节直接证明，
 因此没有为了“使用 Ghidra”而增加工具依赖。Ghidra Adapter 只在复杂控制流、间接
 调用、跨函数数据流、未知 ISA profile 或参数 getter 追踪确实需要时启动。

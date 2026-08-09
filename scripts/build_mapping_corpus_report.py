@@ -17,7 +17,9 @@ from firmatlas.mapping import (
     InventoryPolicy,
     MipsNestedDispatchAnchor,
     MipsRequestProtectionAnchor,
+    MipsServiceAssemblyAnchor,
     NativeRouteAnchor,
+    ServiceAssemblyArtifact,
     SourceArtifactEntry,
     assemble_discovery_catalog,
     build_inventory,
@@ -29,6 +31,7 @@ from firmatlas.mapping import (
     discover_mips_handler_value_flows,
     discover_mips_cgi_nested_dispatch,
     discover_mips_request_protection,
+    discover_mips_service_assembly,
     discover_native_hints,
     discover_script_backend,
     discover_web_configuration,
@@ -170,6 +173,7 @@ def _x5000r_catalog(root: Path):
         "web": "lighttp/lighttpd.conf",
         "native": "www/cgi-bin/cstecgi.cgi",
         "server": "usr/sbin/lighttpd",
+        "launcher": "sbin/rc",
     }
     if not all(
         (root / path).is_file()
@@ -245,6 +249,21 @@ def _x5000r_catalog(root: Path):
             "/cgi-bin/cstecgi.cgi",
         ),),
     )
+    assembly_artifacts = []
+    for path in (
+        paths["launcher"], paths["server"], paths["web"], paths["native"]
+    ):
+        content = (root / path).read_bytes()
+        assembly_artifacts.append(
+            ServiceAssemblyArtifact(_source(path, content), content)
+        )
+    service_assembly = discover_mips_service_assembly(
+        tuple(assembly_artifacts),
+        (MipsServiceAssemblyAnchor(
+            nested_dispatch.paths[0].path_id,
+            "/cgi-bin/cstecgi.cgi",
+        ),),
+    )
     web_content = (root / paths["web"]).read_bytes()
     web = discover_web_configuration(
         _source(paths["web"], web_content), web_content
@@ -274,6 +293,9 @@ def _x5000r_catalog(root: Path):
             ),
             DiscoveryProducerBatch.native_request_protection(
                 (protection,), paths["server"] + ":custom-auth"
+            ),
+            DiscoveryProducerBatch.native_service_assembly(
+                (service_assembly,), paths["launcher"] + ":static-init"
             ),
         ),
         set_difference=set_difference,

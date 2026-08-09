@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-21 X5000R 跨二进制请求保护范围已验证；当前 gate 为 `partial`
+> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-22 X5000R 静态服务装配已验证；当前 gate 为 `partial`
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -81,6 +81,7 @@
 | [M1-19 X5000R 扩展前端](./progress/2026-08-09-m1-19-x5000r-expanded-frontend.md) | `kr.request` 默认 URL、payload variable、multipart 两级 selector 与 77/11 新差集 | 前端依赖范围、间接请求或 upload dispatcher 证据变化时 |
 | [M1-20 X5000R Nested Dispatch](./progress/2026-08-09-m1-20-x5000r-nested-dispatch.md) | upload mode、query segment、multipart parser、suffix、set table 与 handler 六段证明 | nested selector、MIPS main Profile、认证或运行时证据变化时 |
 | [M1-21 X5000R 请求保护范围](./progress/2026-08-09-m1-21-x5000r-request-protection.md) | lighttpd suffix gate、SESSION_ID、302 enforcement 与 CGI 排除边界 | 自定义认证 Profile、保护范围或跨二进制路径变化时 |
+| [M1-22 X5000R 静态服务装配](./progress/2026-08-09-m1-22-x5000r-service-assembly.md) | init_router、service group、argv、配置、CGI namespace 与目标制品十一段证明 | 初始化链、服务参数、namespace 或运行时边界变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -160,8 +161,9 @@ M1 工作项：
 | M1-19 | X5000R 前端范围扩展与嵌套 selector | 已验证 | M1-15/16/18 | 199→203 operations + 3 scope gaps closed + 77/11 residual difference |
 | M1-20 | X5000R multipart 嵌套分发与 handler owner | 已验证 | M1-04/08/12/16/19 | `action=upload → setting/setUploadSetting → set_handle_t → handler@0x0042bf14` 六段确定性证据 |
 | M1-21 | X5000R 自定义认证路径保护范围 | 已验证 | M1-08/12/20 | `lighttpd path gate → userloginAuth → checkLoginUser → SESSION_ID`，并证明 `/cgi-bin/cstecgi.cgi` 不在该门范围内 |
+| M1-22 | X5000R 静态初始化与服务装配 | 已验证 | M1-05/08/12/20/21 | `init_router → start_services_once → start_httpd → lighttpd argv/config → /cgi-bin/ → cstecgi.cgi` 十一段确定性证据 |
 
-**下一项建议**：继续 M1-11。M1-21 已拒绝“upload 被该静态 suffix gate 保护”的义务，但不把它升级为漏洞结论；下一步优先证明 `sbin/rc:start_httpd → usr/sbin/lighttpd → lighttpd.conf → cstecgi.cgi` 的静态服务装配，并独立保留真实运行时可达义务。同时将 HTML script dependency closure 实现为有预算的通用范围 Planner，以 CFG-aware 分析恢复 DHCP 分支及 commit/network/sensitive sink；确定性 Profile 不足时再触发隔离 Ghidra Candidate Worker。
+**下一项建议**：优先实现 M1-23 全固件“潜在隐藏接口”目录与 UI。每个 `native registration − observed frontend scope` 项必须保留固件、处理二进制、注册表/handler、覆盖范围、证据形状和运行时原因义务；X5000R 当前 10 个 `no_frontend_reference` 是首个正例，不能直接命名为后门或已确认隐藏接口。随后继续 M1-11 样本扩展、通用 Scope Planner 和 CFG-aware sink flow；真实运行时可达仍独立验证。
 
 ## 7. 跨会话无缝工作协议
 

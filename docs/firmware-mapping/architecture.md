@@ -158,6 +158,10 @@ M1-20 增加 `discover_mips_cgi_nested_dispatch(source, content, anchors, profil
 
 M1-21 增加 `discover_mips_request_protection(source, content, anchors, profile, policy)`。首个 MIPS32 lighttpd Profile 在 bounded exported function 内同时验证五个 `strstr` 路径门、`userloginAuth → checkLoginUser` 调用、`SESSION_ID → form_get_idx_by_sessionid` 会话拒绝汇合点与 HTTP 302 enforcement，再逐个分类请求路径。`native_request_protection` 只描述该静态门的保护范围；它不能从登录符号共现推断所有 CGI 已认证，也不能发布运行时可达或漏洞结论。
 
+M1-22 增加 `discover_mips_service_assembly(artifacts, anchors, profile, policy)`。Module 从 `init_router → start_services_once → start_httpd` 的 GOT/direct call 进入服务启动函数，验证 `memcpy` 后 argv table 确实作为 `_eval` 的参数，并把 `/usr/sbin/lighttpd -f /lighttp/lighttpd.conf` 解析到同一制品集合；随后复用 Web Configuration Producer 的 listener、document root 和 CGI namespace 证据，将 `/cgi-bin/cstecgi.cgi` 解析为 `www/cgi-bin/cstecgi.cgi`。十一类 EvidenceAtom 缺一不可。结果显式固定 `runtime_reachability_verified=false`，Catalog 只能发布 `native_service_assembly`，不能把静态初始化升级为 live runtime。
+
+M1-23 将把 `Native registration − declared frontend/client scope` 投影为全固件 `potential_hidden_interface`。这个 Module 必须消费已验证 Native binding 与带 Coverage Ledger 的客户端范围，而不是重新按字符串搜索；查询层按固件、厂商、版本、处理二进制、注册表、handler 和归因原因聚合，UI 同时展示 Native 证据强度与“为何仍只是候选”的义务。没有已完成前端范围时必须显示 coverage gap，不能用零引用制造隐藏接口结论。
+
 未来 Ghidra Adapter 采用 `Candidate Worker → Core Validator`，而不是让反编译器成为事实来源。Worker 的 versioned manifest 固定 Ghidra/script/input SHA、language ID、image base、预算、xref/call-site/P-code candidates 与 coverage；stdout、自由文本反编译和启发式置信度都不能直接关闭义务。详细合同及从相邻项目吸收/拒绝的实现经验见 [Native Ghidra Adapter 设计](./native-ghidra-adapter.md)。
 
 M1-11 Corpus Report Module 的公开 Interface 是 `build_corpus_report(CorpusReportInput) -> CorpusReport`。它只读取不可变 Discovery Catalog 与显式研究样本定义，不重新分析源码，也不从路径风格推断架构类别。Module 分开记录 `real_firmware`、`derived_firmware`、`contract_fixture` 与 `external_lead`；只有 real firmware 的预期制品摘要与 Catalog 一致、coverage completed、所需 Evidence Capability 全部满足、禁止能力未出现且没有开放义务时，类别才能成为 `verified`。样本编排脚本是 benchmark Adapter，不属于 Mapper 核心 Interface。

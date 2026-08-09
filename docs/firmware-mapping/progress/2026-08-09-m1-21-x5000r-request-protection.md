@@ -86,6 +86,8 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py
 3. 分析 `setUploadSetting@0x0042bf14` 的文件、命令、持久化与重启 sink，但不跳过输入 provenance；
 4. stripped/复杂变体再实现 Ghidra Candidate Worker。
 
+后续 [M1-22](./2026-08-09-m1-22-x5000r-service-assembly.md) 已完成第 1 项，并把单个 `start_httpd` 函数加深为 `init_router → start_services_once → start_httpd → argv/config/CGI artifact`；live runtime 义务仍开放。
+
 ## 9. 验证记录
 
 - 专项合同：request-protection、research-case、corpus-report 共 `33 tests`，全部通过；
