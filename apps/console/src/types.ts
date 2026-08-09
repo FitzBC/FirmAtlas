@@ -313,7 +313,10 @@ export interface MappingCandidateDetail {
     match_basis: string; evidence_ids: string[]
   }>
   related_candidates: MappingCandidate[]
-  open_obligations: Array<{ obligation_id: string; target_ref: string; status: string; reason: string }>
+  open_obligations: Array<{
+    obligation_id: string; target_ref: string; status: string; reason: string
+    required_capability?: string; priority?: number; candidate_analyzers?: string[]
+  }>
   evidence_atoms: Array<{
     evidence_id: string; predicate: string; object_value: string; capability: string
     source_span: { artifact_path: string; locator: string }

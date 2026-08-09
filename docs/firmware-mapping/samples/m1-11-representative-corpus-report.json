@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:066138102baa35409d82e33925530c82039d0122f26be0baeb7ee5f189f94782",
+  "report_id": "corpus-report:6467fae124cc961b315b1ae67f0b0bedca168209240e459ffa33884af2c1c40b",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -77,7 +77,7 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:771b317c9608c1765ea1e7b53043f5f5e32d86acc4b4047098d44ef0746ed338",
+      "catalog_id": "discovery-catalog:f2b3ac3f8762e4055c8d3c73097d8ab71847cf0560effa4a3938290bdcb4a7ff",
       "required_capabilities": [
         "constructs_request",
         "selects_operation"
@@ -128,7 +128,7 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:a87f400a9d4ff86fe1741950474f70906fcc83fcec40770df15e813147987c14",
+      "catalog_id": "discovery-catalog:398ceee873974869fadac83743d282287c755f35531fc3958830ddd6cfd2b7b2",
       "required_capabilities": [
         "constructs_request",
         "selects_operation"
@@ -155,7 +155,7 @@
       "role": "development",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:9a2ef8e63ef0e7d776314091f2f8997e34cfb318c55dd85f69e999bec19f7ff2",
+      "catalog_id": "discovery-catalog:b62bb00032c1fde8ce9e02c5d5b4c038935aa38833ee06530d196743331afcf8",
       "required_capabilities": [
         "binds_handler",
         "constructs_request"
@@ -192,7 +192,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
+      "catalog_id": "discovery-catalog:9c80f7e4749aa4483936a83b0501580b27d2ecd39a27bc1fedb80b2d1d37b07f",
       "required_capabilities": [
         "binds_handler",
         "constructs_request",

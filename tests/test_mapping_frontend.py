@@ -62,7 +62,7 @@ class FrontendRequestProducerContractTests(unittest.TestCase):
             {item.capability for item in result.evidence_atoms},
         )
 
-    def test_dynamic_luci_rpc_object_is_an_explicit_coverage_gap(self):
+    def test_luci_rpc_format_object_publishes_a_bounded_operation_template(self):
         content = (
             b"rpc.declare({object:'hostapd.%s'.format(ifname),method:'del_client',"
             b"params:['addr']});"
@@ -70,6 +70,41 @@ class FrontendRequestProducerContractTests(unittest.TestCase):
         source = SourceArtifactEntry(
             "www/luci-static/resources/network.js",
             "www/luci-static/resources/network.js",
+            "file",
+            len(content),
+            hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(CoverageStatus.PARTIAL, result.coverage_status)
+        self.assertEqual(1, len(result.candidates))
+        candidate = result.candidates[0]
+        self.assertEqual(
+            "ubus://hostapd.{dynamic}/del_client", candidate.endpoint
+        )
+        self.assertEqual(
+            FrontendEndpointShape.LOGICAL_OPERATION_TEMPLATE,
+            candidate.endpoint_shape,
+        )
+        self.assertEqual(
+            [("object", "hostapd.{dynamic}"), ("method", "del_client")],
+            [
+                (item.name, item.literal_value)
+                for item in result.parameters
+                if item.is_operation_selector
+            ],
+        )
+        self.assertEqual(
+            ["frontend.luci_rpc_operation_template"],
+            [item.code for item in result.diagnostics],
+        )
+
+    def test_unbounded_luci_rpc_object_remains_an_explicit_coverage_gap(self):
+        content = b"rpc.declare({object:getObjectName(),method:'run'});"
+        source = SourceArtifactEntry(
+            "www/luci-static/resources/dynamic.js",
+            "www/luci-static/resources/dynamic.js",
             "file",
             len(content),
             hashlib.sha256(content).hexdigest(),

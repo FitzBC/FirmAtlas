@@ -33,7 +33,8 @@
 - [M1-21 X5000R 请求保护范围](./m1-21-x5000r-request-protection.json)：跨 `usr/sbin/lighttpd` 与 `www/cgi-bin/cstecgi.cgi` 保存 suffix/path gate、SESSION_ID 会话验证、302 enforcement、CGI 排除分类和 nested upload handler 链；进度说明见 [M1-21 记录](../progress/2026-08-09-m1-21-x5000r-request-protection.md)。
 - [M1-22 X5000R 静态服务装配](./m1-22-x5000r-service-assembly.json)：从 `sbin/rc:init_router` 重放 service group、lighttpd argv/config、listener、document root、CGI namespace 与目标 ELF 的十一段证据；进度说明见 [M1-22 记录](../progress/2026-08-09-m1-22-x5000r-service-assembly.md)。
 - [M1-23 X5000R 潜在隐藏接口](./m1-23-x5000r-potential-hidden-interfaces.json)：在 Source Inventory、Frontend 和 Set Difference completed 门槛下保存 10 条 native registration + handler + zero-observed-reference 信号，并固定非后门/非运行时结论边界；进度说明见 [M1-23 记录](../progress/2026-08-09-m1-23-potential-hidden-interfaces.md)。
-- [M1-24 OpenWrt AC9 双版本差异](./m1-24-openwrt-ac9-version-diff.json)：固定两个官方 Artifact、Binwalk 谱系、不可变 release context 和 coverage-aware diff；19.07.8 恢复 52 个去重 LuCI/ubus 逻辑操作，并因一个动态 object 保持 partial；进度说明见 [M1-24 记录](../progress/2026-08-09-m1-24-version-aware-mapping-diff.md)。
+- [M1-24 OpenWrt AC9 双版本差异](./m1-24-openwrt-ac9-version-diff.json)：固定两个官方 Artifact、Binwalk 谱系、不可变 release context 和 coverage-aware diff；Frontend Producer v0.4.0 恢复 53 个去重 LuCI/ubus 逻辑操作（含一个有界动态模板），并因其具体运行时实例未解析而保持 partial；进度说明见 [M1-24 记录](../progress/2026-08-09-m1-24-version-aware-mapping-diff.md)。
+- [M1-25 OpenWrt AC9 ubus 后端图](./m1-25-openwrt-ac9-ubus-backend.json)：恢复 53 个去重逻辑操作（含 1 个动态模板），并分别发布 rpcd 执行主体、25 条静态 Lua binding、30 条 Native plugin candidate、72 条 ACL grant 和未决 owner/registration-table 义务；进度说明见 [M1-25 记录](../progress/2026-08-09-m1-25-ubus-backend-graph.md)。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -95,9 +96,9 @@
 
 - 真实版本：OpenWrt `18.06.7` 与 `19.07.8` 官方 bcm53xx/generic target；
 - 两个 Artifact 均以固定 Binwalk 3.1.0 禁网容器解包，Inventory completed；
-- 18.06.7 恢复 18 条 Lua route；19.07.8 恢复 52 个去重 `ubus://object/method` 逻辑操作；
+- 18.06.7 恢复 18 条 Lua route；19.07.8 恢复 53 个去重 `ubus://object/method` 逻辑操作（含 1 个动态模板）；
 - 旧版 `/admin/status/realtime/*`、network status 与 flashops 路由消失，同时新版出现 system/network/file/uci/iwinfo/luci-rpc 操作；
-- `hostapd.%s` 动态 object 未解析，使新版 Catalog 为 partial、整体 diff 为 coverage-confounded。
+- `hostapd.%s` 已被界定为 `{dynamic}` 操作族，但具体实例与 owner 未解析，使新版 Catalog 为 partial、整体 diff 为 coverage-confounded。
 
 该例用于验证“通信架构迁移不能被降维成 URL 增删”。它支持静态迁移假设，但不证明功能等价、补丁因果、漏洞修复或运行时可达。
 

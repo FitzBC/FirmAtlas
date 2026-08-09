@@ -243,3 +243,15 @@ _Avoid_: 原始 JSON diff、Git diff、漏洞修复结论
 **逻辑 RPC 操作（Logical RPC Operation）**：
 前端或客户端显式声明的远程过程身份，例如 LuCI `rpc.declare` 中由 `object + method` 组成的 `ubus://object/method`。它记录通信语义而不是猜测运行时解析出的固定 HTTP URL；动态 object/method 必须保留覆盖缺口。
 _Avoid_: HTTP endpoint、Native handler、已验证运行时服务
+
+**逻辑 RPC 操作模板（Logical RPC Operation Template）**：
+对象或方法包含一个可界定运行时槽位的 RPC 操作族，例如 `ubus://hostapd.{dynamic}/del_client`。模板证明固定前后缀与方法，不代表某个具体运行时实例已经存在或可达。
+_Avoid_: 未解析表达式、具体 ubus object、运行时枚举结果
+
+**ubus 后端绑定（ubus Backend Binding）**：
+逻辑 RPC 操作与 rpcd 执行主体之间的证据关系。可枚举 Lua exec-plugin 方法表可形成静态绑定；Native plugin 的对象/方法字符串与保守插件身份只能形成候选，必须由注册表或调用点证据晋级。
+_Avoid_: 字符串共现、ACL 授权、运行时可达
+
+**ubus 访问授权（ubus Access Grant）**：
+rpcd ACL 对 object pattern 与 method 的 read/write 授权声明。它描述策略允许范围，不证明执行主体归属、认证结果、接口可达或漏洞存在。
+_Avoid_: 后端绑定、认证绕过、可利用性

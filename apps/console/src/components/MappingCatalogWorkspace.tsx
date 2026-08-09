@@ -17,6 +17,9 @@ const kinds = [
   ['script_route', '脚本路由'], ['native_hint', '原生提示'],
   ['native_route_binding', 'Native 绑定'], ['native_handler', 'Native Handler'],
   ['native_parameter_state_flow', '参数状态流'],
+  ['runtime_principal', '运行时主体'],
+  ['ubus_backend_binding', 'ubus 后端绑定'],
+  ['ubus_access_grant', 'ubus 访问策略'],
   ['set_difference_attribution', '集合差异'],
   ['candidate_association', '跨层关联'],
 ] as const
@@ -340,9 +343,26 @@ function CandidateEvidence({ detail }: { detail: MappingCandidateDetail }) {
     <EvidenceSection title="架构与分析属性">{item.attributes.length ? <div className="grid gap-2 sm:grid-cols-2">{item.attributes.map(([key, value]) => <div key={`${key}:${value}`} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"><div className="text-[9px] uppercase tracking-[0.08em] text-slate-600">{key.replaceAll('_', ' ')}</div><div className="mt-1 break-all font-mono text-[10px] leading-5 text-cyan">{value}</div></div>)}</div> : <Muted />}</EvidenceSection>
     <EvidenceSection title="参数与操作选择器">{detail.parameters.length ? detail.parameters.map((parameter) => <div key={parameter.parameter_id} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"><div className="font-mono text-xs text-cyan">{parameter.name}</div><div className="mt-1 text-[10px] text-slate-600">{parameter.namespace}{parameter.is_operation_selector ? ' · operation selector' : ''}{parameter.literal_value ? ` · ${parameter.literal_value}` : ''}</div></div>) : <Muted />}</EvidenceSection>
     <EvidenceSection title="跨层关联">{detail.associations.length ? detail.associations.map((association) => <div key={association.association_id} className="rounded-lg border border-signal/10 bg-signal/[0.035] p-3 text-xs text-slate-400"><span className="text-signal">{association.match_basis}</span><div className="mt-1 break-all font-mono text-[9px] text-slate-600">{association.native_hint_id}</div></div>) : <Muted />}</EvidenceSection>
-    <EvidenceSection title="已验证 Native 绑定">{detail.related_candidates.length ? detail.related_candidates.map((related) => <div key={related.candidate_id} className="rounded-lg border border-cyan/15 bg-cyan/[0.035] p-3"><div className="flex items-center justify-between gap-3"><span className="font-mono text-xs text-cyan">{related.canonical_identity}</span><span className="text-[9px] uppercase tracking-[0.1em] text-signal">{related.claim_status}</span></div><div className="mt-1 break-all text-[9px] text-slate-600">{related.candidate_kind.replaceAll('_', ' ')} · {related.source_construct}</div></div>) : <Muted />}</EvidenceSection>
+    <EvidenceSection title="后端执行与访问链">{detail.related_candidates.length ? detail.related_candidates.map((related) => <RelatedCandidateCard key={related.candidate_id} candidate={related} />) : <Muted />}</EvidenceSection>
+    <EvidenceSection title="未决分析义务">{detail.open_obligations.length ? detail.open_obligations.map((obligation) => <div key={obligation.obligation_id} className="rounded-lg border border-amber-400/15 bg-amber-400/[0.035] p-3"><div className="flex items-start justify-between gap-3"><span className="font-mono text-[10px] text-amber-300">{obligation.required_capability ?? obligation.status}</span><span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">{obligation.priority ? `P${obligation.priority}` : obligation.status}</span></div><p className="mt-2 text-[10px] leading-5 text-slate-500">{obligation.reason}</p>{obligation.candidate_analyzers?.length ? <div className="mt-2 flex flex-wrap gap-1.5">{obligation.candidate_analyzers.map((analyzer) => <span key={analyzer} className="rounded bg-black/20 px-2 py-1 font-mono text-[8px] text-slate-600">{analyzer}</span>)}</div> : null}</div>) : <Muted />}</EvidenceSection>
     <EvidenceSection title="原始证据位置">{detail.evidence_atoms.map((atom) => <div key={atom.evidence_id} className="rounded-lg border border-white/[0.06] p-3"><div className="text-[10px] text-slate-400">{atom.capability}</div><div className="mt-1 break-all font-mono text-[9px] leading-5 text-slate-600">{atom.source_span.artifact_path} · {atom.source_span.locator}</div></div>)}</EvidenceSection>
   </article>
+}
+
+function RelatedCandidateCard({ candidate }: { candidate: MappingCandidate }) {
+  const attributes = Object.fromEntries(candidate.attributes)
+  const isPolicy = candidate.candidate_kind === 'ubus_access_grant'
+  const isPrincipal = candidate.candidate_kind === 'runtime_principal'
+  const status = isPolicy
+    ? `${attributes.access_mode ?? ''} · ${attributes.policy_group ?? ''}`
+    : isPrincipal ? attributes.principal_kind ?? candidate.claim_status
+      : attributes.binding_status ?? candidate.claim_status
+  return <div className={`rounded-lg border p-3 ${isPolicy ? 'border-violet-400/15 bg-violet-400/[0.035]' : isPrincipal ? 'border-signal/15 bg-signal/[0.035]' : 'border-cyan/15 bg-cyan/[0.035]'}`}>
+    <div className="flex items-start justify-between gap-3"><span className={`break-all font-mono text-xs ${isPolicy ? 'text-violet-300' : isPrincipal ? 'text-signal' : 'text-cyan'}`}>{candidate.canonical_identity}</span><span className="shrink-0 text-[8px] uppercase tracking-[0.1em] text-slate-500">{status}</span></div>
+    <div className="mt-1 break-all text-[9px] text-slate-600">{candidate.candidate_kind.replaceAll('_', ' ')} · {candidate.source_path}</div>
+    {attributes.object_pattern && <div className="mt-2 font-mono text-[9px] text-violet-300/70">object {attributes.object_pattern}</div>}
+    {attributes.parameter_names && <div className="mt-2 font-mono text-[9px] text-cyan/70">params {attributes.parameter_names}</div>}
+  </div>
 }
 
 function EvidenceSection({ title, children }: { title: string; children: React.ReactNode }) { return <section className="mt-6"><h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</h3><div className="space-y-2">{children}</div></section> }

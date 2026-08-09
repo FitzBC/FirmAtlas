@@ -45,15 +45,15 @@
       "inventory_entry_count": 1103,
       "frontend_asset_count": 71,
       "lua_controller_count": 5,
-      "candidate_count": 97,
-      "parameter_count": 209,
+      "candidate_count": 98,
+      "parameter_count": 215,
       "association_count": 1,
-      "open_obligation_count": 73,
+      "open_obligation_count": 74,
       "catalog_coverage_status": "partial",
       "candidate_kind_distribution": {
         "candidate_association": 1,
         "native_hint": 13,
-        "request_interface": 72,
+        "request_interface": 73,
         "script_route": 2,
         "script_source": 2,
         "web_configuration": 7
@@ -62,9 +62,9 @@
   ],
   "comparison": {
     "schema_version": "firmatlas.mapping.snapshot-diff/v1alpha1",
-    "comparison_id": "mapping-snapshot-diff:3a9e98c1ca6d9d6db62eab1c70d0786791daade3f1ca6f0a74a122631e9ba5d4",
+    "comparison_id": "mapping-snapshot-diff:ebc9d669c15dad22623be1b6b62d64fa9c2206074e9f10054fcadde3889f1d69",
     "base": {
-      "catalog_id": "discovery-catalog:14c032824ed4a85b71f61b94d2513cd59d7da0a4c219fd6765eb5cddc7501e55",
+      "catalog_id": "discovery-catalog:c7e1c085ca2265d1493a5db365bac2c2bf0cd3edc3c914798e2ff043298d4aae",
       "firmware_artifact_sha256": "2911048377aa17b44683b5f406fe3f6e62a5247ba7d4ab72cd3cb91fbf2a3184",
       "release_context": {
         "vendor": "OpenWrt",
@@ -76,7 +76,7 @@
       }
     },
     "target": {
-      "catalog_id": "discovery-catalog:93c7242a9ae4900f49f9188dcc34f018571f33d9a7f5726a5bcbdf30bbd339fd",
+      "catalog_id": "discovery-catalog:13f1edc3f52ad714f05f2e1205adf7169a8a0863dec7de001d45c46d96297586",
       "firmware_artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
       "release_context": {
         "vendor": "OpenWrt",
@@ -90,17 +90,17 @@
     "comparison_status": "coverage_confounded",
     "same_firmware_family_verified": true,
     "summary": {
-      "added_candidate_count": 56,
+      "added_candidate_count": 57,
       "removed_candidate_count": 22,
       "changed_candidate_count": 0,
-      "added_parameter_count": 157,
+      "added_parameter_count": 163,
       "removed_parameter_count": 18,
       "changed_parameter_count": 0,
       "discovered_hidden_interface_count": 0,
       "resolved_hidden_interface_count": 0,
       "changed_hidden_interface_count": 0,
       "coverage_change_count": 3,
-      "total_change_count": 256
+      "total_change_count": 263
     },
     "changes": [
       {
@@ -501,6 +501,59 @@
             [
               "endpoint_shape",
               "logical_operation"
+            ],
+            [
+              "method",
+              "POST"
+            ],
+            [
+              "representation",
+              "json_rpc"
+            ],
+            [
+              "request_role",
+              "unspecified"
+            ]
+          ]
+        },
+        "interpretation": "observed structural difference may be caused by analysis coverage drift"
+      },
+      {
+        "change_id": "mapping-snapshot-change:c762b1b86aadd60a14acde3da55b6d201f8bdbd7fb17e2012012a2c167ebe8dc",
+        "category": "candidate",
+        "stable_identity": "request_interface|ubus://hostapd.{dynamic}/del_client",
+        "display_identity": "ubus://hostapd.{dynamic}/del_client",
+        "change_kind": "added",
+        "confidence": "coverage_confounded",
+        "changed_fields": [
+          "attributes",
+          "candidate_kind",
+          "canonical_identities",
+          "claim_statuses",
+          "member_count",
+          "source_constructs",
+          "source_paths"
+        ],
+        "base": null,
+        "target": {
+          "candidate_kind": "request_interface",
+          "canonical_identities": [
+            "ubus://hostapd.{dynamic}/del_client"
+          ],
+          "member_count": 1,
+          "claim_statuses": [
+            "candidate"
+          ],
+          "source_paths": [
+            "www/luci-static/resources/network.js"
+          ],
+          "source_constructs": [
+            "LuCI.rpc.declare.template"
+          ],
+          "attributes": [
+            [
+              "endpoint_shape",
+              "logical_operation_template"
             ],
             [
               "method",
@@ -3994,7 +4047,7 @@
           "producer_kind": "frontend",
           "scope": "www/**/*.{js,html}",
           "producer": "frontend-request-producer",
-          "producer_version": "0.3.0",
+          "producer_version": "0.4.0",
           "status": "completed",
           "required": true,
           "processed_result_count": 3,
@@ -4004,7 +4057,7 @@
           "producer_kind": "frontend",
           "scope": "www/**/*.{js,html}",
           "producer": "frontend-request-producer",
-          "producer_version": "0.3.0",
+          "producer_version": "0.4.0",
           "status": "partial",
           "required": true,
           "processed_result_count": 71,
@@ -4729,6 +4782,170 @@
         "category": "parameter",
         "stable_identity": "request_interface|ubus://file/write|json|path",
         "display_identity": "path",
+        "change_kind": "added",
+        "confidence": "coverage_confounded",
+        "changed_fields": [
+          "literal_values",
+          "member_count",
+          "operation_selector",
+          "selector_values",
+          "source_constructs"
+        ],
+        "base": null,
+        "target": {
+          "member_count": 1,
+          "literal_values": [],
+          "selector_values": [],
+          "operation_selector": false,
+          "source_constructs": [
+            "LuCI.rpc.declare.params"
+          ]
+        },
+        "interpretation": "observed structural difference may be caused by analysis coverage drift"
+      },
+      {
+        "change_id": "mapping-snapshot-change:95851484a2f536604755cefe69dce3e00c00623af6cd7d1bc1266badf95846d4",
+        "category": "parameter",
+        "stable_identity": "request_interface|ubus://hostapd.{dynamic}/del_client|json|addr",
+        "display_identity": "addr",
+        "change_kind": "added",
+        "confidence": "coverage_confounded",
+        "changed_fields": [
+          "literal_values",
+          "member_count",
+          "operation_selector",
+          "selector_values",
+          "source_constructs"
+        ],
+        "base": null,
+        "target": {
+          "member_count": 1,
+          "literal_values": [],
+          "selector_values": [],
+          "operation_selector": false,
+          "source_constructs": [
+            "LuCI.rpc.declare.params"
+          ]
+        },
+        "interpretation": "observed structural difference may be caused by analysis coverage drift"
+      },
+      {
+        "change_id": "mapping-snapshot-change:f74fe0dfaf4b79c7167b3ad24c0a6b39fdf7ad8b911093404cdc184a9a9a1d61",
+        "category": "parameter",
+        "stable_identity": "request_interface|ubus://hostapd.{dynamic}/del_client|json|ban_time",
+        "display_identity": "ban_time",
+        "change_kind": "added",
+        "confidence": "coverage_confounded",
+        "changed_fields": [
+          "literal_values",
+          "member_count",
+          "operation_selector",
+          "selector_values",
+          "source_constructs"
+        ],
+        "base": null,
+        "target": {
+          "member_count": 1,
+          "literal_values": [],
+          "selector_values": [],
+          "operation_selector": false,
+          "source_constructs": [
+            "LuCI.rpc.declare.params"
+          ]
+        },
+        "interpretation": "observed structural difference may be caused by analysis coverage drift"
+      },
+      {
+        "change_id": "mapping-snapshot-change:52d5684f53b985aa00e39bd3524ddfd668167e21684df85371b8039e36a59347",
+        "category": "parameter",
+        "stable_identity": "request_interface|ubus://hostapd.{dynamic}/del_client|json|deauth",
+        "display_identity": "deauth",
+        "change_kind": "added",
+        "confidence": "coverage_confounded",
+        "changed_fields": [
+          "literal_values",
+          "member_count",
+          "operation_selector",
+          "selector_values",
+          "source_constructs"
+        ],
+        "base": null,
+        "target": {
+          "member_count": 1,
+          "literal_values": [],
+          "selector_values": [],
+          "operation_selector": false,
+          "source_constructs": [
+            "LuCI.rpc.declare.params"
+          ]
+        },
+        "interpretation": "observed structural difference may be caused by analysis coverage drift"
+      },
+      {
+        "change_id": "mapping-snapshot-change:68b86349b4cba13b7905a7ba4c56a3011b227900a9b82419b0830d20fbcaac10",
+        "category": "parameter",
+        "stable_identity": "request_interface|ubus://hostapd.{dynamic}/del_client|json|method",
+        "display_identity": "method",
+        "change_kind": "added",
+        "confidence": "coverage_confounded",
+        "changed_fields": [
+          "literal_values",
+          "member_count",
+          "operation_selector",
+          "selector_values",
+          "source_constructs"
+        ],
+        "base": null,
+        "target": {
+          "member_count": 1,
+          "literal_values": [
+            "del_client"
+          ],
+          "selector_values": [
+            "del_client"
+          ],
+          "operation_selector": true,
+          "source_constructs": [
+            "LuCI.rpc.declare"
+          ]
+        },
+        "interpretation": "observed structural difference may be caused by analysis coverage drift"
+      },
+      {
+        "change_id": "mapping-snapshot-change:c3cf92f11f7dc06f72238695c552b940eee3c218bb437589032dd4312b90fbb1",
+        "category": "parameter",
+        "stable_identity": "request_interface|ubus://hostapd.{dynamic}/del_client|json|object",
+        "display_identity": "object",
+        "change_kind": "added",
+        "confidence": "coverage_confounded",
+        "changed_fields": [
+          "literal_values",
+          "member_count",
+          "operation_selector",
+          "selector_values",
+          "source_constructs"
+        ],
+        "base": null,
+        "target": {
+          "member_count": 1,
+          "literal_values": [
+            "hostapd.{dynamic}"
+          ],
+          "selector_values": [
+            "hostapd.{dynamic}"
+          ],
+          "operation_selector": true,
+          "source_constructs": [
+            "LuCI.rpc.declare"
+          ]
+        },
+        "interpretation": "observed structural difference may be caused by analysis coverage drift"
+      },
+      {
+        "change_id": "mapping-snapshot-change:83298a6e70f3b904797cc1cbdd8c2b111a1a7880e998120902ee35e59ca27e33",
+        "category": "parameter",
+        "stable_identity": "request_interface|ubus://hostapd.{dynamic}/del_client|json|reason",
+        "display_identity": "reason",
         "change_kind": "added",
         "confidence": "coverage_confounded",
         "changed_fields": [

@@ -36,8 +36,28 @@ const detail: MappingCandidateDetail = {
     ...candidate, candidate_id: 'native-binding:1', candidate_kind: 'native_route_binding',
     canonical_identity: 'SetOnlineDevName', claim_status: 'supported',
     source_path: 'bin/httpd', source_construct: 'elf.named-route-handler-pairs/v1:.routes',
+  }, {
+    ...candidate, candidate_id: 'ubus-binding:1', candidate_kind: 'ubus_backend_binding',
+    canonical_identity: 'ubus://luci/getFeatures', claim_status: 'supported',
+    source_path: 'usr/libexec/rpcd/luci', source_construct: 'static_plugin_dispatch',
+    attributes: [['binding_status', 'static_plugin_dispatch'], ['parameter_names', 'detail']],
+  }, {
+    ...candidate, candidate_id: 'ubus-principal:1', candidate_kind: 'runtime_principal',
+    canonical_identity: 'usr/libexec/rpcd/luci', claim_status: 'supported',
+    source_path: 'usr/libexec/rpcd/luci', source_construct: 'rpcd_exec_plugin',
+    attributes: [['principal_kind', 'rpcd_exec_plugin']],
+  }, {
+    ...candidate, candidate_id: 'ubus-grant:1', candidate_kind: 'ubus_access_grant',
+    canonical_identity: 'ubus://luci/getFeatures', claim_status: 'supported',
+    source_path: 'usr/share/rpcd/acl.d/luci-base.json', source_construct: 'rpcd_acl',
+    attributes: [['access_mode', 'read'], ['policy_group', 'unauthenticated'], ['object_pattern', 'luci']],
   }],
-  open_obligations: [],
+  open_obligations: [{
+    obligation_id: 'obligation:owner', target_ref: candidate.candidate_id, status: 'open',
+    reason: 'No declared artifact scope statically binds this operation.',
+    required_capability: 'resolve_ubus_runtime_owner', priority: 80,
+    candidate_analyzers: ['rpcd-plugin-analyzer', 'ghidra-adapter'],
+  }],
   evidence_atoms: [{ evidence_id: 'ev:1', predicate: 'constructs', object_value: candidate.canonical_identity, capability: 'constructs_request', source_span: { artifact_path: candidate.source_path, locator: 'text:1' } }],
   coverage: [{ scope: 'webroot/**/*.js', producer_kind: 'frontend', producer: 'frontend-request-producer', status: 'completed' }],
 }
@@ -130,8 +150,12 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   expect(screen.getByText('method')).toBeInTheDocument()
   expect(screen.getByText('POST')).toBeInTheDocument()
   expect(screen.getByText('constructs_request')).toBeInTheDocument()
-  expect(screen.getByText('已验证 Native 绑定')).toBeInTheDocument()
+  expect(screen.getByText('后端执行与访问链')).toBeInTheDocument()
   expect(screen.getByText('SetOnlineDevName')).toBeInTheDocument()
+  expect(screen.getByText('rpcd_exec_plugin')).toBeInTheDocument()
+  expect(screen.getByText('read · unauthenticated')).toBeInTheDocument()
+  expect(screen.getByText('未决分析义务')).toBeInTheDocument()
+  expect(screen.getByText('resolve_ubus_runtime_owner')).toBeInTheDocument()
 })
 
 it('shows potential hidden interfaces as a coverage-gated cross-firmware view', async () => {

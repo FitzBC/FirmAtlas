@@ -19,6 +19,7 @@ from .native_value_flow import MipsHandlerValueFlowResult
 from .native_nested_dispatch import MipsNestedDispatchResult
 from .native_request_protection import MipsRequestProtectionResult
 from .native_service_assembly import MipsServiceAssemblyResult
+from .ubus_backend import UbusBackendBindingStatus, UbusBackendGraphResult
 from .set_difference import SetDifferenceAttributionResult
 from .correlation import FrontendNativeCorrelationResult
 from .scheduler import (
@@ -46,6 +47,7 @@ class DiscoveryProducerKind(str, Enum):
     SET_DIFFERENCE = "set_difference"
     CORRELATION = "correlation"
     SCHEDULER = "scheduler"
+    UBUS_BACKEND = "ubus_backend"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -65,6 +67,9 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_SERVICE_ASSEMBLY = "native_service_assembly"
     SET_DIFFERENCE_ATTRIBUTION = "set_difference_attribution"
     CANDIDATE_ASSOCIATION = "candidate_association"
+    RUNTIME_PRINCIPAL = "runtime_principal"
+    UBUS_BACKEND_BINDING = "ubus_backend_binding"
+    UBUS_ACCESS_GRANT = "ubus_access_grant"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -193,6 +198,17 @@ class DiscoveryProducerBatch:
             scope,
             results,
         )
+
+    @classmethod
+    def ubus_backend(
+        cls, results: Tuple[UbusBackendGraphResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("ubus-backend-producer", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.UBUS_BACKEND, producer, scope, results)
 
     def __post_init__(self) -> None:
         if not self.scope.strip() or not self.producer.name.strip():
@@ -360,6 +376,8 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
     native_nested_target_refs = set()
     native_protection_target_refs = set()
     native_service_target_refs = set()
+    ubus_backend_target_refs = set()
+    producer_obligations = []
     for batch in sorted(value.batches, key=lambda x: (x.producer_kind.value, x.scope)):
         statuses = []
         for result in batch.results:
@@ -699,6 +717,64 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ),
                         ),
                     ))
+            elif batch.producer_kind is DiscoveryProducerKind.UBUS_BACKEND:
+                principal_paths = {
+                    item.principal_id: item.artifact_path
+                    for item in result.principals
+                }
+                for item in result.principals:
+                    candidates.append(DiscoveryCandidate(
+                        item.principal_id,
+                        DiscoveryCandidateKind.RUNTIME_PRINCIPAL,
+                        item.artifact_path,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.artifact_path,
+                        item.principal_kind.value,
+                        item.evidence_ids,
+                        (
+                            ("principal_kind", item.principal_kind.value),
+                            ("object_names", "|".join(item.object_names)),
+                        ),
+                    ))
+                for item in result.bindings:
+                    ubus_backend_target_refs.add(item.operation_ref)
+                    candidates.append(DiscoveryCandidate(
+                        item.binding_id,
+                        DiscoveryCandidateKind.UBUS_BACKEND_BINDING,
+                        item.logical_operation,
+                        (
+                            DiscoveryClaimStatus.SUPPORTED
+                            if item.status is UbusBackendBindingStatus.STATIC_PLUGIN_DISPATCH
+                            else DiscoveryClaimStatus.CANDIDATE
+                        ),
+                        principal_paths[item.principal_id],
+                        item.status.value,
+                        item.evidence_ids,
+                        (
+                            ("target_ref", item.operation_ref),
+                            ("principal_id", item.principal_id),
+                            ("binding_status", item.status.value),
+                            ("parameter_names", "|".join(item.parameter_names)),
+                        ),
+                    ))
+                for item in result.access_grants:
+                    ubus_backend_target_refs.add(item.operation_ref)
+                    candidates.append(DiscoveryCandidate(
+                        item.grant_id,
+                        DiscoveryCandidateKind.UBUS_ACCESS_GRANT,
+                        item.logical_operation,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.source_path,
+                        "rpcd_acl",
+                        item.evidence_ids,
+                        (
+                            ("target_ref", item.operation_ref),
+                            ("policy_group", item.policy_group),
+                            ("access_mode", item.access_mode.value),
+                            ("object_pattern", item.object_pattern),
+                        ),
+                    ))
+                producer_obligations.extend(result.open_obligations)
         if not statuses:
             status = CoverageStatus.FAILED if batch.required else CoverageStatus.NOT_APPLICABLE
             diagnostic = "required_batch_has_no_results" if batch.required else None
@@ -786,8 +862,13 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
         raise ValueError("native request protection references unknown catalog candidate")
     if any(target not in candidate_ids for target in native_service_target_refs):
         raise ValueError("native service assembly references unknown catalog candidate")
+    if any(target not in candidate_ids for target in ubus_backend_target_refs):
+        raise ValueError("ubus backend result references unknown catalog candidate")
     if value.scheduler is not None:
-        obligations = value.scheduler.open_obligations
+        obligations = normalize_scheduler_obligations((
+            *value.scheduler.open_obligations,
+            *producer_obligations,
+        ))
         termination = value.scheduler.termination
         coverage.append(DiscoveryCoverage(
             "catalog/scheduler", DiscoveryProducerKind.SCHEDULER,
@@ -796,10 +877,13 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
             "; ".join(x.message for x in value.scheduler.diagnostics) or None,
         ))
     elif value.correlation is not None:
-        obligations = normalize_scheduler_obligations(value.correlation.obligations)
+        obligations = normalize_scheduler_obligations((
+            *value.correlation.obligations,
+            *producer_obligations,
+        ))
         termination = None
     else:
-        obligations = ()
+        obligations = normalize_scheduler_obligations(tuple(producer_obligations))
         termination = None
     for item in obligations:
         if item.target_ref not in candidate_ids:

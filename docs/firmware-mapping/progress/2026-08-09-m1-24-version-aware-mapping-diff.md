@@ -34,7 +34,7 @@
 2. sectionless stripped ELF 仍可发布 ELF metadata 与 printable hint，不再误判 malformed；
 3. UCI `uhttpd` 配置可恢复 listener、docroot、CGI/Lua prefix。
 
-更重要的是，19.07.8 大量使用 `rpc.declare({object, method, params})`。Frontend Producer v0.3.0 将其发布为 `ubus://object/method` 逻辑操作，保留 object/method selector、输入参数和精确 EvidenceAtom，而不伪造固定 HTTP URL。真实目录恢复 52 个去重 ubus 操作，包括 `ubus://system/info`、`ubus://network.interface/dump` 与 `ubus://uci/apply`。一个 `hostapd.%s` 动态对象仍未解析，因此该版本保持 partial。
+更重要的是，19.07.8 大量使用 `rpc.declare({object, method, params})`。Frontend Producer v0.4.0 将其发布为 `ubus://object/method` 逻辑操作，保留 object/method selector、输入参数和精确 EvidenceAtom，而不伪造固定 HTTP URL。真实目录恢复 53 个去重 ubus 操作，包括 `ubus://system/info`、`ubus://network.interface/dump`、`ubus://uci/apply` 与有界模板 `ubus://hostapd.{dynamic}/del_client`。动态实例仍未解析，因此该版本保持 partial。
 
 ## 4. 可用于论文的案例观察
 

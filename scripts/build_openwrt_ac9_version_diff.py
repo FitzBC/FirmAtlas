@@ -16,6 +16,7 @@ from firmatlas.mapping import (
     MappingReleaseContext,
     DiscoveryCatalogRepository,
     SourceArtifactEntry,
+    UbusArtifactInput,
     assemble_discovery_catalog,
     build_inventory,
     compare_mapping_catalog_documents,
@@ -23,7 +24,9 @@ from firmatlas.mapping import (
     discover_frontend_requests,
     discover_native_hints,
     discover_script_backend,
+    discover_ubus_backend_graph,
     discover_web_configuration,
+    ubus_operation_references_from_frontend,
 )
 
 
@@ -97,7 +100,7 @@ def _release_context(version: str) -> MappingReleaseContext:
     )
 
 
-def build_catalog(version: str):
+def build_catalog(version: str, include_ubus_backend: bool = False):
     metadata = VERSIONS[version]
     artifact, root = metadata["artifact"], metadata["root"]
     if not artifact.is_file() or not root.is_dir():
@@ -134,27 +137,51 @@ def build_catalog(version: str):
         for path in native_paths
     )
     correlation = correlate_frontend_native(frontends, native)
+    batches = [
+        DiscoveryProducerBatch.frontend(
+            frontends, "www/**/*.{js,html}"
+        ),
+        DiscoveryProducerBatch.script_backend(
+            scripts, "usr/lib/lua/luci/controller/**/*.lua"
+        ),
+        DiscoveryProducerBatch.web_configuration(
+            web, "etc/{config,init.d}/uhttpd"
+        ),
+        DiscoveryProducerBatch.native(
+            native, "{usr/sbin/uhttpd,sbin/rpcd}"
+        ),
+    ]
+    ubus_backend = None
+    if include_ubus_backend:
+        ubus_paths = sorted(
+            path
+            for base in (
+                root / "usr/libexec/rpcd",
+                root / "usr/lib/rpcd",
+                root / "usr/share/rpcd/acl.d",
+            )
+            if base.is_dir()
+            for path in base.iterdir()
+            if path.is_file()
+        )
+        ubus_backend = discover_ubus_backend_graph(
+            ubus_operation_references_from_frontend(frontends),
+            tuple(
+                UbusArtifactInput(*_source(root, path)) for path in ubus_paths
+            ),
+        )
+        batches.append(DiscoveryProducerBatch.ubus_backend(
+            (ubus_backend,),
+            "usr/{libexec/rpcd,lib/rpcd,share/rpcd/acl.d}/*",
+        ))
     catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
         firmware_artifact_sha256=_sha256(artifact),
         source_inventory_sha256=inventory.inventory_sha256,
-        batches=(
-            DiscoveryProducerBatch.frontend(
-                frontends, "www/**/*.{js,html}"
-            ),
-            DiscoveryProducerBatch.script_backend(
-                scripts, "usr/lib/lua/luci/controller/**/*.lua"
-            ),
-            DiscoveryProducerBatch.web_configuration(
-                web, "etc/{config,init.d}/uhttpd"
-            ),
-            DiscoveryProducerBatch.native(
-                native, "{usr/sbin/uhttpd,sbin/rpcd}"
-            ),
-        ),
+        batches=tuple(batches),
         correlation=correlation,
         source_inventory_coverage_status=inventory.coverage_status,
     ))
-    return catalog, {
+    summary = {
         "version": version,
         "source_url": metadata["source_url"],
         "artifact_sha256": _sha256(artifact),
@@ -176,6 +203,16 @@ def build_catalog(version: str):
             for kind in sorted({item.candidate_kind.value for item in catalog.candidates})
         },
     }
+    if ubus_backend is not None:
+        summary["ubus_backend"] = {
+            "operation_count": len(ubus_operation_references_from_frontend(frontends)),
+            "principal_count": len(ubus_backend.principals),
+            "binding_count": len(ubus_backend.bindings),
+            "access_grant_count": len(ubus_backend.access_grants),
+            "open_obligation_count": len(ubus_backend.open_obligations),
+            "coverage_status": ubus_backend.coverage_status.value,
+        }
+    return catalog, summary
 
 
 def build_report(database: Optional[str] = None) -> dict:

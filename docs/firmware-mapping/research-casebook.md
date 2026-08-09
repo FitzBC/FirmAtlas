@@ -150,9 +150,13 @@ dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 
 同一 Tenda AC9 target 的 OpenWrt 18.06.7 与 19.07.8 提供了版本通信架构迁移案例。旧版可见 `/admin/status/realtime/*`、network status、flashops 与 UCI confirm 等服务端 LuCI Lua route；新版的前端资源则大量声明 `rpc.declare({object, method, params})`，形成 system、network、file、uci、iwinfo、luci-rpc 等 `ubus://object/method` 逻辑操作。
 
-如果只比较 URL，结论会是“22 个路由删除”；加入前端 RPC 语义后，更合理的研究假设是控制面从服务端 Lua 路由向前端 JSON-RPC/ubus 迁移。这个假设仍受 coverage 约束：新版存在一个动态 `hostapd.%s` object，且 `request.* / L.url` 尚未完整恢复，因此当前 diff 为 `coverage_confounded`，不能声称完整功能对应、漏洞修复或运行时可达。
+如果只比较 URL，结论会是“22 个路由删除”；加入前端 RPC 语义后，更合理的研究假设是控制面从服务端 Lua 路由向前端 JSON-RPC/ubus 迁移。M1-25 又把其中 53 个去重逻辑操作继续向后端推进：`ubus://luci/getFeatures` 可静态绑定到 `usr/libexec/rpcd/luci` 的 Lua method table；`ubus://luci-rpc/getBoardJSON` 与 `ubus://file/read` 分别只形成 `luci.so`、`file.so` Native plugin 候选，等待注册表或调用点确认；`ubus://hostapd.{dynamic}/del_client` 则与 `luci-base.json` 的 `hostapd.* / del_client / write` ACL 相交，但没有在声明制品范围中找到 owner，因此保留运行时归属义务。
 
-论文可用它展示 path-only diff 的消融失败，以及 Coverage Ledger 如何阻止“分析器漏报 → 固件功能删除”的错误因果。固定制品、解包谱系、候选与参数差异见 [M1-24 机器报告](./samples/m1-24-openwrt-ac9-version-diff.json)。
+这个链条提供了另一个适合论文的反例：ACL 允许某操作，不等于 ACL 文件实现该操作；二进制内同时出现 `file` 与 `read`，也不等于任意包含这些字符串的插件就是 handler。系统曾观察到 `luci.so` 的偶然字符串共现，最终用保守插件身份先验排除了这条噪声关系。当前报告包含 25 条静态 exec-plugin binding、30 条 Native plugin candidate、72 条 ACL grant、18 条 runtime-owner obligation 与 30 条 Native registration-table obligation。
+
+这个假设仍受 coverage 约束：动态模板只证明接口族，不证明具体 `hostapd` 实例；Native 候选未经过 Ghidra 注册表重放，`request.* / L.url` 也尚未完整恢复。因此当前目录保持 partial，不能声称完整功能对应、运行时可达、认证结果、漏洞修复或可利用性。
+
+论文可用它展示 path-only diff、ACL-as-owner 与 string-co-occurrence 三种消融失败，以及 Coverage Ledger 如何阻止“分析器漏报 → 固件功能删除”的错误因果。固定制品、解包谱系、候选与参数差异见 [M1-24 机器报告](./samples/m1-24-openwrt-ac9-version-diff.json)，执行主体与访问链见 [M1-25 机器报告](./samples/m1-25-openwrt-ac9-ubus-backend.json)。
 
 ## 4. 后续案例准入触发器
 

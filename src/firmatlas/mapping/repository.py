@@ -444,6 +444,19 @@ class DiscoveryCatalogRepository:
             if item.get("candidate_id") != candidate_id
             and dict(item.get("attributes", [])).get("target_ref") in related_targets
         ]
+        principal_ids = {
+            dict(item.get("attributes", [])).get("principal_id")
+            for item in related_candidates
+            if dict(item.get("attributes", [])).get("principal_id")
+        }
+        related_candidate_ids = {
+            item.get("candidate_id") for item in related_candidates
+        }
+        related_candidates.extend(
+            item for item in document.get("candidates", [])
+            if item.get("candidate_id") in principal_ids
+            and item.get("candidate_id") not in related_candidate_ids
+        )
         obligations = [
             item for item in document.get("open_obligations", [])
             if item.get("target_ref") == candidate_id or item.get("target_ref") in association_ids

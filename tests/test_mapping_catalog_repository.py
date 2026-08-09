@@ -12,8 +12,11 @@ from firmatlas.mapping import (
     DiscoveryProducerBatch,
     MappingReleaseContext,
     SourceArtifactEntry,
+    UbusArtifactInput,
     assemble_discovery_catalog,
     discover_frontend_requests,
+    discover_ubus_backend_graph,
+    ubus_operation_references_from_frontend,
 )
 from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
 from firmatlas.mapping.repository import (
@@ -104,6 +107,49 @@ class DiscoveryCatalogRepositoryTests(unittest.TestCase):
         )
         self.assertEqual([], detail["associations"])
         self.assertEqual([], detail["open_obligations"])
+
+    def test_candidate_detail_follows_ubus_binding_to_runtime_principal(self):
+        frontend_content = b"rpc.declare({object:'luci',method:'getFeatures'});"
+        frontend_source = SourceArtifactEntry(
+            "www/system.js", "www/system.js", "file", len(frontend_content),
+            hashlib.sha256(frontend_content).hexdigest(),
+        )
+        frontend = discover_frontend_requests(frontend_source, frontend_content)
+        plugin_content = b'''#!/usr/bin/env lua
+local methods = { getFeatures = { args = {}, call = function() end } }
+if arg[1] == "list" then elseif arg[1] == "call" then end
+'''
+        plugin_source = SourceArtifactEntry(
+            "usr/libexec/rpcd/luci", "usr/libexec/rpcd/luci", "file",
+            len(plugin_content), hashlib.sha256(plugin_content).hexdigest(),
+        )
+        backend = discover_ubus_backend_graph(
+            ubus_operation_references_from_frontend((frontend,)),
+            (UbusArtifactInput(plugin_source, plugin_content),),
+        )
+        catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
+            firmware_artifact_sha256="3" * 64,
+            source_inventory_sha256="4" * 64,
+            batches=(
+                DiscoveryProducerBatch.frontend((frontend,), "www/**/*.js"),
+                DiscoveryProducerBatch.ubus_backend((backend,), "usr/libexec/rpcd/*"),
+            ),
+        ))
+        repository = DiscoveryCatalogRepository(":memory:")
+        try:
+            repository.publish(catalog)
+            operation = next(
+                item for item in catalog.candidates
+                if item.candidate_kind.value == "request_interface"
+            )
+            detail = repository.get_candidate(catalog.catalog_id, operation.candidate_id)
+        finally:
+            repository.close()
+
+        self.assertEqual(
+            {"ubus_backend_binding", "runtime_principal"},
+            {item["candidate_kind"] for item in detail["related_candidates"]},
+        )
 
     def test_unknown_catalog_and_candidate_return_none(self):
         self.assertIsNone(self.repository.get_catalog("missing"))

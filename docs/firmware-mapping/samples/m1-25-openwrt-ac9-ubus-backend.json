@@ -1,0 +1,155 @@
+{
+  "schema_version": "firmatlas.mapping.openwrt-ac9-ubus-backend/v1alpha1",
+  "sample_role": "real-luci-ubus-execution-and-access-graph",
+  "catalog_id": "discovery-catalog:9a14f14d84b315f62a7a161ae515a7d1342285c16c974aa3c44a95375f429f54",
+  "firmware_artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
+  "release_context": {
+    "vendor": "OpenWrt",
+    "product": "OpenWrt",
+    "device_model": "Tenda AC9",
+    "firmware_version": "19.07.8",
+    "source_ref": "openwrt-downloads:19.07.8:bcm53xx:tenda-ac9",
+    "evidence": "official OpenWrt release target path and filename identify bcm53xx/generic/tenda-ac9"
+  },
+  "source_snapshot": {
+    "version": "19.07.8",
+    "source_url": "https://downloads.openwrt.org/releases/19.07.8/targets/bcm53xx/generic/openwrt-19.07.8-bcm53xx-tenda-ac9-squashfs.trx",
+    "artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
+    "extraction_execution_fingerprint": "44467c7444e6f3428b47a251fb94694a72f54399b2624081526f39290260bf7a",
+    "inventory_sha256": "56cd8353346ef3a27692b21cfebccf311482b69f3ff3022b0ed799f81f232720",
+    "inventory_coverage_status": "completed",
+    "inventory_entry_count": 1103,
+    "frontend_asset_count": 71,
+    "lua_controller_count": 5,
+    "candidate_count": 229,
+    "parameter_count": 215,
+    "association_count": 1,
+    "open_obligation_count": 122,
+    "catalog_coverage_status": "partial",
+    "candidate_kind_distribution": {
+      "candidate_association": 1,
+      "native_hint": 13,
+      "request_interface": 73,
+      "runtime_principal": 4,
+      "script_route": 2,
+      "script_source": 2,
+      "ubus_access_grant": 72,
+      "ubus_backend_binding": 55,
+      "web_configuration": 7
+    },
+    "ubus_backend": {
+      "operation_count": 73,
+      "principal_count": 4,
+      "binding_count": 55,
+      "access_grant_count": 72,
+      "open_obligation_count": 48,
+      "coverage_status": "partial"
+    }
+  },
+  "summary": {
+    "frontend_ubus_candidate_count": 73,
+    "unique_logical_operation_count": 53,
+    "dynamic_operation_template_count": 1,
+    "runtime_principal_count": 4,
+    "static_plugin_binding_count": 25,
+    "native_plugin_candidate_count": 30,
+    "access_grant_count": 72,
+    "runtime_owner_obligation_count": 18,
+    "native_registration_obligation_count": 30
+  },
+  "representative_chains": [
+    {
+      "logical_operation": "ubus://luci/getFeatures",
+      "frontend_source": "www/luci-static/resources/luci.js",
+      "endpoint_shape": "logical_operation",
+      "backend_bindings": [
+        {
+          "status": "static_plugin_dispatch",
+          "principal_kind": "rpcd_exec_plugin",
+          "artifact_path": "usr/libexec/rpcd/luci"
+        }
+      ],
+      "access_grants": [
+        {
+          "policy_group": "unauthenticated",
+          "access_mode": "read",
+          "object_pattern": "luci",
+          "source_path": "usr/share/rpcd/acl.d/luci-base.json"
+        }
+      ],
+      "open_obligations": [
+        "registers_route"
+      ]
+    },
+    {
+      "logical_operation": "ubus://luci-rpc/getBoardJSON",
+      "frontend_source": "www/luci-static/resources/network.js",
+      "endpoint_shape": "logical_operation",
+      "backend_bindings": [
+        {
+          "status": "native_plugin_candidate",
+          "principal_kind": "rpcd_native_plugin",
+          "artifact_path": "usr/lib/rpcd/luci.so"
+        }
+      ],
+      "access_grants": [
+        {
+          "policy_group": "luci-access",
+          "access_mode": "read",
+          "object_pattern": "luci-rpc",
+          "source_path": "usr/share/rpcd/acl.d/luci-base.json"
+        }
+      ],
+      "open_obligations": [
+        "registers_route",
+        "resolve_ubus_registration_table"
+      ]
+    },
+    {
+      "logical_operation": "ubus://file/read",
+      "frontend_source": "www/luci-static/resources/fs.js",
+      "endpoint_shape": "logical_operation",
+      "backend_bindings": [
+        {
+          "status": "native_plugin_candidate",
+          "principal_kind": "rpcd_native_plugin",
+          "artifact_path": "usr/lib/rpcd/file.so"
+        }
+      ],
+      "access_grants": [
+        {
+          "policy_group": "luci-access",
+          "access_mode": "read",
+          "object_pattern": "file",
+          "source_path": "usr/share/rpcd/acl.d/luci-base.json"
+        }
+      ],
+      "open_obligations": [
+        "registers_route",
+        "resolve_ubus_registration_table"
+      ]
+    },
+    {
+      "logical_operation": "ubus://hostapd.{dynamic}/del_client",
+      "frontend_source": "www/luci-static/resources/network.js",
+      "endpoint_shape": "logical_operation_template",
+      "backend_bindings": [],
+      "access_grants": [
+        {
+          "policy_group": "luci-access",
+          "access_mode": "write",
+          "object_pattern": "hostapd.*",
+          "source_path": "usr/share/rpcd/acl.d/luci-base.json"
+        }
+      ],
+      "open_obligations": [
+        "registers_route",
+        "resolve_ubus_runtime_owner"
+      ]
+    }
+  ],
+  "interpretation_boundary": {
+    "supported": "frontend LuCI declarations, statically enumerable rpcd exec-plugin dispatch, native plugin co-occurrence candidates, and rpcd ACL grants",
+    "not_claimed": "runtime reachability, authentication outcome, vulnerability, or a native handler binding without registration-table/callsite evidence"
+  }
+}
