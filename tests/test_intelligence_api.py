@@ -21,6 +21,7 @@ from firmatlas.mapping import (
     discover_frontend_requests,
 )
 from firmatlas.mapping.repository import DiscoveryCatalogRepository
+from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
 
 
 class IntelligenceApiTests(unittest.TestCase):
@@ -123,6 +124,17 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual("/goform/SetOnlineDevName", candidates["items"][0]["canonical_identity"])
         self.assertEqual(200, detail_status)
         self.assertEqual({"mac", "devName"}, {x["name"] for x in detail["parameters"]})
+
+    def test_mapping_hidden_interface_route_exposes_cross_firmware_projection(self) -> None:
+        self.mapping_repository.publish(_hidden_catalog())
+
+        status, result = self.get(
+            "/api/mappings/potential-hidden-interfaces?q=hidden%20operation"
+        )
+
+        self.assertEqual(200, status)
+        self.assertEqual(1, result["total"])
+        self.assertEqual("hiddenOperation", result["items"][0]["operation_token"])
 
     def test_updates_relevance_policy_through_api(self) -> None:
         status, result = self.put(

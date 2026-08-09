@@ -619,6 +619,15 @@ def build_x5000r_shared_cgi_case():
                 "json:$.service_assembly_analysis", "assembles_static_service",
                 "service-assembly-report@v1alpha1",
             ),
+            CaseEvidenceReference(
+                "coverage:x5000r-potential-hidden-interfaces",
+                CaseEvidenceKind.COVERAGE_LEDGER,
+                "docs/firmware-mapping/samples/"
+                "m1-23-x5000r-potential-hidden-interfaces.json",
+                "0a0cb187066c05c0c05af103b89037dfc5f825b063115979e9998c739cd130b2",
+                "json:$.items", "indexes_potential_hidden_interfaces",
+                "potential-hidden-interface-report@v1alpha1",
+            ),
         ),
         claims=(
             CaseClaim(
@@ -746,6 +755,11 @@ def build_x5000r_shared_cgi_case():
                     "coverage:x5000r-service-assembly",
                 ),
             ),
+            CaseClaim(
+                "claim:x5000r-potential-hidden-interfaces",
+                "After completed frontend and set-difference coverage, ten cstecgi.cgi registrations retain exact native handlers but have no observed frontend or auxiliary-native reference; they are preserved as potential hidden interfaces with open runtime-cause obligations, not labeled as backdoors.",
+                ("coverage:x5000r-potential-hidden-interfaces",),
+            ),
         ),
         stages=(
             CaseStage(
@@ -827,6 +841,11 @@ def build_x5000r_shared_cgi_case():
                 resolves_obligations=(
                     "obligation:x5000r-static-service-assembly",
                 ),
+            ),
+            CaseStage(
+                "stage:x5000r-potential-hidden-interface-index", 12,
+                "Apply the completed-coverage gate to the residual native-only registrations and publish all ten as a cross-firmware-queryable uncertainty class without upgrading static absence into a runtime or security conclusion.",
+                ("claim:x5000r-potential-hidden-interfaces",),
             ),
         ),
         obligations=(
@@ -957,6 +976,7 @@ def build_x5000r_shared_cgi_case():
             "Instruction-level nested-dispatch example showing why a firmware map can identify the correct binary and handler where endpoint text or vulnerability prose cannot.",
             "Cross-binary protection-scope example showing why page authentication and CGI operation authorization must be mapped independently before reasoning about a vulnerability mechanism.",
             "Static service-assembly example separating boot-path configuration proof from live runtime observation.",
+            "Coverage-gated hidden-interface candidate set for cross-firmware prevalence, handler clustering, and later runtime-resolution experiments.",
         ),
         limitations=(
             "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
@@ -967,6 +987,7 @@ def build_x5000r_shared_cgi_case():
             "The deterministic Profile proves the static native control-flow edge from action=upload to setUploadSetting, but it does not prove runtime reachability, authentication state, or exploitability.",
             "The custom-auth Profile rejects a guard only within the shipped lighttpd response path and cstecgi dispatcher evidence; external proxies, runtime configuration changes, network policy, and exploitability remain outside this static claim.",
             "The service-assembly Profile proves the shipped initialization and configuration chain, not that a particular boot completed or that the process and listeners were observed live.",
+            "A missing observed frontend reference does not distinguish a hidden client, direct API, dead code, version skew, or runtime-only registration without additional evidence.",
         ),
     ))
 

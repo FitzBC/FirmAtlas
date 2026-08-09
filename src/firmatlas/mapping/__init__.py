@@ -201,6 +201,14 @@ from .native_service_assembly import (
     StaticAssemblyStatus,
     discover_mips_service_assembly,
 )
+from .hidden_interface import (
+    POTENTIAL_HIDDEN_INTERFACE_INDEX_SCHEMA_VERSION,
+    PotentialHiddenInterface,
+    PotentialHiddenInterfaceDiagnostic,
+    PotentialHiddenInterfaceIndex,
+    build_potential_hidden_interface_index,
+    project_potential_hidden_interface_document,
+)
 from .set_difference import (
     SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION,
     AttributionArtifact,
@@ -424,6 +432,12 @@ __all__ = (
     "SetDifferenceDiagnostic",
     "SetDifferencePolicy",
     "attribute_frontend_native_set_difference",
+    "POTENTIAL_HIDDEN_INTERFACE_INDEX_SCHEMA_VERSION",
+    "PotentialHiddenInterface",
+    "PotentialHiddenInterfaceDiagnostic",
+    "PotentialHiddenInterfaceIndex",
+    "build_potential_hidden_interface_index",
+    "project_potential_hidden_interface_document",
     "RESEARCH_CASE_CORPUS_VALIDATION_SCHEMA_VERSION",
     "RESEARCH_CASE_SCHEMA_VERSION",
     "CaseClaim",

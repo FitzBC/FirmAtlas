@@ -1,7 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { intelligenceApi } from '../api/client'
-import type { MappingCandidate, MappingCandidateDetail, MappingCatalogSummary } from '../types'
+import type {
+  MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
+  PotentialHiddenInterfacePage,
+} from '../types'
 import { MappingCatalogWorkspace } from './MappingCatalogWorkspace'
 
 const catalog: MappingCatalogSummary = {
@@ -38,8 +41,38 @@ const detail: MappingCandidateDetail = {
   evidence_atoms: [{ evidence_id: 'ev:1', predicate: 'constructs', object_value: candidate.canonical_identity, capability: 'constructs_request', source_span: { artifact_path: candidate.source_path, locator: 'text:1' } }],
   coverage: [{ scope: 'webroot/**/*.js', producer_kind: 'frontend', producer: 'frontend-request-producer', status: 'completed' }],
 }
+const hiddenPage: PotentialHiddenInterfacePage = {
+  items: [{
+    interface_id: 'potential-hidden-interface:1', catalog_id: catalog.catalog_id,
+    firmware_artifact_sha256: catalog.firmware_artifact_sha256,
+    operation_token: 'UploadFirmwareFile', attribution_id: 'set-difference:1',
+    registration_artifact_path: 'www/cgi-bin/cstecgi.cgi',
+    binding_ids: ['native-route-binding:1'],
+    handler_identities: ['www/cgi-bin/cstecgi.cgi@0x00419e8c'],
+    frontend_coverage_scopes: ['www/**/*.{js,html}'],
+    frontend_coverage_complete: true, runtime_reachability_verified: false,
+    interpretation: 'Native registration has no observed frontend reference.',
+    open_obligation: 'Test hidden clients, direct requests, and dead registrations.',
+    evidence_ids: ['ev:native'],
+  }],
+  total: 1, limit: 200, offset: 0,
+  summary: {
+    firmware_count: 1, handler_count: 1,
+    eligible_firmware_count: 1, coverage_gap_firmware_count: 2,
+  },
+  distributions: {
+    firmware: [{
+      firmware_artifact_sha256: catalog.firmware_artifact_sha256,
+      catalog_id: catalog.catalog_id, count: 1,
+    }],
+    artifact: [{ path: 'www/cgi-bin/cstecgi.cgi', count: 1 }],
+  },
+}
 
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  cleanup()
+  vi.restoreAllMocks()
+})
 
 it('navigates catalog, candidate and evidence levels without overlay drawers', async () => {
   vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
@@ -66,4 +99,26 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   expect(screen.getByText('constructs_request')).toBeInTheDocument()
   expect(screen.getByText('已验证 Native 绑定')).toBeInTheDocument()
   expect(screen.getByText('SetOnlineDevName')).toBeInTheDocument()
+})
+
+it('shows potential hidden interfaces as a coverage-gated cross-firmware view', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
+    items: [catalog], total: 1, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
+    items: [candidate], total: 1, limit: 100, offset: 0,
+  })
+  const hidden = vi.spyOn(intelligenceApi, 'potentialHiddenInterfaces')
+    .mockResolvedValue(hiddenPage)
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '潜在隐藏接口' }))
+
+  expect(await screen.findByText('UploadFirmwareFile')).toBeInTheDocument()
+  expect(screen.getByText('覆盖合格固件')).toBeInTheDocument()
+  expect(screen.getByText('固件信号分布')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: /查看潜在隐藏接口/ }))
+  expect(screen.getByText('不是后门结论')).toBeInTheDocument()
+  expect(screen.getByText('www/cgi-bin/cstecgi.cgi@0x00419e8c')).toBeInTheDocument()
+  expect(hidden).toHaveBeenCalled()
 })

@@ -215,7 +215,7 @@
       ]
     },
     {
-      "case_id": "research-case:25fe25e0b49deb560f7692fadc67ae662697f8123e89011f1b574afe2bff58e1",
+      "case_id": "research-case:e38d15c2dfe4cff67cca6c7f25c53336fab2dda0b98a678869e817cdcf1b0f00",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "totolink-x5000r-shared-cgi-selector-dispatch",
       "title": "TOTOLINK X5000R: one CGI endpoint, multiple logical operations",
@@ -696,6 +696,15 @@
           "locator": "json:$.service_assembly_analysis",
           "capability": "assembles_static_service",
           "producer": "service-assembly-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-potential-hidden-interfaces",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-23-x5000r-potential-hidden-interfaces.json",
+          "source_artifact_sha256": "0a0cb187066c05c0c05af103b89037dfc5f825b063115979e9998c739cd130b2",
+          "locator": "json:$.items",
+          "capability": "indexes_potential_hidden_interfaces",
+          "producer": "potential-hidden-interface-report@v1alpha1"
         }
       ],
       "claims": [
@@ -834,6 +843,14 @@
             "evidence:99bb5ef14b289639b11eabcfaaa1adf982d25de686ab4a2772fb08edc4b4b063",
             "evidence:9f9fb21c6f6d88407ddf0ada7511faccaeec40477e54ca9b26561f90284105cf",
             "coverage:x5000r-service-assembly"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-potential-hidden-interfaces",
+          "statement": "After completed frontend and set-difference coverage, ten cstecgi.cgi registrations retain exact native handlers but have no observed frontend or auxiliary-native reference; they are preserved as potential hidden interfaces with open runtime-cause obligations, not labeled as backdoors.",
+          "evidence_refs": [
+            "coverage:x5000r-potential-hidden-interfaces"
           ],
           "status": "supported"
         }
@@ -992,6 +1009,17 @@
             "obligation:x5000r-static-service-assembly"
           ],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-potential-hidden-interface-index",
+          "order": 12,
+          "interpretation": "Apply the completed-coverage gate to the residual native-only registrations and publish all ten as a cross-firmware-queryable uncertainty class without upgrading static absence into a runtime or security conclusion.",
+          "claim_ids": [
+            "claim:x5000r-potential-hidden-interfaces"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -1134,7 +1162,8 @@
         "Scope-expansion example showing three request architectures behind one CGI: direct literal request, inherited kr.request default with payload-variable selector, and multipart upload URL with nested selectors.",
         "Instruction-level nested-dispatch example showing why a firmware map can identify the correct binary and handler where endpoint text or vulnerability prose cannot.",
         "Cross-binary protection-scope example showing why page authentication and CGI operation authorization must be mapped independently before reasoning about a vulnerability mechanism.",
-        "Static service-assembly example separating boot-path configuration proof from live runtime observation."
+        "Static service-assembly example separating boot-path configuration proof from live runtime observation.",
+        "Coverage-gated hidden-interface candidate set for cross-firmware prevalence, handler clustering, and later runtime-resolution experiments."
       ],
       "limitations": [
         "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
@@ -1144,7 +1173,8 @@
         "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof.",
         "The deterministic Profile proves the static native control-flow edge from action=upload to setUploadSetting, but it does not prove runtime reachability, authentication state, or exploitability.",
         "The custom-auth Profile rejects a guard only within the shipped lighttpd response path and cstecgi dispatcher evidence; external proxies, runtime configuration changes, network policy, and exploitability remain outside this static claim.",
-        "The service-assembly Profile proves the shipped initialization and configuration chain, not that a particular boot completed or that the process and listeners were observed live."
+        "The service-assembly Profile proves the shipped initialization and configuration chain, not that a particular boot completed or that the process and listeners were observed live.",
+        "A missing observed frontend reference does not distinguish a hidden client, direct API, dead code, version skew, or runtime-only registration without additional evidence."
       ]
     }
   ],

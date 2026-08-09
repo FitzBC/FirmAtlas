@@ -318,6 +318,42 @@ export interface MappingCandidatePage {
   offset: number
 }
 
+export interface PotentialHiddenInterface {
+  interface_id: string
+  catalog_id: string
+  firmware_artifact_sha256: string
+  operation_token: string
+  attribution_id: string
+  registration_artifact_path: string
+  binding_ids: string[]
+  handler_identities: string[]
+  frontend_coverage_scopes: string[]
+  frontend_coverage_complete: boolean
+  runtime_reachability_verified: boolean
+  interpretation: string
+  open_obligation: string
+  evidence_ids: string[]
+}
+
+export interface PotentialHiddenInterfacePage {
+  items: PotentialHiddenInterface[]
+  total: number
+  limit: number
+  offset: number
+  summary: {
+    firmware_count: number
+    handler_count: number
+    eligible_firmware_count: number
+    coverage_gap_firmware_count: number
+  }
+  distributions: {
+    firmware: Array<{
+      firmware_artifact_sha256: string; catalog_id: string; count: number
+    }>
+    artifact: Array<{ path: string; count: number }>
+  }
+}
+
 export interface SemanticInterfaceObservation {
   value: string
   kind: string

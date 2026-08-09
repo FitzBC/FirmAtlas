@@ -13,6 +13,7 @@ from firmatlas.mapping import (
     assemble_discovery_catalog,
     discover_frontend_requests,
 )
+from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
 from firmatlas.mapping.repository import (
     CatalogConflictError,
     DiscoveryCatalogRepository,
@@ -125,6 +126,32 @@ class DiscoveryCatalogRepositoryTests(unittest.TestCase):
             rendered = output.getvalue()
             self.assertIn(self.catalog.catalog_id, rendered)
             self.assertIn('"created": true', rendered)
+
+    def test_potential_hidden_interfaces_are_projected_and_queryable(self):
+        catalog = _hidden_catalog()
+        self.repository.publish(catalog)
+
+        result = self.repository.query_potential_hidden_interfaces(
+            query="hidden operation"
+        )
+
+        self.assertEqual(1, result["total"])
+        self.assertEqual(1, result["summary"]["firmware_count"])
+        self.assertEqual(
+            "hiddenOperation", result["items"][0]["operation_token"]
+        )
+        self.assertFalse(result["items"][0]["runtime_reachability_verified"])
+        self.assertEqual(1, result["distributions"]["firmware"][0]["count"])
+
+    def test_latest_incomplete_catalog_suppresses_stale_hidden_candidates(self):
+        self.repository.publish(_hidden_catalog())
+        self.repository.publish(_hidden_catalog(frontend_partial=True))
+
+        result = self.repository.query_potential_hidden_interfaces()
+
+        self.assertEqual(0, result["total"])
+        self.assertEqual(0, result["summary"]["eligible_firmware_count"])
+        self.assertEqual(1, result["summary"]["coverage_gap_firmware_count"])
 
 
 if __name__ == "__main__":

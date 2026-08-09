@@ -24,6 +24,7 @@ import type {
   MappingCatalogSummary,
   MappingCandidatePage,
   MappingCandidateDetail,
+  PotentialHiddenInterfacePage,
 } from '../types'
 
 interface Envelope<T> {
@@ -172,6 +173,13 @@ export const intelligenceApi = {
     request<{ items: MappingCatalogSummary[]; total: number; limit: number; offset: number }>(
       '/api/mappings/catalogs?page_size=50', { signal },
     ),
+  potentialHiddenInterfaces: (query = '', signal?: AbortSignal) => {
+    const params = new URLSearchParams({ page_size: '200' })
+    if (query) params.set('q', query)
+    return request<PotentialHiddenInterfacePage>(
+      `/api/mappings/potential-hidden-interfaces?${params}`, { signal },
+    )
+  },
   mappingCandidates: (
     catalogId: string, filters: { query?: string; kind?: string }, signal?: AbortSignal,
   ) => {

@@ -494,6 +494,18 @@ class ResearchCaseTests(unittest.TestCase):
             coverage["source_artifact_sha256"],
             hashlib.sha256(report_path.read_bytes()).hexdigest(),
         )
+        hidden_coverage = next(
+            item for item in case["evidence"]
+            if item["evidence_ref"]
+            == "coverage:x5000r-potential-hidden-interfaces"
+        )
+        hidden_report_path = Path(hidden_coverage["source_path"])
+        self.assertTrue(hidden_report_path.is_file())
+        self.assertEqual(
+            hidden_coverage["source_artifact_sha256"],
+            hashlib.sha256(hidden_report_path.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(12, case["stages"][-1]["order"])
         expanded_coverage = next(
             item for item in case["evidence"]
             if item["evidence_ref"]

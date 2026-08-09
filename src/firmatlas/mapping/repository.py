@@ -12,6 +12,7 @@ import threading
 from typing import Any, Optional
 
 from .discovery_catalog import DiscoveryCatalog
+from .hidden_interface import project_potential_hidden_interface_document
 
 
 class CatalogConflictError(RuntimeError):
@@ -84,7 +85,88 @@ class DiscoveryCatalogRepository:
                 );
                 CREATE INDEX IF NOT EXISTS idx_mapping_candidate_kind
                     ON mapping_discovery_candidates(catalog_id, candidate_kind, canonical_identity);
+                CREATE TABLE IF NOT EXISTS mapping_hidden_interface_indexes (
+                    catalog_id TEXT PRIMARY KEY,
+                    firmware_artifact_sha256 TEXT NOT NULL,
+                    coverage_status TEXT NOT NULL,
+                    item_count INTEGER NOT NULL,
+                    diagnostics_json TEXT NOT NULL,
+                    FOREIGN KEY(catalog_id) REFERENCES mapping_discovery_catalogs(catalog_id)
+                        ON DELETE CASCADE
+                );
+                CREATE TABLE IF NOT EXISTS mapping_potential_hidden_interfaces (
+                    interface_id TEXT PRIMARY KEY,
+                    catalog_id TEXT NOT NULL,
+                    firmware_artifact_sha256 TEXT NOT NULL,
+                    operation_token TEXT NOT NULL,
+                    registration_artifact_path TEXT NOT NULL,
+                    search_text TEXT NOT NULL,
+                    item_json TEXT NOT NULL,
+                    FOREIGN KEY(catalog_id) REFERENCES mapping_discovery_catalogs(catalog_id)
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_mapping_hidden_interface_catalog
+                    ON mapping_potential_hidden_interfaces(catalog_id, operation_token);
+                CREATE INDEX IF NOT EXISTS idx_mapping_hidden_interface_firmware
+                    ON mapping_potential_hidden_interfaces(
+                        firmware_artifact_sha256, registration_artifact_path
+                    );
                 """
+            )
+            rows = self._connection.execute(
+                """SELECT c.document_json FROM mapping_discovery_catalogs c
+                   LEFT JOIN mapping_hidden_interface_indexes h
+                     ON h.catalog_id = c.catalog_id
+                   WHERE h.catalog_id IS NULL"""
+            ).fetchall()
+            for row in rows:
+                self._replace_hidden_interface_projection(
+                    json.loads(row["document_json"])
+                )
+
+    def _replace_hidden_interface_projection(self, document: dict) -> None:
+        index = project_potential_hidden_interface_document(document)
+        self._connection.execute(
+            "DELETE FROM mapping_potential_hidden_interfaces WHERE catalog_id = ?",
+            (index.catalog_id,),
+        )
+        self._connection.execute(
+            """INSERT OR REPLACE INTO mapping_hidden_interface_indexes (
+                catalog_id, firmware_artifact_sha256, coverage_status,
+                item_count, diagnostics_json
+            ) VALUES (?, ?, ?, ?, ?)""",
+            (
+                index.catalog_id,
+                index.firmware_artifact_sha256,
+                index.coverage_status.value,
+                len(index.items),
+                _encoded([item.__dict__ for item in index.diagnostics]),
+            ),
+        )
+        for item in index.items:
+            value = item.__dict__
+            searchable = " ".join((
+                item.operation_token,
+                item.registration_artifact_path,
+                " ".join(item.handler_identities),
+                item.interpretation,
+                item.open_obligation,
+            ))
+            self._connection.execute(
+                """INSERT INTO mapping_potential_hidden_interfaces (
+                    interface_id, catalog_id, firmware_artifact_sha256,
+                    operation_token, registration_artifact_path,
+                    search_text, item_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    item.interface_id,
+                    item.catalog_id,
+                    item.firmware_artifact_sha256,
+                    item.operation_token,
+                    item.registration_artifact_path,
+                    _search_text(searchable),
+                    _encoded(value),
+                ),
             )
 
     def publish(self, catalog: DiscoveryCatalog) -> dict:
@@ -168,6 +250,7 @@ class DiscoveryCatalogRepository:
                         len(touching) + len(related_deep), open_count, _encoded(candidate),
                     ),
                 )
+            self._replace_hidden_interface_projection(document)
         return {"catalog_id": catalog_id, "created": True, "content_sha256": digest}
 
     def list_catalogs(self, limit: int = 50, offset: int = 0) -> dict:
@@ -305,4 +388,108 @@ class DiscoveryCatalogRepository:
                 x for x in document.get("evidence_atoms", []) if x.get("evidence_id") in evidence_ids
             ],
             "coverage": document.get("coverage", []),
+        }
+
+    def query_potential_hidden_interfaces(
+        self, query: str = "", firmware_sha256: str = "",
+        limit: int = 100, offset: int = 0,
+    ) -> dict:
+        """Query the latest conservative hidden-interface projection per firmware."""
+
+        limit, offset = max(1, min(limit, 200)), max(0, offset)
+        with self._lock:
+            index_rows = self._connection.execute(
+                """SELECT h.*, c.published_at
+                   FROM mapping_hidden_interface_indexes h
+                   JOIN mapping_discovery_catalogs c ON c.catalog_id=h.catalog_id
+                   ORDER BY c.published_at DESC, c.catalog_id DESC"""
+            ).fetchall()
+            latest = {}
+            for row in index_rows:
+                latest.setdefault(row["firmware_artifact_sha256"], row)
+            eligible_ids = tuple(
+                row["catalog_id"] for row in latest.values()
+                if row["coverage_status"] == "completed"
+                and (not firmware_sha256
+                     or row["firmware_artifact_sha256"] == firmware_sha256)
+            )
+            rows = []
+            total = 0
+            firmware_distribution = []
+            artifact_distribution = []
+            firmware_count = 0
+            handler_count = 0
+            if eligible_ids:
+                placeholders = ",".join("?" for _ in eligible_ids)
+                clauses = ["catalog_id IN ({})".format(placeholders)]
+                values = list(eligible_ids)
+                for token in _search_text(query).split():
+                    clauses.append("search_text LIKE ?")
+                    values.append("%{}%".format(token))
+                where = " AND ".join(clauses)
+                total = self._connection.execute(
+                    "SELECT COUNT(*) FROM mapping_potential_hidden_interfaces "
+                    "WHERE {}".format(where),
+                    values,
+                ).fetchone()[0]
+                rows = self._connection.execute(
+                    """SELECT * FROM mapping_potential_hidden_interfaces
+                       WHERE {}
+                       ORDER BY firmware_artifact_sha256, operation_token,
+                                interface_id LIMIT ? OFFSET ?""".format(where),
+                    (*values, limit, offset),
+                ).fetchall()
+                firmware_distribution = self._connection.execute(
+                    """SELECT firmware_artifact_sha256, catalog_id, COUNT(*) count
+                       FROM mapping_potential_hidden_interfaces WHERE {}
+                       GROUP BY firmware_artifact_sha256, catalog_id
+                       ORDER BY count DESC, firmware_artifact_sha256, catalog_id""".format(
+                        where
+                    ),
+                    values,
+                ).fetchall()
+                artifact_distribution = self._connection.execute(
+                    """SELECT registration_artifact_path path, COUNT(*) count
+                       FROM mapping_potential_hidden_interfaces WHERE {}
+                       GROUP BY registration_artifact_path
+                       ORDER BY count DESC, registration_artifact_path""".format(where),
+                    values,
+                ).fetchall()
+                firmware_count = self._connection.execute(
+                    """SELECT COUNT(DISTINCT firmware_artifact_sha256)
+                       FROM mapping_potential_hidden_interfaces WHERE {}""".format(where),
+                    values,
+                ).fetchone()[0]
+                handler_count = self._connection.execute(
+                    """SELECT COUNT(DISTINCT handlers.value)
+                       FROM mapping_potential_hidden_interfaces h,
+                            json_each(h.item_json, '$.handler_identities') handlers
+                       WHERE {}""".format(where),
+                    values,
+                ).fetchone()[0]
+        items = [json.loads(row["item_json"]) for row in rows]
+        current_rows = tuple(latest.values())
+        return {
+            "items": items,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "summary": {
+                "firmware_count": firmware_count,
+                "handler_count": handler_count,
+                "eligible_firmware_count": sum(
+                    row["coverage_status"] == "completed" for row in current_rows
+                ),
+                "coverage_gap_firmware_count": sum(
+                    row["coverage_status"] != "completed" for row in current_rows
+                ),
+            },
+            "distributions": {
+                "firmware": [
+                    dict(row) for row in firmware_distribution
+                ],
+                "artifact": [
+                    dict(row) for row in artifact_distribution
+                ],
+            },
         }

@@ -1,8 +1,14 @@
-import { Activity, Braces, ChevronRight, CircleDot, Database, FileCode2, Search, Waypoints } from 'lucide-react'
+import {
+  Activity, Binary, Braces, ChevronRight, CircleDot, Database, EyeOff,
+  FileCode2, Radar, Search, ShieldQuestion, Waypoints,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { intelligenceApi } from '../api/client'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
-import type { MappingCandidate, MappingCandidateDetail, MappingCatalogSummary } from '../types'
+import type {
+  MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
+  PotentialHiddenInterface, PotentialHiddenInterfacePage,
+} from '../types'
 
 const kinds = [
   ['', '全部能力'], ['request_interface', '请求接口'], ['web_configuration', 'Web 配置'],
@@ -22,7 +28,12 @@ export function MappingCatalogWorkspace() {
   const [kind, setKind] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [view, setView] = useState<'catalog' | 'hidden'>('catalog')
+  const [hiddenQuery, setHiddenQuery] = useState('')
+  const [hiddenPage, setHiddenPage] = useState<PotentialHiddenInterfacePage | null>(null)
+  const [selectedHidden, setSelectedHidden] = useState<PotentialHiddenInterface | null>(null)
   const debouncedQuery = useDebouncedValue(query, 180)
+  const debouncedHiddenQuery = useDebouncedValue(hiddenQuery, 180)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -53,6 +64,26 @@ export function MappingCatalogWorkspace() {
     return () => controller.abort()
   }, [catalogId, debouncedQuery, kind])
 
+  useEffect(() => {
+    if (view !== 'hidden') return
+    const controller = new AbortController()
+    setLoading(true)
+    void intelligenceApi.potentialHiddenInterfaces(
+      debouncedHiddenQuery, controller.signal,
+    ).then((page) => {
+      setHiddenPage(page)
+      setSelectedHidden((current) => page.items.some(
+        (item) => item.interface_id === current?.interface_id,
+      ) ? current : null)
+      setError(null)
+    }).catch((caught) => {
+      if (!controller.signal.aborted) {
+        setError(caught instanceof Error ? caught.message : '潜在隐藏接口加载失败')
+      }
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    return () => controller.abort()
+  }, [view, debouncedHiddenQuery])
+
   const activeCatalog = useMemo(
     () => catalogs.find((item) => item.catalog_id === catalogId), [catalogId, catalogs],
   )
@@ -75,12 +106,21 @@ export function MappingCatalogWorkspace() {
           <h1 className="mt-3 text-[30px] font-semibold tracking-[-0.045em] text-white sm:text-[38px]">通信测绘目录</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">从前端请求、Web 配置、脚本后端与原生提示中发布可追溯候选，保留覆盖状态与未决分析义务。</p>
         </div>
-        {activeCatalog && <StatusPill catalog={activeCatalog} />}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded-xl border border-white/[0.07] bg-black/20 p-1">
+            <button type="button" onClick={() => setView('catalog')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'catalog' ? 'bg-white/[0.08] text-white' : 'text-slate-600 hover:text-slate-300'}`}>目录浏览</button>
+            <button type="button" onClick={() => setView('hidden')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'hidden' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>潜在隐藏接口</button>
+          </div>
+          {view === 'catalog' && activeCatalog && <StatusPill catalog={activeCatalog} />}
+        </div>
       </header>
 
       {error && <div role="alert" className="mb-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
 
-      {!loading && catalogs.length === 0 ? <EmptyCatalog /> : (
+      {view === 'hidden' ? <HiddenInterfaceWorkspace
+        page={hiddenPage} query={hiddenQuery} onQuery={setHiddenQuery}
+        selected={selectedHidden} onSelect={setSelectedHidden} loading={loading}
+      /> : !loading && catalogs.length === 0 ? <EmptyCatalog /> : (
         <div className="grid min-h-[640px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 backdrop-blur-xl xl:grid-cols-[260px_minmax(360px,0.9fr)_minmax(420px,1.1fr)]">
           <aside className="border-b border-white/[0.07] p-4 xl:border-b-0 xl:border-r">
             <div className="eyebrow"><Database size={12} /> Catalog versions</div>
@@ -118,6 +158,55 @@ export function MappingCatalogWorkspace() {
     </section>
   )
 }
+
+function HiddenInterfaceWorkspace({ page, query, onQuery, selected, onSelect, loading }: {
+  page: PotentialHiddenInterfacePage | null
+  query: string
+  onQuery: (value: string) => void
+  selected: PotentialHiddenInterface | null
+  onSelect: (value: PotentialHiddenInterface) => void
+  loading: boolean
+}) {
+  const summary = page?.summary
+  const maxFirmware = Math.max(1, ...(page?.distributions.firmware.map((item) => item.count) ?? [1]))
+  return <div className="detail-enter space-y-4">
+    {/* Design rationale: coverage gates are shown before candidate volume; a stable three-column
+        investigation surface keeps distribution, ranking, and proof readable without drawers. */}
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <SignalMetric icon={<EyeOff size={16} />} label="潜在隐藏接口" value={page?.total ?? 0} />
+      <SignalMetric icon={<Radar size={16} />} label="覆盖合格固件" value={summary?.eligible_firmware_count ?? 0} />
+      <SignalMetric icon={<Binary size={16} />} label="关联 Handler" value={summary?.handler_count ?? 0} />
+      <SignalMetric icon={<ShieldQuestion size={16} />} label="覆盖缺口固件" value={summary?.coverage_gap_firmware_count ?? 0} muted />
+    </div>
+    <div className="grid min-h-[610px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0f17]/80 backdrop-blur-xl xl:grid-cols-[280px_minmax(360px,0.9fr)_minmax(420px,1.1fr)]">
+      <aside className="border-b border-white/[0.07] p-5 xl:border-b-0 xl:border-r">
+        <div className="eyebrow"><Radar size={12} /> 固件信号分布</div>
+        <p className="mt-2 text-[10px] leading-5 text-slate-600">仅统计每个固件最新且前端、Native 差集覆盖完整的目录。</p>
+        <div className="mt-5 space-y-4">
+          {page?.distributions.firmware.map((item) => <div key={item.catalog_id}>
+            <div className="flex items-center justify-between gap-2 text-[9px]"><span className="truncate font-mono text-slate-500">{item.firmware_artifact_sha256.slice(0, 12)}…</span><span className="font-mono text-signal">{item.count}</span></div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.05]"><div className="h-full rounded-full bg-gradient-to-r from-cyan/60 to-signal shadow-[0_0_12px_rgba(183,243,107,0.3)] transition-all" style={{ width: `${Math.max(8, item.count / maxFirmware * 100)}%` }} /></div>
+          </div>)}
+          {!page?.distributions.firmware.length && <Muted />}
+        </div>
+        <div className="mt-7 border-t border-white/[0.06] pt-5"><div className="text-[9px] uppercase tracking-[0.14em] text-slate-600">处理主体</div><div className="mt-3 space-y-2">{page?.distributions.artifact.map((item) => <div key={item.path} className="rounded-lg border border-white/[0.05] bg-white/[0.02] p-2.5"><div className="break-all font-mono text-[9px] text-cyan">{item.path}</div><div className="mt-1 text-[9px] text-slate-600">{item.count} 个注册信号</div></div>)}</div></div>
+      </aside>
+      <div className="border-b border-white/[0.07] xl:border-b-0 xl:border-r">
+        <div className="border-b border-white/[0.07] p-4"><label className="search-field"><Search size={15} /><input aria-label="搜索潜在隐藏接口" placeholder="搜索 operation、handler 或二进制…" value={query} onChange={(event) => onQuery(event.target.value)} /></label><div className="mt-3 flex items-center justify-between text-[9px] text-slate-600"><span>注册存在 · 前端引用未观察</span><span>{page?.total ?? 0} signals</span></div></div>
+        <div className="max-h-[520px] overflow-y-auto p-2">
+          {loading && <div className="p-8 text-center text-xs text-slate-600">正在计算跨固件信号…</div>}
+          {!loading && !page?.items.length && <div className="p-8 text-center text-xs text-slate-600">当前完整覆盖目录中没有该类信号</div>}
+          {page?.items.map((item) => <button key={item.interface_id} type="button" aria-label={`查看潜在隐藏接口 ${item.operation_token}`} onClick={() => onSelect(item)} className={`group mb-1 w-full rounded-xl border p-3 text-left transition ${selected?.interface_id === item.interface_id ? 'border-signal/25 bg-signal/[0.06]' : 'border-transparent hover:border-white/[0.06] hover:bg-white/[0.025]'}`}><div className="flex items-start gap-3"><div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-signal/[0.07] text-signal"><EyeOff size={14} /></div><div className="min-w-0 flex-1"><div className="truncate font-mono text-xs text-slate-200">{item.operation_token}</div><div className="mt-1 truncate font-mono text-[9px] text-cyan/60">{item.registration_artifact_path}</div><div className="mt-2 flex gap-2 text-[8px] uppercase tracking-[0.08em] text-slate-600"><span>{item.handler_identities.length} handler</span><span>{item.evidence_ids.length} evidence</span></div></div><ChevronRight size={14} className="mt-2 text-slate-700 transition group-hover:translate-x-0.5 group-hover:text-signal" /></div></button>)}
+        </div>
+      </div>
+      <div className="min-w-0 bg-[radial-gradient(circle_at_80%_10%,rgba(183,243,107,0.055),transparent_32%)]">{selected ? <HiddenInterfaceEvidence item={selected} /> : <div className="grid h-full min-h-[420px] place-items-center p-8 text-center"><div><EyeOff className="mx-auto text-signal/35" size={36} /><h2 className="mt-4 text-sm font-medium text-slate-300">选择一个潜在隐藏接口</h2><p className="mt-2 max-w-xs text-xs leading-5 text-slate-600">查看注册处理主体、handler、前端覆盖范围与仍需验证的运行时原因。</p></div></div>}</div>
+    </div>
+  </div>
+}
+
+function SignalMetric({ icon, label, value, muted = false }: { icon: React.ReactNode; label: string; value: number; muted?: boolean }) { return <div className="rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-transparent p-4"><div className={`flex items-center gap-2 text-[10px] ${muted ? 'text-slate-600' : 'text-signal'}`}>{icon}<span className="uppercase tracking-[0.12em]">{label}</span></div><div className="mt-3 font-mono text-2xl font-semibold text-white">{value}</div></div> }
+
+function HiddenInterfaceEvidence({ item }: { item: PotentialHiddenInterface }) { return <article className="detail-enter max-h-[640px] overflow-y-auto p-5 sm:p-6"><div className="eyebrow"><ShieldQuestion size={12} /> Potential hidden interface</div><h2 className="mt-3 break-all font-mono text-xl font-semibold text-white">{item.operation_token}</h2><div className="mt-4 rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-3"><div className="text-[10px] font-semibold text-amber-300">不是后门结论</div><p className="mt-1 text-[10px] leading-5 text-slate-500">该标签只说明原生注册已验证、声明的前端覆盖已完成，但未观察到引用；动态客户端、直连请求、废弃代码与运行时注册仍需验证。</p></div><EvidenceSection title="注册与处理主体"><div className="rounded-lg border border-cyan/15 bg-cyan/[0.035] p-3"><div className="break-all font-mono text-xs text-cyan">{item.registration_artifact_path}</div><div className="mt-3 space-y-2">{item.handler_identities.map((handler) => <div key={handler} className="break-all rounded-md bg-black/20 px-2.5 py-2 font-mono text-[10px] text-signal">{handler}</div>)}</div></div></EvidenceSection><EvidenceSection title="前端覆盖范围">{item.frontend_coverage_scopes.map((scope) => <div key={scope} className="rounded-lg border border-white/[0.06] p-3 font-mono text-[10px] text-slate-400">{scope}</div>)}</EvidenceSection><EvidenceSection title="未决原因义务"><div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-[10px] leading-5 text-slate-500">{item.open_obligation}</div></EvidenceSection><EvidenceSection title="证据身份"><div className="space-y-1.5">{item.evidence_ids.map((id) => <div key={id} className="break-all font-mono text-[8px] leading-4 text-slate-700">{id}</div>)}</div></EvidenceSection></article> }
 
 function StatusPill({ catalog }: { catalog: MappingCatalogSummary }) {
   return <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3"><Activity size={16} className="text-signal" /><div><div className="text-[9px] uppercase tracking-[0.16em] text-slate-600">Latest coverage</div><div className="mt-1 text-xs text-slate-300">{catalog.coverage_status} · {catalog.candidate_count} candidates</div><div className="mt-1 text-[9px] uppercase tracking-[0.1em] text-slate-600">Inventory {catalog.source_inventory_coverage_status}</div></div></div>

@@ -29,9 +29,10 @@
 - [M1-18 X5000R frontend/native 集合差异](./m1-18-x5000r-set-difference.json)：将 76 个 Frontend-only 与 14 个 Native-only operation 分为 38/38/3/1/10 五类证据形状，保留精确 token、suffix 变体负例和开放因果义务；进度说明见 [M1-18 记录](../progress/2026-08-09-m1-18-x5000r-set-difference.md)。
 - [M1-19 X5000R 扩展前端范围](./m1-19-x5000r-expanded-frontend.json)：加入 `kr.js`、`wan_ie.html` 与 `advance/config.html`，恢复默认 URL + payload variable 与 multipart 两级 selector，使 operation 从 199 增至 203、范围缺口从 3 降至 0、差集变为 77/11；进度说明见 [M1-19 记录](../progress/2026-08-09-m1-19-x5000r-expanded-frontend.md)。
 - [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；M1-13 重放后上游 Inventory 与 Catalog 均为 completed。
-- [M1-12 通信架构 research-case corpus](./m1-12-research-case-corpus.json)：保存 AC9 split web stack 与 X5000R shared-CGI 的内容寻址证据时间线；X5000R 当前已演进到第 11 阶段，包含差集反向驱动范围扩展、三种请求架构、nested upload dispatch、请求保护范围排除与静态服务装配证明。
+- [M1-12 通信架构 research-case corpus](./m1-12-research-case-corpus.json)：保存 AC9 split web stack 与 X5000R shared-CGI 的内容寻址证据时间线；X5000R 当前已演进到第 12 阶段，包含差集反向驱动范围扩展、三种请求架构、nested upload dispatch、请求保护范围、静态服务装配与潜在隐藏接口集合。
 - [M1-21 X5000R 请求保护范围](./m1-21-x5000r-request-protection.json)：跨 `usr/sbin/lighttpd` 与 `www/cgi-bin/cstecgi.cgi` 保存 suffix/path gate、SESSION_ID 会话验证、302 enforcement、CGI 排除分类和 nested upload handler 链；进度说明见 [M1-21 记录](../progress/2026-08-09-m1-21-x5000r-request-protection.md)。
 - [M1-22 X5000R 静态服务装配](./m1-22-x5000r-service-assembly.json)：从 `sbin/rc:init_router` 重放 service group、lighttpd argv/config、listener、document root、CGI namespace 与目标 ELF 的十一段证据；进度说明见 [M1-22 记录](../progress/2026-08-09-m1-22-x5000r-service-assembly.md)。
+- [M1-23 X5000R 潜在隐藏接口](./m1-23-x5000r-potential-hidden-interfaces.json)：在 Source Inventory、Frontend 和 Set Difference completed 门槛下保存 10 条 native registration + handler + zero-observed-reference 信号，并固定非后门/非运行时结论边界；进度说明见 [M1-23 记录](../progress/2026-08-09-m1-23-potential-hidden-interfaces.md)。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

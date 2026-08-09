@@ -120,6 +120,15 @@ def create_handler(
                 return HTTPStatus.OK, mappings.list_catalogs(
                     limit=page_size, offset=(page - 1) * page_size,
                 )
+            if method == "GET" and path == "/api/mappings/potential-hidden-interfaces":
+                page_size = max(1, min(_integer(query, "page_size", 100), 200))
+                page = max(1, _integer(query, "page", 1))
+                return HTTPStatus.OK, mappings.query_potential_hidden_interfaces(
+                    query=_one(query, "q"),
+                    firmware_sha256=_one(query, "firmware"),
+                    limit=page_size,
+                    offset=(page - 1) * page_size,
+                )
             mapping_prefix = "/api/mappings/catalogs/"
             if method == "GET" and path.startswith(mapping_prefix):
                 remainder = path[len(mapping_prefix):]

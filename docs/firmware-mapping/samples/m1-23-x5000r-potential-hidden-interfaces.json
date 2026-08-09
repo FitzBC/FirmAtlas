@@ -1,0 +1,320 @@
+{
+  "schema_version": "firmatlas.mapping.x5000r-potential-hidden-interfaces/v1alpha1",
+  "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+  "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+  "coverage": {
+    "status": "completed",
+    "frontend_scopes": [
+      "X5000R:expanded-frontend-scope/v1"
+    ],
+    "diagnostics": []
+  },
+  "summary": {
+    "potential_hidden_interface_count": 10,
+    "registration_artifact_count": 1,
+    "handler_count": 10,
+    "runtime_verified_count": 0
+  },
+  "artifact_distribution": [
+    {
+      "path": "www/cgi-bin/cstecgi.cgi",
+      "count": 10
+    }
+  ],
+  "items": [
+    {
+      "interface_id": "potential-hidden-interface:356b0fc5c0711aab66a188420d67b337b30b426dcce65a3674590fa52988beb4",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "UploadCustomModule",
+      "attribution_id": "set-difference:2c52adab1ec92a15a5a16070709f11425115aea94811159db9f9803a8b761605",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:5dfeca0d7421d8ebd9fe3a2359b2156b410f2ed3f4a63997bd22938d152f9f3f"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x0041e518"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:13b2a6816c0c829ed060a5939a7ea682ee2f392362236703fd0e4fcceabb8e27",
+        "evidence:32402320725f0096da7b5b0ca91388112870d899c7a13f8a2617c0d603871536",
+        "evidence:55009980115310a9da4be32d4c70fc2c63ad0f43827136544602989c28ae0d48",
+        "evidence:d70cf4fe2ae3bda16e3c2011a7c88106e749c83f90a9e19c0706b880e241a3aa"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:f193dc3604a800f31b386d07e3442e8eed865f0a36c798fab64fbc9ab2096f03",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "UploadFirmwareFile",
+      "attribution_id": "set-difference:1d6b126e7b6a793536bea283ea6607400172a5a5ea3ae5d319e486a4a5bc1b16",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:161b02bb2f8fddbcd260eec9387bf873811eddd03cc095f8a6026ed3b32cf38e"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x0042c580"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:60a89d75e20ba3394ee3c536af0627d0e008bf2ca94dd6cc029c433e9f679367",
+        "evidence:a86f4d042a5f87de7a60cb7233b99f9a142528b458b7f9695dcc8fd0524fb3b8",
+        "evidence:f27a14c98f82d2fd10a2588b5a4983eb5453d937c8656ed59d9f97eccecc3aa4",
+        "evidence:f46d35bce129edaa13fb1f1ce95f32aac0b358e4d8d62e238308341d57c0ea31"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:c107649f5a558b6e72524dc674845c1a60dc3fd367ec27acb81d9a333f07dc09",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "delIpsecNet2NetCfg",
+      "attribution_id": "set-difference:fae35eb9c42f826c0e46ce31beefc9179c81c07a5fa886127ab992a131713cac",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:1c1eebf5223299826b5e48ca19e4f45151bae495194e5f14acf7a809f5641c38"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x0041b67c"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:45c1c314f02a9f6e00f05e3e87e45c3e303c583e8687df20bbdb1b0396e1179b",
+        "evidence:6f8e950d663bb8f2477fa5d9bc33ab4634b94f6eaa54c1bd96900e708991a4a3",
+        "evidence:c1f6cb799320d6577f3fad57aaa4bd6f4a77441b76e72192632df5467866bf6e",
+        "evidence:f048ce133c3b794166a2809d65a78480fac9755676532104813ec441a2e4e8ea"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:0fc6aa84c82fb75f199e978797b81fc68c2cf87fdc0820a267e3010d63ea4cfb",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "getCrpcConfig",
+      "attribution_id": "set-difference:4f47572a3382e526d4287d62590b8087be2eccc0d26dac3f9872cdc646b86e8e",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:4d1ab7e0f7166aeebec21a39d5e96e471480249a3edf970b537cfaae83559ef0"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x00411600"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:09808dc7d57425ad746a67ac29df35b3b188b487ef721821fe1a30a0ba7e5dca",
+        "evidence:2dea6e4b302a87930b017fe4a51694810349dbb38ef35561e2cddd7c703e3a08",
+        "evidence:b41b67d19a612f4e5ccfd7c4d1e95c4210b1a3647331c4c2e7ca65ed4f6e050d",
+        "evidence:c8fc39dc75341d7832fae030b6361199b5165e46ce90306e2b0be25ba4253ba5"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:f3457192177a98fddeecf60a6857d3d2451de8ba1408bd2293198acde1b9bfc5",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "getIpsecHost2NetCfg",
+      "attribution_id": "set-difference:30be4f29f75e646076c04623191f52eaba50f4bb887891f8e8cbc0833aad5039",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:3b16bd13cdc90c784ea858ba4c0703cd6ec2a808d6f2c670926130804f8a025a"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x00401fb0"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:283674a02402346100cc9c2d927e062803f8a1fc808ac4ae61869dbecc512efc",
+        "evidence:97e017987482c9e8560807733fd62f118298ec061f944c3cdb85b9876e7ba88a",
+        "evidence:d5cc92d65839a8d9e11d86d7f9858d8fd196f4463e68eb583b821dc2732b8904",
+        "evidence:eae80a5cc5bea54e8f0bdca55ec35f709401cc841125393538f41be4fdc2cf9a"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:06ce6da62e6989f79d20009e3cb87ca8b59032daa5f595d3b5a9ca52aeb93edf",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "getIpsecL2tpXauthCfg",
+      "attribution_id": "set-difference:ff8bd3012b8fd3b144931660512d31df97148f62d31f73a450030ac11a2a0dec",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:4c2cb648ab4443b66d95714385bfbecaf6192dc528a2df5acaff93cbcf05fd6b"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x00401dac"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:a94872f856c1679076da406db7826e14018f12a9f3ea9f49227964383450de09",
+        "evidence:b3e95077c54d9175fb2d23267bf9d5a77300e2f9936a15069eee5caf8fff002a",
+        "evidence:b56c35a5870ad086e002133939400c325e229a364f62fdc125bc30925c25e46b",
+        "evidence:d708c8f1addfb406588e409cae5b556d2ebd7dbe69a62ab5f72dc8ee68d91a46"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:0682ad8af952eb83e4ca409931917f0455a3e0ee9ac2f7a4260d0e1e7039af91",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "getIpsecNet2NetCfg",
+      "attribution_id": "set-difference:514d689a54ac1a8f4ea385ff7b098f6d5d45dd17b05bd60e16442f8171c07e05",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:0ce7b81e7603abd3e3c12b802c038831731321e8aef5d3830778ff8c82d3c96f"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x00403a68"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:1f9728e19ea96c9f73ba0f0f911a864a79a3afe59b2cc5ca66c3a2c68103c93a",
+        "evidence:24b91658c7230b3de32b985f5b460dba0336ca373da2c71e6d5bd0d331e6f8ce",
+        "evidence:4500e15b63590ae9312c33b3468e596f06f30032351c2a38c54cd9cf650ea16d",
+        "evidence:eaef83d1db1fe4b2db4b7976540079c6ff9f939ba28367ddb5da8e168e86861d"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:f2fb84d8bcb33d120055023b6e566bc4296c7918b9982bc40cb53add3ab21228",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "setIpsecHost2NetCfg",
+      "attribution_id": "set-difference:10e9b68580ae37d1c3dd7368b78c909159b9402fcc15e3c81f20cf6ba5686f42",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:a55c58d2e48a922abb895e1b7dea51956c5b8426bccaa12691115e0fc3e53adf"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x00419e8c"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:9671d2384d5893c873464d855749ae4b71754911e6d0da0269e63350bbc7283a",
+        "evidence:9fddbab253009d34eb92e8c318a33829dea7635b3a8bd1c68d8335a586518f40",
+        "evidence:fa6191d3c65fa878be80b9c2f28551750b575a9a5dd8296cf91e2cac7324b591",
+        "evidence:fc0ed67ee557b3f51e975554bfa68d888f84de67689eb1f419fa4d487a538dee"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:e996263418cfde26ed76d03cf3067cc2dd843aa0247be60d6c412df475476385",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "setIpsecL2tpXauthCfg",
+      "attribution_id": "set-difference:c5e0a87cadb9a101eea6094a09392e06c766f908c56a61405243204557f639dd",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:7e2baba0cf787c2316c36c934b2d34c4944827f7e9a13ab3450feda539222eaf"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x00419bcc"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:c51f2a87f535df2af8a3058807a67a9d025d7e9cc04914239e99e3216bfce1fd",
+        "evidence:dac93eb704526a85fc8b183e1f2cd9ea3dc600153299604d8b88741534ac22f4",
+        "evidence:e1fa990f000959254abb9aff423074a1950c2eb93a844e7a3594992d39e629b0",
+        "evidence:ebdc6840b806498aad77c460cb9cf476081939197081a1b4cee44b67c92601c0"
+      ]
+    },
+    {
+      "interface_id": "potential-hidden-interface:51a86be4092aee4a09c5083ee8fb338182c4530bb75ba3e3dd0cb0f4b26f2d1d",
+      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "operation_token": "setIpsecNet2NetCfg",
+      "attribution_id": "set-difference:f686f2c12b998e318408026203c460263b9323624014bf956553ae77c448a740",
+      "registration_artifact_path": "www/cgi-bin/cstecgi.cgi",
+      "binding_ids": [
+        "native-route-binding:986fcbe0f7e48ee80e4ef1a4e6a5dfe4a95515e37eb296196fdd56ec04ec76c3"
+      ],
+      "handler_identities": [
+        "www/cgi-bin/cstecgi.cgi@0x0041c3dc"
+      ],
+      "frontend_coverage_scopes": [
+        "X5000R:expanded-frontend-scope/v1"
+      ],
+      "frontend_coverage_complete": true,
+      "runtime_reachability_verified": false,
+      "interpretation": "The dispatcher registration has no observed reference in auxiliary web or native artifacts.",
+      "open_obligation": "Test hidden clients, direct requests, dead registrations, and runtime reachability.",
+      "evidence_ids": [
+        "evidence:0051926104852a76a5ce1e09409aaab071dfb1b2df5a479ac27ff11aa63e9174",
+        "evidence:1c442fd9159548179d37e04ee05d912e08b5c21b823165b0b97e3f97cac703ab",
+        "evidence:990adeba62745c856adece98159bb1b7f86cc1f0acddac207b851ecb1cc7b092",
+        "evidence:f793fc96b001a3eaac361204ec133cfcf15ecb0a15b0550a331154122a0d016d"
+      ]
+    }
+  ],
+  "interpretation_boundary": {
+    "supported": "each item has a replayable native registration and handler, completed declared frontend/set-difference coverage, and no observed frontend or auxiliary native reference",
+    "not_claimed": "a backdoor, undocumented product feature, runtime-reachable endpoint, missing authorization, vulnerability, or exploitability",
+    "remaining_hypotheses": [
+      "hidden or dynamically generated clients",
+      "direct requests outside shipped frontend assets",
+      "dead or version-skewed registrations",
+      "runtime registration and reachability differences"
+    ]
+  },
+  "cross_firmware_contract": {
+    "projection": "latest eligible discovery catalog per firmware",
+    "required_coverage": [
+      "source_inventory",
+      "frontend",
+      "set_difference"
+    ],
+    "excluded_shapes": [
+      "frontend_scope_gap",
+      "cross_native_literal",
+      "cross_native_token_variant",
+      "incomplete_coverage"
+    ]
+  }
+}
