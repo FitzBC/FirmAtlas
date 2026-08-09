@@ -421,12 +421,68 @@ def build_x5000r_shared_cgi_case():
                 "selects_operation", "frontend-request-producer@0.2.0",
             ),
             CaseEvidenceReference(
+                "evidence:fa9dc452827de256c054a71bf56667c393e52df5b31a17a7d86dcf4dc5837464",
+                CaseEvidenceKind.FRONTEND_REQUEST, "www/advance/config.html",
+                "e4ed2ad59c3d574bcf5abcad8a0091aac876e4a72bdb205526944721fd7bffe4",
+                "text_utf8:bytes=2362-2368;lines=57:499-57:505",
+                "selects_operation", "frontend-request-producer@0.2.0",
+            ),
+            CaseEvidenceReference(
                 "coverage:x5000r-expanded-frontend-scope",
                 CaseEvidenceKind.COVERAGE_LEDGER,
                 "docs/firmware-mapping/samples/m1-19-x5000r-expanded-frontend.json",
                 "6463653fa52f573e2578a947d04779a8b6afac9c93bba5f7b160ec1f150e788a",
                 "json:$.scope_closure", "closes_frontend_scope_gap",
                 "expanded-frontend-report@v1alpha1",
+            ),
+            CaseEvidenceReference(
+                "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                X5000R_FIRMWARE_SHA256, "binary:bytes=189852-189876",
+                "selects_transport_mode",
+                "native-mips-cgi-nested-dispatch@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                X5000R_FIRMWARE_SHA256, "binary:bytes=190000-190060",
+                "parses_upload_body",
+                "native-mips-cgi-nested-dispatch@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                X5000R_FIRMWARE_SHA256, "binary:bytes=190272-190388",
+                "constructs_dispatch_payload",
+                "native-mips-cgi-nested-dispatch@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                X5000R_FIRMWARE_SHA256, "binary:bytes=190392-190420",
+                "normalizes_operation_suffix",
+                "native-mips-cgi-nested-dispatch@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                X5000R_FIRMWARE_SHA256, "binary:bytes=190628-190664",
+                "selects_dispatch_table",
+                "native-mips-cgi-nested-dispatch@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                X5000R_FIRMWARE_SHA256, "binary:bytes=237860-237928",
+                "binds_handler", "native-mips-cgi-nested-dispatch@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "coverage:x5000r-nested-upload-dispatch",
+                CaseEvidenceKind.COVERAGE_LEDGER,
+                "docs/firmware-mapping/samples/m1-20-x5000r-nested-dispatch.json",
+                "061ab4d96a5bc50bfef0953a67b75c5e8fc9d064798556b775b3b8465a9c19e1",
+                "json:$.native_dispatch", "binds_upload_mode",
+                "nested-dispatch-report@v1alpha1",
             ),
         ),
         claims=(
@@ -510,6 +566,21 @@ def build_x5000r_shared_cgi_case():
                     "coverage:x5000r-expanded-frontend-scope",
                 ),
             ),
+            CaseClaim(
+                "claim:x5000r-nested-upload-dispatch",
+                "The MIPS CGI main dispatcher recognizes action=upload, extracts the second ampersand-delimited query segment, parses the multipart body through cutUploadFile, carries the segment into JSON topicurl, normalizes the slash suffix to setUploadSetting, selects set_handle_t, and invokes the exact handler registered at 0x0044a124 -> 0x0042bf14.",
+                (
+                    "evidence:fa9dc452827de256c054a71bf56667c393e52df5b31a17a7d86dcf4dc5837464",
+                    "evidence:5692bb66e2b3f7adda5980e80cb964dded2dc5281426843174dafc4345d88fd4",
+                    "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+                    "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+                    "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+                    "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+                    "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+                    "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+                    "coverage:x5000r-nested-upload-dispatch",
+                ),
+            ),
         ),
         stages=(
             CaseStage(
@@ -564,6 +635,16 @@ def build_x5000r_shared_cgi_case():
                 ("claim:x5000r-expanded-frontend-scope",),
                 creates_obligations=("obligation:x5000r-upload-mode-owner",),
                 resolves_obligations=("obligation:x5000r-frontend-scope-expansion",),
+            ),
+            CaseStage(
+                "stage:x5000r-nested-upload-dispatch", 9,
+                "Replay the bounded MIPS main control-flow from upload-mode recognition through selector extraction, multipart parsing, JSON topicurl construction, slash-suffix normalization, set_handle_t selection, and exact handler invocation.",
+                ("claim:x5000r-nested-upload-dispatch",),
+                creates_obligations=(
+                    "obligation:x5000r-upload-runtime-reachability",
+                    "obligation:x5000r-upload-auth-guard",
+                ),
+                resolves_obligations=("obligation:x5000r-upload-mode-owner",),
             ),
         ),
         obligations=(
@@ -621,7 +702,26 @@ def build_x5000r_shared_cgi_case():
             CaseObligation(
                 "obligation:x5000r-upload-mode-owner",
                 "Determine which upload-mode dispatcher consumes action=upload before setUploadSetting reaches the inline native registration, without treating their URL adjacency as a direct call edge.",
-                "binds_upload_mode", CaseObligationStatus.OPEN,
+                "binds_upload_mode", CaseObligationStatus.RESOLVED,
+                (
+                    "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+                    "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+                    "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+                    "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+                    "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+                    "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+                    "coverage:x5000r-nested-upload-dispatch",
+                ),
+            ),
+            CaseObligation(
+                "obligation:x5000r-upload-runtime-reachability",
+                "Verify that the upload path is reachable in the deployed runtime configuration and request lifecycle.",
+                "verifies_runtime_reachability", CaseObligationStatus.OPEN,
+            ),
+            CaseObligation(
+                "obligation:x5000r-upload-auth-guard",
+                "Recover authentication and authorization guards applied before the upload-mode branch.",
+                "maps_auth_guard", CaseObligationStatus.OPEN,
             ),
         ),
         counterfactuals=(
@@ -633,6 +733,7 @@ def build_x5000r_shared_cgi_case():
             "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow.",
             "Substring matching would misclassify loginAuth as an exact cross-native occurrence because usr/sbin/lighttpd contains userloginAuth; the suffix-token variant remains only a candidate clue.",
             "Analyzing only shared wrapper files would leave three implemented operations labeled Native-only; conversely, flattening the multipart URL would hide the distinct outer upload mode and inner setUploadSetting selector.",
+            "Treating the setUploadSetting table entry alone as proof would miss the preceding action=upload branch, multipart parser, query-segment transfer, and slash normalization that make the handler reachable from this request shape.",
         ),
         paper_uses=(
             "Motivating example for operation identity below a shared physical endpoint.",
@@ -642,6 +743,7 @@ def build_x5000r_shared_cgi_case():
             "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state.",
             "Evidence-backed case study showing how frontend/native set differences expose incomplete asset scope, wrapper-only declarations, and native registrations without inventing backend equivalence.",
             "Scope-expansion example showing three request architectures behind one CGI: direct literal request, inherited kr.request default with payload-variable selector, and multipart upload URL with nested selectors.",
+            "Instruction-level nested-dispatch example showing why a firmware map can identify the correct binary and handler where endpoint text or vulnerability prose cannot.",
         ),
         limitations=(
             "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
@@ -649,7 +751,7 @@ def build_x5000r_shared_cgi_case():
             "CGI execution configuration does not prove runtime reachability or authentication state.",
             "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
             "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof.",
-            "The upload URL proves two serialized selector layers but not the native control-flow edge between action=upload and setUploadSetting.",
+            "The deterministic Profile proves the static native control-flow edge from action=upload to setUploadSetting, but it does not prove runtime reachability, authentication state, or exploitability.",
         ),
     ))
 

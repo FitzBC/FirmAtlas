@@ -12,6 +12,11 @@
 > 缺失而不伪造候选。`setLanCfg` 首个无分支前缀已由 GP/GOT 确定性 Profile 证明两条
 > 参数—状态链，因此该窄范围仍不触发 Ghidra。分支后缀和跨函数 sink 保持触发候选。
 
+> M1-20 触发审计：X5000R `main` 保留 dynamic symbol，upload branch、GP/GOT callee、
+> query segment、`cutUploadFile`、JSON topicurl、slash suffix、table loop 与 exact handler
+> 均可从原始 MIPS 字节确定性重放，因此仍不触发 Ghidra。缺少这些稳定边的固件变体
+> 才进入 Candidate Worker。
+
 AC9 当前 ARM PIC 注册模式已由小型确定性 Validator 从原始 ELF 字节直接证明，
 因此没有为了“使用 Ghidra”而增加工具依赖。Ghidra Adapter 只在复杂控制流、间接
 调用、跨函数数据流、未知 ISA profile 或参数 getter 追踪确实需要时启动。

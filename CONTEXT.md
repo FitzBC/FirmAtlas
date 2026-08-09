@@ -78,6 +78,12 @@ _Avoid_: 漏检原因、后端绑定、同源证明
 同一物理请求中按先后层级选择 transport mode、dispatcher 分支或业务 operation 的多个字段或 URL 片段，例如 `action=upload` 与 `setting/setUploadSetting`；各层必须保留独立身份和证据，不能因共享 URL 而压成一个操作。
 _Avoid_: 单一接口名、重复参数、路径别名
 
+**嵌套分发路径（Nested Dispatch Path）**：
+从外层 transport mode、嵌套 selector 的提取与规范化，到具体 operation table 和
+handler 的证据约束路径；每一跳必须保留独立指令或配置证据，不能由多个字符串在
+同一二进制中共现而合成。
+_Avoid_: 字符串共现、单一表项、调用链猜测、Nested Operation Selector
+
 ## 固件测绘
 
 **组件（Software Component）**：

@@ -15,6 +15,7 @@ from firmatlas.mapping import (
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
     InventoryPolicy,
+    MipsNestedDispatchAnchor,
     NativeRouteAnchor,
     SourceArtifactEntry,
     assemble_discovery_catalog,
@@ -25,6 +26,7 @@ from firmatlas.mapping import (
     discover_frontend_requests,
     discover_mips_inline_route_bindings,
     discover_mips_handler_value_flows,
+    discover_mips_cgi_nested_dispatch,
     discover_native_hints,
     discover_script_backend,
     discover_web_configuration,
@@ -205,6 +207,32 @@ def _x5000r_catalog(root: Path):
     value_flow = discover_mips_handler_value_flows(
         native_source, native_content, 0x004209B8
     )
+    upload_operation = next(
+        parameter
+        for result in frontend_graph.results
+        for parameter in result.parameters
+        if parameter.is_operation_selector
+        and parameter.literal_value == "setUploadSetting"
+    )
+    upload_transport = next(
+        parameter
+        for result in frontend_graph.results
+        for parameter in result.parameters
+        if parameter.is_operation_selector
+        and parameter.request_candidate_id == upload_operation.request_candidate_id
+        and parameter.literal_value == "upload"
+    )
+    nested_dispatch = discover_mips_cgi_nested_dispatch(
+        native_source,
+        native_content,
+        (MipsNestedDispatchAnchor(
+            upload_operation.request_candidate_id,
+            upload_transport.name,
+            upload_transport.literal_value,
+            upload_operation.name,
+            upload_operation.literal_value,
+        ),),
+    )
     web_content = (root / paths["web"]).read_bytes()
     web = discover_web_configuration(
         _source(paths["web"], web_content), web_content
@@ -228,6 +256,9 @@ def _x5000r_catalog(root: Path):
             ),
             DiscoveryProducerBatch.native_value_flow(
                 (value_flow,), paths["native"] + ":setLanCfg"
+            ),
+            DiscoveryProducerBatch.native_nested_dispatch(
+                (nested_dispatch,), paths["native"] + ":main:upload"
             ),
         ),
         set_difference=set_difference,

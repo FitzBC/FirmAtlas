@@ -156,7 +156,7 @@ Native Deep 的首个保守 Adapter 已支持命名 ELF `{route_ptr, handler_ptr
 
 ARM32 PIC Adapter 进一步从原始 ELF 验证 `.got` 基址、`R_ARM_GLOB_DAT`、`r0/r1` 参数装载与共同 `BL` registrar。真实 Tenda AC9 `online_list.js` 的 5 个接口已全部绑定到 5 个导出 handler，10/10 深分析义务关闭；这些绑定共享一个包含 131 个独立 route/handler 对的 registrar，形成可查询的后端注册架构信号。中间结果见 [M1-10B AC9 样例](./docs/firmware-mapping/samples/m1-10b-ac9-arm-pic-callsite-summary.json)。
 
-复杂通信结构现在会进入内容寻址的研究案例库，而不是只留在阶段性说明中。AC9 案例保存了 `前端 /goform → nginx namespace 不相交 → ownership obligation → httpd/dhttpd shallow 对照 → ARM PIC call-site`；X5000R 案例保存了 `共享 cstecgi.cgi → 199 个 wrapper operation → MIPS inline table → 参数—状态链 → 76/14 差集归因 → 扩展页面回放 → 203 operations / 77/11 新差集`。扩展回放证明了三种不同请求结构：显式 endpoint、`kr.request` 跨资源缺省 endpoint + payload variable，以及 `action=upload → setting/setUploadSetting` multipart 两级 selector；三个 scope gap 已关闭，但外层 upload-mode 的处理主体仍保持未决。详见[研究案例库](./docs/firmware-mapping/research-casebook.md)、[机器可读案例](./docs/firmware-mapping/samples/m1-12-research-case-corpus.json)、[MIPS dispatcher 中间输出](./docs/firmware-mapping/samples/m1-16-x5000r-mips-dispatch.json)、[集合差异基线](./docs/firmware-mapping/samples/m1-18-x5000r-set-difference.json)与[扩展前端中间输出](./docs/firmware-mapping/samples/m1-19-x5000r-expanded-frontend.json)。
+复杂通信结构现在会进入内容寻址的研究案例库，而不是只留在阶段性说明中。AC9 案例保存了 `前端 /goform → nginx namespace 不相交 → ownership obligation → httpd/dhttpd shallow 对照 → ARM PIC call-site`；X5000R 案例保存了 `共享 cstecgi.cgi → 199 个 wrapper operation → MIPS inline table → 参数—状态链 → 76/14 差集归因 → 扩展页面回放 → 203 operations / 77/11 新差集 → multipart nested dispatch`。扩展回放证明了显式 endpoint、`kr.request` 跨资源缺省 endpoint + payload variable、multipart 两级 selector 三种请求结构；MIPS Nested Dispatch Profile 又从原始 ELF 证明 `action=upload → 第二 query segment → cutUploadFile → JSON topicurl → / 后缀 setUploadSetting → set_handle_t@0x0044a124 → handler@0x0042bf14`，关闭 upload-mode owner，同时保留运行时可达与认证义务。详见[研究案例库](./docs/firmware-mapping/research-casebook.md)、[机器可读案例](./docs/firmware-mapping/samples/m1-12-research-case-corpus.json)、[MIPS dispatcher 中间输出](./docs/firmware-mapping/samples/m1-16-x5000r-mips-dispatch.json)、[集合差异基线](./docs/firmware-mapping/samples/m1-18-x5000r-set-difference.json)、[扩展前端中间输出](./docs/firmware-mapping/samples/m1-19-x5000r-expanded-frontend.json)与[Nested Dispatch 中间输出](./docs/firmware-mapping/samples/m1-20-x5000r-nested-dispatch.json)。
 
 遇到复杂 Native 控制流时，规划使用隔离的 Ghidra Candidate Worker 枚举 xref、call-site 与 P-code value-flow，再由核心 Validator 从原始 ELF 重放后才发布事实。AC9 当前 Profile 可由确定性解码器完成，因此不会为了工具统一而引入不必要的 Ghidra 信任面；接入合同见 [Ghidra Adapter 设计](./docs/firmware-mapping/native-ghidra-adapter.md)。
 
@@ -181,6 +181,10 @@ PYTHONPATH=src python3 scripts/build_x5000r_set_difference_report.py \
 
 # 扩展到页面与 kr.js，恢复缺省 URL、payload variable 和 upload 两级 selector
 PYTHONPATH=src python3 scripts/build_x5000r_expanded_frontend_report.py \
+  --root /path/to/x5000r/squashfs-root
+
+# 重放 upload mode → nested selector → set_handle_t → exact handler
+PYTHONPATH=src python3 scripts/build_x5000r_nested_dispatch_report.py \
   --root /path/to/x5000r/squashfs-root
 ```
 
@@ -280,8 +284,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性 Inventory v1alpha2（含固件 chroot symlink 与空运行时树）、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend shared-CGI/custom-request、跨资源默认 URL、局部 payload variable、multipart 嵌套 selector 与 Asset Graph、lighttpd/nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow、ARM32 PIC、MIPS32 inline-table、MIPS handler-prefix parameter→state 与 frontend/native 集合差异归因、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
-| **Next** | X5000R upload-mode dispatcher、通用 HTML script dependency scope Planner、剩余 77/11 差集因果验证、MIPS CFG-aware DHCP/sink value-flow、动态 method 恢复、脚本后端/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性 Inventory v1alpha2（含固件 chroot symlink 与空运行时树）、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend shared-CGI/custom-request、跨资源默认 URL、局部 payload variable、multipart 嵌套 selector 与 Asset Graph、lighttpd/nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow、ARM32 PIC、MIPS32 inline-table、MIPS CGI nested-dispatch、MIPS handler-prefix parameter→state 与 frontend/native 集合差异归因、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
+| **Next** | X5000R upload 认证/运行时可达、通用 HTML script dependency scope Planner、剩余 77/11 差集因果验证、MIPS CFG-aware DHCP/sink value-flow、动态 method 恢复、脚本后端/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

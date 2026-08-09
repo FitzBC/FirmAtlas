@@ -215,7 +215,7 @@
       ]
     },
     {
-      "case_id": "research-case:c6d2094e47f8b283509ed08548b590d1e967c3534bdc3ef34a106397513e0594",
+      "case_id": "research-case:55c831692b2ce2a153eea23a600ec0bfe2b7728e11ae6ac4848f5a12e7c891d1",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "totolink-x5000r-shared-cgi-selector-dispatch",
       "title": "TOTOLINK X5000R: one CGI endpoint, multiple logical operations",
@@ -454,6 +454,15 @@
           "producer": "frontend-request-producer@0.2.0"
         },
         {
+          "evidence_ref": "evidence:fa9dc452827de256c054a71bf56667c393e52df5b31a17a7d86dcf4dc5837464",
+          "kind": "frontend_request",
+          "source_path": "www/advance/config.html",
+          "source_artifact_sha256": "e4ed2ad59c3d574bcf5abcad8a0091aac876e4a72bdb205526944721fd7bffe4",
+          "locator": "text_utf8:bytes=2362-2368;lines=57:499-57:505",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.2.0"
+        },
+        {
           "evidence_ref": "coverage:x5000r-expanded-frontend-scope",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/m1-19-x5000r-expanded-frontend.json",
@@ -461,6 +470,69 @@
           "locator": "json:$.scope_closure",
           "capability": "closes_frontend_scope_gap",
           "producer": "expanded-frontend-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=189852-189876",
+          "capability": "selects_transport_mode",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190000-190060",
+          "capability": "parses_upload_body",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190272-190388",
+          "capability": "constructs_dispatch_payload",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190392-190420",
+          "capability": "normalizes_operation_suffix",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190628-190664",
+          "capability": "selects_dispatch_table",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=237860-237928",
+          "capability": "binds_handler",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-nested-upload-dispatch",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-20-x5000r-nested-dispatch.json",
+          "source_artifact_sha256": "061ab4d96a5bc50bfef0953a67b75c5e8fc9d064798556b775b3b8465a9c19e1",
+          "locator": "json:$.native_dispatch",
+          "capability": "binds_upload_mode",
+          "producer": "nested-dispatch-report@v1alpha1"
         }
       ],
       "claims": [
@@ -551,6 +623,22 @@
             "evidence:f7628ced45fe71044c8357118eef63f5e677260320ace9d4bdbe962797fd9a95",
             "evidence:5692bb66e2b3f7adda5980e80cb964dded2dc5281426843174dafc4345d88fd4",
             "coverage:x5000r-expanded-frontend-scope"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-nested-upload-dispatch",
+          "statement": "The MIPS CGI main dispatcher recognizes action=upload, extracts the second ampersand-delimited query segment, parses the multipart body through cutUploadFile, carries the segment into JSON topicurl, normalizes the slash suffix to setUploadSetting, selects set_handle_t, and invokes the exact handler registered at 0x0044a124 -> 0x0042bf14.",
+          "evidence_refs": [
+            "evidence:fa9dc452827de256c054a71bf56667c393e52df5b31a17a7d86dcf4dc5837464",
+            "evidence:5692bb66e2b3f7adda5980e80cb964dded2dc5281426843174dafc4345d88fd4",
+            "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+            "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+            "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+            "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+            "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+            "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+            "coverage:x5000r-nested-upload-dispatch"
           ],
           "status": "supported"
         }
@@ -665,6 +753,22 @@
             "obligation:x5000r-frontend-scope-expansion"
           ],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-nested-upload-dispatch",
+          "order": 9,
+          "interpretation": "Replay the bounded MIPS main control-flow from upload-mode recognition through selector extraction, multipart parsing, JSON topicurl construction, slash-suffix normalization, set_handle_t selection, and exact handler invocation.",
+          "claim_ids": [
+            "claim:x5000r-nested-upload-dispatch"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-upload-runtime-reachability",
+            "obligation:x5000r-upload-auth-guard"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-upload-mode-owner"
+          ],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -731,6 +835,28 @@
           "obligation_id": "obligation:x5000r-upload-mode-owner",
           "statement": "Determine which upload-mode dispatcher consumes action=upload before setUploadSetting reaches the inline native registration, without treating their URL adjacency as a direct call edge.",
           "required_capability": "binds_upload_mode",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+            "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+            "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+            "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+            "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+            "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+            "coverage:x5000r-nested-upload-dispatch"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-upload-runtime-reachability",
+          "statement": "Verify that the upload path is reachable in the deployed runtime configuration and request lifecycle.",
+          "required_capability": "verifies_runtime_reachability",
+          "status": "open",
+          "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:x5000r-upload-auth-guard",
+          "statement": "Recover authentication and authorization guards applied before the upload-mode branch.",
+          "required_capability": "maps_auth_guard",
           "status": "open",
           "closure_evidence_refs": []
         }
@@ -743,7 +869,8 @@
         "Treating a selector string hit as a binding would hide the 76 frontend-only and 14 Native-only operation differences.",
         "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow.",
         "Substring matching would misclassify loginAuth as an exact cross-native occurrence because usr/sbin/lighttpd contains userloginAuth; the suffix-token variant remains only a candidate clue.",
-        "Analyzing only shared wrapper files would leave three implemented operations labeled Native-only; conversely, flattening the multipart URL would hide the distinct outer upload mode and inner setUploadSetting selector."
+        "Analyzing only shared wrapper files would leave three implemented operations labeled Native-only; conversely, flattening the multipart URL would hide the distinct outer upload mode and inner setUploadSetting selector.",
+        "Treating the setUploadSetting table entry alone as proof would miss the preceding action=upload branch, multipart parser, query-segment transfer, and slash normalization that make the handler reachable from this request shape."
       ],
       "paper_uses": [
         "Motivating example for operation identity below a shared physical endpoint.",
@@ -752,7 +879,8 @@
         "Frontend/native set-difference experiment for version drift, dead UI code, and alternate backend hypotheses.",
         "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state.",
         "Evidence-backed case study showing how frontend/native set differences expose incomplete asset scope, wrapper-only declarations, and native registrations without inventing backend equivalence.",
-        "Scope-expansion example showing three request architectures behind one CGI: direct literal request, inherited kr.request default with payload-variable selector, and multipart upload URL with nested selectors."
+        "Scope-expansion example showing three request architectures behind one CGI: direct literal request, inherited kr.request default with payload-variable selector, and multipart upload URL with nested selectors.",
+        "Instruction-level nested-dispatch example showing why a firmware map can identify the correct binary and handler where endpoint text or vulnerability prose cannot."
       ],
       "limitations": [
         "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
@@ -760,7 +888,7 @@
         "CGI execution configuration does not prove runtime reachability or authentication state.",
         "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
         "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof.",
-        "The upload URL proves two serialized selector layers but not the native control-flow edge between action=upload and setUploadSetting."
+        "The deterministic Profile proves the static native control-flow edge from action=upload to setUploadSetting, but it does not prove runtime reachability, authentication state, or exploitability."
       ]
     }
   ],

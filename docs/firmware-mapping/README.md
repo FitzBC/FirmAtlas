@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-19 X5000R 前端范围扩展与嵌套 selector 已验证；当前 gate 为 `partial`
+> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-20 X5000R multipart nested dispatch 已验证；当前 gate 为 `partial`
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -79,6 +79,7 @@
 | [M1-17 X5000R MIPS Value Flow](./progress/2026-08-09-m1-17-x5000r-mips-value-flow.md) | `setLanCfg` getter→state 五线证据、控制流边界、Catalog/案例投影 | MIPS GOT、寄存器 provenance、分支或 sink 证据变化时 |
 | [M1-18 X5000R 集合差异归因](./progress/2026-08-09-m1-18-x5000r-set-difference.md) | 76/14 差集的五类证据形状、范围缺口、字符串变体负例与 Catalog 投影 | 前端范围、差集策略或辅助制品证据变化时 |
 | [M1-19 X5000R 扩展前端](./progress/2026-08-09-m1-19-x5000r-expanded-frontend.md) | `kr.request` 默认 URL、payload variable、multipart 两级 selector 与 77/11 新差集 | 前端依赖范围、间接请求或 upload dispatcher 证据变化时 |
+| [M1-20 X5000R Nested Dispatch](./progress/2026-08-09-m1-20-x5000r-nested-dispatch.md) | upload mode、query segment、multipart parser、suffix、set table 与 handler 六段证明 | nested selector、MIPS main Profile、认证或运行时证据变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -156,8 +157,9 @@ M1 工作项：
 | M1-17 | X5000R MIPS handler-prefix value-flow | 已验证 | M1-08/11/12/16 | 2 parameter→state flows + 10 EvidenceAtoms + first-branch scope boundary |
 | M1-18 | X5000R Frontend / Native 集合差异归因 | 已验证 | M1-08/11/12/16/17 | 76/14 operations → 38/38/3/1/10 evidence shapes + Catalog/API/UI projection |
 | M1-19 | X5000R 前端范围扩展与嵌套 selector | 已验证 | M1-15/16/18 | 199→203 operations + 3 scope gaps closed + 77/11 residual difference |
+| M1-20 | X5000R multipart 嵌套分发与 handler owner | 已验证 | M1-04/08/12/16/19 | `action=upload → setting/setUploadSetting → set_handle_t → handler@0x0042bf14` 六段确定性证据 |
 
-**下一项建议**：继续 M1-11。M1-19 已将三个 scope gap 纳入一等 Frontend Asset Graph，并暴露 `action=upload → setUploadSetting` 的两级 selector 新义务；下一步优先恢复 upload-mode dispatcher，同时将 HTML script dependency closure 实现为有预算的通用范围 Planner，并以 CFG-aware 分析恢复 DHCP 分支及 commit/network/sensitive sink。确定性 Profile 无法重放跨块或跨函数 witness 时再触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 固件样本，M1-02B 仍需从仓库固定 Dockerfile 独立重建正式镜像。
+**下一项建议**：继续 M1-11。M1-20 已关闭 `action=upload → setUploadSetting` 的静态 owner 义务；下一步优先恢复 upload 分支之前的认证 guard 与运行时可达证据，同时将 HTML script dependency closure 实现为有预算的通用范围 Planner，并以 CFG-aware 分析恢复 DHCP 分支及 commit/network/sensitive sink。确定性 Profile 无法重放跨块或跨函数 witness 时再触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 固件样本，M1-02B 仍需从仓库固定 Dockerfile 独立重建正式镜像。
 
 ## 7. 跨会话无缝工作协议
 

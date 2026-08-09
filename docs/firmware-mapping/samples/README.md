@@ -87,6 +87,19 @@
 
 它是开发样本，不进入最终无泄漏测试结果。
 
+**TOTOLINK X5000R / shared CGI + multipart nested dispatch**
+
+- 前端请求：`POST /cgi-bin/cstecgi.cgi?action=upload&setting/setUploadSetting`；
+- 外层 selector：`action=upload`；内层 selector：`setting/setUploadSetting`；
+- 原生 dispatcher：`main@0x0042e390`，上传解析器 `cutUploadFile`；
+- suffix 规范化：`setting/setUploadSetting → setUploadSetting`；
+- 精确注册：`set_handle_t@0x0044a124 → handler@0x0042bf14`；
+- 中间报告：[M1-20 Nested Dispatch](./m1-20-x5000r-nested-dispatch.json)；
+- Catalog：695 candidates / 223 parameters / 1668 EvidenceAtom。
+
+该例用于验证同一物理 CGI 内多层 selector 与原生表分发，不能据此断言运行时可达、
+认证状态或漏洞可利用性。
+
 **D-Link DSL2877AL / vendor ASP + Shell CGI**
 
 - 平台候选：`BM-2024-00096`；

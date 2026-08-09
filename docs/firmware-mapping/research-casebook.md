@@ -122,15 +122,18 @@ flowchart LR
 `advance/config.html` 纳入一等前端范围，分别恢复显式 `kr.request`、继承缺省 URL
 且 payload 通过局部变量传递的 `kr.request`，以及 multipart upload property URL。
 三个 scope gap 因此全部关闭，前端 operation 从 199 增至 203，差集变为 77/11。
-新增的 `action=upload` 是外层 selector，`setting/setUploadSetting` 是内层 selector；
-只有后者进入当前 MIPS inline table，二者之间的 dispatcher 控制流仍开放。对
+新增的 `action=upload` 是外层 selector，`setting/setUploadSetting` 是内层 selector。
+MIPS Nested Dispatch Profile 随后证明 `main` 以 `action=upload` 进入上传分支，提取
+第二个 `&` 分段，经 `cutUploadFile` 处理 body，把该分段写入 JSON `topicurl`，在读取后
+选择 `/` 后缀 `setUploadSetting`，再进入 `set_handle_t@0x0044a124` 并调用
+`handler@0x0042bf14`。该静态 owner 义务已关闭，运行时可达和认证 guard 仍开放。对
 `setLanCfg@0x004209b8`，系统进一步从
 dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 `lanIp→lan_ipaddr`、`lanNetmask→lan_netmask` 两条请求参数—配置状态链，并在
 `0x00420ad8` 的首个条件分支停止；DHCP 分支和敏感 sink 仍未确认。
 
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
-“跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、upload-mode 控制流、运行时可达、认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
+“跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、multipart nested dispatch 关闭、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、运行时可达、认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
 
 ## 3. 后续案例准入触发器
 

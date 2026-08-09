@@ -168,6 +168,16 @@ from .native_value_flow import (
     MipsParameterStateFlow,
     discover_mips_handler_value_flows,
 )
+from .native_nested_dispatch import (
+    MIPS_NESTED_DISPATCH_RESULT_SCHEMA_VERSION,
+    MipsNestedDispatchAnchor,
+    MipsNestedDispatchDiagnostic,
+    MipsNestedDispatchPath,
+    MipsNestedDispatchPolicy,
+    MipsNestedDispatchProfile,
+    MipsNestedDispatchResult,
+    discover_mips_cgi_nested_dispatch,
+)
 from .set_difference import (
     SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION,
     AttributionArtifact,
@@ -364,6 +374,14 @@ __all__ = (
     "MipsHandlerValueFlowResult",
     "MipsParameterStateFlow",
     "discover_mips_handler_value_flows",
+    "MIPS_NESTED_DISPATCH_RESULT_SCHEMA_VERSION",
+    "MipsNestedDispatchAnchor",
+    "MipsNestedDispatchDiagnostic",
+    "MipsNestedDispatchPath",
+    "MipsNestedDispatchPolicy",
+    "MipsNestedDispatchProfile",
+    "MipsNestedDispatchResult",
+    "discover_mips_cgi_nested_dispatch",
     "SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION",
     "AttributionArtifact",
     "AttributionArtifactRole",

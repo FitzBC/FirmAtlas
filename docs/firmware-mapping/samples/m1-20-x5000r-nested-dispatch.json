@@ -1,0 +1,272 @@
+{
+  "schema_version": "firmatlas.mapping.x5000r-nested-dispatch/v1alpha1",
+  "source": {
+    "path": "www/cgi-bin/cstecgi.cgi",
+    "content_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+    "size": 251300
+  },
+  "frontend_anchor": {
+    "request_candidate_id": "frontend-request:e10b55ec8e21585eb27aee5e6f95af031644ed3229b9182e66d78f43eda66ffa",
+    "endpoint": "/cgi-bin/cstecgi.cgi",
+    "method": "POST",
+    "representation": "multipart_form",
+    "source_construct": "custom.file-upload-property",
+    "request_evidence_ids": [
+      "evidence:0b4d21ce68bb3ce00ee51089a7eefa850f14ba26e369681d0bf3b3eeafa1e3f4"
+    ],
+    "transport_selector": {
+      "name": "action",
+      "value": "upload",
+      "namespace": "query",
+      "evidence_ids": [
+        "evidence:8b3366dee6ba1b4e3eb506d4184e7923de7b403b77be438b78f4b7072038a054",
+        "evidence:fa9dc452827de256c054a71bf56667c393e52df5b31a17a7d86dcf4dc5837464"
+      ]
+    },
+    "nested_operation_selector": {
+      "name": "setting",
+      "value": "setUploadSetting",
+      "namespace": "query",
+      "evidence_ids": [
+        "evidence:bbfd0cc7f4d6c1bb84c7ad0f4f77ddc1b5d60810a33609de8be8f158df4f9809",
+        "evidence:5692bb66e2b3f7adda5980e80cb964dded2dc5281426843174dafc4345d88fd4"
+      ]
+    }
+  },
+  "native_dispatch": {
+    "schema_version": "firmatlas.mapping.mips-nested-dispatch-result/v1alpha1",
+    "source_path": "www/cgi-bin/cstecgi.cgi",
+    "coverage_status": "completed",
+    "producer": {
+      "name": "native-mips-cgi-nested-dispatch",
+      "version": "0.1.0"
+    },
+    "profile": "mips32-cgi-query-json-table-dispatch/v1",
+    "processed_instructions": 456,
+    "paths": [
+      {
+        "path_id": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "target_ref": "frontend-request:e10b55ec8e21585eb27aee5e6f95af031644ed3229b9182e66d78f43eda66ffa",
+        "transport_selector": "action=upload",
+        "nested_selector": "setting/setUploadSetting",
+        "normalized_operation": "setUploadSetting",
+        "dispatcher_identity": "www/cgi-bin/cstecgi.cgi@0x0042e390",
+        "dispatcher_address": 4383632,
+        "transport_match_callsite": 4384168,
+        "selector_extract_callsite": 4384328,
+        "upload_parse_callsite": 4384352,
+        "suffix_normalization_address": 4384720,
+        "dispatch_table_symbol": "set_handle_t",
+        "registration_address": 4497700,
+        "handler_address": 4374292,
+        "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042bf14",
+        "source_construct": "elf.mips32-cgi-query-json-table-dispatch/v1:set_handle_t",
+        "evidence_ids": [
+          "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+          "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+          "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+          "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+          "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+          "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816"
+        ]
+      }
+    ],
+    "evidence_atoms": [
+      {
+        "evidence_id": "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+        "subject_ref": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "predicate": "selects_transport_mode",
+        "object_value": "action=upload",
+        "source_span": {
+          "artifact_path": "www/cgi-bin/cstecgi.cgi",
+          "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=189852-189876",
+          "span_kind": "binary",
+          "start_byte": 189852,
+          "end_byte": 189876,
+          "excerpt_sha256": "6d9527405ecaf9167c7b1bf147748e84ec9ff50f9bae784cddc0e5d9b3266364",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-cgi-nested-dispatch",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "selects_transport_mode",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+        "subject_ref": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "predicate": "parses_upload_body",
+        "object_value": "getNthValueSafe+cutUploadFile",
+        "source_span": {
+          "artifact_path": "www/cgi-bin/cstecgi.cgi",
+          "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=190000-190060",
+          "span_kind": "binary",
+          "start_byte": 190000,
+          "end_byte": 190060,
+          "excerpt_sha256": "8a67c121325ff0a81981deaba65074db6640b0c9378e47c5f366425d6ce3ad71",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-cgi-nested-dispatch",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "parses_upload_body",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+        "subject_ref": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "predicate": "constructs_dispatch_payload",
+        "object_value": "topicurl=setting/setUploadSetting",
+        "source_span": {
+          "artifact_path": "www/cgi-bin/cstecgi.cgi",
+          "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=190272-190388",
+          "span_kind": "binary",
+          "start_byte": 190272,
+          "end_byte": 190388,
+          "excerpt_sha256": "6b0df8c731f51ae30f4786d9d6addbf947028e6766aa07e19c99a7bc09f007fd",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-cgi-nested-dispatch",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "constructs_dispatch_payload",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+        "subject_ref": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "predicate": "normalizes_operation_suffix",
+        "object_value": "setting/setUploadSetting->setUploadSetting",
+        "source_span": {
+          "artifact_path": "www/cgi-bin/cstecgi.cgi",
+          "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=190392-190420",
+          "span_kind": "binary",
+          "start_byte": 190392,
+          "end_byte": 190420,
+          "excerpt_sha256": "c7b829a98cc8397d7c726339d1af4dd7cf5cf3eab37cad6d3e3e4a25ac61b634",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-cgi-nested-dispatch",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "normalizes_operation_suffix",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+        "subject_ref": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "predicate": "selects_dispatch_table",
+        "object_value": "set_handle_t",
+        "source_span": {
+          "artifact_path": "www/cgi-bin/cstecgi.cgi",
+          "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=190628-190664",
+          "span_kind": "binary",
+          "start_byte": 190628,
+          "end_byte": 190664,
+          "excerpt_sha256": "66c497b7c55f415e0155c9c75a7491bee7b0fbfd492e613fea1ddcd267c7c275",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-cgi-nested-dispatch",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "selects_dispatch_table",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+        "subject_ref": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "predicate": "binds_handler",
+        "object_value": "www/cgi-bin/cstecgi.cgi@0x0042bf14",
+        "source_span": {
+          "artifact_path": "www/cgi-bin/cstecgi.cgi",
+          "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=237860-237928",
+          "span_kind": "binary",
+          "start_byte": 237860,
+          "end_byte": 237928,
+          "excerpt_sha256": "f0ae2fad9784ff0137b06d22e03a571a669a790909395af8e0e42293db864043",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-cgi-nested-dispatch",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "binds_handler",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      }
+    ],
+    "diagnostics": []
+  },
+  "architecture_path": [
+    {
+      "stage": "transport_mode",
+      "value": "action=upload",
+      "address": "0x0042e5a8"
+    },
+    {
+      "stage": "query_segment_extraction",
+      "value": "setting/setUploadSetting",
+      "address": "0x0042e648"
+    },
+    {
+      "stage": "multipart_body_parse",
+      "value": "cutUploadFile",
+      "address": "0x0042e660"
+    },
+    {
+      "stage": "slash_suffix_normalization",
+      "value": "setUploadSetting",
+      "address": "0x0042e7d0"
+    },
+    {
+      "stage": "operation_table",
+      "value": "set_handle_t",
+      "address": "0x0044a124"
+    },
+    {
+      "stage": "handler",
+      "value": "www/cgi-bin/cstecgi.cgi@0x0042bf14",
+      "address": "0x0042bf14"
+    }
+  ],
+  "ghidra_trigger": {
+    "triggered": false,
+    "reason": "main/cutUploadFile/table symbols and the bounded MIPS branch, query extraction, suffix normalization, table loop, and exact handler entry are replayable from original ELF bytes",
+    "future_trigger": "use the isolated Ghidra Candidate Worker when a variant hides these edges behind unsupported CFG, indirect factories, or cross-function P-code flow"
+  },
+  "obligation_transition": {
+    "resolved": "obligation:x5000r-upload-mode-owner",
+    "created": [
+      "obligation:x5000r-upload-runtime-reachability",
+      "obligation:x5000r-upload-auth-guard"
+    ]
+  }
+}

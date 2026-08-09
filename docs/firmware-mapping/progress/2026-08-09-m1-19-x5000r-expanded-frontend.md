@@ -4,6 +4,10 @@
 > 范围：Frontend Asset Graph、集合差异、Discovery Catalog、Research Case  
 > 样本：TOTOLINK X5000R `V9.1.0u.6118_B20201102`
 
+> 后续状态：M1-20 已从原始 MIPS `main` 重放 upload mode、第二 query segment、
+> `cutUploadFile`、slash suffix、`set_handle_t` 与 exact handler，关闭本记录创建的
+> upload-mode owner 义务；本记录仍作为前端范围扩展基线保留。
+
 ## 1. 从差集归因返回 Producer
 
 M1-18 将 14 个 Native-only operation 中的三个精确引用归为 `frontend_scope_gap`：
@@ -42,7 +46,8 @@ setUploadSetting
 
 这三条链共享物理 CGI，但不是同一种通信结构。尤其不能把 `action=upload` 与
 `setUploadSetting` 压成一个 selector：后者存在于 MIPS `set_handle_t`，前者不在该表中，
-其 upload-mode 处理主体仍是开放义务。
+其 upload-mode 处理主体在 M1-19 时仍是开放义务；后续 M1-20 已用原始 ELF 六段
+确定性证据关闭静态 owner，运行时可达与认证 guard 仍开放。
 
 ## 3. Interface 与证据规则
 

@@ -334,6 +334,9 @@ class ResearchCaseTests(unittest.TestCase):
         from scripts.build_x5000r_expanded_frontend_report import (
             build_analysis as build_expanded_analysis,
         )
+        from scripts.build_x5000r_nested_dispatch_report import (
+            build_analysis as build_nested_analysis,
+        )
 
         if not X5000R_ROOT.exists():
             self.skipTest("local X5000R representative sample is unavailable")
@@ -385,6 +388,7 @@ class ResearchCaseTests(unittest.TestCase):
         (
             _, expanded_frontend, _, _, _, expanded_difference
         ) = build_expanded_analysis(X5000R_ROOT)
+        *_, nested_dispatch = build_nested_analysis(X5000R_ROOT)
         results = (
             *frontend_graph.results,
             analyze("lighttp/lighttpd.conf", discover_web_configuration),
@@ -394,6 +398,7 @@ class ResearchCaseTests(unittest.TestCase):
             set_difference,
             *expanded_frontend.results,
             expanded_difference,
+            nested_dispatch,
         )
         replayed = {
             atom.evidence_id: atom
@@ -453,7 +458,14 @@ class ResearchCaseTests(unittest.TestCase):
             obligations["obligation:x5000r-frontend-scope-expansion"]["status"],
         )
         self.assertEqual(
-            "open", obligations["obligation:x5000r-upload-mode-owner"]["status"]
+            "resolved", obligations["obligation:x5000r-upload-mode-owner"]["status"]
+        )
+        self.assertEqual(
+            "open",
+            obligations["obligation:x5000r-upload-runtime-reachability"]["status"],
+        )
+        self.assertEqual(
+            "open", obligations["obligation:x5000r-upload-auth-guard"]["status"]
         )
         self.assertEqual(124, len(deep.bindings))
         self.assertEqual(123, len({item.route_token for item in deep.bindings}))
@@ -478,6 +490,16 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual(
             expanded_coverage["source_artifact_sha256"],
             hashlib.sha256(expanded_report_path.read_bytes()).hexdigest(),
+        )
+        nested_coverage = next(
+            item for item in case["evidence"]
+            if item["evidence_ref"] == "coverage:x5000r-nested-upload-dispatch"
+        )
+        nested_report_path = Path(nested_coverage["source_path"])
+        self.assertTrue(nested_report_path.is_file())
+        self.assertEqual(
+            nested_coverage["source_artifact_sha256"],
+            hashlib.sha256(nested_report_path.read_bytes()).hexdigest(),
         )
 
 
