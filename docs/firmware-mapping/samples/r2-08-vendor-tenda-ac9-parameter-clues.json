@@ -1,0 +1,197 @@
+{
+  "assessments": [
+    {
+      "assessment_status": "external_clue_observed",
+      "endpoint": "goform/SetDlnaCfg",
+      "frontend_evidence_ids": [
+        "evidence:a55afd5b026acd268857deb76febada25cb5dbda9bd6d7543d92e0f87472fd06"
+      ],
+      "occurrences": [
+        {
+          "artifact_path": "bin/httpd",
+          "artifact_role": "native",
+          "end_byte": 888902,
+          "evidence_id": "evidence:e32a82f1baf0eec7c80c5edb1e8006e293c48e39295dbfe6533198b3d2932b50",
+          "start_byte": 888892
+        },
+        {
+          "artifact_path": "bin/httpd",
+          "artifact_role": "native",
+          "end_byte": 935006,
+          "evidence_id": "evidence:9e4588bc59a31eae8ce745fb15bd77c2a95a54b509a726612f20b5c9d122101a",
+          "start_byte": 934996
+        },
+        {
+          "artifact_path": "bin/httpd",
+          "artifact_role": "native",
+          "end_byte": 944242,
+          "evidence_id": "evidence:ac6756b639e0c2b166c942b64dfdd922735bc1f29e1c2584e1536fde06daf05a",
+          "start_byte": 944232
+        },
+        {
+          "artifact_path": "bin/httpd",
+          "artifact_role": "native",
+          "end_byte": 951998,
+          "evidence_id": "evidence:352e46525969a645162dacc90181a38142745ca59b46d25d7c429a4971afa050",
+          "start_byte": 951988
+        }
+      ],
+      "parameter_id": "frontend-parameter:03928e58a23746e91c4a22a161c78448a748dab334e57f13d6ac7bd70733637f",
+      "parameter_name": "deviceName",
+      "request_candidate_id": "frontend-request:6d73be62c79d227737d2f0bef2fc08c81ad1e9c91ea2e0862ce5eb846cc4d5ab"
+    },
+    {
+      "assessment_status": "no_external_clue",
+      "endpoint": "goform/SetDlnaCfg",
+      "frontend_evidence_ids": [
+        "evidence:1bf3bef23bad742400bd0255a942064c86f37702b718313550e4ec3612c8d2bb"
+      ],
+      "occurrences": [],
+      "parameter_id": "frontend-parameter:5022705f0f66ca53a35f7fd15f93ab6841830807d8912500543b6717359cdb3d",
+      "parameter_name": "dlnaEn",
+      "request_candidate_id": "frontend-request:6d73be62c79d227737d2f0bef2fc08c81ad1e9c91ea2e0862ce5eb846cc4d5ab"
+    },
+    {
+      "assessment_status": "no_external_clue",
+      "endpoint": "goform/SetDlnaCfg",
+      "frontend_evidence_ids": [
+        "evidence:3d03afbfb105253368c4c94c7085ae254f7bf697bd30d6dbed05c3abfbc91f15"
+      ],
+      "occurrences": [],
+      "parameter_id": "frontend-parameter:97f93b303b1a0f0d15f9fe605517c5f5a1d3bb0bc65d28b55380d1cded899efe",
+      "parameter_name": "scanList",
+      "request_candidate_id": "frontend-request:6d73be62c79d227737d2f0bef2fc08c81ad1e9c91ea2e0862ce5eb846cc4d5ab"
+    }
+  ],
+  "claim_boundary": "Exact token co-occurrence is a discovery clue, not parameter-to-state value flow.",
+  "coverage_status": "completed",
+  "diagnostics": [],
+  "evidence_atoms": [
+    {
+      "capability": "external_parameter_token",
+      "confidence": 0.55,
+      "evidence_id": "evidence:352e46525969a645162dacc90181a38142745ca59b46d25d7c429a4971afa050",
+      "object_value": "deviceName",
+      "observation_kind": "direct_static",
+      "predicate": "has_same_firmware_token_clue",
+      "producer": "frontend-parameter-clue",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951998,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "604fa9fa159d5c48da45d6034e730115db00576c10aa14606e0c3fc22f8670b6",
+        "locator": "binary:bytes=951988-951998",
+        "span_kind": "binary",
+        "start_byte": 951988,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "frontend-parameter:03928e58a23746e91c4a22a161c78448a748dab334e57f13d6ac7bd70733637f"
+    },
+    {
+      "capability": "external_parameter_token",
+      "confidence": 0.55,
+      "evidence_id": "evidence:9e4588bc59a31eae8ce745fb15bd77c2a95a54b509a726612f20b5c9d122101a",
+      "object_value": "deviceName",
+      "observation_kind": "direct_static",
+      "predicate": "has_same_firmware_token_clue",
+      "producer": "frontend-parameter-clue",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 935006,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "604fa9fa159d5c48da45d6034e730115db00576c10aa14606e0c3fc22f8670b6",
+        "locator": "binary:bytes=934996-935006",
+        "span_kind": "binary",
+        "start_byte": 934996,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "frontend-parameter:03928e58a23746e91c4a22a161c78448a748dab334e57f13d6ac7bd70733637f"
+    },
+    {
+      "capability": "external_parameter_token",
+      "confidence": 0.55,
+      "evidence_id": "evidence:ac6756b639e0c2b166c942b64dfdd922735bc1f29e1c2584e1536fde06daf05a",
+      "object_value": "deviceName",
+      "observation_kind": "direct_static",
+      "predicate": "has_same_firmware_token_clue",
+      "producer": "frontend-parameter-clue",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 944242,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "604fa9fa159d5c48da45d6034e730115db00576c10aa14606e0c3fc22f8670b6",
+        "locator": "binary:bytes=944232-944242",
+        "span_kind": "binary",
+        "start_byte": 944232,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "frontend-parameter:03928e58a23746e91c4a22a161c78448a748dab334e57f13d6ac7bd70733637f"
+    },
+    {
+      "capability": "external_parameter_token",
+      "confidence": 0.55,
+      "evidence_id": "evidence:e32a82f1baf0eec7c80c5edb1e8006e293c48e39295dbfe6533198b3d2932b50",
+      "object_value": "deviceName",
+      "observation_kind": "direct_static",
+      "predicate": "has_same_firmware_token_clue",
+      "producer": "frontend-parameter-clue",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 888902,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "604fa9fa159d5c48da45d6034e730115db00576c10aa14606e0c3fc22f8670b6",
+        "locator": "binary:bytes=888892-888902",
+        "span_kind": "binary",
+        "start_byte": 888892,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "frontend-parameter:03928e58a23746e91c4a22a161c78448a748dab334e57f13d6ac7bd70733637f"
+    }
+  ],
+  "frontend_requests": [
+    "/goform/refreshDLNA",
+    "goform/GetDlnaCfg",
+    "goform/SetDlnaCfg"
+  ],
+  "known_parser_gaps": [
+    {
+      "endpoint": "goform/expandDlnaFile",
+      "parameters": [
+        "folderGrade",
+        "filePath"
+      ],
+      "reason": "custom $.GetSetData.setData wrapper is not yet modeled"
+    },
+    {
+      "endpoint": "/goform/refreshDLNA",
+      "parameters": [
+        "action"
+      ],
+      "reason": "jQuery.post form-encoded string payload is not yet modeled"
+    }
+  ],
+  "processed_artifact_count": 451,
+  "processed_bytes": 69144996,
+  "schema_version": "firmatlas.mapping.research/ac9-parameter-clue-r2-08/v1",
+  "scope": "Tenda AC9 V15.03.2.21_cn DLNA frontend request parameters versus non-webroot artifacts"
+}

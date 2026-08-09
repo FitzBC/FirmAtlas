@@ -58,6 +58,15 @@ from .frontend import (
     discover_frontend_requests,
     discover_frontend_asset_graph,
 )
+from .parameter_clue import (
+    FrontendParameterClueAssessment,
+    FrontendParameterClueIndex,
+    ParameterClueArtifact,
+    ParameterClueArtifactRole,
+    ParameterClueOccurrence,
+    ParameterCluePolicy,
+    trace_frontend_parameter_clues,
+)
 from .inventory import (
     INVENTORY_SCHEMA_VERSION,
     InventoryDiagnostic,
@@ -323,6 +332,13 @@ from .research_case import (
 )
 
 __all__ = (
+    "FrontendParameterClueAssessment",
+    "FrontendParameterClueIndex",
+    "ParameterClueArtifact",
+    "ParameterClueArtifactRole",
+    "ParameterClueOccurrence",
+    "ParameterCluePolicy",
+    "trace_frontend_parameter_clues",
     "AnalyzerIdentity",
     "ClaimStatus",
     "CoverageEntry",
