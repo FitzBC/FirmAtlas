@@ -194,10 +194,13 @@ from .native_value_flow import (
     discover_mips_handler_value_flows,
 )
 from .analysis_run import (
+    BUILTIN_ANALYZER_REGISTRY,
     MAPPING_ANALYSIS_RUN_SCHEMA_VERSION,
+    MappingAnalysisProfile,
     MappingAnalysisRequest,
     MappingAnalysisRun,
     MappingAnalysisStage,
+    MappingAnalyzerRegistry,
     MappingSourcePlanEntry,
     analyze_extracted_root,
 )
@@ -464,9 +467,12 @@ __all__ = (
     "NativeUbusRegistrationResult",
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
+    "BUILTIN_ANALYZER_REGISTRY",
+    "MappingAnalysisProfile",
     "MappingAnalysisRequest",
     "MappingAnalysisRun",
     "MappingAnalysisStage",
+    "MappingAnalyzerRegistry",
     "MappingSourcePlanEntry",
     "analyze_extracted_root",
     "MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION",

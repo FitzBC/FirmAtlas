@@ -414,6 +414,7 @@ def _page_model_url_properties(content: bytes) -> tuple:
                 and cursor + 2 < len(tokens)
                 and tokens[cursor + 1].value == b":"
                 and tokens[cursor + 2].kind == "string"
+                and tokens[cursor + 2].value
             ):
                 value = tokens[cursor + 2]
                 results.append(

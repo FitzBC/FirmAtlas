@@ -89,6 +89,7 @@
 - 已核验 Web 配置链：nginx `:8180`、`/cgi-bin/luci/ → 127.0.0.1:8188`、`spawn-fcgi → app_data_center`；
 - 可观察接口：`SetStaticRouteCfg`、`SetOnlineDevName`；
 - 可观察参数：`list`、`mac`、`devName`。
+- 现作为首要典型样本由 `auto-v1` Profile 整根运行：1038 Inventory 节点、3461 candidates、79 parameters、3966 EvidenceAtom，并自动证明 45 条 ARM PIC route→handler、关闭 90 条 Scheduler 义务；报告见 [R2-02 原厂 AC9](./r2-02-vendor-tenda-ac9-auto-profile.json)。
 
 它是开发样本，不进入最终无泄漏测试结果。
 
@@ -102,6 +103,8 @@
 - 19.07.8 的 4 个 sectionless ARM32 rpcd 插件已从原始 ELF 注册表重放，31 条 LuCI operation 晋级为 verified Native handler binding，30 条 registration obligation 关闭；动态 `hostapd.{dynamic}` owner 仍保持未决。报告见 [M1-26](./m1-26-openwrt-ac9-native-ubus-registration.json)。
 
 该例用于验证“通信架构迁移不能被降维成 URL 增删”。它支持静态迁移假设，但不证明功能等价、补丁因果、漏洞修复或运行时可达。
+
+R2 起该例作为原厂 Tenda AC9 的同硬件控制面对照，而非主样本。Auto Profile 报告见 [R2-02 OpenWrt AC9](./r2-02-tenda-ac9-auto-profile.json)。
 
 **TOTOLINK X5000R / shared CGI + multipart nested dispatch + custom protection scope**
 

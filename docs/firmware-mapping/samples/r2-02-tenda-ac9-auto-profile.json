@@ -1,0 +1,50 @@
+{
+  "schema_version": "firmatlas.mapping.ac9-auto-profile-report/v1alpha1",
+  "sample_role": "same-hardware-openwrt-control-plane-validation",
+  "firmware_artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
+  "analysis_run_id": "mapping-analysis-run:8dcc9d4470d418b087042150713673d6d84492152ff41ebb96483ca1e15da9e9",
+  "catalog_id": "discovery-catalog:6486ec3ee35a03c0efaf13f98f0878234674578735fb3a314365b288e2d047c5",
+  "profile_id": "firmatlas.mapping.profile/auto-v1",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v1",
+  "coverage_status": "partial",
+  "source_plan_count": 273,
+  "stages": [
+    {"name": "inventory", "coverage_status": "completed", "input_count": 1103, "output_count": 1103, "diagnostics": []},
+    {"name": "source_plan", "coverage_status": "completed", "input_count": 1103, "output_count": 273, "diagnostics": []},
+    {"name": "frontend", "coverage_status": "partial", "input_count": 84, "output_count": 74, "diagnostics": ["frontend.luci_rpc_operation_template"]},
+    {"name": "web_configuration", "coverage_status": "completed", "input_count": 2, "output_count": 7, "diagnostics": []},
+    {"name": "script_backend", "coverage_status": "completed", "input_count": 27, "output_count": 10, "diagnostics": []},
+    {"name": "native", "coverage_status": "completed", "input_count": 156, "output_count": 612, "diagnostics": []},
+    {"name": "native_ubus_registration", "coverage_status": "completed", "input_count": 4, "output_count": 4, "diagnostics": []},
+    {"name": "arm_pic_callsite", "coverage_status": "not_applicable", "input_count": 0, "output_count": 0, "diagnostics": ["no selected sources"]},
+    {"name": "ubus_backend", "coverage_status": "partial", "input_count": 8, "output_count": 56, "diagnostics": []},
+    {"name": "scheduler", "coverage_status": "completed", "input_count": 117, "output_count": 117, "diagnostics": ["no_eligible_analyzer"]},
+    {"name": "catalog", "coverage_status": "partial", "input_count": 273, "output_count": 853, "diagnostics": ["one or more producer results were incomplete", "one or more producer results were incomplete", "candidate correlation used one or more incomplete producer results", "open obligations remain but no unattempted eligible analyzer is available"]}
+  ],
+  "catalog_summary": {
+    "candidate_count": 853,
+    "parameter_count": 220,
+    "evidence_count": 1326,
+    "association_count": 22,
+    "open_obligation_count": 117,
+    "verified_native_binding_count": 31,
+    "static_plugin_binding_count": 25,
+    "native_registration_obligation_count": 0,
+    "runtime_owner_obligation_count": 17
+  },
+  "handler_examples": [
+    {"logical_operation": "ubus://file/read", "source_path": "usr/lib/rpcd/file.so", "handler_identity": "usr/lib/rpcd/file.so@0x00001b4c"},
+    {"logical_operation": "ubus://luci-rpc/getBoardJSON", "source_path": "usr/lib/rpcd/luci.so", "handler_identity": "usr/lib/rpcd/luci.so@0x00002a80"}
+  ],
+  "comparison_to_base_profile": {
+    "source_plan_count": {"base": 269, "auto": 273},
+    "candidate_count": {"base": 720, "auto": 853},
+    "evidence_count": {"base": 1105, "auto": 1326},
+    "native_ubus_binding": {"base": 0, "auto": 31}
+  },
+  "interpretation": {
+    "supported": "the versioned auto profile and builtin registry select four rpcd registration validators and project verified native handlers into the same immutable catalog",
+    "why_obligations_increase": "the enriched graph removes all native registration-table obligations while exposing 17 real runtime-owner gaps that the base profile did not model",
+    "not_claimed": "runtime ubus object existence, authentication outcome, vulnerability, or resolution of the remaining generic frontend/native obligations"
+  }
+}

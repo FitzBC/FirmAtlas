@@ -7,7 +7,11 @@ from collections import Counter
 import json
 from pathlib import Path
 
-from firmatlas.mapping import MappingAnalysisRequest, analyze_extracted_root
+from firmatlas.mapping import (
+    MappingAnalysisProfile,
+    MappingAnalysisRequest,
+    analyze_extracted_root,
+)
 
 
 ROOT = Path(
@@ -19,7 +23,9 @@ ARTIFACT_SHA256 = "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568
 
 def build_report() -> dict:
     run = analyze_extracted_root(MappingAnalysisRequest(
-        root=ROOT, firmware_artifact_sha256=ARTIFACT_SHA256
+        root=ROOT,
+        firmware_artifact_sha256=ARTIFACT_SHA256,
+        profile=MappingAnalysisProfile.base(),
     ))
     candidate_kinds = Counter(
         item.candidate_kind.value for item in run.catalog.candidates

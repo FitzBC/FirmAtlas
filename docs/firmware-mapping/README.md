@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1 corpus gate 仍为 `partial`；R2-01 extracted-root AnalyzeRun 统一编排已验证
+> 当前状态：M1 corpus gate 仍为 `partial`；R2-02 Profile/Registry 与原厂 Tenda AC9 自动 ARM 深化已验证
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -87,6 +87,7 @@
 | [M1-25 ubus 后端执行图](./progress/2026-08-09-m1-25-ubus-backend-graph.md) | 动态 RPC 模板、rpcd principal/binding、ACL grant 与 AC9 实证 | rpcd 插件、ACL、动态对象或后端归属规则变化时 |
 | [M1-26 Native ubus 注册表](./progress/2026-08-09-m1-26-native-ubus-registration.md) | ARM32 rpcd 注册表、handler binding、义务关闭与 UI 下钻 | rpcd ABI/Profile、Native registration 或 handler 投影变化时 |
 | [R2-01 AnalyzeRun 编排](./progress/2026-08-09-r2-01-analysis-run-orchestration.md) | rootfs 自动 source plan、多 producer、Scheduler 与 Catalog 一键闭环 | 运行 Interface、source plan、阶段或 CLI 变化时 |
+| [R2-02 Profile/Registry](./progress/2026-08-09-r2-02-analysis-profile-registry.md) | 原厂 Tenda AC9 主样本、ARM PIC 自动深化、OpenWrt ubus 对照 | Profile、Registry、适用性 gate 或主样本结果变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -172,7 +173,7 @@ M1 工作项：
 | M1-25 | LuCI/ubus 后端执行主体与访问图 | 已验证 | M1-08/24 | bounded dynamic template + rpcd exec/native principal + backend binding + ACL grant + AC9 真实回放 + Console 证据链 |
 | M1-26 | Native rpcd/ubus 注册表与 handler 绑定 | 已验证 | M1-25 | 4 个真实 ARM32 plugin + 31 verified binding + 30 registration obligations closed + handler UI |
 
-**下一项建议**：为 AnalyzeRun 增加 versioned Analysis Profile/Analyzer Registry，根据 source plan 自动注册适用的 deterministic deep analyzer；随后串接 ContainerBinwalkWorker、任务持久化、上传接口和通信图 read model。继续补 M1-11 真实 script-backend / Native-only 样本出口。
+**下一项建议**：以原厂 Tenda AC9 的 89 条剩余义务为入口，建立历史漏洞 expectation-vs-catalog 差异与漏检原因分类，再据此选择通用 dispatcher/parameter Analyzer；随后串接 ContainerBinwalkWorker、任务持久化、上传接口和通信图 read model。
 
 ## 7. 跨会话无缝工作协议
 

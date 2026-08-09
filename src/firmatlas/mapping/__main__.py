@@ -10,7 +10,11 @@ from typing import Optional, Sequence
 
 from .domain import FirmwareMappingSnapshot, ObligationStatus
 from .inventory import InventoryPolicy, build_inventory
-from .analysis_run import MappingAnalysisRequest, analyze_extracted_root
+from .analysis_run import (
+    MappingAnalysisProfile,
+    MappingAnalysisRequest,
+    analyze_extracted_root,
+)
 
 
 def _summary(snapshot: FirmwareMappingSnapshot) -> dict:
@@ -100,6 +104,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     analyze.add_argument("root")
     analyze.add_argument("--artifact-sha256", required=True)
     analyze.add_argument("--output", required=True)
+    analyze.add_argument(
+        "--profile", choices=("auto", "base"), default="auto",
+        help="versioned analyzer profile (default: auto)",
+    )
     analyze.add_argument("--max-files", type=int, default=defaults.max_files)
     analyze.add_argument(
         "--max-total-bytes", type=int, default=defaults.max_total_bytes
@@ -122,6 +130,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             run = analyze_extracted_root(MappingAnalysisRequest(
                 root=Path(args.root),
                 firmware_artifact_sha256=args.artifact_sha256,
+                profile=(
+                    MappingAnalysisProfile.auto()
+                    if args.profile == "auto"
+                    else MappingAnalysisProfile.base()
+                ),
                 inventory_policy=InventoryPolicy(
                     max_files=args.max_files,
                     max_total_bytes=args.max_total_bytes,
@@ -141,6 +154,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "analysis_run_id": run.analysis_run_id,
                 "catalog_id": run.catalog.catalog_id,
                 "coverage_status": run.coverage_status.value,
+                "profile_id": run.profile_id,
+                "analyzer_registry_id": run.analyzer_registry_id,
                 "candidate_count": len(run.catalog.candidates),
                 "parameter_count": len(run.catalog.parameters),
                 "evidence_count": len(run.catalog.evidence_atoms),

@@ -9,7 +9,9 @@ from contextlib import redirect_stdout
 from firmatlas.mapping import (
     CoverageStatus,
     DiscoveryCandidateKind,
+    MappingAnalysisProfile,
     MappingAnalysisRequest,
+    MappingAnalyzerRegistry,
     SchedulerTermination,
     analyze_extracted_root,
 )
@@ -17,6 +19,14 @@ from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class MappingAnalysisRunContractTests(unittest.TestCase):
+    AC9_ROOT = Path(
+        "var/mapping-work/ac9-version-diff/extractions/openwrt-19.07.8/"
+        "extractions/firmware.bin.extracted/0/partition_1.bin.extracted/0/squashfs-root"
+    )
+    TENDA_AC9_ROOT = (
+        Path(__file__).resolve().parents[2]
+        / "iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root"
+    )
     def test_extracted_root_runs_selected_producers_and_publishes_catalog(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -46,7 +56,11 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertEqual(first.catalog.catalog_id, second.catalog.catalog_id)
         self.assertEqual(CoverageStatus.COMPLETED, first.inventory_coverage_status)
         self.assertEqual(
-            {"inventory", "source_plan", "frontend", "web_configuration", "script_backend", "native", "scheduler", "catalog"},
+            {
+                "inventory", "source_plan", "frontend", "web_configuration",
+                "script_backend", "native", "native_ubus_registration",
+                "arm_pic_callsite", "ubus_backend", "scheduler", "catalog",
+            },
             {stage.stage_name for stage in first.stages},
         )
         self.assertEqual(
@@ -96,7 +110,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             with redirect_stdout(stdout):
                 exit_code = mapping_main((
                     "analyze-root", str(root), "--artifact-sha256", "c" * 64,
-                    "--output", str(output),
+                    "--output", str(output), "--profile", "base",
                 ))
 
             summary = json.loads(stdout.getvalue())
@@ -107,6 +121,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertEqual(1, summary["candidate_count"])
         self.assertEqual(1, summary["parameter_count"])
         self.assertEqual(str(output), summary["output"])
+        self.assertEqual("firmatlas.mapping.profile/base-v1", summary["profile_id"])
 
     def test_elf_paths_are_not_misrouted_to_text_producers(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -124,6 +139,76 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         kinds = {item.source_path: item.analyzer_kinds for item in result.source_plan}
         self.assertEqual(("native",), kinds["usr/sbin/uhttpd"])
         self.assertEqual(("native",), kinds["www/cgi-bin/tool.cgi"])
+
+    def test_auto_profile_closes_real_ac9_native_ubus_registration_work(self):
+        if not self.AC9_ROOT.is_dir():
+            self.skipTest("local OpenWrt AC9 rootfs is unavailable")
+
+        result = analyze_extracted_root(MappingAnalysisRequest(
+            root=self.AC9_ROOT,
+            firmware_artifact_sha256=(
+                "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9"
+            ),
+            profile=MappingAnalysisProfile.auto(),
+        ))
+
+        bindings = [
+            item for item in result.catalog.candidates
+            if item.candidate_kind is DiscoveryCandidateKind.UBUS_BACKEND_BINDING
+            and dict(item.attributes).get("binding_status")
+            == "verified_native_registration"
+        ]
+        self.assertEqual(31, len(bindings))
+        self.assertNotIn(
+            "resolve_ubus_registration_table",
+            {item.required_capability for item in result.catalog.open_obligations},
+        )
+        stage = next(
+            item for item in result.stages
+            if item.stage_name == "native_ubus_registration"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
+        self.assertEqual(4, stage.output_count)
+        self.assertEqual("firmatlas.mapping.profile/auto-v1", result.profile_id)
+
+    def test_profile_cannot_request_an_analyzer_missing_from_registry(self):
+        registry = MappingAnalyzerRegistry(
+            "firmatlas.mapping.analyzer-registry/test-v1", ("frontend",)
+        )
+        with self.assertRaisesRegex(ValueError, "unavailable analyzers"):
+            analyze_extracted_root(
+                MappingAnalysisRequest(
+                    root=Path("does-not-need-to-exist"),
+                    firmware_artifact_sha256="e" * 64,
+                    profile=MappingAnalysisProfile.auto(),
+                ),
+                registry=registry,
+            )
+
+    def test_auto_profile_deepens_primary_vendor_tenda_ac9_arm_routes(self):
+        if not self.TENDA_AC9_ROOT.is_dir():
+            self.skipTest("local vendor Tenda AC9 rootfs is unavailable")
+
+        result = analyze_extracted_root(MappingAnalysisRequest(
+            root=self.TENDA_AC9_ROOT,
+            firmware_artifact_sha256="981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+            profile=MappingAnalysisProfile.auto(),
+        ))
+
+        routes = {
+            item.canonical_identity
+            for item in result.catalog.candidates
+            if item.candidate_kind is DiscoveryCandidateKind.NATIVE_ROUTE_BINDING
+        }
+        self.assertTrue({
+            "SetOnlineDevName", "setBlackRule", "delBlackRule",
+            "getOnlineList", "getBlackRuleList",
+        } <= routes)
+        stage = next(
+            item for item in result.stages if item.stage_name == "arm_pic_callsite"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
+        self.assertGreaterEqual(stage.output_count, 5)
 
 
 if __name__ == "__main__":

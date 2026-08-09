@@ -1,0 +1,54 @@
+{
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-auto-profile/v1alpha1",
+  "sample_role": "primary-vendor-tenda-ac9-goform-arm-pic",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "analysis_run_id": "mapping-analysis-run:83dd2780bc401d690efe7c9c906a771853349191d6988bfb4fd9ba32d208b73e",
+  "catalog_id": "discovery-catalog:b7a0f7db00de577fe26b81e584764d004599ba10b2143a4a639fb7746174c880",
+  "profile_id": "firmatlas.mapping.profile/auto-v1",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v1",
+  "coverage_status": "completed",
+  "inventory_coverage_status": "completed",
+  "source_plan_count": 418,
+  "stages": [
+    {"name": "inventory", "coverage_status": "completed", "input_count": 1038, "output_count": 1038, "diagnostics": []},
+    {"name": "source_plan", "coverage_status": "completed", "input_count": 1038, "output_count": 418, "diagnostics": []},
+    {"name": "frontend", "coverage_status": "completed", "input_count": 130, "output_count": 114, "diagnostics": []},
+    {"name": "web_configuration", "coverage_status": "completed", "input_count": 1, "output_count": 5, "diagnostics": []},
+    {"name": "script_backend", "coverage_status": "completed", "input_count": 1, "output_count": 0, "diagnostics": []},
+    {"name": "native", "coverage_status": "completed", "input_count": 287, "output_count": 3187, "diagnostics": []},
+    {"name": "native_ubus_registration", "coverage_status": "not_applicable", "input_count": 0, "output_count": 0, "diagnostics": ["no selected sources"]},
+    {"name": "arm_pic_callsite", "coverage_status": "completed", "input_count": 1, "output_count": 45, "diagnostics": []},
+    {"name": "ubus_backend", "coverage_status": "not_applicable", "input_count": 0, "output_count": 0, "diagnostics": ["no ubus operations"]},
+    {"name": "scheduler", "coverage_status": "completed", "input_count": 179, "output_count": 89, "diagnostics": ["no_eligible_analyzer"]},
+    {"name": "catalog", "coverage_status": "completed", "input_count": 418, "output_count": 3461, "diagnostics": ["open obligations remain but no unattempted eligible analyzer is available"]}
+  ],
+  "catalog_summary": {
+    "candidate_count": 3461,
+    "parameter_count": 79,
+    "evidence_count": 3966,
+    "association_count": 65,
+    "open_obligation_count": 89,
+    "resolved_obligation_count": 90,
+    "native_route_binding_count": 45,
+    "native_handler_count": 45
+  },
+  "representative_routes": [
+    {"route": "getBlackRuleList", "source_path": "bin/httpd", "handler_symbol": "formGetMacfilterRuleList", "handler_identity": "bin/httpd@0x000c483c", "registration_address": "0x42bb0", "registrar_pair_count": 131},
+    {"route": "delBlackRule", "source_path": "bin/httpd", "handler_symbol": "formDelMacfilterRule", "handler_identity": "bin/httpd@0x000c3278", "registration_address": "0x42b94", "registrar_pair_count": 131},
+    {"route": "getOnlineList", "source_path": "bin/httpd", "handler_symbol": "formGetOnlineList", "handler_identity": "bin/httpd@0x0005ecf4", "registration_address": "0x42788", "registrar_pair_count": 131},
+    {"route": "setBlackRule", "source_path": "bin/httpd", "handler_symbol": "formAddMacfilterRule", "handler_identity": "bin/httpd@0x000c1bd8", "registration_address": "0x42b78", "registrar_pair_count": 131},
+    {"route": "SetOnlineDevName", "source_path": "bin/httpd", "handler_symbol": "formSetDeviceName", "handler_identity": "bin/httpd@0x00060ee8", "registration_address": "0x42aec", "registrar_pair_count": 131}
+  ],
+  "iteration_findings": [
+    {
+      "code": "empty_page_model_url",
+      "affected_sources": ["webroot_ro/js/parental_control.js", "webroot_ro/js/status_usb.js", "webroot_ro/js/system_log.js"],
+      "resolution": "empty getUrl/setUrl values are disabled operations and no longer become zero-length interface evidence"
+    }
+  ],
+  "interpretation": {
+    "supported": "a whole-root no-seed run automatically derives ARM anchors from frontend/native correlation, proves 45 route-handler bindings, and resolves 90 route/handler obligations",
+    "why_open_obligations_remain": "89 unmatched or non-profiled operations still require script, other native dispatcher, runtime, or parameter analysis",
+    "not_claimed": "runtime reachability, authentication outcome, exploitability, or complete parameter-to-state recovery for all 45 handlers"
+  }
+}

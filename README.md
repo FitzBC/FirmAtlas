@@ -135,10 +135,11 @@ make mapping-inventory ROOT=/path/to/extracted-root
 ```bash
 PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
   --artifact-sha256 <original-firmware-sha256> \
+  --profile auto \
   --output mapping-analysis-run.json
 ```
 
-该入口会自动建立 Source Plan，运行 Frontend、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。真实 OpenWrt AC9 中间报告见 [R2-01 AnalyzeRun](./docs/firmware-mapping/samples/r2-01-openwrt-ac9-analysis-run.json)。
+该入口会自动建立 Source Plan，运行 Frontend、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。`--profile base` 可重放 R2-01 基线。首要样本见 [R2-02 原厂 Tenda AC9](./docs/firmware-mapping/samples/r2-02-vendor-tenda-ac9-auto-profile.json)，同硬件 OpenWrt 对照见 [R2-02 OpenWrt AC9](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。
 
 输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。Inventory v1alpha2 会在固件 chroot 内解析绝对与链式 symlink，但不会经链接打开或散列目标；普通缺失、循环、深度耗尽和越界仍进入 coverage ledger。内置 Inventory 只读取已解包目录并以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装由独立 Container Extraction Worker 处理，不能把原始固件直接交给此命令。
 
