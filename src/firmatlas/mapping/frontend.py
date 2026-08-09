@@ -22,13 +22,15 @@ from .inventory import SourceArtifactEntry
 
 
 FRONTEND_RESULT_SCHEMA_VERSION = "firmatlas.mapping.frontend-result/v1alpha1"
-_PRODUCER = AnalyzerIdentity(name="frontend-request-producer", version="0.1.0")
+_PRODUCER = AnalyzerIdentity(name="frontend-request-producer", version="0.2.0")
 _SUPPORTED_CONSTRUCTS = (
     "R.pageModel",
     "R.moduleModel.getSubmitData",
     "jQuery.getJSON",
     "jQuery.post",
     "jQuery.ajax",
+    "custom.request",
+    "shared-cgi.topicurl",
     "HTML.form",
 )
 
@@ -744,6 +746,215 @@ def _jquery_ajax_calls(content: bytes) -> tuple:
     return tuple(results)
 
 
+def _contains_token_sequence(
+    tokens: Tuple[_Token, ...], start: int, end: int, sequence: tuple
+) -> bool:
+    width = len(sequence)
+    return any(
+        tuple(token.value for token in tokens[index : index + width]) == sequence
+        for index in range(start, max(start, end - width + 1))
+    )
+
+
+def _function_owner(tokens: Tuple[_Token, ...], function_index: int) -> Optional[bytes]:
+    if (
+        function_index + 1 < len(tokens)
+        and tokens[function_index + 1].kind == "identifier"
+    ):
+        return tokens[function_index + 1].value
+    if (
+        function_index >= 2
+        and tokens[function_index - 1].value == b"="
+        and tokens[function_index - 2].kind == "identifier"
+    ):
+        return tokens[function_index - 2].value
+    return None
+
+
+def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
+    """Resolve a shared CGI wrapper plus prototype-level operation selectors.
+
+    Some firmware frontends keep one physical CGI URL in configuration, assign it
+    to an instance field, and place the logical operation in ``topicurl`` before
+    JSON serialization.  The endpoint and selector are only published when the
+    complete wrapper contract is present in the same constructor function.
+    """
+
+    tokens = _tokenize_javascript(content)
+    endpoint_properties = {}
+    for index in range(0, max(0, len(tokens) - 3)):
+        if (
+            tokens[index].kind == "identifier"
+            and tokens[index + 1].value == b"="
+            and tokens[index + 2].value == b"{"
+        ):
+            properties, _ = _object_string_properties(tokens, index + 2)
+            for key, value in properties:
+                if key.value.lower() == b"cgiurl":
+                    endpoint_properties[(tokens[index].value, b"cgiurl")] = value
+
+    wrappers = {}
+    for function_index, token in enumerate(tokens):
+        if token.value != b"function":
+            continue
+        owner = _function_owner(tokens, function_index)
+        if owner is None:
+            continue
+        body_open = function_index + 1
+        while body_open < len(tokens) and tokens[body_open].value != b"{":
+            body_open += 1
+        if body_open >= len(tokens):
+            continue
+        body_end = _matching_close(tokens, body_open)
+        endpoint_token = None
+        for index in range(body_open + 1, max(body_open + 1, body_end - 6)):
+            if (
+                tuple(item.value for item in tokens[index : index + 4])
+                == (b"this", b".", b"srcUrl", b"=")
+                and tokens[index + 4].kind == "identifier"
+                and tokens[index + 5].value == b"."
+                and tokens[index + 6].value.lower() == b"cgiurl"
+            ):
+                endpoint_token = endpoint_properties.get(
+                    (tokens[index + 4].value, tokens[index + 6].value.lower())
+                )
+                break
+        if endpoint_token is None:
+            continue
+        required_sequences = (
+            (b".", b"topicurl", b"=", b"this", b".", b"topicurl"),
+            (b"JSON", b".", b"stringify", b"("),
+            (b"$", b".", b"ajax", b"("),
+            (b"url", b":", b"this", b".", b"srcUrl"),
+            (b"type", b":", b"POST"),
+            (b"dataType", b":", b"json"),
+        )
+        if not all(
+            _contains_token_sequence(tokens, body_open + 1, body_end, sequence)
+            for sequence in required_sequences
+        ):
+            continue
+        wrappers[owner] = endpoint_token
+
+    results = []
+    for index in range(0, max(0, len(tokens) - 7)):
+        if not (
+            tokens[index].kind == "identifier"
+            and tuple(item.value for item in tokens[index + 1 : index + 4])
+            == (b".", b"prototype", b".")
+            and tokens[index + 4].kind == "identifier"
+            and tokens[index + 5].value == b"="
+            and tokens[index + 6].value == b"function"
+        ):
+            continue
+        endpoint_token = wrappers.get(tokens[index].value)
+        if endpoint_token is None:
+            continue
+        body_open = index + 7
+        while body_open < len(tokens) and tokens[body_open].value != b"{":
+            body_open += 1
+        if body_open >= len(tokens):
+            continue
+        body_end = _matching_close(tokens, body_open)
+        if not _contains_token_sequence(
+            tokens, body_open + 1, body_end, (b"this", b".", b"post", b"(")
+        ):
+            continue
+        for cursor in range(body_open + 1, max(body_open + 1, body_end - 4)):
+            if not (
+                tuple(item.value for item in tokens[cursor : cursor + 4])
+                == (b"this", b".", b"topicurl", b"=")
+                and tokens[cursor + 4].kind == "string"
+            ):
+                continue
+            name_token = tokens[cursor + 2]
+            selector_token = tokens[cursor + 4]
+            parameter = _ParameterLiteral(
+                name="topicurl",
+                name_start=name_token.start,
+                name_end=name_token.end,
+                namespace=FrontendParameterNamespace.JSON,
+                literal_value=selector_token.value.decode("utf-8"),
+                value_start=selector_token.start,
+                value_end=selector_token.end,
+                is_operation_selector=True,
+                source_construct="shared-cgi.topicurl",
+            )
+            results.append(
+                (
+                    endpoint_token.value.decode("utf-8"),
+                    endpoint_token.start,
+                    endpoint_token.end,
+                    FrontendRequestRole.WRITE,
+                    "POST",
+                    "json",
+                    (parameter,),
+                )
+            )
+            break
+    return tuple(results)
+
+
+def _custom_request_calls(content: bytes) -> tuple:
+    tokens = _tokenize_javascript(content)
+    results = []
+    selector_names = {
+        b"action", b"cmd", b"command", b"method", b"operation", b"topicurl"
+    }
+    for index in range(0, max(0, len(tokens) - 6)):
+        if not (
+            tokens[index].kind == "identifier"
+            and tuple(item.value for item in tokens[index + 1 : index + 5])
+            == (b".", b"request", b"(", b"{")
+        ):
+            continue
+        properties, _ = _object_properties(tokens, index + 4)
+        direct = {key.value.lower(): value for key, value in properties}
+        url = direct.get(b"url")
+        if url is None or url.kind != "string":
+            continue
+        method_token = direct.get(b"type") or direct.get(b"method")
+        method = (
+            method_token.value.decode("ascii").upper()
+            if method_token is not None and method_token.kind == "string"
+            else None
+        )
+        data = direct.get(b"data")
+        parameters = []
+        if data is not None and data.value == b"{":
+            data_index = tokens.index(data)
+            data_properties, _ = _object_properties(tokens, data_index)
+            for name, value in data_properties:
+                literal_value = (
+                    value.value.decode("utf-8") if value.kind == "string" else None
+                )
+                parameters.append(_ParameterLiteral(
+                    name=name.value.decode("utf-8"),
+                    name_start=name.start,
+                    name_end=name.end,
+                    namespace=FrontendParameterNamespace.JSON,
+                    literal_value=literal_value,
+                    value_start=value.start if value.kind == "string" else None,
+                    value_end=value.end if value.kind == "string" else None,
+                    is_operation_selector=(
+                        name.value.lower() in selector_names
+                        and literal_value is not None
+                    ),
+                    source_construct="custom.request.data",
+                ))
+        role = (
+            FrontendRequestRole.READ if method == "GET"
+            else FrontendRequestRole.WRITE
+            if method in {"POST", "PUT", "PATCH", "DELETE"}
+            else FrontendRequestRole.UNSPECIFIED
+        )
+        results.append((
+            url.value.decode("utf-8"), url.start, url.end, role, method,
+            "json" if parameters else None, tuple(parameters),
+        ))
+    return tuple(results)
+
+
 def _html_form_requests(content: bytes) -> tuple:
     parser = _HtmlFormParser(content.decode("utf-8"))
     parser.feed(content.decode("utf-8"))
@@ -833,6 +1044,42 @@ def _request_literals(content: bytes, source_path: str) -> tuple:
                 method,
                 representation,
                 "jQuery.ajax",
+                parameters,
+            )
+        )
+    for (
+        endpoint,
+        start_byte,
+        end_byte,
+        role,
+        method,
+        representation,
+        parameters,
+    ) in _custom_request_calls(content):
+        discoveries.append((
+            endpoint, start_byte, end_byte,
+            FrontendEndpointShape.EXACT_LITERAL, role, method, representation,
+            "custom.request", parameters,
+        ))
+    for (
+        endpoint,
+        start_byte,
+        end_byte,
+        role,
+        method,
+        representation,
+        parameters,
+    ) in _shared_cgi_topicurl_calls(content):
+        discoveries.append(
+            (
+                endpoint,
+                start_byte,
+                end_byte,
+                FrontendEndpointShape.EXACT_LITERAL,
+                role,
+                method,
+                representation,
+                "shared-cgi.topicurl",
                 parameters,
             )
         )

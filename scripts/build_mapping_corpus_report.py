@@ -34,6 +34,11 @@ from firmatlas.mapping import (
 AC9_FIRMWARE_SHA256 = "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296"
 AC9_INVENTORY_SHA256 = "a6b3a57b7262de8692ebf9f9fac2aa249bbbdb69272a45c8c0a651089a6ddcf4"
 DAP3520_FIRMWARE_SHA256 = "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9"
+X5000R_FIRMWARE_SHA256 = "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9"
+X5000R_ROOT = Path(
+    "var/mapping-work/x5000r-v9.1.0u.6118/extractions/firmware.bin.extracted/"
+    "1004C/C8343R-6118.bin.extracted/184C70/squashfs-root"
+)
 DAP3520_ROOT = Path(
     "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/"
     "_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/"
@@ -143,7 +148,52 @@ def _dap3520_catalog(root: Path):
     ))
 
 
-def build_m1_report(ac9_root: Path, dap3520_root: Path = DAP3520_ROOT):
+def _x5000r_catalog(root: Path):
+    paths = {
+        "frontend": "www/static/js/config_ie.js",
+        "wrapper": "www/static/js/topicurl.js",
+        "web": "lighttp/lighttpd.conf",
+        "native": "www/cgi-bin/cstecgi.cgi",
+    }
+    if not all((root / path).is_file() for path in paths.values()):
+        return None
+    frontend_results = []
+    for key in ("frontend", "wrapper"):
+        path = paths[key]
+        content = (root / path).read_bytes()
+        frontend_results.append(
+            discover_frontend_requests(_source(path, content), content)
+        )
+    web_content = (root / paths["web"]).read_bytes()
+    web = discover_web_configuration(
+        _source(paths["web"], web_content), web_content
+    )
+    native_content = (root / paths["native"]).read_bytes()
+    native = discover_native_hints(
+        _source(paths["native"], native_content), native_content
+    )
+    inventory = build_inventory(root, InventoryPolicy())
+    return assemble_discovery_catalog(DiscoveryCatalogInput(
+        X5000R_FIRMWARE_SHA256,
+        inventory.inventory_sha256,
+        (
+            DiscoveryProducerBatch.frontend(
+                tuple(frontend_results), "www/static/js/{config_ie,topicurl}.js"
+            ),
+            DiscoveryProducerBatch.web_configuration(
+                (web,), paths["web"]
+            ),
+            DiscoveryProducerBatch.native((native,), paths["native"]),
+        ),
+        source_inventory_coverage_status=inventory.coverage_status,
+    ))
+
+
+def build_m1_report(
+    ac9_root: Path,
+    dap3520_root: Path = DAP3520_ROOT,
+    x5000r_root: Path = X5000R_ROOT,
+):
     """Replay available evidence without promoting fixtures or leads to firmware truth."""
 
     ac9 = _ac9_catalog(ac9_root)
@@ -164,6 +214,7 @@ def build_m1_report(ac9_root: Path, dap3520_root: Path = DAP3520_ROOT):
         "shared-cgi-selector",
     )
     dap3520 = _dap3520_catalog(dap3520_root)
+    x5000r = _x5000r_catalog(x5000r_root)
     return build_corpus_report(CorpusReportInput(
         corpus_version="firmatlas.mapping.corpus/m1.2",
         required_categories=(
@@ -203,6 +254,17 @@ def build_m1_report(ac9_root: Path, dap3520_root: Path = DAP3520_ROOT):
                 ("constructs_request", "selects_operation"), catalog=shared_cgi,
             ),
             CorpusSampleInput(
+                "totolink-x5000r-shared-cgi", "cgi_gateway",
+                "shared_cgi_dispatcher", "cross-architecture-validation",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                (
+                    "constructs_request", "selects_operation",
+                    "maps_namespace", "binds_handler", "mentions_endpoint",
+                ),
+                expected_firmware_sha256=X5000R_FIRMWARE_SHA256,
+                catalog=x5000r,
+            ),
+            CorpusSampleInput(
                 "dlink-dsl2877-derived", "script_backend",
                 "vendor_asp_controller", "cross-architecture-validation",
                 CorpusEvidenceTier.DERIVED_FIRMWARE,
@@ -228,9 +290,12 @@ def main() -> int:
         ),
     )
     parser.add_argument("--dap3520-root", type=Path, default=DAP3520_ROOT)
+    parser.add_argument("--x5000r-root", type=Path, default=X5000R_ROOT)
     args = parser.parse_args()
     print(json.dumps(
-        build_m1_report(args.ac9_root, args.dap3520_root).to_dict(),
+        build_m1_report(
+            args.ac9_root, args.dap3520_root, args.x5000r_root
+        ).to_dict(),
         ensure_ascii=False,
         indent=2,
     ))

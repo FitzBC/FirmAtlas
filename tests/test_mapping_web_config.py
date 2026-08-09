@@ -24,6 +24,43 @@ def _source(path: str, content: bytes) -> SourceArtifactEntry:
 
 
 class WebConfigurationProducerContractTests(unittest.TestCase):
+    def test_lighttpd_cgi_namespace_preserves_listener_root_and_execution_mode(self):
+        content = b'''server.port = 80
+server.document-root = "/www/"
+$SERVER["socket"] == ":8080" { server.document-root = "/www/" }
+$HTTP["url"] =~ "^(/~[^/]+)?/cgi-bin/" {
+  cgi.assign = ( "" => "" )
+}
+'''
+
+        result = discover_web_configuration(
+            _source("lighttp/lighttpd.conf", content), content
+        )
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual("lighttpd", result.detected_format)
+        self.assertEqual(
+            [
+                (WebConfigFindingKind.LISTENER, None, "80", None),
+                (WebConfigFindingKind.DOCUMENT_ROOT, "/", "/www/", None),
+                (WebConfigFindingKind.LISTENER, None, "8080", None),
+                (
+                    WebConfigFindingKind.NAMESPACE_MAPPING,
+                    "/cgi-bin/",
+                    "cgi",
+                    "cgi_executor",
+                ),
+            ],
+            [
+                (item.kind, item.namespace, item.value, item.qualifier)
+                for item in result.findings
+            ],
+        )
+        self.assertEqual(
+            {"listens_on", "maps_namespace", "binds_handler"},
+            {item.capability for item in result.evidence_atoms},
+        )
+
     def test_proprietary_httpd_control_binds_alias_to_root_and_external_handler(self):
         content = b"""<? require('/etc/templates/troot.php'); ?>
 Server {
@@ -115,7 +152,7 @@ CFG;
         self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
         self.assertEqual("nginx", result.detected_format)
         self.assertEqual(
-            {"nginx", "posix_shell", "proprietary_httpd"},
+            {"lighttpd", "nginx", "posix_shell", "proprietary_httpd"},
             set(result.supported_formats),
         )
         self.assertEqual(

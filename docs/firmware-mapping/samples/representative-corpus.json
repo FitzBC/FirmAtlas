@@ -99,14 +99,14 @@
       "sample_id": "totolink-x5000r-shared-cgi",
       "vendor": "Totolink",
       "model": "X5000R",
-      "firmware_candidate_id": null,
-      "availability": "vulnerability_only",
+      "firmware_candidate_id": "local-artifact:2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "availability": "locally_extracted",
       "category": "cgi_gateway",
       "subtype": "shared_cgi_dispatcher",
       "anchors": ["/cgi-bin/cstecgi.cgi"],
-      "role": "acquisition-gap",
+      "role": "cross-architecture-validation",
       "target_milestones": ["M1", "M2"],
-      "evidence_basis": "CVE-2023-6612 semantic observation; firmware artifact still required"
+      "evidence_basis": "exact firmware artifact, isolated Binwalk lineage, completed Inventory, frontend selector, lighttpd CGI namespace, and MIPS native hints"
     },
     {
       "sample_id": "nextu-fleta-boafrm",

@@ -164,9 +164,23 @@ def _resolve_firmware_symlink(
             candidate_mode = candidate.lstat().st_mode
         except (FileNotFoundError, NotADirectoryError):
             missing_path = "/".join(candidate_parts + tuple(pending))
+            runtime_root = candidate_parts[0] if candidate_parts else None
+            runtime_root_path = root / runtime_root if runtime_root else None
+            declared_empty_runtime_tree = False
+            if runtime_root in {"tmp", "var"} and runtime_root_path is not None:
+                try:
+                    declared_empty_runtime_tree = (
+                        runtime_root_path.is_dir()
+                        and next(runtime_root_path.iterdir(), None) is None
+                    )
+                except OSError:
+                    declared_empty_runtime_tree = False
             if (
                 candidate_parts
-                and candidate_parts[0] == "dev"
+                and (
+                    candidate_parts[0] == "dev"
+                    or declared_empty_runtime_tree
+                )
                 and ".." not in pending
             ):
                 return (

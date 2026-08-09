@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:384bf542890d89f47da86402ddb805551ea229c1dd6a81d22bb763a0354e055e",
+  "report_id": "corpus-report:9cfe522e64f5a21a56cb11b51b987bae7566017225c1ea75a32b9bdfabade241",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -18,7 +18,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:b0537381a16b6849890027d803727fa1b4e7af24e0edf1e3d57bd54bb751da01",
+      "catalog_id": "discovery-catalog:580cdd0306769d61e63292345471a9559a0b22ca5245760ecfe5f70304162d1f",
       "required_capabilities": [
         "binds_handler",
         "maps_namespace",
@@ -77,7 +77,7 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:ddb7950e6a26d9598ce451c88aa5629691f17f8daf17210e778ec51cf3d44482",
+      "catalog_id": "discovery-catalog:d98760ebb79832df8c53850a2d56f3ea2c7cb5f14e386facac1265c4f9a68a99",
       "required_capabilities": [
         "constructs_request",
         "selects_operation"
@@ -128,7 +128,7 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:0a8391cb2a3253fa68e85a05883293165b9048b1a10f91309e507e5505d428d1",
+      "catalog_id": "discovery-catalog:72f87ed92d9d1395afbf95b409a33a1a9bcb089715cbae400266f895755908da",
       "required_capabilities": [
         "constructs_request",
         "selects_operation"
@@ -155,7 +155,7 @@
       "role": "development",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:bb90b9c6fa341704bfcf0fd5da72ee1131fc90daaa913cc6c3aa5086e30fcab1",
+      "catalog_id": "discovery-catalog:f65a775827dd28ec61ccafd233f2f827f68b1b873efe35c7fc34be8e3cde4e9a",
       "required_capabilities": [
         "binds_handler",
         "constructs_request"
@@ -184,25 +184,69 @@
       "candidate_count": 374,
       "evidence_count": 392,
       "open_obligation_count": 0
+    },
+    {
+      "sample_id": "totolink-x5000r-shared-cgi",
+      "architecture_category": "cgi_gateway",
+      "architecture_subtype": "shared_cgi_dispatcher",
+      "role": "cross-architecture-validation",
+      "evidence_tier": "real_firmware",
+      "status": "verified",
+      "catalog_id": "discovery-catalog:6f7eb013f2abc8ff8eabba28d006b3212acbe286d68f91cb6b07be964b5b5655",
+      "required_capabilities": [
+        "binds_handler",
+        "constructs_request",
+        "maps_namespace",
+        "mentions_endpoint",
+        "selects_operation"
+      ],
+      "forbidden_capabilities": [],
+      "observed_capabilities": [
+        "binds_handler",
+        "constructs_request",
+        "declares_symbol",
+        "listens_on",
+        "maps_namespace",
+        "mentions_endpoint",
+        "selects_operation",
+        "serializes_parameter"
+      ],
+      "missing_capabilities": [],
+      "unexpected_capabilities": [],
+      "candidate_kinds": [
+        "native_hint",
+        "request_interface",
+        "web_configuration"
+      ],
+      "candidate_count": 139,
+      "evidence_count": 145,
+      "open_obligation_count": 0
     }
   ],
   "categories": [
     {
       "architecture_category": "cgi_gateway",
-      "status": "contract_only",
-      "sample_count": 1,
-      "real_firmware_verified_count": 0,
+      "status": "verified",
+      "sample_count": 2,
+      "real_firmware_verified_count": 1,
       "derived_firmware_verified_count": 0,
       "contract_verified_count": 1,
       "coverage_gap_count": 0,
       "acquisition_gap_count": 0,
       "observed_capabilities": [
+        "binds_handler",
         "constructs_request",
+        "declares_symbol",
+        "listens_on",
+        "maps_namespace",
+        "mentions_endpoint",
         "selects_operation",
         "serializes_parameter"
       ],
       "candidate_kinds": [
-        "request_interface"
+        "native_hint",
+        "request_interface",
+        "web_configuration"
       ],
       "open_obligation_count": 0
     },

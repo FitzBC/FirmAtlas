@@ -23,8 +23,8 @@ from .inventory import SourceArtifactEntry
 
 
 WEB_CONFIG_RESULT_SCHEMA_VERSION = "firmatlas.mapping.web-config-result/v1alpha1"
-_PRODUCER = AnalyzerIdentity(name="web-configuration-producer", version="0.2.0")
-_SUPPORTED_FORMATS = ("nginx", "posix_shell", "proprietary_httpd")
+_PRODUCER = AnalyzerIdentity(name="web-configuration-producer", version="0.3.0")
+_SUPPORTED_FORMATS = ("lighttpd", "nginx", "posix_shell", "proprietary_httpd")
 
 
 class WebConfigFindingKind(str, Enum):
@@ -160,6 +160,11 @@ def _detect_format(path: str, text: str) -> Optional[str]:
     basename = posixpath.basename(path).lower()
     normalized = path.lower()
     static_text = re.sub(r"<\?.*?\?>", "", text, flags=re.DOTALL)
+    if basename in {"lighttpd.conf", "lighttp.conf"} or (
+        "lighttp" in normalized
+        and re.search(r"(?m)^\s*server\.(?:port|document-root)\s*=", text)
+    ):
+        return "lighttpd"
     if "nginx" in normalized and (
         basename.endswith(".conf") or basename == "nginx.conf"
     ):
@@ -178,6 +183,84 @@ def _detect_format(path: str, text: str) -> Optional[str]:
     if text.startswith("#!") or text.startswith("#/bin/sh"):
         return "posix_shell"
     return None
+
+
+def _lighttpd_namespace(expression: str) -> Optional[str]:
+    literals = re.findall(r"/(?:[A-Za-z0-9._~-]+/)+", expression)
+    return literals[-1] if literals else None
+
+
+def _parse_lighttpd(
+    source: SourceArtifactEntry, content: bytes, policy: WebConfigPolicy
+) -> tuple:
+    findings = []
+    evidence_atoms = {}
+    namespaces = []
+    cursor = 0
+    for raw_line in content.splitlines(keepends=True):
+        line = raw_line.decode("utf-8")
+        stripped = re.sub(r"#.*$", "", line).strip()
+        url_scope = re.search(
+            r'^\$HTTP\[\s*["\']url["\']\s*\]\s*=~\s*["\'](.+?)["\']\s*\{',
+            stripped,
+        )
+        if url_scope is not None:
+            namespaces.append(_lighttpd_namespace(url_scope.group(1)))
+            cursor += len(raw_line)
+            continue
+        socket = re.search(
+            r'^\$SERVER\[\s*["\']socket["\']\s*\]\s*==\s*["\'](?:[^"\']*:)?(\d+)["\']',
+            stripped,
+        )
+        if socket is not None:
+            token = _line_token(content, cursor, socket.group(1))
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.LISTENER, socket.group(1), token,
+                "listens_on", source_construct="lighttpd.socket",
+            )
+            cursor += len(raw_line)
+            continue
+        port = re.match(r"^server\.port\s*=\s*(\d+)", stripped)
+        if port is not None:
+            token = _line_token(content, cursor, port.group(1))
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.LISTENER, port.group(1), token,
+                "listens_on", source_construct="lighttpd.server.port",
+            )
+        root = re.match(
+            r'^server\.document-root\s*=\s*["\']([^"\']+)["\']', stripped
+        )
+        if root is not None:
+            token = _line_token(content, cursor, root.group(1))
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.DOCUMENT_ROOT, root.group(1), token,
+                "maps_namespace", namespace="/",
+                source_construct="lighttpd.server.document-root",
+            )
+        if re.match(r"^cgi\.assign\s*=", stripped) and namespaces:
+            namespace = namespaces[-1]
+            if namespace is not None:
+                token = _line_token(content, cursor, "cgi.assign")
+                _publish(
+                    source, content, findings, evidence_atoms,
+                    WebConfigFindingKind.NAMESPACE_MAPPING, "cgi", token,
+                    "binds_handler", namespace=namespace,
+                    qualifier="cgi_executor", source_construct="lighttpd.cgi.assign",
+                )
+        if stripped.startswith("}") and namespaces:
+            namespaces.pop()
+        cursor += len(raw_line)
+        if len(findings) >= policy.max_findings:
+            return findings, evidence_atoms, (
+                WebConfigDiagnostic(
+                    "finding_budget_exceeded",
+                    "finding budget truncated lighttpd analysis",
+                ),
+            )
+    return findings, evidence_atoms, ()
 
 
 def _nginx_tokens(content: bytes) -> Tuple[_Token, ...]:
@@ -285,18 +368,33 @@ def _publish(
         )
         evidence_atoms[atom.evidence_id] = atom
         evidence_ids.append(atom.evidence_id)
-    findings.append(
-        WebConfigFinding(
-            finding_id=finding_id,
-            kind=kind,
-            value=value,
-            namespace=namespace,
-            qualifier=qualifier,
-            related_value=related_value,
-            source_construct=source_construct,
-            evidence_ids=tuple(evidence_ids),
-        )
+    finding = WebConfigFinding(
+        finding_id=finding_id,
+        kind=kind,
+        value=value,
+        namespace=namespace,
+        qualifier=qualifier,
+        related_value=related_value,
+        source_construct=source_construct,
+        evidence_ids=tuple(evidence_ids),
     )
+    for index, existing in enumerate(findings):
+        if existing.finding_id != finding_id:
+            continue
+        findings[index] = WebConfigFinding(
+            finding_id=existing.finding_id,
+            kind=existing.kind,
+            value=existing.value,
+            namespace=existing.namespace,
+            qualifier=existing.qualifier,
+            related_value=existing.related_value,
+            source_construct=existing.source_construct,
+            evidence_ids=tuple(dict.fromkeys(
+                (*existing.evidence_ids, *finding.evidence_ids)
+            )),
+        )
+        return
+    findings.append(finding)
 
 
 def _parse_nginx(
@@ -622,7 +720,11 @@ def discover_web_configuration(
     if detected_format is None:
         return _empty_result(source, CoverageStatus.NOT_APPLICABLE, len(content), None,
                              "unsupported_format", "source does not match a declared web configuration format")
-    if detected_format == "nginx":
+    if detected_format == "lighttpd":
+        findings, evidence_atoms, diagnostics = _parse_lighttpd(
+            source, content, policy
+        )
+    elif detected_format == "nginx":
         findings, evidence_atoms, diagnostics = _parse_nginx(source, content, policy)
     elif detected_format == "proprietary_httpd":
         findings, evidence_atoms, diagnostics = _parse_proprietary_httpd(

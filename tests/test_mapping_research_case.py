@@ -324,6 +324,48 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertTrue(selected <= {item.value for item in shallow.hints})
         self.assertFalse(selected & {item.value for item in dhttpd.hints})
 
+    def test_real_x5000r_case_evidence_replays_from_current_producers(self) -> None:
+        from scripts.build_mapping_corpus_report import X5000R_ROOT
+
+        if not X5000R_ROOT.exists():
+            self.skipTest("local X5000R representative sample is unavailable")
+
+        def analyze(relative_path, producer):
+            content = (X5000R_ROOT / relative_path).read_bytes()
+            source = SourceArtifactEntry(
+                relative_path, relative_path, "file", len(content),
+                hashlib.sha256(content).hexdigest(),
+            )
+            return producer(source, content)
+
+        results = (
+            analyze("www/static/js/config_ie.js", discover_frontend_requests),
+            analyze("lighttp/lighttpd.conf", discover_web_configuration),
+            analyze("www/cgi-bin/cstecgi.cgi", discover_native_hints),
+        )
+        replayed = {
+            atom.evidence_id: atom
+            for result in results
+            for atom in result.evidence_atoms
+        }
+        case = build_research_case_corpus()["cases"][1]
+        references = [
+            item for item in case["evidence"]
+            if item["evidence_ref"].startswith("evidence:")
+        ]
+
+        self.assertLessEqual(
+            {item["evidence_ref"] for item in references}, set(replayed)
+        )
+        for reference in references:
+            atom = replayed[reference["evidence_ref"]]
+            self.assertEqual(reference["locator"], atom.source_span.locator)
+            self.assertEqual(reference["capability"], atom.capability)
+            self.assertEqual(
+                reference["producer"],
+                "{}@{}".format(atom.producer, atom.producer_version),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

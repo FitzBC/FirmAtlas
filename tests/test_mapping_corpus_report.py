@@ -236,7 +236,7 @@ class CorpusReportContractTests(unittest.TestCase):
         self.assertEqual(CorpusGateStatus.PARTIAL, report.gate_status)
         self.assertEqual(CorpusSampleStatus.VERIFIED, categories["form_handler"])
         self.assertEqual(CorpusSampleStatus.VERIFIED, categories["hnap_soap"])
-        self.assertEqual(CorpusSampleStatus.CONTRACT_ONLY, categories["cgi_gateway"])
+        self.assertEqual(CorpusSampleStatus.VERIFIED, categories["cgi_gateway"])
         self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, categories["script_backend"])
         self.assertEqual(CorpusSampleStatus.ACQUISITION_GAP, categories["native_only"])
         ac9 = next(item for item in report.samples if item.sample_id.startswith("tenda-ac9"))
@@ -255,6 +255,14 @@ class CorpusReportContractTests(unittest.TestCase):
             self.assertEqual(273, dap3520.candidate_count)
             self.assertEqual(288, dap3520.evidence_count)
             self.assertEqual((), dap3520.missing_capabilities)
+        x5000r = next(
+            item for item in report.samples
+            if item.sample_id == "totolink-x5000r-shared-cgi"
+        )
+        self.assertEqual(CorpusSampleStatus.VERIFIED, x5000r.status)
+        self.assertEqual(139, x5000r.candidate_count)
+        self.assertEqual(145, x5000r.evidence_count)
+        self.assertEqual((), x5000r.missing_capabilities)
 
     def test_open_obligation_prevents_verified_status(self):
         catalog = _frontend_catalog(b'$.post("/goform/SetX", {});')

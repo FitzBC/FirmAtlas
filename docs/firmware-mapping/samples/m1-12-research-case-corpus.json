@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:551b7c3e74e7512f1cb276cb0d6e96c8d9fb211f602b2c7863eb9dcd3e161d3b",
+      "case_id": "research-case:dd8a65de788c6414ff1236aab59c76440d0b358b674016a4be73f94c030d891f",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -16,40 +16,40 @@
       "research_question": "When nginx exposes only /cgi-bin/luci/ and /download/, which binary actually owns the frontend-observed /goform operations?",
       "evidence": [
         {
-          "evidence_ref": "evidence:cf210fc7d542aeaf112b737083c5e0e28f1a62ba3c9379ca8b8a1b7633e0f296",
+          "evidence_ref": "evidence:be1603c27afb7608e60987579f894ee5cb8c460298935038f8adade2fdfb7c01",
           "kind": "frontend_request",
           "source_path": "webroot_ro/js/online_list.js",
           "source_artifact_sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87",
           "locator": "text_utf8:bytes=8902-8925;lines=293:10-293:33",
           "capability": "constructs_request",
-          "producer": "frontend-request-producer@0.1.0"
+          "producer": "frontend-request-producer@0.2.0"
         },
         {
-          "evidence_ref": "evidence:fbce8d64775c7863eec568b2e8ef4cab7ef00861fdbcb4da8fa62f9ba381cb04",
+          "evidence_ref": "evidence:b4e7db7994cd77bf793b56bdd8fe094b1a7bd597c506c75b5c0d96d0a444ed81",
           "kind": "web_configuration",
           "source_path": "etc_ro/nginx/conf/nginx.conf",
           "source_artifact_sha256": "66d18e21c0224ae7f738f8b97a7d4bc699669cd695e8f0432b7f8d3f54ac3663",
           "locator": "text_utf8:bytes=703-707;lines=36:22-36:26",
           "capability": "listens_on",
-          "producer": "web-configuration-producer@0.2.0"
+          "producer": "web-configuration-producer@0.3.0"
         },
         {
-          "evidence_ref": "evidence:3d36e23710d1c0b10c3678592fdeb9dde9f34f3b88e18ea5f7f14ba44d865884",
+          "evidence_ref": "evidence:3b6cfac5872906fd9400e03ffe6d4a76576f2f3a8455b6f9a2e9f7269bf592f4",
           "kind": "web_configuration",
           "source_path": "etc_ro/nginx/conf/nginx.conf",
           "source_artifact_sha256": "66d18e21c0224ae7f738f8b97a7d4bc699669cd695e8f0432b7f8d3f54ac3663",
           "locator": "text_utf8:bytes=971-985;lines=49:17-49:31",
           "capability": "maps_namespace",
-          "producer": "web-configuration-producer@0.2.0"
+          "producer": "web-configuration-producer@0.3.0"
         },
         {
-          "evidence_ref": "evidence:b20a69d0c5ad8b2aebeca64c6855bd84c598d2e8fb57f7f6fc5e52ce13c7672c",
+          "evidence_ref": "evidence:cfc1150db9836df69bc7bb7a2ebbd4b7bcc6219993a88b00c59f20142fb6dd30",
           "kind": "web_configuration",
           "source_path": "etc_ro/nginx/conf/nginx_init.sh",
           "source_artifact_sha256": "c1e33c019efab0ac120c99c0abf8b66bbbdb6b64ba2ea855abcace257195b9a1",
           "locator": "text_utf8:bytes=114-138;lines=6:33-6:57",
           "capability": "starts",
-          "producer": "web-configuration-producer@0.2.0"
+          "producer": "web-configuration-producer@0.3.0"
         },
         {
           "evidence_ref": "evidence:b63bed9e6504f0d6467d6a85cff55e4df243325d8cbb0a71868ae1236e836048",
@@ -93,7 +93,7 @@
           "claim_id": "claim:frontend-goform",
           "statement": "The web UI constructs POST goform/SetOnlineDevName.",
           "evidence_refs": [
-            "evidence:cf210fc7d542aeaf112b737083c5e0e28f1a62ba3c9379ca8b8a1b7633e0f296"
+            "evidence:be1603c27afb7608e60987579f894ee5cb8c460298935038f8adade2fdfb7c01"
           ],
           "status": "supported"
         },
@@ -101,9 +101,9 @@
           "claim_id": "claim:fastcgi-branch",
           "statement": "A distinct nginx branch listens on :8180 and forwards /cgi-bin/luci/ to 127.0.0.1:8188, where app_data_center is started.",
           "evidence_refs": [
-            "evidence:fbce8d64775c7863eec568b2e8ef4cab7ef00861fdbcb4da8fa62f9ba381cb04",
-            "evidence:3d36e23710d1c0b10c3678592fdeb9dde9f34f3b88e18ea5f7f14ba44d865884",
-            "evidence:b20a69d0c5ad8b2aebeca64c6855bd84c598d2e8fb57f7f6fc5e52ce13c7672c"
+            "evidence:b4e7db7994cd77bf793b56bdd8fe094b1a7bd597c506c75b5c0d96d0a444ed81",
+            "evidence:3b6cfac5872906fd9400e03ffe6d4a76576f2f3a8455b6f9a2e9f7269bf592f4",
+            "evidence:cfc1150db9836df69bc7bb7a2ebbd4b7bcc6219993a88b00c59f20142fb6dd30"
           ],
           "status": "supported"
         },
@@ -111,8 +111,8 @@
           "claim_id": "claim:namespace-divergence",
           "statement": "The observed nginx namespaces do not establish ownership of /goform; backend ownership must remain unresolved at this stage.",
           "evidence_refs": [
-            "evidence:cf210fc7d542aeaf112b737083c5e0e28f1a62ba3c9379ca8b8a1b7633e0f296",
-            "evidence:3d36e23710d1c0b10c3678592fdeb9dde9f34f3b88e18ea5f7f14ba44d865884"
+            "evidence:be1603c27afb7608e60987579f894ee5cb8c460298935038f8adade2fdfb7c01",
+            "evidence:3b6cfac5872906fd9400e03ffe6d4a76576f2f3a8455b6f9a2e9f7269bf592f4"
           ],
           "status": "unresolved"
         },
@@ -213,14 +213,181 @@
         "The dhttpd negative control is bounded by the declared shallow producer and is not proof of total runtime non-participation.",
         "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality."
       ]
+    },
+    {
+      "case_id": "research-case:eb0b621ebde12c7c23e9d847d19547206a2a7bcecc357a4c56f9250c01625f86",
+      "schema_version": "firmatlas.mapping.research-case/v1alpha1",
+      "case_key": "totolink-x5000r-shared-cgi-selector-dispatch",
+      "title": "TOTOLINK X5000R: one CGI endpoint, multiple logical operations",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "architecture_tags": [
+        "lighttpd_cgi",
+        "shared_cgi_dispatcher",
+        "json_topicurl_selector",
+        "hybrid_query_and_json_dispatch"
+      ],
+      "research_question": "How can operations sharing /cgi-bin/cstecgi.cgi be kept distinct, and which native dispatch structure implements each selector?",
+      "evidence": [
+        {
+          "evidence_ref": "evidence:e84594b32b7f72f69bc268790212d8612a1c84bff9b43e11e1c0b514947fa5a9",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/config_ie.js",
+          "source_artifact_sha256": "6147395422cc29a9d77628450603d08f58fb8ed8b8b7916701e2eecf41183f0e",
+          "locator": "text_utf8:bytes=1382-1402;lines=1:1277-1:1297",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.2.0"
+        },
+        {
+          "evidence_ref": "evidence:0bb8be665021bced43b08b040bbca9a94f3f1440c1f3718df1628827ab4c9954",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/config_ie.js",
+          "source_artifact_sha256": "6147395422cc29a9d77628450603d08f58fb8ed8b8b7916701e2eecf41183f0e",
+          "locator": "text_utf8:bytes=1429-1439;lines=1:1324-1:1334",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.2.0"
+        },
+        {
+          "evidence_ref": "evidence:948bf3c98411d5eda32ae8e148a056bd12db6f9f91c0ad9903b8d9865bf6f30c",
+          "kind": "web_configuration",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=5556-5560;lines=147:31-147:35",
+          "capability": "listens_on",
+          "producer": "web-configuration-producer@0.3.0"
+        },
+        {
+          "evidence_ref": "evidence:51b716822d8f5eaa179e02f44ffe6d99d690b19fac712047238919c9f8cbe317",
+          "kind": "web_configuration",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=8344-8354;lines=238:2-238:12",
+          "capability": "binds_handler",
+          "producer": "web-configuration-producer@0.3.0"
+        },
+        {
+          "evidence_ref": "evidence:af51c25c0f5de49cce076d4851c699b81084a1e9455c67163d3c6ea122f467a1",
+          "kind": "native_hint",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=233632-233642",
+          "capability": "mentions_endpoint",
+          "producer": "native-shallow-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:topicurl-cross-resource-binding-open",
+          "kind": "coverage_ledger",
+          "source_path": "www/static/js/topicurl.js",
+          "source_artifact_sha256": "2170e9339adf4c3579ba015f19105c2ec03d1695796881589b0c5b163e059366",
+          "locator": "coverage:complete-single-source;cross_resource_symbol=globalConfig.cgiUrl",
+          "capability": "bounds_candidate_search",
+          "producer": "frontend-request-producer@0.2.0"
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:x5000r-shared-endpoint",
+          "statement": "The frontend posts JSON operation getInitCfg to /cgi-bin/cstecgi.cgi.",
+          "evidence_refs": [
+            "evidence:e84594b32b7f72f69bc268790212d8612a1c84bff9b43e11e1c0b514947fa5a9",
+            "evidence:0bb8be665021bced43b08b040bbca9a94f3f1440c1f3718df1628827ab4c9954"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-cgi-execution",
+          "statement": "lighttpd listens on 8080 and enables CGI execution for /cgi-bin/.",
+          "evidence_refs": [
+            "evidence:948bf3c98411d5eda32ae8e148a056bd12db6f9f91c0ad9903b8d9865bf6f30c",
+            "evidence:51b716822d8f5eaa179e02f44ffe6d99d690b19fac712047238919c9f8cbe317"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-native-selector-presence",
+          "statement": "The MIPS cstecgi.cgi binary contains the getInitCfg selector.",
+          "evidence_refs": [
+            "evidence:af51c25c0f5de49cce076d4851c699b81084a1e9455c67163d3c6ea122f467a1"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-complete-operation-surface",
+          "statement": "The cross-file wrapper operation surface and selector-to-native-handler bindings remain unresolved.",
+          "evidence_refs": [
+            "coverage:topicurl-cross-resource-binding-open"
+          ],
+          "status": "unresolved"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "stage:x5000r-frontend",
+          "order": 1,
+          "interpretation": "Separate the physical CGI endpoint from its logical JSON selector.",
+          "claim_ids": [
+            "claim:x5000r-shared-endpoint"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-web-native",
+          "order": 2,
+          "interpretation": "Confirm CGI execution and prioritize the concrete MIPS binary without claiming a handler binding.",
+          "claim_ids": [
+            "claim:x5000r-cgi-execution",
+            "claim:x5000r-native-selector-presence"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-selector-handler"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-open-boundary",
+          "order": 3,
+          "interpretation": "Retain cross-resource symbol resolution and native dispatch recovery as explicit work.",
+          "claim_ids": [
+            "claim:x5000r-complete-operation-surface"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        }
+      ],
+      "obligations": [
+        {
+          "obligation_id": "obligation:x5000r-selector-handler",
+          "statement": "Resolve globalConfig.cgiUrl across assets and bind each topicurl selector to native dispatch code.",
+          "required_capability": "binds_handler",
+          "status": "open",
+          "closure_evidence_refs": []
+        }
+      ],
+      "counterfactuals": [
+        "Path-only grouping would collapse many distinct operations into one CGI interface.",
+        "Frontend-only analysis would not identify cstecgi.cgi as a MIPS deep-analysis target.",
+        "A native string hit alone would incorrectly imply a proved selector-to-handler binding."
+      ],
+      "paper_uses": [
+        "Motivating example for operation identity below a shared physical endpoint.",
+        "Ablation of path-only, frontend-plus-config, and native-dispatch analysis.",
+        "Open-obligation case for cross-resource JavaScript and native value-flow recovery."
+      ],
+      "limitations": [
+        "Current evidence proves selected operation presence, not the complete operation surface.",
+        "CGI execution configuration does not prove runtime reachability or authentication state.",
+        "Native selector strings do not yet identify handler functions or dangerous data flow."
+      ]
     }
   ],
   "validation": {
     "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
     "paper_ready": true,
-    "case_count": 1,
+    "case_count": 2,
     "evidence_line_count": 5,
     "issues": []
   }
 }
-

@@ -85,7 +85,34 @@ flowchart LR
 不能从此案例单独声称跨厂商泛化、动态可达性或漏洞存在。后续必须用共享 CGI、
 HNAP、脚本—Native 混合、反向代理多跳和 Native-only 样本形成多案例证据。
 
-## 2. 后续案例准入触发器
+## 2. X5000R：一个 CGI 入口承载多个逻辑操作
+
+TOTOLINK X5000R V9.1.0u.6118 的页面不是为每个功能构造独立路径，而是把
+`POST /cgi-bin/cstecgi.cgi` 作为物理入口，再在 JSON 的 `topicurl` 字段中选择
+`getInitCfg`、`setLanCfg` 等逻辑操作。lighttpd 同时在 80/8080 提供 `/www/`，并
+对 `/cgi-bin/` 启用 CGI 执行；对应的 MIPS ELF `www/cgi-bin/cstecgi.cgi` 中可重放
+`getInitCfg` 和大量相邻动作字符串。
+
+```mermaid
+flowchart LR
+    UI["config_ie.js / topicurl.js"] -->|"POST JSON"| CGI["/cgi-bin/cstecgi.cgi"]
+    CGI --> SEL["topicurl selector"]
+    L["lighttpd :80 / :8080"] --> NS["/www + /cgi-bin CGI executor"]
+    NS --> BIN["MIPS cstecgi.cgi"]
+    SEL -. "handler binding remains open" .-> BIN
+```
+
+这个案例证明路径本身不是完整接口身份：若只按 URL 聚类，所有逻辑操作会被压成
+一个接口；若只做 strings，又会把 selector 的存在误写成 handler binding。当前
+系统已确认物理入口、至少一个 JSON selector、CGI execution namespace 和目标
+二进制，但诚实保留两项边界：`globalConfig.cgiUrl` 定义在 `config.js`、wrapper
+位于 `topicurl.js`，完整动作面需要跨资源符号解析；selector 到 Native handler
+仍需确定性 dispatcher Profile 或隔离 Ghidra Candidate Worker 后由 Validator 重放。
+
+论文中可将它用于 shared-endpoint operation identity、path-only 消融和开放义务
+案例；不能据此声称所有 selector 已恢复、运行时可达、认证状态或漏洞数据流已确认。
+
+## 3. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：
 
@@ -101,7 +128,7 @@ HNAP、脚本—Native 混合、反向代理多跳和 Native-only 样本形成�
 准入不是要求案例必须成功解决。一个证据充分、局限明确且仍然 open 的案例同样
 有研究价值；但不得把 open 写成 supported。
 
-## 3. 案例模板
+## 4. 案例模板
 
 每个案例至少包含：
 
@@ -125,4 +152,4 @@ PYTHONPATH=src python scripts/build_mapping_research_cases.py
 ```
 
 当前机器可读记录见
-[AC9 research-case corpus](./samples/m1-12-research-case-corpus.json)。
+[AC9/X5000R research-case corpus](./samples/m1-12-research-case-corpus.json)。

@@ -196,6 +196,32 @@ class SourceInventoryContractTests(unittest.TestCase):
             self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
             self.assertEqual((), inventory.diagnostics)
 
+    def test_target_under_declared_empty_runtime_tree_is_not_a_source_gap(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "usr" / "bin").mkdir(parents=True)
+            (root / "tmp").mkdir()
+            (root / "var").mkdir()
+            (root / "usr" / "bin" / "dynamic-tool").symlink_to(
+                "/var/dynamic-tool"
+            )
+            (root / "usr" / "bin" / "runtime-state").symlink_to(
+                "/tmp/runtime-state"
+            )
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            links = [item for item in inventory.entries if item.kind == "symlink"]
+            self.assertEqual(
+                [
+                    "recorded_runtime_target_not_materialized",
+                    "recorded_runtime_target_not_materialized",
+                ],
+                [item.expansion_status for item in links],
+            )
+            self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
+            self.assertEqual((), inventory.diagnostics)
+
     def test_dap3520_chroot_symlinks_replay_without_false_escape_gap(self):
         root = Path(
             "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/"

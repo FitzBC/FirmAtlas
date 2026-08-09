@@ -43,6 +43,8 @@ class FrontendRequestProducerContractTests(unittest.TestCase):
                 "jQuery.getJSON",
                 "jQuery.post",
                 "jQuery.ajax",
+                "custom.request",
+                "shared-cgi.topicurl",
                 "HTML.form",
             },
             set(result.supported_constructs),
@@ -256,6 +258,112 @@ var pageModel = R.pageModel({});
             candidate.candidate_id,
             discover_frontend_requests(changed_source, changed).candidates[0].candidate_id,
         )
+
+    def test_shared_cgi_wrapper_resolves_endpoint_and_prototype_operation(self):
+        content = b'''var globalConfig = {cgiUrl: "/cgi-bin/cstecgi.cgi"};
+function Dispatcher() {
+    this.srcUrl = globalConfig.cgiUrl;
+    this.topicurl = "";
+    this.post = function(data) {
+        (data = data || {}).topicurl = this.topicurl;
+        data = JSON.stringify(data);
+        $.ajax({url: this.srcUrl, type: "POST", dataType: "json", data: data});
+    };
+}
+Dispatcher.prototype.getSysStatusCfg = function(data) {
+    return this.topicurl = "getSysStatusCfg", this.url = "/data/sysinfo.json", this.post(data);
+};
+Dispatcher.prototype.setLanCfg = function(data) {
+    return this.topicurl = "setLanCfg", this.post(data);
+};'''
+        source = SourceArtifactEntry(
+            canonical_path="www/static/js/topicurl.js",
+            original_path="www/static/js/topicurl.js",
+            kind="file",
+            size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(
+            [
+                ("/cgi-bin/cstecgi.cgi", "getSysStatusCfg"),
+                ("/cgi-bin/cstecgi.cgi", "setLanCfg"),
+            ],
+            [
+                (
+                    candidate.endpoint,
+                    next(
+                        parameter.literal_value
+                        for parameter in result.parameters
+                        if parameter.request_candidate_id == candidate.candidate_id
+                        and parameter.is_operation_selector
+                    ),
+                )
+                for candidate in result.candidates
+            ],
+        )
+        self.assertEqual({"POST"}, {item.method for item in result.candidates})
+        self.assertEqual({"json"}, {item.representation for item in result.candidates})
+        self.assertEqual(
+            {"shared-cgi.topicurl"},
+            {item.source_construct for item in result.candidates},
+        )
+        self.assertEqual(
+            {"constructs_request", "serializes_parameter", "selects_operation"},
+            {item.capability for item in result.evidence_atoms},
+        )
+
+    def test_custom_request_object_preserves_literal_json_selector(self):
+        content = b'''transport.request({
+  type: "POST",
+  url: "/cgi-bin/cstecgi.cgi",
+  async: false,
+  data: {topicurl: "getInitCfg"}
+});'''
+        source = SourceArtifactEntry(
+            canonical_path="www/static/js/config_ie.js",
+            original_path="www/static/js/config_ie.js",
+            kind="file",
+            size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(1, len(result.candidates))
+        self.assertEqual("/cgi-bin/cstecgi.cgi", result.candidates[0].endpoint)
+        self.assertEqual("custom.request", result.candidates[0].source_construct)
+        self.assertEqual("json", result.candidates[0].representation)
+        self.assertEqual("getInitCfg", result.parameters[0].literal_value)
+        self.assertTrue(result.parameters[0].is_operation_selector)
+
+    def test_shared_cgi_wrapper_does_not_borrow_endpoint_from_another_object(self):
+        content = b'''var unrelated = {cgiUrl: "/cgi-bin/wrong.cgi"};
+function Dispatcher() {
+  this.srcUrl = globalConfig.cgiUrl;
+  this.post = function(data) {
+    data.topicurl = this.topicurl;
+    data = JSON.stringify(data);
+    $.ajax({url:this.srcUrl,type:"POST",dataType:"json",data:data});
+  };
+}
+Dispatcher.prototype.setLanCfg = function(data) {
+  return this.topicurl = "setLanCfg", this.post(data);
+};'''
+        source = SourceArtifactEntry(
+            canonical_path="www/static/js/topicurl.js",
+            original_path="www/static/js/topicurl.js",
+            kind="file",
+            size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual((), result.candidates)
 
     def test_html_form_action_and_named_inputs_become_one_request_shape(self):
         content = b"""<form action="/goform/Login" method="post">
