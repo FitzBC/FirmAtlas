@@ -100,7 +100,9 @@ flowchart LR
     CGI --> SEL["topicurl selector"]
     L["lighttpd :80 / :8080"] --> NS["/www + /cgi-bin CGI executor"]
     NS --> BIN["MIPS cstecgi.cgi"]
-    SEL -. "handler binding remains open" .-> BIN
+    SEL -->|"123/199 selectors"| TAB["get/set/del/other_handle_t"]
+    TAB -->|"executable pointer"| BIN
+    SEL -. "76 selectors + value-flow remain open" .-> BIN
 ```
 
 这个案例证明路径本身不是完整接口身份：若只按 URL 聚类，所有逻辑操作会被压成
@@ -108,12 +110,14 @@ flowchart LR
 系统已用 Frontend Asset Graph 将 `config.js` 中的 `globalConfig.cgiUrl` 绑定到
 `topicurl.js` wrapper，并恢复 199 个静态枚举 operation；定义端与消费端仍保存为
 不同 EvidenceAtom。真实 wrapper 通过 `this.type` 动态选择方法，因此不能把所有动作
-写成 POST。selector 到 Native handler/value-flow 仍需确定性 dispatcher Profile，
-或由隔离 Ghidra Candidate Worker 枚举候选后交给核心 Validator 重放。
+写成 POST。随后 MIPS Inline Table Profile 从四个带大小的动态符号恢复 138 条注册，
+为 123/199 个前端 selector 建立 124 条 handler proof；`getTelnetCfg` 的两条相同注册
+作为重复事实保留。76 个 Frontend-only 与 14 个 Native-only operation 继续作为版本、
+条件构建、死代码或替代处理主体假设；已绑定 handler 的下游 value-flow 仍未确认。
 
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
-“跨资源义务关闭但 Native 义务仍开放”的阶段性案例；不能据此声称动态 selector
-全集、运行时可达、认证状态、具体 handler 或漏洞数据流已确认。
+“跨资源义务关闭、Native 子集绑定、整体 value-flow 仍开放”的阶段性案例；不能据此
+声称动态 selector 全集、76/14 差集原因、运行时可达、认证状态或漏洞数据流已确认。
 
 ## 3. 后续案例准入触发器
 

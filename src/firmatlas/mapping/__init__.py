@@ -147,6 +147,7 @@ from .repository import CatalogConflictError, DiscoveryCatalogRepository
 from .native_deep import (
     NATIVE_DEEP_RESULT_SCHEMA_VERSION,
     ArmPicCallsiteProfile,
+    MipsInlineRouteTableProfile,
     NativeDeepDiagnostic,
     NativeDeepPolicy,
     NativeDeepResult,
@@ -154,6 +155,7 @@ from .native_deep import (
     NativeRouteBinding,
     NativeRouteTableProfile,
     discover_arm_pic_callsite_bindings,
+    discover_mips_inline_route_bindings,
     discover_native_route_bindings,
     native_deep_scheduler_analyzer,
 )
@@ -323,6 +325,7 @@ __all__ = (
     "DiscoveryCatalogRepository",
     "NATIVE_DEEP_RESULT_SCHEMA_VERSION",
     "ArmPicCallsiteProfile",
+    "MipsInlineRouteTableProfile",
     "NativeDeepDiagnostic",
     "NativeDeepPolicy",
     "NativeDeepResult",
@@ -330,6 +333,7 @@ __all__ = (
     "NativeRouteBinding",
     "NativeRouteTableProfile",
     "discover_arm_pic_callsite_bindings",
+    "discover_mips_inline_route_bindings",
     "discover_native_route_bindings",
     "native_deep_scheduler_analyzer",
     "RESEARCH_CASE_CORPUS_VALIDATION_SCHEMA_VERSION",

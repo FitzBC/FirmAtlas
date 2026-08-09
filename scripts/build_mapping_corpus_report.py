@@ -25,6 +25,7 @@ from firmatlas.mapping import (
     discover_arm_pic_callsite_bindings,
     discover_frontend_requests,
     discover_frontend_asset_graph,
+    discover_mips_inline_route_bindings,
     discover_native_hints,
     discover_script_backend,
     discover_web_configuration,
@@ -168,14 +169,26 @@ def _x5000r_catalog(root: Path):
             FrontendAssetInput(_source(path, content), content)
         )
     frontend_graph = discover_frontend_asset_graph(tuple(frontend_assets))
+    native_content = (root / paths["native"]).read_bytes()
+    native_source = _source(paths["native"], native_content)
+    deep = discover_mips_inline_route_bindings(
+        native_source,
+        native_content,
+        tuple(
+            NativeRouteAnchor(
+                parameter.request_candidate_id, parameter.literal_value
+            )
+            for result in frontend_graph.results
+            for parameter in result.parameters
+            if parameter.is_operation_selector
+            and parameter.source_construct == "shared-cgi.topicurl"
+        ),
+    )
     web_content = (root / paths["web"]).read_bytes()
     web = discover_web_configuration(
         _source(paths["web"], web_content), web_content
     )
-    native_content = (root / paths["native"]).read_bytes()
-    native = discover_native_hints(
-        _source(paths["native"], native_content), native_content
-    )
+    native = discover_native_hints(native_source, native_content)
     inventory = build_inventory(root, InventoryPolicy())
     return assemble_discovery_catalog(DiscoveryCatalogInput(
         X5000R_FIRMWARE_SHA256,
@@ -189,6 +202,9 @@ def _x5000r_catalog(root: Path):
                 (web,), paths["web"]
             ),
             DiscoveryProducerBatch.native((native,), paths["native"]),
+            DiscoveryProducerBatch.native_deep(
+                (deep,), paths["native"] + ":inline-route-tables"
+            ),
         ),
         source_inventory_coverage_status=inventory.coverage_status,
     ))

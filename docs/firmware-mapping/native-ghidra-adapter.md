@@ -4,6 +4,10 @@
 > 状态：设计冻结，按需实现
 > 参考实现来源：`../iot_seedintelligentanalysis`
 
+> M1-16 触发审计：X5000R dispatcher 由带大小的 MIPS inline route-table 动态符号
+> 直接证明，因此未触发 Ghidra。76 个未绑定 frontend selector 和已绑定 handler 的
+> 跨函数 value-flow 仍可能成为首个 Ghidra Worker 触发点。
+
 AC9 当前 ARM PIC 注册模式已由小型确定性 Validator 从原始 ELF 字节直接证明，
 因此没有为了“使用 Ghidra”而增加工具依赖。Ghidra Adapter 只在复杂控制流、间接
 调用、跨函数数据流、未知 ISA profile 或参数 getter 追踪确实需要时启动。

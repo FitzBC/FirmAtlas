@@ -1,0 +1,1999 @@
+{
+  "schema_version": "firmatlas.mapping.x5000r-mips-dispatch/v1alpha1",
+  "source": {
+    "source_path": "www/cgi-bin/cstecgi.cgi",
+    "content_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+    "size": 251300
+  },
+  "profile": "mips32-inline-route-handler-table/v1",
+  "coverage": {
+    "frontend_binding": "completed",
+    "native_table_inventory": "completed"
+  },
+  "counts": {
+    "frontend_selector": 199,
+    "native_registration": 138,
+    "native_unique_route": 137,
+    "bound_frontend_selector": 123,
+    "binding_proof": 124,
+    "frontend_only": 76,
+    "native_only": 14
+  },
+  "table_registration_counts": {
+    "del_handle_t": 13,
+    "get_handle_t": 61,
+    "other_handle_t": 14,
+    "set_handle_t": 50
+  },
+  "duplicate_native_routes": {
+    "getTelnetCfg": 2
+  },
+  "frontend_only_selectors": [
+    "CloudACMunualUpdate",
+    "CloudSrcApplibVerCheck",
+    "cancelUssd",
+    "clearTcpdumpCfg",
+    "delNetStrategyCfg",
+    "delNetStrategyPwdCfg",
+    "delSmsCfg",
+    "delUsbDevice",
+    "getAppFilterCfg",
+    "getAppListById",
+    "getAppTypeList",
+    "getClientsInfo",
+    "getCloudSrvAppLibCheckStatus",
+    "getDosCfg",
+    "getDynamicRoute",
+    "getEngineerModeCfg",
+    "getGameSpeedCfg",
+    "getIpQosLimit",
+    "getIpv6LanCfg",
+    "getIpv6WanCfg",
+    "getNetStrategyCfg",
+    "getNetStrategyPwdCfg",
+    "getNetStrategyStatus",
+    "getNoticeCfg",
+    "getOpenVpnCert",
+    "getOpenVpnCertStatus",
+    "getOpenVpnCfg",
+    "getOpenVpnLog",
+    "getPptpServerCfg",
+    "getQosPolicy",
+    "getRadvdCfg",
+    "getSmsCfg",
+    "getSpeedtest",
+    "getStorageCfg",
+    "getTcpdumpCfg",
+    "getTr069Cfg",
+    "getVpnClientCfg",
+    "getWiFiEasyScheduleCfg",
+    "getWiFiIpMacTable",
+    "getWiFiMeshConfig",
+    "getWiFiRepeaterStaInfo",
+    "setAppById",
+    "setAppFilterCfg",
+    "setDeviceNameCfg",
+    "setDosCfg",
+    "setDynamicRoute",
+    "setEngineerModeCfg",
+    "setGameSpeedCfg",
+    "setIpQosLimit",
+    "setIpv6LanCfg",
+    "setIpv6WanCfg",
+    "setNetIdCfg",
+    "setNetStrategyCfg",
+    "setNetStrategyPwdCfg",
+    "setNetStrategyReconnect",
+    "setNoticeCfg",
+    "setOpenVpnCert",
+    "setOpenVpnCertGenerationCfg",
+    "setOpenVpnCfg",
+    "setPptpServerCfg",
+    "setQosCfg",
+    "setQosPolicy",
+    "setRadvdCfg",
+    "setSmsCfg",
+    "setSpeedtest",
+    "setStorageCfg",
+    "setTcpdumpCfg",
+    "setTr069Cfg",
+    "setUpdateInfoCfg",
+    "setUpgradeApplib",
+    "setUssd",
+    "setVpnClientCfg",
+    "setWiFiEasyScheduleCfg",
+    "setWiFiMeshConfig",
+    "setWiFiRepeaterCfg",
+    "uploadQosConfig"
+  ],
+  "native_only_routes": [
+    "UploadCustomModule",
+    "UploadFirmwareFile",
+    "delIpsecNet2NetCfg",
+    "getCrpcConfig",
+    "getIpsecHost2NetCfg",
+    "getIpsecL2tpXauthCfg",
+    "getIpsecNet2NetCfg",
+    "getWanIeCfg",
+    "loginAuth",
+    "setIpsecHost2NetCfg",
+    "setIpsecL2tpXauthCfg",
+    "setIpsecNet2NetCfg",
+    "setUploadSetting",
+    "setWanIeCfg"
+  ],
+  "bindings": [
+    {
+      "binding_id": "native-route-binding:69e3869baeda00f7baadd897e0d8dc157e6211180119a8d246f685cac4bcd755",
+      "target_ref": "frontend-request:d6ae23a3e5115f025c22a563d2604e3c3d0c4c7f5f7a6aac3d490bd6f0aee706",
+      "route_token": "delStaticRoute",
+      "registration_address": "0x0044ae28",
+      "handler_address": "0x0041c1c8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041c1c8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:15ab3099b71114d86f9e8d3fa3996e0e5ce69e526db46e93e8b315ed0d13ea25",
+        "evidence:ceadeeb0cb8a0396e3bafd4a9bc4ee3ea6a50371da5750680ed7eef3cd64680d",
+        "evidence:b58282d94eabb3d7668f197ebe51d3041439080988fe610a9ebb26b9f026a6c0",
+        "evidence:81f135a9fdba161b22780f383989f37b130e785bb3894efb05ab0ea9fb1e2b09"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:04e14311e12bed9c1f5236df5fdf6a227e7a5f87d53221e54328dd22c0e02caf",
+      "target_ref": "frontend-request:045daff8887968abdf3a995c3fa24e335d7decad945517a4c2ff78f417198e1e",
+      "route_token": "delIpPortFilterRules",
+      "registration_address": "0x0044ae6c",
+      "handler_address": "0x0041bf44",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041bf44",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:05cd89ac1592d226e4bcd815a2598f0afdc57179e84568d3ace7372fdc114893",
+        "evidence:56d7db0fecb2c8d840c8b92085a6a289f690f39a633f495c6f6e2bdf0eb9de4e",
+        "evidence:a5682cc5c258a87fd85f027036393a6d65e58fa48a8b32f4f4151a9035f92a52",
+        "evidence:e17824edb308a96230b9010eeae5cb3562824020a7d08cd520eb214fd0d1d727"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:764677669613b98c7b2adfd7dbd9a0727730aed21f59fb0af09d942964b5bfa1",
+      "target_ref": "frontend-request:b07df8956ef1b1814feae8f36d903f22bb8c96e3deaf0fa3358e1dfddc0c9677",
+      "route_token": "delMacFilterRules",
+      "registration_address": "0x0044aeb0",
+      "handler_address": "0x0041be5c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041be5c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:4ef8af1ab1c930e60ccadb8f456fda6b491a63e59b25c5a68fb47245c426d40f",
+        "evidence:d652911137f53a9ff191043081ddd69c6c8e9bc7574804a78cfa4bd71b6e7d1f",
+        "evidence:c59a4f2a27fdc7e2a2db3acaf5a48e29a5a2b5447cab845a5793a130fdb5e1cc",
+        "evidence:f81a0e26420713149ed9320af90517a7ef3936d5e5fada4abcf60209a45e81b5"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:09fe0db80d7f77bab846162b8209b3417849c09fabfdbb86a04d603f656ac548",
+      "target_ref": "frontend-request:17a19674531bd0d978e79c3d0a8b9e8c2da165e532a54bc04116fe09f6bef62e",
+      "route_token": "delUrlFilterRules",
+      "registration_address": "0x0044aef4",
+      "handler_address": "0x0041bd98",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041bd98",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:a268a987be4470fce63807604a6aa213e6d0aa7b4f75836c17a807420056dd5d",
+        "evidence:62868416c51e6129270c21c01136a59f6a3095c4bfc7c4eaf8f2fd74bf53d60f",
+        "evidence:6d1bd7850078a60a62974009f7a6f3a4d8f5a8a43a3895f9c6aaefc5f224a9a2",
+        "evidence:3d09fb9e381dd3f0377d17122d9962e1c211dbacc18ad79b93d2db3573764290"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:4a5456f94aacaa714e2f437d3c3f33468a9690988fb7d57c4fec4ec697f12aad",
+      "target_ref": "frontend-request:05dbbcd6289255255e8bbbd562cedc927c9751d01d0c943f530d9fde73cf2d08",
+      "route_token": "delStaticDhcpRules",
+      "registration_address": "0x0044af38",
+      "handler_address": "0x0041f2a8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f2a8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:669744fcc6699d959444787c13a8cea5f56000ff02f8d6b216b8f371f2d0c803",
+        "evidence:f9ad645a3eca5f5dddb767b452da9e2c115b0727d46fa4b8684d46e7be9202d4",
+        "evidence:9702a769b4c918038cf300f520b2fcdb8711fe0c3db53df1afa1302ef25a7723",
+        "evidence:ddfb62c4b352027724bc433dbcf32564aa4bbba7c618a15831ab602ade09809e"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:a259b60210060f19ecee116acf71cc2db37fabfdfa3db305057af8b9b619ffc9",
+      "target_ref": "frontend-request:a560d4500c6a596bb56ff5b855a043488960cd15a67d3417aa3686043e896058",
+      "route_token": "delWiFiAclRules",
+      "registration_address": "0x0044af7c",
+      "handler_address": "0x0041ba38",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041ba38",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:bf85dd9abec50cdbd36427c46f46422d6d0b5ebd0b6bfa9aad9d5fe71ee6f0f6",
+        "evidence:71576cfc61a3061bc46847a650ac0f076d90388268597ce8fd58fb20c2111648",
+        "evidence:d8055d324fef0a0ae2b16abe6c05b336bb30f5e68c6810f947c6e7764ec8ec04",
+        "evidence:5684cf7f35edddbe9d1098fbd3654ad9bf53ec55c1eb365c4748bffc62a516e4"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:678ce71173cf7bdaedd587079de240b72b5ceabb8c537185437f9768944e9203",
+      "target_ref": "frontend-request:7d1562e96538c4e3a24b8c89df5c66ca9352acc0bf6044c77ea2b1e5877e9e68",
+      "route_token": "delWiFiWdsRules",
+      "registration_address": "0x0044afc0",
+      "handler_address": "0x0041c044",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041c044",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:d1dde9ef294ad9e7a60f72e48216b25a3b093043e020a1bd5279fdb4f380d4e1",
+        "evidence:bfeaf7175b03eaeb575b7156c21b771855e8268ea6eed18c477d6bf3356118dc",
+        "evidence:729a478c443d9f29b33178ce5c371e2ebe91ab9c01a0965023d0a30d17d8a493",
+        "evidence:60aab92ff3a722f0797f1808fca6505cb3121d002af379d96c145324f1bdf6f3"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:ee73d456620e19a67477368c8f7a83e27c772946a057284003248530a377db0f",
+      "target_ref": "frontend-request:cbd0daf50a029a68eb578ce831d9bf7732ccd55b814cbe343d341b7cbf9cfc68",
+      "route_token": "delPortForwardRules",
+      "registration_address": "0x0044b004",
+      "handler_address": "0x0041c2e8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041c2e8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:941d03f3cf7d92f8e3563ca5522eda809a22b0bf9a979321ff1717fdebb721e6",
+        "evidence:b0ab443caf876ee1b95622e9ac872d3f87f712e013758e61f332804c3d3fe8f7",
+        "evidence:48b642d4f617f8383da6b612304fd1877ce8c39bd5824adfa39050f41ab1c198",
+        "evidence:f5846f24436ff20055bd7e885c8d774f16653816b558066202401621254d6821"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:608f914f48a3b73009a1637c2e53a7cfed6dbca0b26ee823d8e0121a8315d492",
+      "target_ref": "frontend-request:17bc8ceee96cd5aa1aab090515c6c4eb6dd54ab40509e9efcd5ecdecc35cdf29",
+      "route_token": "delWiFiScheduleCfg",
+      "registration_address": "0x0044b048",
+      "handler_address": "0x0041b8bc",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041b8bc",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:d219bc29025a9e04751e8b987252385c97740248b6b066c0329d6e76f639143f",
+        "evidence:3c0540907fc9151158b19f646b75a9625d29cb1c4d30165bcdf93b34d5ac4aa1",
+        "evidence:e183c465edea5d4c45cfb692da9bb6540effa72b47be1ded3995a588681f0176",
+        "evidence:5dcbb4b8faf42e036436cef5f39e81d6b334de1cb5e664d63ffb286fefdf9f03"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:8f6599ce1d806a45176c3a030c1cf1031d7273c542e22c1436b372207249c4aa",
+      "target_ref": "frontend-request:1682dd63c9764f9c7e8dd27e51e2ec04014407bd72b1449cdb68303333855691",
+      "route_token": "delParentalRules",
+      "registration_address": "0x0044b08c",
+      "handler_address": "0x0041bcb0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041bcb0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:db166200f8251810f009b1f10c6d35b5e153b9c931fb2a35b0d223a330fbf3a0",
+        "evidence:9f46e80a3cc05afe0b21c1d08b262e5da8932cc4f77f74e4a95ea0990d9d647d",
+        "evidence:b43298a21560a7dc88970e64cbb965cc798003f9b23149043f939b57b0af9e4e",
+        "evidence:5658fd3286e8a0708e07511872931a2887f036ef6e23b9367e5df22236ae0192"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:d575eec58a238214f144b8ac5f1774d8635a42486d3a32a154cb646343245229",
+      "target_ref": "frontend-request:8314e2aa36174053021d675a6dad2a70d0bf6014b29fb0e1679d0b81f2920393",
+      "route_token": "delSmartQosCfg",
+      "registration_address": "0x0044b0d0",
+      "handler_address": "0x0041bbbc",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041bbbc",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:88686851d0d84b3dccda259f99b942524f6ddbcd8bc69e8b723782bb9ff125de",
+        "evidence:e4209bbe4356dcffe6e047086fa582be1d52d1dcd4c9a0f6331e25e5ad71cc1c",
+        "evidence:645b541b91dd4c76f51f81d44d8df750d49a942a2a8fe4df23c984843899d081",
+        "evidence:71e96a16027433baf2982b8210e73afbb1bffacfdf93fec3845d582d0dd60bf4"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:5690c0034312d65ad4963b6543c0f71deae28ba9f7d4d057cc096d7d4855055f",
+      "target_ref": "frontend-request:80cc540bd965e6f5bfd28ee61c25991bac0b9c6289abc30dfa492a7097f51a0a",
+      "route_token": "delVpnAccountCfg",
+      "registration_address": "0x0044b158",
+      "handler_address": "0x0041b7a8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041b7a8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:del_handle_t",
+      "evidence_ids": [
+        "evidence:5bd10f9504daee89ef9070db7c8df10399cd2733df19fc1189c2a0a51c0f6ac9",
+        "evidence:7c0b66d3c1d0b7bafae36d282002ad75e328e23020ca6b972519ef0a6a07d318",
+        "evidence:66ae61b72b243b9f5e1e65cbc719971bd32d731915eaa7d4f30a27d4f1236d6e",
+        "evidence:1e96f1e862915087ecc9b029442320bc3be6bd199e1ffe2804d360907c5ee92c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:6cf4688dc1deab45c2d07d54165f4a819e817fc6bb94f75ecb1312534395247d",
+      "target_ref": "frontend-request:ca8998e48caa552443ac22abe27c3e52e60e138945d83dc54de6d6a410e87c25",
+      "route_token": "RebootSystem",
+      "registration_address": "0x0044b1e0",
+      "handler_address": "0x00420814",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00420814",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:a1b42d7a7a2710b758b73635ad9ad7d7c8a44d95ab2f18ce67920ac8c4518620",
+        "evidence:052df83bce5d1d7411f135b0cc3a4b9aedb1d3825a4167567307ca3970eb08b6",
+        "evidence:6a8bb4878440950ab824a3879f542a2a59a12b296d2e077e1e235bc52b703f5a",
+        "evidence:e2e4318bc73aca35706a46959e742db8ac3c36e82a26d77023e3f5c0d3322d8c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:db33a85b32d207d38fff70f386763488eebb39c053dd0abf46c19e9fc79166d9",
+      "target_ref": "frontend-request:b2486141ded7a06a6d4393f773dbdaebedc0245da3f6143902ce872e07638bc0",
+      "route_token": "LoadDefSettings",
+      "registration_address": "0x0044b224",
+      "handler_address": "0x0042beac",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042beac",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:8ea86949d2ecdbe6a01a93b88f77cf0a06c68dd9ca67ce80ffd70ef503e368e9",
+        "evidence:ef29f132f557bbb8cceab5d7b9a41ab1d927391d5ff6815ed98149c1d99320b8",
+        "evidence:3e8db14411facbf4365f8ed7d66535d710927a224af8b861479e67b9375c3e2b",
+        "evidence:9e6394bdeca05ea80bf51d99fb2fc32c5cb81d896fc7be5958b5d06c4bcd0601"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:2af6479f97e9ed144a137259cb18ad7bc945497797beb1ef8b03b98bb7c6495e",
+      "target_ref": "frontend-request:b672b128d8effd1425a50cea07d28dd125863a9869cbd4696bed2c27d1dc50f2",
+      "route_token": "SystemSettings",
+      "registration_address": "0x0044b268",
+      "handler_address": "0x0042bd58",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042bd58",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:41a1b3806467df58af736a4e6d8972b7fd1e2394765fdd9621e0abb93fc884e7",
+        "evidence:f6af10eaaa93cfe2864735d791d4d52a499ced3b0774bda554c185d8fb5d19a4",
+        "evidence:757e67a199c2c8833170effca41c3caec2319e262d3c421d0cbdd3143522db39",
+        "evidence:13a79c176f4c5b6f22ba3308f240ef2fcb51db82d61a15aa34f770535dba7262"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:481ca61f4277c4ab26521122015d71651cb8952524706cf14b340777d63046c7",
+      "target_ref": "frontend-request:36a80b0df6b0e42a9f2beded2182ecc86cfd04eccc97473c0b75b40027709198",
+      "route_token": "FirmwareUpgrade",
+      "registration_address": "0x0044b2ac",
+      "handler_address": "0x0042b8f4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042b8f4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:bd006774239feff6fc70341c9d124797aaaf27c073339f417a2c65f83d9d1cc3",
+        "evidence:3de6784f88ab7e0e417c90e330d53051d038479c2f50dd94e4e63edd11bf93ad",
+        "evidence:d32e2784b05da46fdcf9761d6188f31176fe0d8b90c5b86af60904410b45189f",
+        "evidence:fa80aa9ce77ebefa4a0762fc3ed482999168c96e29f5450e9fbed0924c10c657"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c37103ed99ab9dcd5184f059a857705c7a48881739484f254908f268283f2d76",
+      "target_ref": "frontend-request:6054aff49dd77f4c95c0699ed3c56762d7ceb4ec1b14fba8fc96539dc68c685b",
+      "route_token": "discoverWan",
+      "registration_address": "0x0044b334",
+      "handler_address": "0x0042b6d0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042b6d0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:3478023660939823376322bd528a1ef8c5493dd68fec498b90eab1e32895e159",
+        "evidence:62c7c67db79d4d35a910a94de51779f8462c1fb8907c767e4cf3d5b6ceae93e7",
+        "evidence:196a6efa06146363d03ec88cc76f08ca81ad6a4d0a0dcd30ae683eaf39bf3422",
+        "evidence:fa3ff3e2253cd98c8cc0a1cf5599d841a05ed109339cd062cdcc5d7bcb405219"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:55fbafa19a30cdc2559a31e75dca86d01cecb04923eb9d3673f3a150ed64e64f",
+      "target_ref": "frontend-request:637055c42fba009f637c7afa648bd3e7b6bc62c433afdb81888baecd247a63c0",
+      "route_token": "NTPSyncWithHost",
+      "registration_address": "0x0044b378",
+      "handler_address": "0x0041f95c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f95c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:112df5fb8afa4238e2d22338b095f644e696651a48a094fdfa0eeda70c8f3302",
+        "evidence:e7e1102e73ee2315b4740a5729c4ba3ace52828f61215c50bd5d8bb69ad50f19",
+        "evidence:786445c3f7e2b375f2622bdc679734be61aef47aacfb750fc24874c5fe0093c5",
+        "evidence:f8c4ca40df616c41e139812069024de6c71867ae71c16ce6a99ce33643013359"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:84af81d15731d502647513cd474e596e5f2db9c079266e66c060243cf7ca1e57",
+      "target_ref": "frontend-request:ee77ecebcf38fa8547989059f41b9a546b6af8f1154ee1cb490e567f711d65da",
+      "route_token": "showSyslog",
+      "registration_address": "0x0044b3bc",
+      "handler_address": "0x0042b5e0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042b5e0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:17e765abe65d2df326793a61a157e219a49f474a906d5eaf9d58a06f33b2cb15",
+        "evidence:e88636a77388e3f42b82ac7f2257a7750530a54efbdef89b21454c5f240bafa0",
+        "evidence:6ea4f558699ab4f43666e8aab0ca93cd68f9f0fe310816fcf6b85e1a0ac8a66f",
+        "evidence:1ff4ea62c3ec64c4d69e1bd9da58a0e1a41784bd2662fe548c33760dd8adf17c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:27fb8c48bce891cc32cce2984e25c5be5abc67f366fb37bcafb9c385ed8794e3",
+      "target_ref": "frontend-request:b5037df8e69d9299c1b3249bef60f91e941ce26383dfaafd03201c1b6899b705",
+      "route_token": "clearSyslog",
+      "registration_address": "0x0044b400",
+      "handler_address": "0x0041f8e0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f8e0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:ad800d5f466ebcca3482c571d711c720689a5fc96e4cb5cb0a22e51da4c63d95",
+        "evidence:1b72f84606b43b354eade71e92454ff185e8b651d689bc24bbaa1c6da69eb47b",
+        "evidence:06635b649948569435f014c178fa779d2dc67e1e19fafa14d6008d7027c34427",
+        "evidence:66fdba96e6b02477a2b2611a2705d0ab05be2d511de512ec906f1af756f8ebd9"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:9ce96e1e3ad5b995f0d0b915ea7ebf14df34abf7a1b1d9c15c95c7149d407412",
+      "target_ref": "frontend-request:3ae45d895debea7cc64479e93a778d40c23ab88e26b14682fba1a9c6bba48c05",
+      "route_token": "clearDiagnosisLog",
+      "registration_address": "0x0044b444",
+      "handler_address": "0x0041f798",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f798",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:b7b5fea573a3b2459a9d1142f9a8b82c9089d62ec1af79017f4589773877d4ea",
+        "evidence:60d9ae5885ef8c63e86c4da4cf9dfe9cebf7a3f1f82efb2b8a2f7b538b8c94d6",
+        "evidence:204d59c27fa3350c1f674892b123b6dd83cd7dde8c4cea343ed40236118dec3a",
+        "evidence:e19e979e616f0281ab19235125e6ec0babab066d9d4459f41c1f74ccc366c779"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:3066a37f3a63e17568fb5a02d1801f5a7d2514087a4496dc67c9bbe132d57d25",
+      "target_ref": "frontend-request:16b8167e846f71977c6e530a745120b8a9522b7abb05ed7a66d9699c7578e0ab",
+      "route_token": "clearTracerouteLog",
+      "registration_address": "0x0044b488",
+      "handler_address": "0x0041f650",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f650",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:94ae1793e1dc7e10a7caaa3dcf2edee1f281c58aa624f3a9b64be92ed64a3811",
+        "evidence:24a33986c743e6a108513301b7f4c6d9aaeefc739c3e701dc4fe0af8dd0eb45c",
+        "evidence:78306d448aa0a5927d46f2edb277071abe832eb2d05409f77db2221aa4a1b53b",
+        "evidence:b093ce2f34f78eb14b2673bf47a23c34edafa2adb789b4f36a4ff0fcefb7b2d7"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:9686987244bb49ae04c7c84c9ebd895eecf4da60b5ef317b726d6080cb6d0f0c",
+      "target_ref": "frontend-request:f4adae276b1f2187ad4feb0212536755a3a0467a3e84db2d8aca9df6741a0e98",
+      "route_token": "CloudSrvVersionCheck",
+      "registration_address": "0x0044b4cc",
+      "handler_address": "0x0042a210",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042a210",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:other_handle_t",
+      "evidence_ids": [
+        "evidence:b52c16894784ae7b7e88e37eb2210c565f9b8994780c684c56c5e34ac059d03d",
+        "evidence:7887d9e7e96cac802b08f5fff2f4b7188ce5b44f8eb193d3bf79f284f208a4bf",
+        "evidence:0335630b66051e30a596e77f7f94417146e451f461d3f788cf8178931f803ef8",
+        "evidence:38877e0a07c922cef4bf4422b52184524104f1cffc853b86975922b4d8e1dfe5"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:14a63d67788b7f85e0712cb3ee038464b41426b7b93940e48194f2982513ce96",
+      "target_ref": "frontend-request:8abaaa6b23bf95eec5013e4b9147d8186ef451b3053af1c1b964e34dfc088908",
+      "route_token": "setLanguageCfg",
+      "registration_address": "0x0044a0e0",
+      "handler_address": "0x0042b428",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042b428",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:4210e501e351eaeb97207d9078f6d643a2c49871df28b6bd6277f0a77d840f48",
+        "evidence:8aa92951f3a4c4fac8b99f79befa3bbad47c713fefac60275efc4d99a6715c8d",
+        "evidence:364c3d38b127753300f77b8889a512dd546939743753c9745d9f1cf8af4b7683",
+        "evidence:4b2a2454e370e9dbb497e766c6e9defafdc00dfa9c2dee3fc9ce363eff80f77e"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:d953ca875954f4d06f19b1f9d8e22bfd724e983f87f01431db368157a0c2a901",
+      "target_ref": "frontend-request:172df6abd59d5a5fcc3d5738b31b1a78c3ddee4c4e144e8c127257bb5ac70cd5",
+      "route_token": "setUpgradeFW",
+      "registration_address": "0x0044a168",
+      "handler_address": "0x0042c29c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042c29c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:57290426ae43d4c835c9631146924ff907b228579fa6bf1b29928622566da9fc",
+        "evidence:222e451735f54341b3a58f18445cebd1eab0c7655a494d5ccf379247bb20fc8d",
+        "evidence:aac3b25ff395774dcef7671fee6019a044f780a36b676a55f7e0db0f706d9767",
+        "evidence:a195008700adccb8cfbfb693d89a876da1c9e32120db007148d9f5c1e884cb90"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:b7d3168ec97d484c563b5aaf1f6209d4f989d02b279674e7274227903fdd5ce1",
+      "target_ref": "frontend-request:0f9d347fa517f8af26a6ebc6c46fcd7b585564e023ca8930b453cec6d5784e1e",
+      "route_token": "setWizardCfg",
+      "registration_address": "0x0044a1ac",
+      "handler_address": "0x0042835c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042835c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:36d7335a56a7a4aadf7cbfd19583571c16ba3d327d1b00b839a56085b132eba2",
+        "evidence:c6102d5515fdb9c3881812565d727ce5ad3d7799b9d645dbb3fb2ab57922915a",
+        "evidence:ece0ae8ebfa2dbe0bf11a255f6bc8302831617ab405bdbae467d2fef70f2b0b4",
+        "evidence:f237301a6c2911c6daba85d90eea61c818f39a984acd42bfb7163f46ae1557ea"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:2c29f8916944cb9cd1eba113944ee993fd78e489074efd3b99dd2d6b7b936025",
+      "target_ref": "frontend-request:63cc09292d9786f29192fc45619521356cb1f438c5b5cbd532f4683d85d27497",
+      "route_token": "setOpModeCfg",
+      "registration_address": "0x0044a1f0",
+      "handler_address": "0x0042abc4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042abc4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:db0e0d73069e4bff5908a49ca4768c8a19490d4640d544899c780dc26ee90380",
+        "evidence:c417390f3cbfcb105486269613b17eebc80ca7358451a688d21dca3852c125e1",
+        "evidence:61bb4e2a346732de4a22f75d95698d05d780a8154bd99611ab066d396e564f07",
+        "evidence:de1e04cff7982f6d729fea4d3c7689a1fefa2cd85f9eb66627d88da369213c81"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:9057530253b35176f9b2ef541678ec180a922eb6038932357dc107e2553312af",
+      "target_ref": "frontend-request:e559e72c4fa257c782083f4611c93acc5f159d5efbf8a24d5a7fc5aa2ae767a9",
+      "route_token": "setIpPortFilterRules",
+      "registration_address": "0x0044a234",
+      "handler_address": "0x0041d3e4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041d3e4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:7a121bfd48b9811bd02b93f5a8589b14f43649c3cc1646222929bb0849cf0831",
+        "evidence:7008c3e9196a3ef4162f4ecd2d1cd8ef9ef5fec5ba1d3b7131de8b4949b43ed6",
+        "evidence:804e99e285996b9d64989c08884cd2748ff08e683e3ad66033c4e1e321102d2a",
+        "evidence:578fc2dff45d89e5b1c5216f0da35b708df0fe8fa52880394df36e15eea7fab3"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:5169493e72f565a6cd590144dfefee1308d4f9d4893eb00fbf53d9274931c9be",
+      "target_ref": "frontend-request:f4645233c7e0d6521608f228ee9fd1d59f16b7e671d92d7600cdfe7b57ff64d0",
+      "route_token": "setMacFilterRules",
+      "registration_address": "0x0044a278",
+      "handler_address": "0x004204a4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004204a4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:0b47640291b0f48360aff56f4bc3f71509d185014788fb582b7d924cee5fef58",
+        "evidence:eb64d4073a0682b0ad296500e0cba0c13445e7a2d7f69cbd54c3b49ea477badd",
+        "evidence:6d058c0fffd7e26b855ece6e53c4c9bc6cec9d8f28cf0c8bbd6e16c8e72ef1fb",
+        "evidence:eb7d4f697943c73eb4de70b877f806a63b0d4f4d49267df04e16b20d2996deb6"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:7fdcdff460877de8cb771080f71be705bf6496b8749a5548beef6b53c942573f",
+      "target_ref": "frontend-request:538e10b38a6fd6341a8e8389d63b486c1d13b48a6fc80770ff1d66f4bdee00f4",
+      "route_token": "setUrlFilterRules",
+      "registration_address": "0x0044a2bc",
+      "handler_address": "0x0041d1f0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041d1f0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:aabecd741871032bf3dfd6f444d9214640ff4be5d437c9c6503d669400534f59",
+        "evidence:b353833ae1acd258126ba7f3f6bf81d9740886ece1a07e5fa746b5377cde2098",
+        "evidence:ffdc5467e89c4bc8700290aba6120f22de9d70aa8a6e03304c03712936360136",
+        "evidence:d62b801722a75d900fb3b32558479e8326872be13731e167c285d7aa227ef91c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:ed0fa89491fbd18cb6db6fb2454c0bc5dd01dd8e46367263659e5c006c6f4a07",
+      "target_ref": "frontend-request:f902cf471ff7f64eb3e8268927d813037f38ae433a39ed28a089996574c0c99c",
+      "route_token": "setParentalRules",
+      "registration_address": "0x0044a300",
+      "handler_address": "0x0041e168",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041e168",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:1b80c596f161bebf430b9c3ca62e71d1af1966eeb013cef2c0911d5414982365",
+        "evidence:bec51d80de532a84b2b32075f19185f7b2d542a30a7dd783a4c64a89c1eaa80a",
+        "evidence:c66910eb948b93e72f8d7d572331a56aa767f02eac3c0e5afd2ebf6b918c040a",
+        "evidence:b19a25067a787a829526af384adcb17bb7918f426603fd6dc631e26a4b792172"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:7097f66986b1b720ed74b7a67f2bfcd64cad57b362960c68f882acbdd91c51c9",
+      "target_ref": "frontend-request:6f4f673ac9634e4686b12e2811b34ee069a0a81bd6e59128ac3ecc1a9a24ab58",
+      "route_token": "setSmartQosCfg",
+      "registration_address": "0x0044a344",
+      "handler_address": "0x0041dd3c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041dd3c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:8d0610e5cc920379140f37eed158bf4409b2dd14ebf63e8d9cf362cb467808bb",
+        "evidence:1d87ed7b03f42054d36c1343ce9ab642a03b549fcafbc2ceb368dd59a2f8ab4b",
+        "evidence:3ea316326ed406edf64b4fcb93611ca00104de7c03b3309ee8021d3f55aefd56",
+        "evidence:76560cf7685aa7c69685d4af32f5739915e064c37ef73cdbbdc8886402c25e65"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c6deb7d73b5c997284941c765901f9c767a375c2eefdf655a2d154277c2b8a9d",
+      "target_ref": "frontend-request:898b252400beb5c66cc3eaad8bf4fe029523f408ce4ae3b08929565090c3673c",
+      "route_token": "setAccessDeviceCfg",
+      "registration_address": "0x0044a388",
+      "handler_address": "0x0042da3c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042da3c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:0a4206f00ed7f28e48159eeb99a9ce5c7d23e431136edaba0af358637fd20d52",
+        "evidence:f3cd5049a684b31fa8516bdfb25db69607efbdf831349bee2b7da699c8690f25",
+        "evidence:607f795d70c461ac5d82057f3eb631e1d613b40aac870c0c3b38eb2fdc15900c",
+        "evidence:4755cfde54c86b70e84bf0f404885b03c6c1897be96e3ead2c48fb3791b7d63e"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:5f11580e35f07b65297867540eb0540254e6cf2c2a9c2b694a499ccf41de36d6",
+      "target_ref": "frontend-request:f06c51e3ca3cc4a569df71507d115eea117a7f7f6c4efac9e4da3da37a3ac3c2",
+      "route_token": "setPasswordCfg",
+      "registration_address": "0x0044a3cc",
+      "handler_address": "0x0042d824",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042d824",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:8440b833c0c14830df359b23e6b419772bf38d96db8889f53321b4e63b29b653",
+        "evidence:215175a53965d3c3199b69378a648de40eebeaa6037e781221a4b4d7e9b059ed",
+        "evidence:ee6512dece34b3371713bd7d82a560c17283df0307a3d0b1e7e4251fc99bbadb",
+        "evidence:e05e89014c560c777511a95d0c082ffc07122cd9cf81770b1f4d78fdb44128ff"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:879f20e7fc81796448315183712db2fd2dcda00cefe3558f51a3b77f9a80534f",
+      "target_ref": "frontend-request:c7000eda3e5cada0dbf5b2b926c28c673b1a19fdcda4ab76f8938fd04ddc1cda",
+      "route_token": "setNtpCfg",
+      "registration_address": "0x0044a410",
+      "handler_address": "0x004230a4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004230a4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:b9e5acd3a9ba4db99390a7ddd785fa01c6381adcbd4c7754abd33af8b89f3cae",
+        "evidence:48751ee37df175f300711d8312018f6eeee5c86beded9c499166c3e8842ff404",
+        "evidence:37ce8047037c10bb79404ead2fa886be5edf692c6a8353055a17cc2c262c0894",
+        "evidence:6d1824a24dc2612989dbb88bbdc386d59eed76175677960d4c16db33a99d3680"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:5262ce0a5cf5f0cac97afbfa70e98ee771858c0cef660ea9542d41871743801f",
+      "target_ref": "frontend-request:5ef96f09490735329e14a6d1526a44fbbad41f9f096b4c2596faae05ce055dae",
+      "route_token": "setRemoteCfg",
+      "registration_address": "0x0044a454",
+      "handler_address": "0x0041af84",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041af84",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:e2b395893546ad8c75ceb98ef4bce10052d6d0133a5bfecc98cdd5c65d8ed11b",
+        "evidence:6df4c9599e8093f32727a8e28806802c66974f6df37e5fde6a32af36f5443c1d",
+        "evidence:103ec8ca9cf69096ea422e2ba0e6d675cfd9f181c8b3acd03bee1764cd70d1de",
+        "evidence:250224722906355d7e8563544afdfc4e97b8908bf9b9198078db2451dd3a59a7"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:1b2327e3ada601795b6af9b6a2d3761cd16e028b15dba4ae73c8c4c9c27adcc7",
+      "target_ref": "frontend-request:585eb5626828ea147357c439cc03607833c39528638c294bc8d0391e7c462b14",
+      "route_token": "setSyslogCfg",
+      "registration_address": "0x0044a498",
+      "handler_address": "0x0041ac74",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041ac74",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:db817ddcd31920e1eddd2cd8c1779ea9cc4df4c0bd5c3c2ed653d94f67acec27",
+        "evidence:def66995a50e6cdd1f24647db20e6d7768d3025ad3f7d756cae985d52fc64543",
+        "evidence:26916a8d099df8d7fdfdeb214885d0b43ee86a475f6448c444322b292e32db47",
+        "evidence:024707f7492f8d6c85b346caa40944f4a0b19be4d703f956c37fa5020712f4c5"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:ce14a1a38f49612decb5be8062de123b71de167b3a07e85ee034a2017e19f5ee",
+      "target_ref": "frontend-request:79e804a2028dd1859f0c67b8311465d7e76f3fb323a0938227222c087b556c04",
+      "route_token": "setDiagnosisCfg",
+      "registration_address": "0x0044a4dc",
+      "handler_address": "0x0041f7e8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f7e8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:82cc875c2e863e6f48f0d26ad33981966e5fb42811f8cfbf8821a6eea1dcf6c4",
+        "evidence:1a03e068c0b9ab4852c94cd187dce721348f91726aeeec0aeb7f57bc21e169ff",
+        "evidence:d5e0b228631abdc01cca2a90f227e911756de6b132205ca13e446ea54923b0db",
+        "evidence:56a24d924f7a7cc45e8554983b266c0be60ed7e98af679d046e5b651c7b261a7"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:3c5c5061ebbec1777a335d92e00534819d9d8e856232df0b6f1e365cceb5a16e",
+      "target_ref": "frontend-request:bc0eb2e5e0e62be6bca86be360889ec15311d2b54f95f3101ad5fa376eb66fb0",
+      "route_token": "setTracerouteCfg",
+      "registration_address": "0x0044a520",
+      "handler_address": "0x0041f6a0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f6a0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:d2ada2ac5e9f0543a5b8d407d6dbf7c3315106165b66018eebbf292f49782ff9",
+        "evidence:3a91039d68c67437451853c00ae5a1e942362e4af8583101c1c0252238d29f83",
+        "evidence:a7064af33327182a46479f1ecc70ddd9275200da7c92c4509949bf4dd303cbd3",
+        "evidence:233941f08c3150fd4315623d7581b680f54213088c49fb617e14ef7a3ebb1cd3"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:81abfdd2d8dd04da29663c72d1a9eb7042796b8cce4f82e91635dddaf6778359",
+      "target_ref": "frontend-request:a036990c625ee62d91fbbf71699bbd9e62071364c6270f68c69ee132f19f68d8",
+      "route_token": "setScheduleCfg",
+      "registration_address": "0x0044a564",
+      "handler_address": "0x0042d5b8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042d5b8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:c23edff7361d4f4de93df05084597e057a092b4667c4c49d09ba994264f6e0e2",
+        "evidence:48a5f21320ea77104c38ea6e352deaeac00db4174fa0c3b22085dc3b4f01845c",
+        "evidence:9e92dc726f172ae0ba5bad567ee2667c9d3f5fc9752171dca1d57d831b736c62",
+        "evidence:c6a847e57d0a145ffe1c099a49f4eff125b57e20fc1d2e18618a4744bf370abf"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:e5013d8e43341f79d403d0ebe33cabac232048e19fd99d909a68ec7e40d06f03",
+      "target_ref": "frontend-request:23d9492bcbc21738928af69c8f78a88cb9d6685121ec7e9736852faa3bde7934",
+      "route_token": "setPortForwardRules",
+      "registration_address": "0x0044a5a8",
+      "handler_address": "0x0042d134",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0042d134",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:5b079ffaffeb5b7d642e3a3ff1b8ce2e15ce82f13fd9d685eaf5f26135bc7fb9",
+        "evidence:600bb9b3d72dd82d1fada90b81f80beac0ceb7516218e0d38413b56a6c837f7e",
+        "evidence:7336b6d1dca5ae806d239d27da5002c6becdc6a5b6e509936b70b08f4f8b7ebc",
+        "evidence:e40154aa3cf180a52d0c098eaa2a013c95e03fec00a7aebc808b546a4e900ee8"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:e347bdf1383fb8607776cda065dedac8837b18b35ba38bce7490394a9c241459",
+      "target_ref": "frontend-request:1fa560fe5e7383917035d5c0ebb3241773435ac7df3bc488a1742b7dbc350ea5",
+      "route_token": "setDmzCfg",
+      "registration_address": "0x0044a5ec",
+      "handler_address": "0x0041ae80",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041ae80",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:5a74613b0dc2d568f0b279913f9fa0de560d17dac13dff87da7b00e41e9c9a96",
+        "evidence:f28d19e746909b01973c6c6fc4989c8c8d0957d2cb3811aabf1aecca57b3d1b2",
+        "evidence:3144fd98dd9f8f6214bf26b659ec8308a3a0af302265b278e202c9eae5c41de4",
+        "evidence:43097dc4729ca8a789156797b80a82184d56a3db4d98d34bdad2922d9ff122d0"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:bb6e28d0500e475b9e481b77021d2890441a1a72ca8c9cdd390f72c1127a90c0",
+      "target_ref": "frontend-request:8f6198e5e5bdc3c8f72682aacbf2244f240d3262ff96dc76709d2ccb6214fe98",
+      "route_token": "setVpnPassCfg",
+      "registration_address": "0x0044a630",
+      "handler_address": "0x0041ad18",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041ad18",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:a1d08f7d92aff7f2ac42aa43a6385fc9c7642f4e5819fe1df0da7783bb6fcbb3",
+        "evidence:5f5fc8e63ee62b6de9e28a40c3d12669d60368d88ffe7aac7723a751958832ed",
+        "evidence:d94f0da5d99bf22e3c0f76ddacbdf2fac22b9c0e2c5f4c606bde404df80ba7be",
+        "evidence:ee4fa9888f17dbbce89e2431a865da9444ececd7d4fcb98099be672ad7fcf4b0"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:5db75e3c8ff0e4398c7b466c0343731dbf8fe33a9fe27c8ea9932514ce22dd7f",
+      "target_ref": "frontend-request:dbc9784559204e3a7e8997cf3a7e8b4621b9f2af254b91d7e434e2740fb87b37",
+      "route_token": "setStaticRoute",
+      "registration_address": "0x0044a674",
+      "handler_address": "0x00420e98",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00420e98",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:b0487a4016b63ae0ba4a3c1f0698d09991efa22274198cda3018d23197fdbc46",
+        "evidence:8858a8b235bb0233f338f5441f2d9a95c00c002c33912dd1532eccae05e85932",
+        "evidence:595d22856d90d326544f95ece91a5c70f663b759b7773698d69667210976cb21",
+        "evidence:58a13e928e21dbec42ec054dc2ebe80cc3dc652a01930bbce6f425366d8a40b4"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:530b36a7f50728ef5ab39df6c1952ac3709dbee3ade8c8c28a3f3fd2d1118159",
+      "target_ref": "frontend-request:025f9e27fd03cd22b336bfbf64aec08e470a57a3ef07e09eb6d8a1bef6cc6f07",
+      "route_token": "setWiFiEasyCfg",
+      "registration_address": "0x0044a6b8",
+      "handler_address": "0x00427558",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00427558",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:53b20c6dc7bfd6417fb0bd641be0e8b19b882232a11344adf80ac47050334cc6",
+        "evidence:6a97601ea4d7f5c4c3e688411e6141b47bb7bd924f5e167d6cc58d5285863335",
+        "evidence:540fe5d2cecce690a393b32ad2a09ac8310f62d9b8534c7d4083c8326fedc649",
+        "evidence:259e886842178cf13536a3085c90dd05272276e06b0e808fa307a3677cd14382"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:fd410d7be8fe216d65770cca8e0516409931ce0708a7879f14e5deaf2d5982ea",
+      "target_ref": "frontend-request:f00c1c9447213d6cede9cc775e256d5c48e1d59892e0dfd4497d53abd98bd572",
+      "route_token": "setWiFiEasyGuestCfg",
+      "registration_address": "0x0044a6fc",
+      "handler_address": "0x00426934",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00426934",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:962be9847742448990ae157defcd8e674c5aae265f8997f61ee4ae59545eb0cd",
+        "evidence:82ce61e1cdbc03f2eaab6000fbf2026f50fcd75f27c823284c9ca043c79fd931",
+        "evidence:0add2f2148f0234894b2b3d3bbf947e131ac1ccbc1af9fd112df8d0654469334",
+        "evidence:3d0ca48d5aab674e7db7d78ed1c1a93cb1307b704d74ee0a31c8a867bd2944e8"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c34b8d77d37c1e8b89df256c685b15cca7dba84a0a0d0e3a563cad4daee3155b",
+      "target_ref": "frontend-request:e0537183f3a0237c0dd7832e87fd6ff65337f87e867a6d918e30fe4028cdb90c",
+      "route_token": "setWiFiBasicCfg",
+      "registration_address": "0x0044a740",
+      "handler_address": "0x00425d58",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00425d58",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:bb9fd91ad0472d37ce0a393d11de988ce45049450d2df5f492c751941a75a313",
+        "evidence:8f7e585180bf79c62c815ebb57704cd5c20a5ea6372ff1bcd2c851934c503564",
+        "evidence:9bea98ba3eed10819fc63c79bab7d1e43f8f879068b1c3960c54596fd9186f98",
+        "evidence:3cd0ebdd9bccf01be60fb7625d25968edb1f5669ec226bd47e4ed486fb61b134"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:6adaf8e1b7428c6137c299ce85dc94848b54868872953ded8d0c62243e6c3a53",
+      "target_ref": "frontend-request:0126a83f3244dac5b51493acfa139eede6077b0b4e6ec0f5bb2ba25dd41ce9a8",
+      "route_token": "setWiFiAdvancedCfg",
+      "registration_address": "0x0044a784",
+      "handler_address": "0x004232a4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004232a4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:7216f00cf7e8c6787ce8cc6b360a01d30873bb2656fef9f0952dbd2a70a7f3ff",
+        "evidence:f35865142f3e5fa27d84292b7833576855836cb13fbcf3b4b6dfcc843b71898a",
+        "evidence:dca073b47a4a91d9d6518e51316b65ec2eedac8b03fdd2991769ce0049283291",
+        "evidence:6e6d7616caaaf1e738dabd57abd1f5f13a51b0e567582f3175d26b88aa7ba4d9"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:09f24ba7f028c53354158e6e98e0a822b1f58a6b59308f53844ed3914d340aaf",
+      "target_ref": "frontend-request:9f1042f7ad9494e6efb29b76af9109e8e1b3e1b8969c415a68fe60de882c9804",
+      "route_token": "setWiFiGuestCfg",
+      "registration_address": "0x0044a7c8",
+      "handler_address": "0x00425674",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00425674",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:6b6f538aa8a5ee7e56e771a1173d147fe01ad368b4703686b501bf318a5d7421",
+        "evidence:84ecbebcdfca48ac191121ef157851b8cd8ab1a2980302e43f95ac12c29eccfc",
+        "evidence:7ab257ad616b6c64e3b66421cf86f66e3ce72537924a5ece663fbf4729267885",
+        "evidence:16f99f047aefd79ce94ac2765390cd3062f82feb1ef23a5397b3df010b0492b9"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:ca248ade5575e0edacb5a5103ae1e7212d5526c94c8e4369400ba80be3a5782e",
+      "target_ref": "frontend-request:a7b8b39fbf8e66413b76dbc70b09d62e831a81cd830919a9cf348bb0cf3720a4",
+      "route_token": "setWiFiAclRules",
+      "registration_address": "0x0044a80c",
+      "handler_address": "0x00424fe0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00424fe0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:3b9d91511db7897c29a2ecb332f46ad14dbd590bea95fa13684652c892464ada",
+        "evidence:5ea12d97e8d7a066c78b5e4dd865573914f2786bfd95682a46c23edd2ac84eaa",
+        "evidence:ff4ec2159402c3d76726b28c0911fe8168dcd49af05e73eb152d8fc60a3631a1",
+        "evidence:c724fec218557edf9e538911438773a00cd08120a4a8cac3d98292e5d0cd4274"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:dbe2926364c2aed5893c2d46f88702af0c5dcd5ecca67cfa7aaafd22ec3c2ec3",
+      "target_ref": "frontend-request:b75c28f49dd21417657b47bb9e06075c5dddeeaf49b5e165e5c752edf8c1c02c",
+      "route_token": "setWiFiScheduleCfg",
+      "registration_address": "0x0044a850",
+      "handler_address": "0x004226a0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004226a0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:c8cbe1e1d18e144bd53c4b36bf289093ea5a1d81c5955ce460b50635db53982d",
+        "evidence:3a2bca3f34432be1baefa3ecbc90952081ec147a5a999f069c9f3a0327c5e8b4",
+        "evidence:3506c8da9f80ed762c97e51fc1dc9f00f60d5f55cd4e417fc4ea4fb78e2360c3",
+        "evidence:872151bf1e32b4f35722167aee87372022d2ae163bce03cef0080c24aa949d7c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:d950c097e4bf4edf8b31829c6da4e282ee411a3941d5c1b22dd2856276afca6f",
+      "target_ref": "frontend-request:0e2536a7afe0dbbe879e94090b0d06720ab70820d3f5e300e5a38c2d7753b64b",
+      "route_token": "setWiFiSignalCfg",
+      "registration_address": "0x0044a894",
+      "handler_address": "0x00422544",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00422544",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:0fb5d52bc6e69c169ed4ad9804602b0f9f2234245233a0c551076d18ab386e88",
+        "evidence:22fa9363399a2d99caf5995fd47e59c39bcf2e5b3e9276ee87b9b62824d95c62",
+        "evidence:6cc52c496794411378f17f7c785f5119ff54ba2823c694801443f0e24780844f",
+        "evidence:f88be9e30c4d3ea2f480e64f2daa6e8f3bec834b1835a8542c35887f57619d89"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:f504769e68ae5c99ed1a616bd76631b609549299fe28a97f8cf63a44486c7431",
+      "target_ref": "frontend-request:3d73721cd45fa6cf90b678a1c5f3ce9fce1b6e6d7f6f2831dbf76bde7f881c7b",
+      "route_token": "setWiFiWpsCfg",
+      "registration_address": "0x0044a8d8",
+      "handler_address": "0x0041ab7c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041ab7c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:bf234393a148f84ec3ef23bc2c2ea7de394a2a62a20796361a84a3185a6e4f12",
+        "evidence:b7a2430939afd5986f63fd86be38de6baa735b8d76318e3597fcb25a1fb54f99",
+        "evidence:69fedb66a39c4b8d3441d523f8900c1bd3382103785642a8b74539621cbacc25",
+        "evidence:cce6378ae339504d8a3f6f3543e9e2d2dca24e7b61aaa6115cc0f9de7cc3373c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:6cfc3e9ad72dbe9291b68d6cd7bd159d60fa42cac81b82cfe59d1503010af196",
+      "target_ref": "frontend-request:db899b4e4ea9b6444fc5d7634a0eaf18ed3cfdcb28e66ca9a9b4cfe8a5b67dca",
+      "route_token": "setWiFiWdsCfg",
+      "registration_address": "0x0044a91c",
+      "handler_address": "0x00425370",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00425370",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:b0cf0f5f6822f84fb323545efac18fb044e2c7285df4581dedc260909e574334",
+        "evidence:ce502d6a499469e72f2357bd3e53261a6090769326cc1bfc9eea078efb14ba2a",
+        "evidence:c8e0b7c3d911f2f83e3faf817bfbcb56d214485019e39e2f8ae6bdf52e61c15e",
+        "evidence:2972b115deb9c630657360a4f05bd21b01b4423c6bc5a4acee688a49404d96e7"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:09ced94a6865c447ac0821e80886cfbeda228691b677f81a12c905983eef98d0",
+      "target_ref": "frontend-request:f34b02972934d2548d01f42cd47c0d51c05ff286fae434a7afed1857f74ac861",
+      "route_token": "setWiFiWpsStart",
+      "registration_address": "0x0044a960",
+      "handler_address": "0x0041f38c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f38c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:77960e72ac57a5bce627f2fae7fcd9f6f372aae6f9794272bfaaa9511da4fd64",
+        "evidence:b83ef62308edb7f5822d1a34dfe747718584d5a958856f4f9505aa4441148365",
+        "evidence:b4d00b30399667c58ca7509d14b9ebbda0ce71a62822b0928f5af7a7f92fed16",
+        "evidence:caaff466eec6796cc22a24546d527355b5c8d7f58545ff28d105a6c80cc933b1"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:9ce46d56650ad6ad22fb91af325ee86c28c9a20244ea2b812e83c177da1d27df",
+      "target_ref": "frontend-request:37c905d21992812d51628dc8266e6a8416e06c74fcc80c59955cfde96e02f1ec",
+      "route_token": "setWanCfg",
+      "registration_address": "0x0044a9a4",
+      "handler_address": "0x004212cc",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004212cc",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:f4f30958fbe5a33e00b64e74eb1150607b26d0903596e8eaec02402a7b372d36",
+        "evidence:a43d4afbd0c1c3bce55f0c18ba9c449e42f933fc13cc997384f0c0771c005645",
+        "evidence:97ac1651b63d48517557153085a3187f12ab2a581e87ff1c3d9306739f838649",
+        "evidence:e9881ce79ef4b56a873cc1c456f1818e9f5ffac2e1c9ecc8e67c837a2a2d8d04"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:5e6d20a11927b49eba416dcae31d686bc0bf8cfde0adfb43caa4d21278455b30",
+      "target_ref": "frontend-request:ae818ae8fe18ee759a55e1a8d12f423e836020344965b2dc6bbd5e851facb925",
+      "route_token": "setLanCfg",
+      "registration_address": "0x0044aa2c",
+      "handler_address": "0x004209b8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004209b8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:7b8f6bc1380ed52f3b870059b0d9fdf6e31d08c1d6668712397c34f8578f08b5",
+        "evidence:40f4546d6cd758973c602b975270fd34a65952eb0af3480684e4df9c1f1f9b75",
+        "evidence:aa8f5f7a8b5cad1c0f36a8e6f603f37bd27a49409b107efb9ad8b15dda37c4f5",
+        "evidence:6df24edc5d0e4dc1e08efb25e9551a410f8a56acd526181f30ddaa10e1755f88"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:10e544c488fb4c2015e1e82f68b2020f73e665e8534139500ccb0c2866890289",
+      "target_ref": "frontend-request:59e57f0631b6fd5ecd1d6184f5cc0afa855fe0fc85fd573bc22f4ed276838f7c",
+      "route_token": "setStaticDhcpRules",
+      "registration_address": "0x0044aa70",
+      "handler_address": "0x00420178",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00420178",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:1e773c43e4c7885173cf3066c62633e053d593bae3a7fa72d5c33e4e760cdc03",
+        "evidence:54f4f2718e0fa842e142e113c0e09fce01f201b3f04970590d5e6782004f3ec7",
+        "evidence:55110889e29e39a619a28a6d85c209dd41979ff5ea2056b5160a8684758e2d1d",
+        "evidence:3016eb2df8546e4f669995f932364f69ab1ed8eaad4b4c9bd633786d1fe86787"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c8de27e902be8cc6469eb9f2b270094e308f26aec5e81e80f367080ca06c4ad2",
+      "target_ref": "frontend-request:feb697e790f2604ba04c6b4b5ad36ee7bd92d941ef7f28a41b8df6c28a2c583b",
+      "route_token": "setDdnsCfg",
+      "registration_address": "0x0044aab4",
+      "handler_address": "0x0041f9f4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041f9f4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:53ff141564234ebc78701ac399a988bc193812d5b092218b3993ffe08e88021a",
+        "evidence:5a8a73ecae72a286eae6cf4ecd99f4af05dd26150df0d2878ad8e450a1ead6e3",
+        "evidence:c082f6099e1dd7d0d986868a6f60c06c531cfa9af4bd5575f07d6cbcfe6dd5d1",
+        "evidence:5451d3a3f6635c9b7471daf653407b92ed7a4b07e5ebc7c484161ba0808f755d"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c34ddbd4f24966c4f073d98f1d432608df033eb964032b12cfc5d7aa2c148e27",
+      "target_ref": "frontend-request:96990bd344246e0e3a513631fa3b1bf48fb82c198da3a3b078f5417ee9f3e0d6",
+      "route_token": "setIptvCfg",
+      "registration_address": "0x0044aaf8",
+      "handler_address": "0x0041b080",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041b080",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:346713d8edae45ab28bc322c55a06a31c13e20111835e9c9100f2e000fad6949",
+        "evidence:0535f023dfdff5bda1cd2a57d4ee90146706d7c2c64d6be70159bfe2e453adbc",
+        "evidence:900725ff5c579da1f9738ba37f09d5ade0ee1cd1a4f9bde15f1b239a3d1e33c0",
+        "evidence:b2968962cb26e650e0539159d697258b77f3be7df731038a594222c6401e6e94"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:0e5bb9a96269f1e2ac46cbb28f81e78279e08ca8189d609484ad986ff7a455d1",
+      "target_ref": "frontend-request:8fff0e274d8b8620e21925ab8f0311e55031f84bb7dcadb39210440db32a3478",
+      "route_token": "setIpv6Cfg",
+      "registration_address": "0x0044ab3c",
+      "handler_address": "0x0041e8b4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041e8b4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:ae80c66da3202c4fcade65c37a737a4b5a5de401c459921aa40eb2f65039cc9b",
+        "evidence:38168693308bbe183d79e686fd19c856fdfa9ed73d5bb11f022b5d23fd29c203",
+        "evidence:03fe750cbc37782e8cb14f25d2a3a4dbc3793289f9db6175a60453f8436959db",
+        "evidence:751ff78a15565c8cb87aeb422bbc2ece0da4ac6ece229351fd5ca25b99e62cda"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:07e466798db6a0d99c5630a4822e45709d5daa76ab70d659c4c2f05ba7bb0315",
+      "target_ref": "frontend-request:bc2b29983341635a189756be9268e365ea26d95cf1e5547de3d8495a773b8ff3",
+      "route_token": "setUPnPCfg",
+      "registration_address": "0x0044ab80",
+      "handler_address": "0x0041aaf4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041aaf4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:34f47b29c254ba7d2b294ca0b4131abfe6038937d88dbad0e42a8052238018ac",
+        "evidence:8d8e66202b7da8502e73fa6a368c23055772faede21f8bc04557bf8be82e14a3",
+        "evidence:eadb299db7e3034ebdced4c923772c64a6cd683b13ec32d298da98e7039bf5b0",
+        "evidence:3b3801201d3eae75bc0e9853758b849de45b4c76ae379ac9bf183b66dc48d3c0"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:004ccff41ebecb7011249a2187c3111b40620a3480080b82ed39baccecf56e81",
+      "target_ref": "frontend-request:3b5b53aa5506b3b1d23d4752e3dce6cd6e013de60e4e417c390d323303a5eca3",
+      "route_token": "setManualDialCfg",
+      "registration_address": "0x0044abc4",
+      "handler_address": "0x0041aa50",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041aa50",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:2945a86f4b6e00713d6e2e2114aac6c94ee967cc37b90afbcefe5897c471ea1d",
+        "evidence:c067c6657db55ba38b20da9814e392ee069d6129f1199ab2741e6d2e0f8fba2f",
+        "evidence:8fe463f0e434ee990f557558d7b456132b21deedcdc6a174fd340404f0118923",
+        "evidence:ab78b3d6dd59141514609b19541c4f412d192e01c50c6b2fb5d092ef2a4aba83"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:03e2f28ca22b85b37d8311821f15f48e7a31c3d75f818458a72fecd8b5788234",
+      "target_ref": "frontend-request:9860f8f363fd323c267fb2ef6f058300dde2d99186f5b6662787fc19cb88e3b7",
+      "route_token": "setLedCfg",
+      "registration_address": "0x0044ac08",
+      "handler_address": "0x0041a900",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041a900",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:a529453feb44516052ebf0271e3ca3a991f14f21020b27d348b1fdf774e9d359",
+        "evidence:b487e1acb8296f8c0575075115493c44c6bcfd5ae12ae081663f80fa0769cba1",
+        "evidence:66645b10adf05e3113d74da410e928960d0909e988454d95abda78a812da0b55",
+        "evidence:fa2813c865b72426890d81e3cc5b41400fea1beb062e5fa681ab7827b2b9530f"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:3a4a0ed332dd0cc06aa9a7cbf2f9cf53e05c02d9518251b9c9fef4c7e3b7ba11",
+      "target_ref": "frontend-request:8492a3e68f5b7442979a8d4c66498356e2fc22fa361c533b6e347e0988a17565",
+      "route_token": "setL2tpServerCfg",
+      "registration_address": "0x0044ac4c",
+      "handler_address": "0x0041a534",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041a534",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:833e93ac8c5fbaa8b128fe8f9fd7289ec065121459a70a47167848168a3d4722",
+        "evidence:ef86246cd670390fe94107471c5eefac3f3d289a2fb4e21b81b297bcce3f8739",
+        "evidence:dee0fa579b68ab0b38030d810ab9e03de3570181a8a4a2ba9970832ae68c57cc",
+        "evidence:6bcb786256e7ed46057f87f0c619173e93821da2dcdf438df71532fd8168a39d"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:f5d98aa030f0b5361a3d58138843cd20807d3a87c955e0bb62b2d460a72e79f7",
+      "target_ref": "frontend-request:50ab68a5f81bf46c81dc8319fbfad387a4468f5627f0501568c93bc033c46f9e",
+      "route_token": "setVpnAccountCfg",
+      "registration_address": "0x0044ac90",
+      "handler_address": "0x0041d868",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041d868",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:1b81920a3833c612881dfeb039920fe84a90ba7090853525118965b855a3508a",
+        "evidence:7ef159fd7bf60f71e5eae947479162c80df66e074cb197f71554c0cd2784a551",
+        "evidence:eafa130740a8dc036666bb575ee0381f49da9cd8fa948df3b03da496e32d81f3",
+        "evidence:b0bc391a3efb7114d06631e82340a678130fe29346c2dfff612f8cf6806719d6"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:97f7846a23e1547c00bb70b02a48d2a3f1aae20ccacc964eec5023d8b6522099",
+      "target_ref": "frontend-request:9a94e0efe0eb28c474dda24501784735203e9ffd3dd87b1bf6e6016327e40c53",
+      "route_token": "setSSServer",
+      "registration_address": "0x0044acd4",
+      "handler_address": "0x0041a330",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041a330",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:0f162c3b370e4577e42beaf0d9635c47842b9cf7edfd3721a98d478e2a1e0120",
+        "evidence:049a5af074be1f7fdb973f81c30cc3e4ec7f046930e4745a10ac1c53699acc88",
+        "evidence:317347f0b504d97d9b0fc03a6add69e1f48eeea12cf40b29ffbf479187eac2ef",
+        "evidence:8b6858548c7c54a2106428bc722daa84669d9b4667d97b06c6c7ce2012f3570d"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:7ae48346ffbdd9df1c63f16b309aa49c116434cf773a559514f144d8dfe10a87",
+      "target_ref": "frontend-request:b82b17bc870802aaed55842e2c43c518c81e1aa055b0958125a50c64541635d8",
+      "route_token": "setTelnetCfg",
+      "registration_address": "0x0044ade4",
+      "handler_address": "0x0041a9a8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041a9a8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:set_handle_t",
+      "evidence_ids": [
+        "evidence:d2889c612b7e70e4665f76ab0b74d6ddc524da6618283d416cca49fda6811093",
+        "evidence:2c1dc79c33ef45db2ceab03446d171d3508b8970f86da1ac1fdd27da5ed02760",
+        "evidence:517c21d58e632e26fafc53f64b9dd8782175f7d3a4a0c3d3f6e6db9c17b964cd",
+        "evidence:1a5847766da61317d4d41b6e65ca30058b517abdedc9fecc0e16a5930333b51e"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:20a53b542b0b70aeeccc0b97dcaaead0fd58c0737feff131420e40b64a76734b",
+      "target_ref": "frontend-request:e301b72fee96b57226aec372146db061e6b79aa47e22f7e043338b8e0db5701e",
+      "route_token": "getInitCfg",
+      "registration_address": "0x004490a0",
+      "handler_address": "0x00415454",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00415454",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:ed2001915a807b5600f0a38279af0156ba6ac5d3d4ac34e325cdd3bbce047ac1",
+        "evidence:2fc0568e5c4838db0f76d9d7d941bab07a9fdb279417939d91e2a44047203366",
+        "evidence:9f070d325864782eede1efe291f3e3954bae5a30c1b89a52243965609c19beb0",
+        "evidence:d2e4c570ede85933a0b5816fe043818c3cfbac3ea8859fc47b9666ec5daf2cd2"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:6f704bc552ff192eb7619ec0d671ca13c03767869296545f3c01797f484eb246",
+      "target_ref": "frontend-request:2e27d9377cca1fcd8c6f945df225472cd1b3ae674327c1e181e47254539c6637",
+      "route_token": "getLoginCfg",
+      "registration_address": "0x004490e4",
+      "handler_address": "0x00413828",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00413828",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:0e11e2c26fb76f47556fda642c658e1c42c29ce172e6bcf8b15f1a658cec4e5c",
+        "evidence:dfe8beba2e7561dab036688c681e5870c07eada1908a2c5624dc3d402f6a8f7a",
+        "evidence:e9be3193ff18eb1c99fbcc41819708fb099ba300af65c768c2a66d81bc7762be",
+        "evidence:d366b3f3e6f315a91c044e14392a8259104db0c3267f4642b25544a96db8ca11"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:926fb74c159f747e70b23343e70b74d5b401fff6f0fc08165771180bf58f39b3",
+      "target_ref": "frontend-request:c8d2495d02970535bd5296964e7dcdfce859d0d3caf382232a17b56c9291f212",
+      "route_token": "getNetInfoCfg",
+      "registration_address": "0x00449128",
+      "handler_address": "0x004189d4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004189d4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:4ee3984bd9065c1656ce9947f098ee0a64916f3c155bf82f4e56598b8826fc96",
+        "evidence:ebae78dc182f821ed8cfb1c72ab575390142f7dec098bf19e38d700f9310c79e",
+        "evidence:8c54a3c616c76386af48387a78a96d1a063cff0047e745e9aadb8245929ed475",
+        "evidence:10f24d532c6b95985de46d4f63748abe35dce8141e5c5b2618eb6f1a472207c7"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:4db4af5dfaa860e97c1ea65178fc85590e11126369c5a13c5d68a7869ee373d2",
+      "target_ref": "frontend-request:9f385ea984b4ebfdd3f0b9d301b02fb85620331b351d234449541feeae7c75b8",
+      "route_token": "getSysStatusCfg",
+      "registration_address": "0x0044916c",
+      "handler_address": "0x004166e8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004166e8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:30df2dbbb3f760b366a3da71383cd698cfe04931abf9fe2a399b5cf9e1e18625",
+        "evidence:14b6d61acef19e08337bc140680aeaf9e2b6de81a72765df824f021a3b4bf654",
+        "evidence:aed57304d4f2dd06273a3f17fd4d347db45a42468f9b685a30dd6bc7f8c56b6f",
+        "evidence:cebf9ac87091e2879ec4aac3f2026a53536c77fc3bd6b82c267f76e35b9490b2"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:6c1994902e3966458ac428f9ed98a463885b8084c73b6de3bd8c17d0567bb25e",
+      "target_ref": "frontend-request:c28a0b57ba64244849c4eda5fd62484048b0b75a4b0832b26f9241eb51e77f4f",
+      "route_token": "getWizardCfg",
+      "registration_address": "0x004491b0",
+      "handler_address": "0x0041179c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041179c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:4e0221176ba5f5025b5fffdb8bdc38ffb3218f282abc70c26ab3f05eb55e5079",
+        "evidence:d1de2c45745fcdb4cf4b8ede0b9c55e8b249029de15d9fa17a26c8bdeb535547",
+        "evidence:9c6733d0a9f58a41c403180a45ec001442706f7fa21871e1a8a6c40d5b61cbb3",
+        "evidence:dbcf8d065aa88decde09522ee06ed1230739d51c9359a33e3a0441db1f98a881"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:b80c3c97cea21ff72419ff1bfa7fa714100950b84b23208eda5da4d57e4ef0e5",
+      "target_ref": "frontend-request:67d2afad0e2f782c467288de33d3799b20a7c289e3617cdff1ff510e624e7eef",
+      "route_token": "getOpModeCfg",
+      "registration_address": "0x004491f4",
+      "handler_address": "0x0040e464",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040e464",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:32f5dc74c22738d14da0f1d0feb4eda9e6448f71c095fe2de250ee55fab589f9",
+        "evidence:0c817eff09c9481c28d00ccaa6902f47d3617c3298b33d6ac1fbf16284835452",
+        "evidence:19a30732b5576a6ab4b321415150a81df303f6b1449ed9100d03d6fe21b5c76a",
+        "evidence:1b0d4270ae7a8f1881fbdbfa35af5225ccecb5958f91dba7070aa80199966f95"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:32bdd53a4e8e8828926c64f2bba50f55a8ae335eb1152a839164ba66af531ae7",
+      "target_ref": "frontend-request:1aafbb8d1303636465a4b8bb6c95ec0ac746fb911703a61700a7057de62e66fd",
+      "route_token": "getWiFiApcliScan",
+      "registration_address": "0x00449238",
+      "handler_address": "0x00414c90",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00414c90",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:c5e56ce02461eb9ec0b6ff80c74be024b2e236a0bfb519fbd17ac62e293d1e18",
+        "evidence:7a92d90d10c0adbb6111db6b73c821c0a471e605e2f0a4e80b81544b1b5d2023",
+        "evidence:652bf8a234d95bb0e701595991701e732c1f58e89d511af897ca128b778b1815",
+        "evidence:3720ac34852c42a8ae730f3232042ecf2caf29260bbe4ede367892773d68072c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c949f70680bb43718004e75885fb6d6cf3e211d4590e2d302a7142e9ffcc10a5",
+      "target_ref": "frontend-request:7eb1de1c3bf0bf825a8d783f1aba5a46abdf90d3fa3e1107b1dec0d94a5dbcad",
+      "route_token": "getAccessDeviceCfg",
+      "registration_address": "0x0044927c",
+      "handler_address": "0x00413918",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00413918",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:c4828a637d3e114545123f7475d859e65de8fadadb426dccc8049a60307c7437",
+        "evidence:deacd0d80825ea61f829a8bc03794af3d3e7dfc86f88ee8a623863000cb6c86b",
+        "evidence:cd63a08f38fcd12710d8bbe9ebca9f9b488463682e3d7943e8598fd9cbfd643d",
+        "evidence:178123742c8ba6ede196617feb7817c33b82240619f92406a6613b4cb01bebbb"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:3fa64256e5d271aa8e845528b2841fa90c770f3107604626d15c3b446982b3a2",
+      "target_ref": "frontend-request:cd367b3fbbf6aa28b40a3a3bdd0f510074c38d34b7604052d39c7fe81ef3cfab",
+      "route_token": "getCrpcCfg",
+      "registration_address": "0x004492c0",
+      "handler_address": "0x00411600",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00411600",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:d72232679f4f12ba8cc327ec0f9e46c53d7ea145bbca490685b2288715375b50",
+        "evidence:3b6525ddb76f94566e8db39e7296b9659a58e7f891a6ac679b7a673e37ff0c03",
+        "evidence:a2f9e0be9351db13a222172787bc837e5574d121c620d42897845a082bd8e97b",
+        "evidence:99302cae8565f4ebad3cdaf9f63afe48e1f4d8435dbe43fcf4700b7bf8adb9b4"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:d898142ae7d87e0b911bd7b3a90126b9ca6056ec4049278a5b9ec55df9027936",
+      "target_ref": "frontend-request:39cf6b7cb6427fcc7dea49cd7d11c4e004a7f846527378bfa1e4e5d4415a280a",
+      "route_token": "getPasswordCfg",
+      "registration_address": "0x00449348",
+      "handler_address": "0x00403078",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00403078",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:0d36ef6b18116842b915ba524a8c9ca735a4f6ae1312718846f8e2fcc822158c",
+        "evidence:7407a32497a34d7ae6909157c07fc9c9bf9cea48fd63afd2a20d445675f48e55",
+        "evidence:18def2f4f48ecf9fed55dfbbf98a5c8b73f6945eb1e19fc533b7e70649715c0f",
+        "evidence:2ce96450d82bf47b09752c8789537e87a6117a6d1da174202af516749f6f869d"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:59e72d24a61f91b34915da1d4e99057a66f0981d2df40ebe9523a3bb28f98241",
+      "target_ref": "frontend-request:d7e22cc0348ed0354009a2f22365e2401fb7606bef17b95236c0bb9b44e722dd",
+      "route_token": "getNtpCfg",
+      "registration_address": "0x0044938c",
+      "handler_address": "0x0041138c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0041138c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:6898869c0eef5555ee3ef6074b6fbfab6ca544bc3edb0afff1423f1738c8706d",
+        "evidence:dcfc61c21685a38b7972e65d51e15694ed24816443669b776e0be42bbc19c51a",
+        "evidence:dd6fe721d7a178c195778080bc5e890886d91da7336d66c61a2012c74eceee16",
+        "evidence:bd9d096084cd64031bfdfb2aa3eff525f5d84d540bf10642868d58b953078962"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:dea4e66b7d6f81a3cb43e3f3fd3fe3b4ca904c6609cd09c9049f9bc9c0066b3b",
+      "target_ref": "frontend-request:8c976635b73f785c2df2be9c20f1dabfa9c35e521e46984e143db27cb7f746a7",
+      "route_token": "getRemoteCfg",
+      "registration_address": "0x004493d0",
+      "handler_address": "0x00402f70",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00402f70",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:176399ee3fb4528cfc4f136dd704113df96ce3bc6d9a31aeaa76c6ff20d542d8",
+        "evidence:71ee71dccc6e3cd2759371ddb569566c9ed288705dce666f10bfba1ee2429732",
+        "evidence:f746e2ec78b53c639951dc59bf114dd079c806d818a0173fa61c9528db2dd663",
+        "evidence:d13d99ea0b6b1bc4eac64719d4350d43321ca74facf4c8164ae34c0124c56a64"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:4cf2f6e74b1abe077f347c12173bfe5a3821ffab633b5789f477d8fdcbb96fbd",
+      "target_ref": "frontend-request:4676da08da5f2acc25b54abe01a3e5495452015b358ddebe74a3af14aa204e66",
+      "route_token": "getScheduleCfg",
+      "registration_address": "0x00449414",
+      "handler_address": "0x00410ff0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00410ff0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:5845e4edb53c8478ab1f465de63e1b76c800bdb7807766e50196b502ddd2ef5e",
+        "evidence:1784845bc47b6632f84df1cdd9b66043711c9d7617093750e14847c7ede31192",
+        "evidence:611a61c84615b0f30397fc642ae7d329b03e09964055e1e8b3822fc10e4581ee",
+        "evidence:fe07b3748dc235a7097f2046469221244d20e5ecc44bf8132b8ac1a75b982e90"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:6f3b6c3e42ad0e2917c93613a6e9526ed59c3a722171c7505bcf9b168f6c60dc",
+      "target_ref": "frontend-request:bc64f91109d3cbf32201fef0a7262209331d17d4a11adb107db40cf3a50c1394",
+      "route_token": "getSyslogCfg",
+      "registration_address": "0x00449458",
+      "handler_address": "0x0040399c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040399c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:65de80643888d6de84896067e271125225d11bda7242f7737da1cbdf1aab7d93",
+        "evidence:89fb2590b2fbb693a454736ba05615864a9872be61bb4409740d422e36f95ebb",
+        "evidence:e58dc1a06de09a44a76cae2edcf9c5486e1e0961deb7206a636477572b8fb3ae",
+        "evidence:c7c417c91fb94e122012e4ce1d16144689f8eb9f996ec0169804ae144b2fd96d"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:f40bde023dd0054d9e7f20ab93d09da44b3bfb55ad6884974b90f3a497f83ff1",
+      "target_ref": "frontend-request:3de7b2fdb57da99c3f472f0db15905515c759ab7fb7ad997d1e0edeebbe5c457",
+      "route_token": "getDiagnosisCfg",
+      "registration_address": "0x0044949c",
+      "handler_address": "0x0040b864",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040b864",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:8950c9103fef2b43e3237bbc1d1d40d5eb4c950dc6cd795f82789cdfd5e5dd74",
+        "evidence:fa55d26cf84846374e68bef2eb9ca9f1874e676c7ca25fe1d47e9679f262d269",
+        "evidence:aba7fbd217a5d0a20f46ca8e5a1767b795fda713d1f6f8ccf73b75bf3951ccc0",
+        "evidence:7970f03cbb50c353c6f2b6d71180f1b3e5cfbcf1126e1dc0d1b2a1c6f79ff14e"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:50e7210d78f782b1f20f817de870973ae31ea674876e0e7fea668eab5116b18e",
+      "target_ref": "frontend-request:84baad6ac0363ea63eb028a857af42b99f77365c90c3acbf7b01a25956792c14",
+      "route_token": "getTracerouteCfg",
+      "registration_address": "0x004494e0",
+      "handler_address": "0x0040b684",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040b684",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:541ad98bd71223ddea426c94b1adb7f02257eeab78ae990db59857dc346da92b",
+        "evidence:3f51c25c3aa2055bb7ec9e9a95e8821ecdb0328db40bf06e0f6c7c82908b6110",
+        "evidence:5af45330cb96ac866b144b84185802f009cb0bdd425fd7f2778ff438e378e8dc",
+        "evidence:9e32e5e926a3c9ed7db109209ad6966a0e263e02dc93c6d7f90b89061b311d13"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:74c3c58e446881b7be24706528ccfa3b81044c0415ad38416753939f2e1d608b",
+      "target_ref": "frontend-request:2d598d9a3c2c9781e5a76e8f4b7892257913b0b28361c13374962c6a3d5b81a3",
+      "route_token": "getCloudSrvCheckStatus",
+      "registration_address": "0x00449524",
+      "handler_address": "0x0040b444",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040b444",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:f6610b7d7425dd45d3570b88ccccc4a552fb8683f4dc1945f7e461bb90e8cfdd",
+        "evidence:49ff1afadd6ed012db0922a30c48ad7ab663836d2e7c2843575d52254a4d2b6d",
+        "evidence:0644c6b8f97c59605ae4fd2f76641597d0023d391dcd9e8e71f6c3860f07689a",
+        "evidence:1630b7f5adcf6fe0393944cd063930178e47e3a5bc5e57f5a866b58e868f7f77"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:4eb97a15ec8714522b31d91aabe6bffc36cd20fd327f1154f3f956bbbd984896",
+      "target_ref": "frontend-request:4b7d8c1f9ce88b577a7f9c5abd8d892ae8ea19d2aa514b0919950d5cba4ec8b0",
+      "route_token": "getCloudDownloadStatus",
+      "registration_address": "0x00449568",
+      "handler_address": "0x00402eb0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00402eb0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:9aafba58a36f655b822eb60153d48772770821ff3c21fffa6a45e65199af843c",
+        "evidence:42d9508a6dbf4192ee665136d58bdc48b88f9686aea6c2b8730cf6b12b11d2be",
+        "evidence:1f0d58683ccff48a9f1d68eb00e63df03e59062d48474f3bf6fa4d9e5b0ffd3a",
+        "evidence:9aa0d004cdb90113ae69694b796ba3d713935e1e381999e76c4520bf2d6bc5f0"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:1ed221536488154b06d2924c2253abbd8150bb56d9cbd1ee13d4973467d22463",
+      "target_ref": "frontend-request:ae6313883b7de05f787f5d18f34003013bc15ce3810f894b591bd42995cdca73",
+      "route_token": "getUPnPCfg",
+      "registration_address": "0x004495ac",
+      "handler_address": "0x004056a8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004056a8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:06cd95de3f45a114eccd6a46c9bc9f3fa3f9895a9a19f1ff2171da6423191474",
+        "evidence:5dd81eb3c64b8b29e4a734336de994b0260cfec4ca02843450e730ccf28616d1",
+        "evidence:fca564db8d3092573841bf34ee465d39f718fe946c766dd8adbe24cda2d4ed0d",
+        "evidence:f2405894eba0cab9145549ec85acb88cfb6ba22bd1b847fcb88818a6d0b717f9"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:7290dbdf0e66933d32320369eed54cd156aa2728dd744d26d384195bf3feda09",
+      "target_ref": "frontend-request:fc8072b5a1b6abefdb632418864f6843908d23e9ee3c5fde6b5b2a0a88b3e6c3",
+      "route_token": "getPortForwardRules",
+      "registration_address": "0x004495f0",
+      "handler_address": "0x0040be04",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040be04",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:e56fa37f21fa3b0a3b4e72d1f0abb728d894455e3ea2c02f8f24ce4d512fe5a5",
+        "evidence:57c748049268b2be730b02d1a2103ff89ca5e58fae651b3f5c97d2d8d4a52c9d",
+        "evidence:db94d0423b8176cd9b16d30b39d6e0e639983bfb749ce84a41afd4973d570801",
+        "evidence:b163215b293f0cfb912962d388d57ca29bea7087aa9e82041cd0939c420e8a83"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:6f5b544b87dabb9e72c6eb4399ab8e56629a954319ace467c914f5c18e044c2e",
+      "target_ref": "frontend-request:48fa5b460951637a6effcbe37bffdb836381ba7398ffa6bf51e87e90bc2cfc5d",
+      "route_token": "getDmzCfg",
+      "registration_address": "0x00449634",
+      "handler_address": "0x0040bbc4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040bbc4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:be21df2a861a23eaedb37e536d6cdd9522a90dd9eb1d0b4c02f9829f76dbfea1",
+        "evidence:8553972512204ec372e4b27d5faa1566e5d7f0f3c6c56eda69baa853e6a6150c",
+        "evidence:dfb9a486bf4f4db0210c3db79a1d1fd991da4ed304304844c9eec900582f3d71",
+        "evidence:97708649f183da9fe0a17c45afc19b0aeadf9c89257333d4c0d2a851aa137383"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:f4e7534765c109e1aec26c4001e68891b93c6d3a240d9764d50b395a5f7c55d5",
+      "target_ref": "frontend-request:21dbe39e7ec6df40846d01b5bd3c6929832cc4fe82ae2d029946145b90d50e06",
+      "route_token": "getVpnPassCfg",
+      "registration_address": "0x00449678",
+      "handler_address": "0x00402d28",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00402d28",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:77f942524768922b7862f2e5bb135b9de71ab38c51e3d4114a40295b6beef890",
+        "evidence:13c0d32cbb32e036a819d1bbf2921c6308a09aacd8963e10297caec03f2504fe",
+        "evidence:e4b9fa7b9de65180898c8348cb01b613e08d67f8fd61b5bcc0b7c886768afee9",
+        "evidence:fc62c777312dc8a521b095fd50e64f360a9601c6ed59035e04c218232ae733fe"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:14e38773c452a8f74ff8268461a2978a2f437ddc3f41a6a2472f2a9a53220dc1",
+      "target_ref": "frontend-request:9772c0d590960706ef6cb066a743e330c5b355243dfef7ebacf7644371d2dd22",
+      "route_token": "getIpPortFilterRules",
+      "registration_address": "0x004496bc",
+      "handler_address": "0x00410678",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00410678",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:e3c71406f9580f403e452781f0eb50e94204859e972cdbcf14bc62e010698ad1",
+        "evidence:893139ee0e2d6209fae332bdf71294fd735e97079f1fd56e3e5512391aa05921",
+        "evidence:bb73f51cb3ce073b334a2224d23407b6c589462d1f2ad78d610f123a1b89320f",
+        "evidence:aac1b28352cc1968ad6ce511fdee700850bda2b5d318c28c154bc7a2626ea450"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:23be413d76f9b0afa1f4b17ebf5081e020b8da72d609b5baa11a95067777c163",
+      "target_ref": "frontend-request:3eebc54265e4555157061c457d0e719a4653dc3bbf709b962b06a745d63739cf",
+      "route_token": "getMacFilterRules",
+      "registration_address": "0x00449700",
+      "handler_address": "0x0040e080",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040e080",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:7e3db8ba8f543d0551c158e4c7cae42221fb22ee514ca6eedc9d142e506a3086",
+        "evidence:24cdc13db6c60b12ad4583f62bd0c6f1b1b5f33b36ab75b7c14cb572747104b3",
+        "evidence:b1a08ae0dae7a86323e60cb5b1707de822159e2273d5f9d568a2aade030b9eef",
+        "evidence:769766f354f4b97757ecbe9d7abe0bf1cfaf94afcd747e923f6de5cd45fc15e7"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:0905e6795a6981f01a2a211e2a0451b6790507e30c99462f8e6bc7f5e43609c3",
+      "target_ref": "frontend-request:073fd8e0e1bdfd4c847b9c5cecd14e3f33feac119ce7a85d5a875257d3dc68cc",
+      "route_token": "getUrlFilterRules",
+      "registration_address": "0x00449744",
+      "handler_address": "0x00404418",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00404418",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:b532155d59d2db377a75cbb06534437dd0d53c806041e3f09690356fbf5c8a1a",
+        "evidence:2d7ba6639fe64dcec44bffb9437243bbf7101ef5bf51a768ba5fa1aff71abe4d",
+        "evidence:714f1f45deebd1bf667fc7dadfcb5fa66ae027a1780235ce6ad4b5a3cfe076c1",
+        "evidence:63599f25fb099d165aa39077adede4ea9cb3248813d52d4e0cd66d631a25a092"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c621f97ce9faf61abc0a3091d611fb549a635498d9afcbd757854d82a8a04d42",
+      "target_ref": "frontend-request:e74cf367988293879aa3a9128cca18114b4f449839dba41f2f11bf9bf674e86f",
+      "route_token": "getParentalRules",
+      "registration_address": "0x00449788",
+      "handler_address": "0x00406a00",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00406a00",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:a59fa2fc1b53e96ebafe045afacd1d33c2d5ba7d9c5aacd69fcc3f14c033226b",
+        "evidence:b58cfaec7ccf3905bc6d22c87354e63b8323dfe630901a4e4aa730474b60b774",
+        "evidence:fbed544bf44f68424dcf5ef6b9050b8f72d394d93f200d2caf4d2c177a86edc6",
+        "evidence:c0825c516d4489b73bb580f445a935bada3502402b7685679d75b48762ed0079"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:3631e9aa5b1432237032e244433d77b659834745090eead7c38d40994e46fbda",
+      "target_ref": "frontend-request:dba28e50d41b85a7681a2f2e2114d1abecb660d91454ce057c750cd11eeedb0c",
+      "route_token": "getSmartQosCfg",
+      "registration_address": "0x004497cc",
+      "handler_address": "0x00406534",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00406534",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:669faad941deceb01690691f8f12f91f16edb4223a673c12947787ed387fbaa4",
+        "evidence:c058117b936b7bf251c1466feb17b36e96af58adb07dd89e79d2c95dfeb8dc03",
+        "evidence:08858b099287105c1219439f353f233a7b240efe3fc25f636c1c001dfda52f23",
+        "evidence:7caf5fba7d41714dc7d3a94c9e7772046d879934e9bf1790f583c018bf1776b7"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:9e199f76fbd7084dbcc4c701b663d832eb982a567dd6bcc9221a232ba9cdbe93",
+      "target_ref": "frontend-request:eb003e6a3724f87903750344b0761cd9e485763494f17d161a6df9d65e2591ed",
+      "route_token": "getOnlineMsg",
+      "registration_address": "0x00449810",
+      "handler_address": "0x00410c24",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00410c24",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:66e68f6324f64006b734348d811c4d826532c03fd31fa889a1c63d5ff6f5cb6b",
+        "evidence:e789982e2eb6a56a1f6dbb30b58a2dbfd9b5e6d55eefcb00e96cf77c80e01c01",
+        "evidence:2480ce475281677f69f7b2eb9386dd74b230afce8a3b48bccc37dffb357fcce9",
+        "evidence:bfee44165cafb79aedc2d9ec19532ccad606a4ed4328f5c3cbee4e3c46aab6a5"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:ea9f9179ae8ea956fe5ec9c95c63bcff8124dbd5fd197ca941077745e6d40e2f",
+      "target_ref": "frontend-request:25cd31f7ae826c9008424389728321599606a7e037d5736ca305e85c0c3c477e",
+      "route_token": "getWanCfg",
+      "registration_address": "0x00449854",
+      "handler_address": "0x0040d080",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040d080",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:e266dd47d6b509b113214f7ef4b04494d6cb9a912a29b9cfccead63c889b6a40",
+        "evidence:07bfd06b4f19c80e87d301be361f6a1c617ef0eca89e0a04d8c8cdeb11a2b811",
+        "evidence:75ad8f24280f16297a0b142f6380781887e943faccb9241718907dd8283ab142",
+        "evidence:471c804b873d170f874a0ec696db911a83c8ebf8e36df0816dd07b491bcdbeea"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:022c0a11f66ee3ad2e23ac53f2cadee5ade3b3b131a9f5473a803595547ebe32",
+      "target_ref": "frontend-request:2b711182b743b04e1dccd0dea7d46353464cf37a7383172ed5501762be9717e2",
+      "route_token": "getStationMacByIp",
+      "registration_address": "0x004498dc",
+      "handler_address": "0x0040c9c4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040c9c4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:71227d6dfd2f26408c47fbf4879307d85756d43ce9501fbae045b8e44fad9c27",
+        "evidence:8f114f70a991ea753eef48ad17b72af36e4c2dbb65a4730e8665dd3b42388d2b",
+        "evidence:89757da92c8a6df1dcc13083bfc1e1427bd741533b3d8c3d02c3a4ae8a8b1f88",
+        "evidence:680134c5a3ddc9d8d98fe575fa0b8c3b0dc555e10e6971eadbf81a07606e43e2"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c55fa18e2ac0e2c41e15b4c37e75067a75c1c2a7d9f8cb3399929765497e2d58",
+      "target_ref": "frontend-request:fce82c2cc2caa260ddb386293154957560ba05977bc9b436bdec3f1f2d1b38a9",
+      "route_token": "getLanCfg",
+      "registration_address": "0x00449920",
+      "handler_address": "0x0040c420",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040c420",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:06dca93c0a43f6a2fa4af97666634847330400f246123c68bc46097337d5801d",
+        "evidence:0e688052e8aa4a2aefc3529b04930a60a9c9abe5e327350bf0e51b65d1da9152",
+        "evidence:5ecb24ed6cc129c34fc940fc46f09c3ef3a07bedf617617299bdf963f1365e85",
+        "evidence:c9d1946a7847ec1840e7076e3c52940d2fb29a333ffde97e5e4325ba4fe0e1cb"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:4e5a26bf9a91e8b511328dc4320b22eaf7546adeed140799d71a2d2db650a2e0",
+      "target_ref": "frontend-request:25f582a90ebbfbab8f9062e672acccafc8c0786956cc5d03e6972deb7f965d07",
+      "route_token": "getStaticDhcpRules",
+      "registration_address": "0x00449964",
+      "handler_address": "0x00409fa4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00409fa4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:5c4be773dc9883af739de51b8f6a4bb8ccb9741f5e811cbb0bd331059b7dbbdc",
+        "evidence:7db549672383f388d61c05ba3bdcf7fb4d29dc60e4ee0a9ef4a1ffcbdd182012",
+        "evidence:637b495398cf2d3dd90073fc1b08992a9afcb1478bfc69e2efcd569a19631623",
+        "evidence:409786e70b49b0d9d679e3be76d5964e411148f66e0d6d11a67ffefc266a60e0"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:0758b3d604f1df5f9e187b685551fdba82e129963f3a61ffcd1a2477c629e519",
+      "target_ref": "frontend-request:d68aa44bc1cfea9ef78a7221a556c5ccd9d2bbffa3768b3b7021b2460e48d4c6",
+      "route_token": "getDdnsCfg",
+      "registration_address": "0x004499a8",
+      "handler_address": "0x00404b04",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00404b04",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:5622b50af88ff9a46e431be1144b34a6149b5fe5283b65aa7675ec3266956275",
+        "evidence:9cfc08a3364d79c86f499057143c96f2f6bb20b157b8a2fe393c6ffb9d8622fe",
+        "evidence:fe4da01ecba255153e1df5f8eff730172b1450204af6735d48317213f964666d",
+        "evidence:3b6bfc720fd289921151788147b71ee573d0ffbb5cb51db304c38545f6fa6f7d"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:e5961217218839d69890ee7822ff3aac2859338bce32c8af046ab593ff89ecf2",
+      "target_ref": "frontend-request:5cc2159e60eced1071312c0ae87658735f5beb75fd1c0cb297a21cb201146706",
+      "route_token": "getDdnsStatus",
+      "registration_address": "0x004499ec",
+      "handler_address": "0x0040b950",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040b950",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:2fff8fb462b36d1a4444423f092f03db413494e8ad7c24f76f8f001f67b528c2",
+        "evidence:074525093723f25cad3841311c2e6756e407fd88b4b194deee7e14fd7f214205",
+        "evidence:79cde7eb4249fe9e2cfb487c0e43ee209c93d457e8380488c4ec32a724c5395f",
+        "evidence:77b3c6b10ef2896917c24124ae0def4325e7c1834c6990169c4f2a3fa431daea"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:bf5d5addc9bad2413ac0dfaaef76be2792870b162e53e989ae6023f310f278ff",
+      "target_ref": "frontend-request:623c1b2c93faf2f81ee5ffe861612c1096fcbfc561c5b81c24feb25ff52bff8e",
+      "route_token": "getIptvCfg",
+      "registration_address": "0x00449a30",
+      "handler_address": "0x00403140",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00403140",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:c25dfdb1371e71a7e33da09bbece76a83bb39d0022308855915b4673164f0012",
+        "evidence:48b1e876eb6e8cca5588ba090d7af7230d06208e9b2a383045f9c195f8cbec37",
+        "evidence:f5eb8a6f817c3b031df847a810bf5376c05ac271d6e837f630725b4343b3618f",
+        "evidence:a24f168e18a0c0912ca973d64fce45a91334b52acb2cc5875acb6c68991ea6d8"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:71d327cec44d076b4e407198c3ea4e2393b2607807f85cabae54a825fda2379c",
+      "target_ref": "frontend-request:6aff3570ecfb0802e525a204a6ac0b8c72c297c59e91df44ff75dea3c09afd2e",
+      "route_token": "getIpv6Cfg",
+      "registration_address": "0x00449a74",
+      "handler_address": "0x00402620",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00402620",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:f102b142c8135154f8e848d1b684d590aed2f4daa9525ce7f800669ea2aea884",
+        "evidence:cdbd46bd9fc95696727fabe20745ae58c294878083d74fe494517ddee6ae064c",
+        "evidence:f42744e53ae2037f17081b381d823d8f7786b69aa12552ae97698edeb56f3b97",
+        "evidence:4bace041c890f9007cb1c132da9f001e5caa866bb82044151c8b7c4b17407e70"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:1d6d1bde02c630ef7933dde1aa120a0f5880b41bed88686ba885f0a9aaf84e1d",
+      "target_ref": "frontend-request:279a8d06d0f492ea4308923079c156b05dbf8f61ca3ae728ca5c2c00746c4c80",
+      "route_token": "getSystemRoute",
+      "registration_address": "0x00449ab8",
+      "handler_address": "0x0040b058",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040b058",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:74f567fb7e0123826a63e5c554a28221a3b3817c742d7e8e57a7e0fd9b7e9d44",
+        "evidence:18036a8590c4c4d8957e0682d0dfca187eee4902d2fe79767fc329b729414ea4",
+        "evidence:d40cb6374639dcefe4faaf3cb539bdf77909bfbb4fb090609ecf159dab622616",
+        "evidence:8b3892226485ee55652ec4355bdd0797f318d3d94f2ed50c27ea3a6f0b3eab3a"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c710e6ccf48257a15693231f7b7083c4ab5ca0e0f0879b62556a83d4f3e0f743",
+      "target_ref": "frontend-request:994ce24a4411fe84797c6ffcb95bc0b3b2aed22be23051ef159a73c86dcc0dea",
+      "route_token": "getStaticRoute",
+      "registration_address": "0x00449afc",
+      "handler_address": "0x004046c0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004046c0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:93df099393f356972c7bbb1698dff413695188ec36d0d72239f790260da04b7f",
+        "evidence:8f2603658a6709b3c87884704c50e6f5c25741a868a88b5f34e9fbfda7346b8d",
+        "evidence:7a30707717e7a46f8029e9ad45f40c485b45e445d14b603b514a3f733422bbc1",
+        "evidence:051745485a5a12d753f49a53cc3e949e8ea27cd4d6db68348191d5349da8bf53"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:e7768c30554d6550db5aaf8d9443fefef612bc3c3bda35f52d14460a5d1bf4eb",
+      "target_ref": "frontend-request:d3f5712bc9d304436e0ef6c3c2cfa35fdf8ecc26be1fd6992cb4f8e66035de3b",
+      "route_token": "getWiFiEasyCfg",
+      "registration_address": "0x00449b40",
+      "handler_address": "0x00408bc8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00408bc8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:031a936f7030f253137a0dc1455f712f3280cb24904711e88144cb7820b98b8c",
+        "evidence:2bb3257484f2228fbb4b16f2135bbf0f64ac6f33eb5d428f12ae3790703bd0f3",
+        "evidence:a310ab001a710ab38baaa758fd9d6993f08aa3d43b0a51224e335abcb1afcfc4",
+        "evidence:8c4af6386150733972ab7247487c2d40cdcc18c8653696cacd1029f8866c280f"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:84bbf3c20d23e9efb0d21265da277fd79347b667bb5329c13910a0e1e968156a",
+      "target_ref": "frontend-request:0e88e8e567b98681e6729455454107c6ccf42031172cde859cd8f531a3ad9d8c",
+      "route_token": "getWiFiEasyGuestCfg",
+      "registration_address": "0x00449b84",
+      "handler_address": "0x00408128",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00408128",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:c70c55b9edd7fbb6804d1d2be17260dbbc810209b49c29f43d5957341305bb33",
+        "evidence:b777ad392edea95b80f85a6dc8c27938916c42e084997c801f3d9ff28bf94aec",
+        "evidence:ca505ccf7a4258e50484e148d4a7c65e2784b013292bfa0c8b3eb8c999035cc7",
+        "evidence:28e96edfc7329de553931ab9bacce339293dce511cbfa5c0f8a7b7cc9657942f"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:56862459287269bf754c52b872ec39bc99c38408e3e75004229ddec05da436a9",
+      "target_ref": "frontend-request:2584dd32e9c698340dcdb5861af34420eb57af13e1cdc64c6c56512f05d24303",
+      "route_token": "getWiFiBasicCfg",
+      "registration_address": "0x00449bc8",
+      "handler_address": "0x0040a3e8",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040a3e8",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:cad8e92400f9042c1bd447328cea6dee9434e90951fc7949b4267a67edd8e278",
+        "evidence:77c8f7dda45a1d8d729e58d160a2e8ee17442ef87f46778a78213dea245707ea",
+        "evidence:fbc824598195be4353239d0dcf6e872e664a681632eadf00c53de3cac61a676d",
+        "evidence:802ea36f7192cbdae651957db95f78227693fdffc75a1cdd845e4f68b7a43861"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:8a6b32004a2794935a30ab79e3861ebb2300e19d1891de6793f28d763f486c0b",
+      "target_ref": "frontend-request:b2443c11594ae824bff1ff95a40ebd2b9464a01b3f910fed227db781326be8c1",
+      "route_token": "getWiFiAdvancedCfg",
+      "registration_address": "0x00449c0c",
+      "handler_address": "0x00407c88",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00407c88",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:8aa78fd0dd26b12e6373831f7c4585fc17871a6b63688c16456cf6af807e2701",
+        "evidence:35674be0bfbcf1625f5461aeb02067804763139630ee46f40021a4afe962141e",
+        "evidence:0168db3048fb8f84104126087c10747d2bc64639933fba1078583f3a96104064",
+        "evidence:667b2172c3c0dff9c3763ab9e492bec885e8d1cbe45b5d04e99eab1513bfbdf2"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:80dcd59a5fd9f23657f8c1e1b40bbf8331bfe1fd053036c305f2dda81e64e5bb",
+      "target_ref": "frontend-request:1c3564c15ce08298b97733672677e47714855d192dde18e44a6143fd97c0f0c5",
+      "route_token": "getWiFiGuestCfg",
+      "registration_address": "0x00449c50",
+      "handler_address": "0x00407624",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00407624",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:482cdcd43e30f4e49a85c4c91fc71d7f106d21752a64b06efd6447a8e98fb03b",
+        "evidence:429b4fc16e5b19613eda264a1923aa18eac56aa67e8db64401c956ae671a91cf",
+        "evidence:d5f6034aa73bdfd4eb04b2d54ae3210c342c1d9d62c53180bec83876d5d32863",
+        "evidence:43a9377befe8a97ebdb6967aaa69d8d0ee87109e41d0f2d1de3e6fab1b2463e3"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:955c83571ec83622ca211d641f60f05dc042eb07cc7a90e20e7a32c76aa6e4c3",
+      "target_ref": "frontend-request:596bdd03a0d21eeb0f728cdb87ceff9aafc369983efe3326aca7110132c8eea8",
+      "route_token": "getWiFiAclRules",
+      "registration_address": "0x00449c94",
+      "handler_address": "0x00409b78",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00409b78",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:4875526ce04a0fdb26f2a8d87487ceebf70dafa3cd4a6a98ac59278e71f8dfa8",
+        "evidence:14ada9f35cc0b720a957ddbb8b0a2991c6339edf013511c71790eb0edf02f4b7",
+        "evidence:a48b8ae93e8a898447eabb9a164e6604f5c6c3649e6b621f45819072c4703e5f",
+        "evidence:438d14cd83826e6c76a35ac3d221c79d26f32257d15501e4fe1d9bf42e244349"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:a24772b45d2359eae8c4e64dc1e57ff086bbcc5a115d020cf5317a2d627907e0",
+      "target_ref": "frontend-request:06dc13c9506485487858416e48beb1fc57cac13a349e67bb75db5f39a2cbaa8b",
+      "route_token": "getWiFiScheduleCfg",
+      "registration_address": "0x00449cd8",
+      "handler_address": "0x00405f30",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00405f30",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:1b664b164fb4800845176d81d5521504b04b7a1f3b6c1f84ef5ee4eeb6e7a1ee",
+        "evidence:b27b0149684b0ffa9d3a860e7d88c3a706c2094a77905dd92a238787085ff89a",
+        "evidence:4d3aca5aa2fe24d30fb2063504148a789a922395e429db1669a3439f1f6d681a",
+        "evidence:12d5487584b3972ca55b449d655d9a2e5de3f04026f670c52d7c6a555777a031"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:21cd0c4302d934fd168f8b8410e02fb0cb9086c9608a2df8fd8ac4996e15d017",
+      "target_ref": "frontend-request:08856403994122112ef8e483ec798cef3131b60c9f252cc42efc918d40b11efc",
+      "route_token": "getWiFiSignalCfg",
+      "registration_address": "0x00449d1c",
+      "handler_address": "0x0040747c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040747c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:70c3cb07704697dd6ef981c301c7b4941b06d82c20e94497c2e8182dbf4a0342",
+        "evidence:b1aee1ceb87a7248289e8d412c6fa71559d55972676fde17c9ef3c2c123c2e83",
+        "evidence:5a212fd3b2a065a74e3cc74730f705b397cf7c3e9d26d2381e65ebbbb65c8e33",
+        "evidence:62ca7b2973ec20492f43cc3b0e918888040be086d5444331534f4282fd50507e"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:e45f40a428602302bb5b6b1d96a71a8d60b8d919e124ad158940daa4e46c58b7",
+      "target_ref": "frontend-request:94d5248ff4e1f63b30b5c3250b63a639ab2866967f363541bae3969ace01e647",
+      "route_token": "getWiFiWpsCfg",
+      "registration_address": "0x00449d60",
+      "handler_address": "0x0040711c",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x0040711c",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:23a686a74362b8d63e8b27c5bb7c5ec7fddab397fdc1a767636674f71af4c267",
+        "evidence:785147e5644cb1a18aa5937a22607e35f24f4e24bd6be19c880243ef6f45bc70",
+        "evidence:708703430ca753af4ae1b4ab7e42a5317b0e2d12381c1a3410ae3fcd15d8e4eb",
+        "evidence:9f836c57dbefe7c1448aa3965c7080db5bc7dee916d6eb88df8d22339d3c1973"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:ca21ab7106967356d33c844f0fd6de7f0550b907d169abb6aac6812ebbf3548b",
+      "target_ref": "frontend-request:985db636b17e0fe2da90966a49a3ab190c10f4895f2b9169ca305b3b40e85b59",
+      "route_token": "getWiFiWdsCfg",
+      "registration_address": "0x00449da4",
+      "handler_address": "0x004097d0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004097d0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:9adce61c0485379c9804523f76ad0f8a69be20103abe32059fb5fa098abb79c4",
+        "evidence:1dbe94eb329722c987f10d13d2639d00b40f5b9732f6a60d37c84f3e0406c6f8",
+        "evidence:3bbee6f73bd7e9f0ef8c9af7c0aed8d071d9be5eb9d760f47190656767797b33",
+        "evidence:2af999e13eaffbd55d8352a1a33d1b8c636253b3bc78c336be3bd8f157f190f5"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:c0fea8293aea06a2053b4e339194a2f9c2ec201d3e11070727f84a542f50956a",
+      "target_ref": "frontend-request:4b54cea2b8089715bcd6d39d51d9290ee6e44b827af425855dfc1b9295947d32",
+      "route_token": "getGenerateWiFiWpsPin",
+      "registration_address": "0x00449de8",
+      "handler_address": "0x00406f98",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00406f98",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:51644ae9dd06e2c8d02a31b54c5301155e41fb48d42403105773ba81bb5e2eee",
+        "evidence:53ca402873ef40a48e97debfbac8a6e1afb1b164d9d6f2278ea46aba36a24366",
+        "evidence:a74ee0fc7025d8dd6df50b63d225196df14434fd80ce0d34f45b212fe62ef788",
+        "evidence:13764cce61613db38dd55e06b098b60f4004651eb6710da216ca1dba11c1ac8c"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:cfff2342c26d184c5c24249e907aee3e08c51810f5bf72bc7e9a5132db905068",
+      "target_ref": "frontend-request:c7f7c7ec7bf6b7691aaa303a3acaaeccce23f6625fb8c456268ca05d205e3cab",
+      "route_token": "getWiFiWpsStatus",
+      "registration_address": "0x00449e2c",
+      "handler_address": "0x00406dc0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00406dc0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:eab3b8fc47015322aa1f3e41c084b8b9d10b77efc498f4eeff084a078f47e19d",
+        "evidence:65fd0ba52bcd154c20e3d4fbe65dfc39e13fc58222ee4536a282d8a3d218aae3",
+        "evidence:d9cfc09055b6c87742f429171c171662ebc482bd025515832dc9a49fe5dd64f8",
+        "evidence:cc14c0ac5e50da050c31f64fae5129c6e3feb637eb40f922f40b5d77a9e67314"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:0099a1f5353e45714c8fc8553aa2013cfbaa85a255fd55aaade34a82dfcb66d5",
+      "target_ref": "frontend-request:57e0209bf94e2d5fe5fc10d24f66a6b69de929d7067332037c85835a28393fb8",
+      "route_token": "getTelnetCfg",
+      "registration_address": "0x00449e70",
+      "handler_address": "0x004038d0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004038d0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:f269e4b0ad1c6c21f19e1e253dbb4851d11e316fa9c68f95cba5ad8a88aa216d",
+        "evidence:e7a371f60de2ad906a36961cd0190a75f4ece012f6216d1bedf231f4bcc86c73",
+        "evidence:972ff79f4f95ef838ff5eedc062299a05a22bdfd7ef55e0c5d243f01b63fb032",
+        "evidence:cd4a9808b1a48a3ab54daaa13c90a1e7e040c15644824531b1b3111fe34ef760"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:652791691d6434b24f1953603e77e1aaa91bc0d7fd5e3fdbfec65d22a3033f0e",
+      "target_ref": "frontend-request:582e178e3274aaa14f21f23e430e24c614da106be3721359494fa59d10ee7019",
+      "route_token": "getL2tpServerCfg",
+      "registration_address": "0x00449eb4",
+      "handler_address": "0x00405b80",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00405b80",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:0eee94beb164a41aaf5c65de3ceb75fe598ab7ae60a7102fb10e2b42e1bd5cd6",
+        "evidence:6c7950802852f224a64d96d6233094341b8c511994069a73a84d2347e2d2f7d2",
+        "evidence:f5cf89663109d511562c60eea8bdddbaa81e3c0732bbd2ed12b9264a7952fb4f",
+        "evidence:38280217c143265261fa706b43b95137678857854c980443becce6ad014d42f0"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:ab5235b96046c0f3adceccbc57f7fe66b07c2e7cd30d009842cd9cd50b4a2610",
+      "target_ref": "frontend-request:30d0b21cbf89355a97f1fd6fda4e086748dd4506813a1bf866c0330c444a259e",
+      "route_token": "getVpnAccountCfg",
+      "registration_address": "0x00449ef8",
+      "handler_address": "0x00405144",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00405144",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:c18db37d9ce75ab638f52bddf4223e720359f728b419a5aaa073ef5ee54da964",
+        "evidence:967750396bd335fdb2491daed4d17e582f248dde6a71ed278e569e5b79cb6160",
+        "evidence:583e644ed2ca79539e2403f1e0dec3c14fcc0107b8313513c6ac2bcb32e6e5c7",
+        "evidence:df369b10dd41d7271a9e0b2af5c37cadc4e634cc1ef7953a6d0eebc1113e4967"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:3398eb620b9a4dbccd9794923bf7a82a02aaf2db780e09ab7908d26002cc22f7",
+      "target_ref": "frontend-request:37cf18414c16023888d98e3b250b75890d32b7a9ca1d4c03ed1e6ef55d39ae09",
+      "route_token": "getSSServer",
+      "registration_address": "0x00449f3c",
+      "handler_address": "0x004023f4",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004023f4",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:8fe64de85380438a0006400e4b69903edf36756e785e034416e6e9a9b49c98e7",
+        "evidence:0496e36f13d7de02e510423a5b6874f4998b8a9908b572a632f07c112529884e",
+        "evidence:12339d50c8ff3015de58a4ade1dfb127e555ac6b05b65082c395220cf0114c5d",
+        "evidence:66a4053b50a37cb0d7ec0ce2894052df2b4e48ad80910e7e52d1d9a9e33dce18"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:7eae4b9f55000c3882315a7d305b1b4fbaa45aacc52352ac3aa44e6bd772246f",
+      "target_ref": "frontend-request:8a70b9d435c25d9f10bc432ba375d05d38fa23b96a254893099b989e24a76cd5",
+      "route_token": "getBandwidthGpeedCfg",
+      "registration_address": "0x0044a04c",
+      "handler_address": "0x00401aa0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x00401aa0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:b5f5a67fd0c1238e34973b01bcea9535274e1818278e5c00c77395329e0c755d",
+        "evidence:456a36c411d423cc5b830e235a76ca5b5b46df8ca0ac3eb3673c91109528e4cf",
+        "evidence:bb7642b307d1ac7d5f50d3ea1e781206a65b2f1b3279115f518a2c9f0bd7ae02",
+        "evidence:d07e97ecc85e83d2e52c43e6eb5f9206c0c6f5ddd35840d0343f32b4d122b0c3"
+      ]
+    },
+    {
+      "binding_id": "native-route-binding:0bd8dd1f3f64f8a432b41299856c736451e3729f738244f0ad04c9d09d8c3e29",
+      "target_ref": "frontend-request:57e0209bf94e2d5fe5fc10d24f66a6b69de929d7067332037c85835a28393fb8",
+      "route_token": "getTelnetCfg",
+      "registration_address": "0x0044a090",
+      "handler_address": "0x004038d0",
+      "handler_identity": "www/cgi-bin/cstecgi.cgi@0x004038d0",
+      "source_construct": "elf.mips32-inline-route-handler-table/v1:get_handle_t",
+      "evidence_ids": [
+        "evidence:facf2704dee41f8f49b184b030a5100bfe3177988eedaac789a8d7c3ca46703f",
+        "evidence:566603edc4d982ce53350e115ac3e5c5a3d6bd7b12e956044da06947fd8b25c9",
+        "evidence:bf25b5719193778cfba9fbd54dea6abc93142666b717d637482304a1106368b0",
+        "evidence:ab6bd20628231e04a315cc977fac98a993f870f5afc9c2298b8da8591ce93836"
+      ]
+    }
+  ],
+  "open_obligations": [
+    {
+      "capability": "binds_handler",
+      "count": 76,
+      "statement": "Explain or bind frontend selectors absent from the profiled native tables."
+    },
+    {
+      "capability": "traces_value_flow",
+      "count": 123,
+      "statement": "Recover parameter getters and sensitive data flow from each verified handler entry."
+    }
+  ]
+}

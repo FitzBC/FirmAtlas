@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import hashlib
 import json
+import re
 import struct
 from typing import Optional, Tuple
 
@@ -21,9 +22,13 @@ from .scheduler import (
 NATIVE_DEEP_RESULT_SCHEMA_VERSION = "firmatlas.mapping.native-deep-result/v1alpha1"
 _PRODUCER = AnalyzerIdentity("native-deep-route-table", "0.1.0")
 _CALLSITE_PRODUCER = AnalyzerIdentity("native-deep-arm-pic-callsite", "0.1.0")
+_MIPS_INLINE_PRODUCER = AnalyzerIdentity(
+    "native-deep-mips-inline-route-table", "0.1.0"
+)
 _ALLOC = 0x2
 _EXEC = 0x4
 _ARM_MACHINE = 40
+_MIPS_MACHINE = 8
 _R_ARM_GLOB_DAT = 21
 _CONTENT_KINDS = frozenset({"file", "hardlink", "archive", "archive_member"})
 
@@ -92,6 +97,26 @@ class ArmPicCallsiteProfile:
             raise ValueError("ARM PIC callsite profile requires relocation types")
         if len(self.relocation_types) != len(set(self.relocation_types)):
             raise ValueError("duplicate ARM PIC relocation type")
+
+
+@dataclass(frozen=True)
+class MipsInlineRouteTableProfile:
+    name: str = "mips32-inline-route-handler-table/v1"
+    table_symbol_names: Tuple[str, ...] = (
+        "get_handle_t", "set_handle_t", "del_handle_t", "other_handle_t",
+    )
+    route_field_bytes: int = 64
+    min_valid_entries: int = 2
+
+    def __post_init__(self) -> None:
+        if not self.name.strip() or not self.table_symbol_names:
+            raise ValueError("MIPS inline route-table profile requires identity and symbols")
+        if any(not name.strip() for name in self.table_symbol_names):
+            raise ValueError("MIPS inline route-table symbols must not be blank")
+        if len(self.table_symbol_names) != len(set(self.table_symbol_names)):
+            raise ValueError("duplicate MIPS inline route-table symbol")
+        if self.route_field_bytes <= 1 or self.min_valid_entries < 2:
+            raise ValueError("MIPS inline route-table dimensions are invalid")
 
 
 @dataclass(frozen=True)
@@ -207,6 +232,7 @@ def _validate_result_contract(result: NativeDeepResult) -> None:
         }
         supporting_capabilities = {
             "establishes_pic_base", "resolves_handler_symbol",
+            "resolves_table_symbol",
         }
         if not required_capabilities.issubset(by_capability) or not set(by_capability).issubset(
             required_capabilities | supporting_capabilities
@@ -236,6 +262,29 @@ def _validate_result_contract(result: NativeDeepResult) -> None:
             for atom in by_capability.get(capability, ())
         ):
             raise ValueError("native deep supporting proof must be deterministic")
+        table_symbol_atoms = by_capability.get("resolves_table_symbol", ())
+        if (
+            result.producer == _MIPS_INLINE_PRODUCER
+            and len(table_symbol_atoms) != 1
+        ):
+            raise ValueError("MIPS inline binding requires one table symbol proof")
+        expected_table_name = binding.source_construct.rpartition(":")[2]
+        for atom in table_symbol_atoms:
+            match = re.fullmatch(
+                r"([^@]+)@0x([0-9a-f]+):size=0x([0-9a-f]+)",
+                atom.object_value,
+            )
+            if match is None:
+                raise ValueError("native deep table symbol proof is invalid")
+            table_address = int(match.group(2), 16)
+            table_size = int(match.group(3), 16)
+            if (
+                match.group(1) != expected_table_name
+                or table_size <= 0
+                or not table_address <= binding.registration_address
+                < table_address + table_size
+            ):
+                raise ValueError("native deep table symbol proof is invalid")
         expected_symbol_proof = (
             "{}|{}".format(binding.handler_symbol, binding.handler_identity)
             if binding.handler_symbol is not None else binding.handler_identity
@@ -514,6 +563,8 @@ class _DynamicSymbol:
     address: int
     size: int
     section_index: int
+    source_offset: int
+    entry_size: int
 
 
 @dataclass(frozen=True)
@@ -586,9 +637,252 @@ def _read_dynamic_symbols(elf: _Elf, content: bytes) -> dict:
                 elf.endian_prefix + "IIIBBH", content, offset
             )
             name = "" if name_offset == 0 else _string_at(strings, name_offset)
-            symbols.append(_DynamicSymbol(index, name, address, size, section_index))
+            symbols.append(_DynamicSymbol(
+                index, name, address, size, section_index, offset,
+                section.entry_size,
+            ))
         symbols_by_section[section.index] = tuple(symbols)
     return symbols_by_section
+
+
+def _empty_mips_inline(
+    source: SourceArtifactEntry,
+    profile: MipsInlineRouteTableProfile,
+    status: CoverageStatus,
+    code: str,
+    message: str,
+) -> NativeDeepResult:
+    return NativeDeepResult(
+        source.canonical_path, status, 0, _MIPS_INLINE_PRODUCER,
+        profile.name, (), (), (NativeDeepDiagnostic(code, message),),
+    )
+
+
+def discover_mips_inline_route_bindings(
+    source: SourceArtifactEntry,
+    content: bytes,
+    anchors: Tuple[NativeRouteAnchor, ...],
+    profile: MipsInlineRouteTableProfile = MipsInlineRouteTableProfile(),
+    policy: NativeDeepPolicy = NativeDeepPolicy(),
+) -> NativeDeepResult:
+    """Prove MIPS32 ``char route[N] + handler pointer`` table entries."""
+
+    if len(content) > policy.max_source_bytes:
+        return _empty_mips_inline(
+            source, profile, CoverageStatus.SKIPPED_BY_POLICY,
+            "source_budget_exceeded", "source exceeds configured byte budget",
+        )
+    if len(anchors) > policy.max_anchors:
+        return _empty_mips_inline(
+            source, profile, CoverageStatus.SKIPPED_BY_POLICY,
+            "anchor_budget_exceeded", "anchors exceed configured budget",
+        )
+    if source.kind not in _CONTENT_KINDS:
+        return _empty_mips_inline(
+            source, profile, CoverageStatus.FAILED,
+            "unsupported_source_kind", "source kind cannot publish binary evidence",
+        )
+    if len(content) != source.size or hashlib.sha256(content).hexdigest() != source.content_sha256:
+        return _empty_mips_inline(
+            source, profile, CoverageStatus.FAILED,
+            "source_mismatch", "content does not match source inventory",
+        )
+    try:
+        elf = _parse_elf(content)
+        if elf.pointer_size != 4 or elf.machine != _MIPS_MACHINE:
+            return _empty_mips_inline(
+                source, profile, CoverageStatus.UNSUPPORTED,
+                "unsupported_architecture",
+                "inline route-table adapter currently supports MIPS32 ELF only",
+            )
+        symbols = tuple(
+            symbol
+            for table in _read_dynamic_symbols(elf, content).values()
+            for symbol in table
+        )
+    except TypeError:
+        return _empty_mips_inline(
+            source, profile, CoverageStatus.UNSUPPORTED,
+            "unsupported_binary_format", "inline route-table adapter supports ELF only",
+        )
+    except (ValueError, struct.error) as exc:
+        return _empty_mips_inline(
+            source, profile, CoverageStatus.FAILED, "malformed_elf", str(exc)
+        )
+
+    executable_sections = tuple(
+        section for section in elf.sections
+        if section.flags & (_ALLOC | _EXEC) == (_ALLOC | _EXEC)
+    )
+    data_sections = tuple(
+        section for section in elf.sections
+        if section.section_type == 1
+        and section.flags & _ALLOC
+        and not section.flags & _EXEC
+    )
+    entry_size = profile.route_field_bytes + elf.pointer_size
+    pointer_format = elf.endian_prefix + "I"
+    table_entries = []
+    diagnostics = []
+    for symbol in symbols:
+        if symbol.name not in profile.table_symbol_names:
+            continue
+        if symbol.section_index == 0:
+            continue
+        section = _section_by_index(elf, symbol.section_index)
+        if not (
+            section in data_sections
+            and symbol.size >= entry_size * profile.min_valid_entries
+            and symbol.size % entry_size == 0
+            and section.address <= symbol.address
+            and symbol.address + symbol.size <= section.address + section.size
+        ):
+            diagnostics.append(NativeDeepDiagnostic(
+                "invalid_inline_table_symbol",
+                "profiled dynamic symbol does not describe a complete inline table",
+            ))
+            continue
+        table_offset = _file_offset_for_address(elf, symbol.address)
+        if table_offset is None:
+            diagnostics.append(NativeDeepDiagnostic(
+                "inline_table_not_file_backed",
+                "profiled inline table is not backed by source bytes",
+            ))
+            continue
+        valid = []
+        invalid_entry_count = 0
+        for relative in range(0, symbol.size, entry_size):
+            entry_offset = table_offset + relative
+            route_field = content[
+                entry_offset : entry_offset + profile.route_field_bytes
+            ]
+            terminator = route_field.find(b"\x00")
+            if (
+                terminator <= 0
+                or any(route_field[terminator + 1 :])
+                or any(byte < 0x21 or byte > 0x7E for byte in route_field[:terminator])
+            ):
+                invalid_entry_count += 1
+                continue
+            handler = struct.unpack_from(
+                pointer_format, content,
+                entry_offset + profile.route_field_bytes,
+            )[0]
+            if not _contains_address(executable_sections, handler, _ALLOC | _EXEC):
+                invalid_entry_count += 1
+                continue
+            valid.append((
+                route_field[:terminator].decode("ascii"), handler,
+                symbol.address + relative, entry_offset, symbol,
+            ))
+        if invalid_entry_count:
+            diagnostics.append(NativeDeepDiagnostic(
+                "inline_table_entry_invalid",
+                "profiled table contains {} structurally invalid entries".format(
+                    invalid_entry_count
+                ),
+            ))
+        if len(valid) < profile.min_valid_entries:
+            diagnostics.append(NativeDeepDiagnostic(
+                "inline_table_validation_failed",
+                "profiled table did not contain enough structurally valid entries",
+            ))
+            continue
+        table_entries.extend(valid)
+
+    anchors_by_route = {}
+    for anchor in set(anchors):
+        anchors_by_route.setdefault(anchor.route_token, []).append(anchor)
+    bindings = []
+    atoms = []
+    truncated = False
+    for route, handler, registration, entry_offset, table_symbol in table_entries:
+        for anchor in sorted(
+            anchors_by_route.get(route, ()), key=lambda item: item.target_ref
+        ):
+            if len(bindings) >= policy.max_bindings:
+                truncated = True
+                continue
+            binding_id = _binding_id(
+                source.canonical_path, anchor.target_ref, route, registration
+            )
+            handler_identity = "{}@0x{:08x}".format(
+                source.canonical_path, handler
+            )
+            route_atom = capture_evidence(
+                source, content,
+                SpanSelection(
+                    SpanKind.BINARY, entry_offset, entry_offset + len(route.encode("ascii"))
+                ),
+                EvidenceClaim(
+                    binding_id, "mentions_endpoint", route,
+                    ObservationKind.DIRECT_STATIC, "mentions_endpoint", 1.0,
+                ),
+                _MIPS_INLINE_PRODUCER,
+            )
+            entry_selection = SpanSelection(
+                SpanKind.BINARY, entry_offset, entry_offset + entry_size
+            )
+            table_symbol_atom = capture_evidence(
+                source, content,
+                SpanSelection(
+                    SpanKind.BINARY, table_symbol.source_offset,
+                    table_symbol.source_offset + table_symbol.entry_size,
+                ),
+                EvidenceClaim(
+                    binding_id, "resolves_table_symbol",
+                    "{}@0x{:08x}:size=0x{:x}".format(
+                        table_symbol.name, table_symbol.address, table_symbol.size
+                    ),
+                    ObservationKind.DETERMINISTIC_DERIVED,
+                    "resolves_table_symbol", 1.0,
+                ),
+                _MIPS_INLINE_PRODUCER,
+            )
+            registration_atom = capture_evidence(
+                source, content, entry_selection,
+                EvidenceClaim(
+                    binding_id, "registers_route", route,
+                    ObservationKind.DETERMINISTIC_DERIVED,
+                    "registers_route", 1.0,
+                ),
+                _MIPS_INLINE_PRODUCER,
+            )
+            handler_atom = capture_evidence(
+                source, content, entry_selection,
+                EvidenceClaim(
+                    binding_id, "binds_handler", handler_identity,
+                    ObservationKind.DETERMINISTIC_DERIVED,
+                    "binds_handler", 1.0,
+                ),
+                _MIPS_INLINE_PRODUCER,
+            )
+            evidence_ids = tuple(
+                atom.evidence_id
+                for atom in (
+                    route_atom, table_symbol_atom,
+                    registration_atom, handler_atom,
+                )
+            )
+            atoms.extend((
+                route_atom, table_symbol_atom, registration_atom, handler_atom,
+            ))
+            bindings.append(NativeRouteBinding(
+                binding_id, anchor.target_ref, route, handler_identity,
+                registration, handler,
+                "elf.{}:{}".format(profile.name, table_symbol.name), evidence_ids,
+            ))
+    if truncated:
+        diagnostics.append(NativeDeepDiagnostic(
+            "binding_budget_exceeded",
+            "binding budget truncated MIPS inline route-table analysis",
+        ))
+    return NativeDeepResult(
+        source.canonical_path,
+        CoverageStatus.PARTIAL if diagnostics or truncated else CoverageStatus.COMPLETED,
+        len(content), _MIPS_INLINE_PRODUCER, profile.name,
+        tuple(bindings), tuple(atoms), tuple(diagnostics),
+    )
 
 
 def _read_arm_relocations(

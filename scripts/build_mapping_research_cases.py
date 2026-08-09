@@ -305,6 +305,42 @@ def build_x5000r_shared_cgi_case():
                 "text_utf8:bytes=806-826;lines=1:807-1:827",
                 "resolves_endpoint_binding", "frontend-request-producer@0.2.0",
             ),
+            CaseEvidenceReference(
+                "evidence:7b8f6bc1380ed52f3b870059b0d9fdf6e31d08c1d6668712397c34f8578f08b5",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+                "binary:bytes=240172-240181", "mentions_endpoint",
+                "native-deep-mips-inline-route-table@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:40f4546d6cd758973c602b975270fd34a65952eb0af3480684e4df9c1f1f9b75",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+                "binary:bytes=2008-2024", "resolves_table_symbol",
+                "native-deep-mips-inline-route-table@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:aa8f5f7a8b5cad1c0f36a8e6f603f37bd27a49409b107efb9ad8b15dda37c4f5",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+                "binary:bytes=240172-240240", "registers_route",
+                "native-deep-mips-inline-route-table@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:6df24edc5d0e4dc1e08efb25e9551a410f8a56acd526181f30ddaa10e1755f88",
+                CaseEvidenceKind.NATIVE_BINDING, "www/cgi-bin/cstecgi.cgi",
+                "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+                "binary:bytes=240172-240240", "binds_handler",
+                "native-deep-mips-inline-route-table@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "coverage:x5000r-mips-dispatch-set-difference",
+                CaseEvidenceKind.COVERAGE_LEDGER,
+                "docs/firmware-mapping/samples/m1-16-x5000r-mips-dispatch.json",
+                "cb1c549c5248b5f31f20257f30c0d634dde8e2eee81de43381967f6d1ea37d4f",
+                "json:$.counts", "bounds_candidate_search",
+                "mips-dispatch-report@v1alpha1",
+            ),
         ),
         claims=(
             CaseClaim(
@@ -339,12 +375,23 @@ def build_x5000r_shared_cgi_case():
             ),
             CaseClaim(
                 "claim:x5000r-native-handler-binding",
-                "The static topicurl selectors are not yet bound to concrete native handler functions or value-flow paths.",
+                "At the cross-resource frontend stage, the static topicurl selectors were not yet bound to concrete native handler functions or value-flow paths.",
                 (
                     "evidence:128aadaeb5b82881f0a0ea6f134e58c8282138006a2c5cd313ade5656c0a7203",
                     "evidence:af51c25c0f5de49cce076d4851c699b81084a1e9455c67163d3c6ea122f467a1",
                 ),
                 CaseClaimStatus.UNRESOLVED,
+            ),
+            CaseClaim(
+                "claim:x5000r-inline-table-bindings",
+                "Exported inline route tables bind 123 of 199 static frontend selectors to executable MIPS addresses; 124 registration proofs are retained because getTelnetCfg appears twice, while setLanCfg binds table entry 0x0044aa2c to handler 0x004209b8.",
+                (
+                    "evidence:7b8f6bc1380ed52f3b870059b0d9fdf6e31d08c1d6668712397c34f8578f08b5",
+                    "evidence:40f4546d6cd758973c602b975270fd34a65952eb0af3480684e4df9c1f1f9b75",
+                    "evidence:aa8f5f7a8b5cad1c0f36a8e6f603f37bd27a49409b107efb9ad8b15dda37c4f5",
+                    "evidence:6df24edc5d0e4dc1e08efb25e9551a410f8a56acd526181f30ddaa10e1755f88",
+                    "coverage:x5000r-mips-dispatch-set-difference",
+                ),
             ),
         ),
         stages=(
@@ -371,6 +418,11 @@ def build_x5000r_shared_cgi_case():
                 "Retain selector-to-native-handler and native value-flow recovery as explicit work.",
                 ("claim:x5000r-native-handler-binding",),
             ),
+            CaseStage(
+                "stage:x5000r-inline-native-table", 5,
+                "Use exported symbol sizes and the 64-byte inline route plus executable pointer layout to close a verified selector subset without hiding unmatched operations.",
+                ("claim:x5000r-inline-table-bindings",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -384,7 +436,7 @@ def build_x5000r_shared_cgi_case():
             ),
             CaseObligation(
                 "obligation:x5000r-selector-handler",
-                "Bind each recovered topicurl selector to native dispatch code and downstream value flow.",
+                "Bind the remaining 76 frontend selectors or explain their version/dead-code/alternate-backend status, then recover downstream native value flow.",
                 "binds_handler", CaseObligationStatus.OPEN,
             ),
         ),
@@ -393,14 +445,17 @@ def build_x5000r_shared_cgi_case():
             "Frontend-only analysis would not identify cstecgi.cgi as a MIPS deep-analysis target.",
             "A native string hit alone would incorrectly imply a proved selector-to-handler binding.",
             "A single-resource frontend pass would miss 199 wrapper operations whose endpoint is defined in another asset.",
+            "Treating a selector string hit as a binding would hide the 76 frontend-only and 14 Native-only operation differences.",
         ),
         paper_uses=(
             "Motivating example for operation identity below a shared physical endpoint.",
             "Ablation of path-only, frontend-plus-config, and native-dispatch analysis.",
             "Evidence-preserving example of closing a cross-resource JavaScript obligation while retaining a native value-flow obligation.",
+            "Frontend/native set-difference experiment for version drift, dead UI code, and alternate backend hypotheses.",
         ),
         limitations=(
             "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
+            "The inline table proves handler entry addresses for 123 selectors but does not yet prove downstream parameter getters or sensitive sinks.",
             "CGI execution configuration does not prove runtime reachability or authentication state.",
             "Native selector strings do not yet identify handler functions or dangerous data flow.",
         ),

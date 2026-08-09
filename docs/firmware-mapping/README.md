@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-15 X5000R 跨资源 Frontend Asset Graph 已验证；当前 gate 为 `partial`
+> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-16 X5000R MIPS inline dispatcher 已验证；当前 gate 为 `partial`
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -75,6 +75,7 @@
 | [M1-13 chroot symlink Inventory 记录](./progress/2026-08-09-m1-13-chroot-symlink-inventory.md) | 固件内绝对/链式链接、安全边界、DAP-3520 重放与 corpus 晋级 | Inventory symlink 语义、运行时 namespace 或代表样本变化时 |
 | [M1-14 X5000R 共享 CGI 记录](./progress/2026-08-09-m1-14-x5000r-shared-cgi.md) | 隔离解包、lighttpd CGI、selector、MIPS 目标与研究义务 | shared-CGI、跨资源前端或 Native dispatcher 证据变化时 |
 | [M1-15 X5000R Frontend Asset Graph](./progress/2026-08-09-m1-15-frontend-asset-graph.md) | config.js → topicurl.js、199 operations、双来源证据与义务演进 | asset graph、动态 method 或 Native handler 证据变化时 |
+| [M1-16 X5000R MIPS Inline Dispatcher](./progress/2026-08-09-m1-16-x5000r-mips-inline-dispatch.md) | 四张导出表、123/199 handler binding、前后端差集与 Ghidra 触发决策 | MIPS table、差集归因或 handler value-flow 变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -148,8 +149,9 @@ M1 工作项：
 | M1-13 | 固件 chroot symlink Inventory | 已验证 | M1-02/02B/11A | Inventory v1alpha2 + escape/cycle/missing/depth tests + DAP-3520 753-node completed replay |
 | M1-14 | X5000R shared-CGI 真实固件链 | 已验证 | M1-02B/04/05/06A/11/12/13 | completed 912-node Inventory + lighttpd/selector/MIPS evidence + verified CGI category + research case |
 | M1-15 | X5000R 跨资源 Frontend Asset Graph | 已验证 | M1-04/08/11/12/14 | 唯一符号绑定 + 双来源 EvidenceAtom + 199 operation + frontend 义务关闭 |
+| M1-16 | X5000R MIPS inline dispatcher | 已验证 | M1-06A/08/11/12/15 | 138 registrations + 123/199 selector binding + 四线证据 + 差集开放义务 |
 
-**下一项建议**：继续 M1-11。M1-15 已用 `config.js → topicurl.js` Asset Graph 恢复 199 个 shared-CGI operation，并关闭跨资源 endpoint 义务；下一步为 MIPS selector dispatcher 尝试确定性 Profile，无法关闭 handler/value-flow 义务时才触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 样本。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
+**下一项建议**：继续 M1-11。M1-16 已用四张 MIPS inline table 为 123/199 个 frontend selector 建立 124 条 handler proof；下一步解释 76 个 Frontend-only 与 14 个 Native-only 差集，并从已验证 handler 恢复参数 getter/state/sink。确定性 Profile 无法重放跨函数 value-flow 时再触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 固件样本，M1-02B 仍需从仓库固定 Dockerfile 独立重建正式镜像。
 
 ## 7. 跨会话无缝工作协议
 

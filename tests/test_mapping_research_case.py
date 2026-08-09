@@ -21,6 +21,7 @@ from firmatlas.mapping import (
     discover_arm_pic_callsite_bindings,
     discover_frontend_requests,
     discover_frontend_asset_graph,
+    discover_mips_inline_route_bindings,
     discover_native_hints,
     discover_web_configuration,
     validate_research_case_corpus,
@@ -355,10 +356,28 @@ class ResearchCaseTests(unittest.TestCase):
                 content,
             ))
         frontend_graph = discover_frontend_asset_graph(tuple(frontend_assets))
+        selector_anchors = tuple(
+            NativeRouteAnchor(
+                parameter.request_candidate_id, parameter.literal_value
+            )
+            for result in frontend_graph.results
+            for parameter in result.parameters
+            if parameter.is_operation_selector
+            and parameter.source_construct == "shared-cgi.topicurl"
+        )
+        binary_content = (X5000R_ROOT / "www/cgi-bin/cstecgi.cgi").read_bytes()
+        binary_source = SourceArtifactEntry(
+            "www/cgi-bin/cstecgi.cgi", "www/cgi-bin/cstecgi.cgi", "file",
+            len(binary_content), hashlib.sha256(binary_content).hexdigest(),
+        )
+        deep = discover_mips_inline_route_bindings(
+            binary_source, binary_content, selector_anchors
+        )
         results = (
             *frontend_graph.results,
             analyze("lighttp/lighttpd.conf", discover_web_configuration),
             analyze("www/cgi-bin/cstecgi.cgi", discover_native_hints),
+            deep,
         )
         replayed = {
             atom.evidence_id: atom
@@ -401,6 +420,19 @@ class ResearchCaseTests(unittest.TestCase):
         )
         self.assertEqual(
             "open", obligations["obligation:x5000r-selector-handler"]["status"]
+        )
+        self.assertEqual(124, len(deep.bindings))
+        self.assertEqual(123, len({item.route_token for item in deep.bindings}))
+        coverage = next(
+            item for item in case["evidence"]
+            if item["evidence_ref"]
+            == "coverage:x5000r-mips-dispatch-set-difference"
+        )
+        report_path = Path(coverage["source_path"])
+        self.assertTrue(report_path.is_file())
+        self.assertEqual(
+            coverage["source_artifact_sha256"],
+            hashlib.sha256(report_path.read_bytes()).hexdigest(),
         )
 
 
