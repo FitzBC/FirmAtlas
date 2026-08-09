@@ -14,6 +14,7 @@ from firmatlas.mapping import (
     CorpusSampleInput,
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
+    FrontendAssetInput,
     InventoryPolicy,
     NativeRouteAnchor,
     SourceArtifactEntry,
@@ -23,6 +24,7 @@ from firmatlas.mapping import (
     correlate_frontend_native,
     discover_arm_pic_callsite_bindings,
     discover_frontend_requests,
+    discover_frontend_asset_graph,
     discover_native_hints,
     discover_script_backend,
     discover_web_configuration,
@@ -150,6 +152,7 @@ def _dap3520_catalog(root: Path):
 
 def _x5000r_catalog(root: Path):
     paths = {
+        "config": "www/static/js/config.js",
         "frontend": "www/static/js/config_ie.js",
         "wrapper": "www/static/js/topicurl.js",
         "web": "lighttp/lighttpd.conf",
@@ -157,13 +160,14 @@ def _x5000r_catalog(root: Path):
     }
     if not all((root / path).is_file() for path in paths.values()):
         return None
-    frontend_results = []
-    for key in ("frontend", "wrapper"):
+    frontend_assets = []
+    for key in ("config", "frontend", "wrapper"):
         path = paths[key]
         content = (root / path).read_bytes()
-        frontend_results.append(
-            discover_frontend_requests(_source(path, content), content)
+        frontend_assets.append(
+            FrontendAssetInput(_source(path, content), content)
         )
+    frontend_graph = discover_frontend_asset_graph(tuple(frontend_assets))
     web_content = (root / paths["web"]).read_bytes()
     web = discover_web_configuration(
         _source(paths["web"], web_content), web_content
@@ -178,7 +182,8 @@ def _x5000r_catalog(root: Path):
         inventory.inventory_sha256,
         (
             DiscoveryProducerBatch.frontend(
-                tuple(frontend_results), "www/static/js/{config_ie,topicurl}.js"
+                frontend_graph.results,
+                "www/static/js/{config,config_ie,topicurl}.js",
             ),
             DiscoveryProducerBatch.web_configuration(
                 (web,), paths["web"]

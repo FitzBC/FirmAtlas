@@ -215,7 +215,7 @@
       ]
     },
     {
-      "case_id": "research-case:eb0b621ebde12c7c23e9d847d19547206a2a7bcecc357a4c56f9250c01625f86",
+      "case_id": "research-case:9c004bf2c226494a7ea066eb7812dd522e655b2ff4cf0869feac0e3850b938c1",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "totolink-x5000r-shared-cgi-selector-dispatch",
       "title": "TOTOLINK X5000R: one CGI endpoint, multiple logical operations",
@@ -274,12 +274,39 @@
           "producer": "native-shallow-producer@0.1.0"
         },
         {
-          "evidence_ref": "coverage:topicurl-cross-resource-binding-open",
-          "kind": "coverage_ledger",
+          "evidence_ref": "evidence:d94fefa5e89a9178276489c8d11ff1c335ec663eba03783f433a94b56f71ef81",
+          "kind": "frontend_request",
           "source_path": "www/static/js/topicurl.js",
           "source_artifact_sha256": "2170e9339adf4c3579ba015f19105c2ec03d1695796881589b0c5b163e059366",
-          "locator": "coverage:complete-single-source;cross_resource_symbol=globalConfig.cgiUrl",
-          "capability": "bounds_candidate_search",
+          "locator": "text_utf8:bytes=787-806;lines=1:788-1:807",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.2.0"
+        },
+        {
+          "evidence_ref": "evidence:2d2999d293727a9d3619f2ff9915100506bf7ef55759bc5b5146e85dd3494bc7",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/topicurl.js",
+          "source_artifact_sha256": "2170e9339adf4c3579ba015f19105c2ec03d1695796881589b0c5b163e059366",
+          "locator": "text_utf8:bytes=2510-2518;lines=1:2511-1:2519",
+          "capability": "serializes_parameter",
+          "producer": "frontend-request-producer@0.2.0"
+        },
+        {
+          "evidence_ref": "evidence:128aadaeb5b82881f0a0ea6f134e58c8282138006a2c5cd313ade5656c0a7203",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/topicurl.js",
+          "source_artifact_sha256": "2170e9339adf4c3579ba015f19105c2ec03d1695796881589b0c5b163e059366",
+          "locator": "text_utf8:bytes=2520-2529;lines=1:2521-1:2530",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.2.0"
+        },
+        {
+          "evidence_ref": "evidence:612a81d3e2c0dc9eddbf56f1651d5d1cce43d0729c4f5fee68c06164387d3193",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/config.js",
+          "source_artifact_sha256": "83aa98623d98aeffbcee6748a5c176f2c52bf1e9bdc9e722f111cadc2b31e739",
+          "locator": "text_utf8:bytes=806-826;lines=1:807-1:827",
+          "capability": "resolves_endpoint_binding",
           "producer": "frontend-request-producer@0.2.0"
         }
       ],
@@ -311,10 +338,21 @@
           "status": "supported"
         },
         {
-          "claim_id": "claim:x5000r-complete-operation-surface",
-          "statement": "The cross-file wrapper operation surface and selector-to-native-handler bindings remain unresolved.",
+          "claim_id": "claim:x5000r-cross-resource-endpoint",
+          "statement": "Asset-graph resolution binds globalConfig.cgiUrl in config.js to the wrapper consumed in topicurl.js and recovers 199 statically enumerated topicurl operations.",
           "evidence_refs": [
-            "coverage:topicurl-cross-resource-binding-open"
+            "evidence:d94fefa5e89a9178276489c8d11ff1c335ec663eba03783f433a94b56f71ef81",
+            "evidence:128aadaeb5b82881f0a0ea6f134e58c8282138006a2c5cd313ade5656c0a7203",
+            "evidence:612a81d3e2c0dc9eddbf56f1651d5d1cce43d0729c4f5fee68c06164387d3193"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-native-handler-binding",
+          "statement": "The static topicurl selectors are not yet bound to concrete native handler functions or value-flow paths.",
+          "evidence_refs": [
+            "evidence:128aadaeb5b82881f0a0ea6f134e58c8282138006a2c5cd313ade5656c0a7203",
+            "evidence:af51c25c0f5de49cce076d4851c699b81084a1e9455c67163d3c6ea122f467a1"
           ],
           "status": "unresolved"
         }
@@ -340,17 +378,32 @@
             "claim:x5000r-native-selector-presence"
           ],
           "creates_obligations": [
-            "obligation:x5000r-selector-handler"
+            "obligation:x5000r-cross-resource-endpoint"
           ],
           "resolves_obligations": [],
           "rejects_obligations": []
         },
         {
-          "stage_id": "stage:x5000r-open-boundary",
+          "stage_id": "stage:x5000r-cross-resource-resolution",
           "order": 3,
-          "interpretation": "Retain cross-resource symbol resolution and native dispatch recovery as explicit work.",
+          "interpretation": "Resolve the endpoint definition and wrapper consumption across separate frontend assets while preserving both source locations.",
           "claim_ids": [
-            "claim:x5000r-complete-operation-surface"
+            "claim:x5000r-cross-resource-endpoint"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-selector-handler"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-cross-resource-endpoint"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-open-native-boundary",
+          "order": 4,
+          "interpretation": "Retain selector-to-native-handler and native value-flow recovery as explicit work.",
+          "claim_ids": [
+            "claim:x5000r-native-handler-binding"
           ],
           "creates_obligations": [],
           "resolves_obligations": [],
@@ -359,8 +412,18 @@
       ],
       "obligations": [
         {
+          "obligation_id": "obligation:x5000r-cross-resource-endpoint",
+          "statement": "Resolve globalConfig.cgiUrl from its defining asset into topicurl wrapper consumers.",
+          "required_capability": "resolves_endpoint_binding",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:d94fefa5e89a9178276489c8d11ff1c335ec663eba03783f433a94b56f71ef81",
+            "evidence:612a81d3e2c0dc9eddbf56f1651d5d1cce43d0729c4f5fee68c06164387d3193"
+          ]
+        },
+        {
           "obligation_id": "obligation:x5000r-selector-handler",
-          "statement": "Resolve globalConfig.cgiUrl across assets and bind each topicurl selector to native dispatch code.",
+          "statement": "Bind each recovered topicurl selector to native dispatch code and downstream value flow.",
           "required_capability": "binds_handler",
           "status": "open",
           "closure_evidence_refs": []
@@ -369,15 +432,16 @@
       "counterfactuals": [
         "Path-only grouping would collapse many distinct operations into one CGI interface.",
         "Frontend-only analysis would not identify cstecgi.cgi as a MIPS deep-analysis target.",
-        "A native string hit alone would incorrectly imply a proved selector-to-handler binding."
+        "A native string hit alone would incorrectly imply a proved selector-to-handler binding.",
+        "A single-resource frontend pass would miss 199 wrapper operations whose endpoint is defined in another asset."
       ],
       "paper_uses": [
         "Motivating example for operation identity below a shared physical endpoint.",
         "Ablation of path-only, frontend-plus-config, and native-dispatch analysis.",
-        "Open-obligation case for cross-resource JavaScript and native value-flow recovery."
+        "Evidence-preserving example of closing a cross-resource JavaScript obligation while retaining a native value-flow obligation."
       ],
       "limitations": [
-        "Current evidence proves selected operation presence, not the complete operation surface.",
+        "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
         "CGI execution configuration does not prove runtime reachability or authentication state.",
         "Native selector strings do not yet identify handler functions or dangerous data flow."
       ]

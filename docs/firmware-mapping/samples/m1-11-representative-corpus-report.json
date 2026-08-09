@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:9cfe522e64f5a21a56cb11b51b987bae7566017225c1ea75a32b9bdfabade241",
+  "report_id": "corpus-report:a48d28f7b752db86dfe6183bb3627aca165d05736b1c178eec261eeb1312e4b3",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -192,7 +192,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:6f7eb013f2abc8ff8eabba28d006b3212acbe286d68f91cb6b07be964b5b5655",
+      "catalog_id": "discovery-catalog:04b1857d52280928a10cf0107af881eb866a827290f539d053f350bc34b8f804",
       "required_capabilities": [
         "binds_handler",
         "constructs_request",
@@ -208,6 +208,7 @@
         "listens_on",
         "maps_namespace",
         "mentions_endpoint",
+        "resolves_endpoint_binding",
         "selects_operation",
         "serializes_parameter"
       ],
@@ -218,8 +219,8 @@
         "request_interface",
         "web_configuration"
       ],
-      "candidate_count": 139,
-      "evidence_count": 145,
+      "candidate_count": 339,
+      "evidence_count": 942,
       "open_obligation_count": 0
     }
   ],
@@ -240,6 +241,7 @@
         "listens_on",
         "maps_namespace",
         "mentions_endpoint",
+        "resolves_endpoint_binding",
         "selects_operation",
         "serializes_parameter"
       ],

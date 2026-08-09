@@ -156,7 +156,7 @@ Native Deep 的首个保守 Adapter 已支持命名 ELF `{route_ptr, handler_ptr
 
 ARM32 PIC Adapter 进一步从原始 ELF 验证 `.got` 基址、`R_ARM_GLOB_DAT`、`r0/r1` 参数装载与共同 `BL` registrar。真实 Tenda AC9 `online_list.js` 的 5 个接口已全部绑定到 5 个导出 handler，10/10 深分析义务关闭；这些绑定共享一个包含 131 个独立 route/handler 对的 registrar，形成可查询的后端注册架构信号。中间结果见 [M1-10B AC9 样例](./docs/firmware-mapping/samples/m1-10b-ac9-arm-pic-callsite-summary.json)。
 
-复杂通信结构现在会进入内容寻址的研究案例库，而不是只留在阶段性说明中。AC9 案例保存了 `前端 /goform → nginx namespace 不相交 → ownership obligation → httpd/dhttpd shallow 对照 → ARM PIC call-site`；X5000R 案例保存了 `共享 cstecgi.cgi → topicurl operation → lighttpd CGI namespace → MIPS 目标 → 跨资源/handler 开放义务`。两者均记录反事实和论文使用边界；详见[研究案例库](./docs/firmware-mapping/research-casebook.md)与[机器可读案例](./docs/firmware-mapping/samples/m1-12-research-case-corpus.json)。
+复杂通信结构现在会进入内容寻址的研究案例库，而不是只留在阶段性说明中。AC9 案例保存了 `前端 /goform → nginx namespace 不相交 → ownership obligation → httpd/dhttpd shallow 对照 → ARM PIC call-site`；X5000R 案例保存了 `共享 cstecgi.cgi → config.js/topicurl.js 跨资源绑定 → 199 个 operation → lighttpd CGI namespace → MIPS 目标 → Native handler 开放义务`。Frontend Asset Graph 只接受唯一符号定义并保留定义端/消费端两处 EvidenceAtom；真实 wrapper 的 `type:this.type` 继续标为 method 未决。详见[研究案例库](./docs/firmware-mapping/research-casebook.md)、[机器可读案例](./docs/firmware-mapping/samples/m1-12-research-case-corpus.json)与[X5000R 中间输出](./docs/firmware-mapping/samples/m1-15-x5000r-frontend-asset-graph.json)。
 
 遇到复杂 Native 控制流时，规划使用隔离的 Ghidra Candidate Worker 枚举 xref、call-site 与 P-code value-flow，再由核心 Validator 从原始 ELF 重放后才发布事实。AC9 当前 Profile 可由确定性解码器完成，因此不会为了工具统一而引入不必要的 Ghidra 信任面；接入合同见 [Ghidra Adapter 设计](./docs/firmware-mapping/native-ghidra-adapter.md)。
 
@@ -264,8 +264,8 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性 Inventory v1alpha2（含固件 chroot symlink 与空运行时树）、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend shared-CGI/custom-request、lighttpd/nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow 与 ARM32 PIC Deep Producer、frontend/native 候选关联、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
-| **Next** | 跨资源前端 asset graph、MIPS shared-CGI dispatcher binding、脚本后端/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性 Inventory v1alpha2（含固件 chroot symlink 与空运行时树）、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend shared-CGI/custom-request 与跨资源 Asset Graph、lighttpd/nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow 与 ARM32 PIC Deep Producer、frontend/native 候选关联、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
+| **Next** | MIPS shared-CGI dispatcher binding、动态 method 恢复、脚本后端/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

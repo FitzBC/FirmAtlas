@@ -6,16 +6,178 @@ import unittest
 from firmatlas.mapping import (
     CoverageStatus,
     FrontendEndpointShape,
+    FrontendAssetInput,
     FrontendParameterDirection,
     FrontendParameterNamespace,
     FrontendPolicy,
     FrontendRequestRole,
     SourceArtifactEntry,
     discover_frontend_requests,
+    discover_frontend_asset_graph,
 )
 
 
 class FrontendRequestProducerContractTests(unittest.TestCase):
+    def test_documented_x5000r_asset_graph_is_exactly_replayable(self):
+        from scripts.build_x5000r_frontend_asset_graph import (
+            X5000R_ROOT,
+            build_summary,
+        )
+
+        if not X5000R_ROOT.exists():
+            self.skipTest("local X5000R representative sample is unavailable")
+        documented = json.loads(Path(
+            "docs/firmware-mapping/samples/"
+            "m1-15-x5000r-frontend-asset-graph.json"
+        ).read_text())
+
+        replayed = build_summary(X5000R_ROOT)
+
+        self.assertEqual(documented, replayed)
+        self.assertEqual(199, replayed["operation_count"])
+        self.assertEqual({"/cgi-bin/cstecgi.cgi"}, {
+            item["endpoint"] for item in replayed["operations"]
+        })
+        self.assertEqual({"unresolved_dynamic"}, {
+            item["method_status"] for item in replayed["operations"]
+        })
+
+    def test_asset_graph_resolves_cross_file_shared_cgi_with_two_source_evidence(self):
+        config = b'var globalConfig={cgiUrl:"/cgi-bin/cstecgi.cgi"};'
+        wrapper = b'''function Dispatcher(){
+this.srcUrl=globalConfig.cgiUrl;
+this.post=function(data){data.topicurl=this.topicurl;data=JSON.stringify(data);
+$.ajax({url:this.srcUrl,type:"POST",dataType:"json",data:data});};}
+Dispatcher.prototype.setLanCfg=function(data){
+return this.topicurl="setLanCfg",this.post(data);};'''
+        assets = tuple(
+            FrontendAssetInput(
+                SourceArtifactEntry(path, path, "file", len(content),
+                                    hashlib.sha256(content).hexdigest()),
+                content,
+            )
+            for path, content in (
+                ("www/static/js/config.js", config),
+                ("www/static/js/topicurl.js", wrapper),
+            )
+        )
+
+        graph = discover_frontend_asset_graph(assets)
+
+        self.assertEqual(CoverageStatus.COMPLETED, graph.coverage_status)
+        self.assertEqual(1, len(graph.bindings))
+        binding = graph.bindings[0]
+        self.assertEqual("globalConfig.cgiUrl", binding.symbol)
+        self.assertEqual("/cgi-bin/cstecgi.cgi", binding.value)
+        self.assertEqual("www/static/js/config.js", binding.definition_source_path)
+        self.assertEqual("www/static/js/topicurl.js", binding.consumer_source_path)
+        candidates = [
+            candidate for result in graph.results for candidate in result.candidates
+        ]
+        self.assertEqual(1, len(candidates))
+        self.assertEqual("/cgi-bin/cstecgi.cgi", candidates[0].endpoint)
+        self.assertEqual("shared-cgi.topicurl.cross-resource",
+                         candidates[0].source_construct)
+        atoms = [atom for result in graph.results for atom in result.evidence_atoms]
+        self.assertEqual(
+            {"www/static/js/config.js", "www/static/js/topicurl.js"},
+            {atom.source_span.artifact_path for atom in atoms},
+        )
+        self.assertEqual(
+            {"constructs_request", "resolves_endpoint_binding",
+             "serializes_parameter", "selects_operation"},
+            {atom.capability for atom in atoms},
+        )
+
+    def test_asset_graph_keeps_conflicting_endpoint_definitions_unresolved(self):
+        sources = (
+            ("www/a.js", b'globalConfig={cgiUrl:"/cgi-bin/a.cgi"};'),
+            ("www/b.js", b'globalConfig={cgiUrl:"/cgi-bin/b.cgi"};'),
+            ("www/wrapper.js", b'''function D(){this.srcUrl=globalConfig.cgiUrl;
+this.post=function(x){x.topicurl=this.topicurl;x=JSON.stringify(x);
+$.ajax({url:this.srcUrl,type:"POST",dataType:"json",data:x});};}
+D.prototype.run=function(x){return this.topicurl="run",this.post(x)};'''),
+        )
+        assets = tuple(FrontendAssetInput(
+            SourceArtifactEntry(path, path, "file", len(content),
+                                hashlib.sha256(content).hexdigest()), content,
+        ) for path, content in sources)
+
+        graph = discover_frontend_asset_graph(assets)
+
+        self.assertEqual(CoverageStatus.PARTIAL, graph.coverage_status)
+        self.assertEqual((), graph.bindings)
+        self.assertEqual(
+            ["frontend.asset_symbol_conflict"],
+            [item.code for item in graph.diagnostics],
+        )
+        self.assertFalse(any(
+            candidate.source_construct == "shared-cgi.topicurl.cross-resource"
+            for result in graph.results for candidate in result.candidates
+        ))
+
+    def test_asset_graph_binds_consumed_symbol_not_another_symbol_with_same_url(self):
+        config = b'''globalConfig={cgiUrl:"/cgi-bin/shared.cgi"};
+otherConfig={cgiUrl:"/cgi-bin/shared.cgi"};'''
+        wrapper = b'''function D(){this.srcUrl=globalConfig.cgiUrl;
+this.post=function(x){x.topicurl=this.topicurl;x=JSON.stringify(x);
+$.ajax({url:this.srcUrl,type:"POST",dataType:"json",data:x});};}
+D.prototype.run=function(x){return this.topicurl="run",this.post(x)};'''
+        assets = tuple(FrontendAssetInput(
+            SourceArtifactEntry(path, path, "file", len(content),
+                                hashlib.sha256(content).hexdigest()), content,
+        ) for path, content in (("www/config.js", config),
+                                ("www/topicurl.js", wrapper)))
+
+        graph = discover_frontend_asset_graph(assets)
+
+        self.assertEqual(CoverageStatus.COMPLETED, graph.coverage_status)
+        self.assertEqual(1, len(graph.bindings))
+        self.assertEqual("globalConfig.cgiUrl", graph.bindings[0].symbol)
+
+    def test_asset_graph_marks_repeated_same_symbol_definition_ambiguous(self):
+        sources = (
+            ("www/a.js", b'globalConfig={cgiUrl:"/cgi-bin/a.cgi"};'),
+            ("www/b.js", b'globalConfig={cgiUrl:"/cgi-bin/a.cgi"};'),
+        )
+        assets = tuple(FrontendAssetInput(
+            SourceArtifactEntry(path, path, "file", len(content),
+                                hashlib.sha256(content).hexdigest()), content,
+        ) for path, content in sources)
+
+        graph = discover_frontend_asset_graph(assets)
+
+        self.assertEqual(CoverageStatus.PARTIAL, graph.coverage_status)
+        self.assertEqual((), graph.bindings)
+        self.assertEqual(
+            ["frontend.asset_symbol_ambiguous"],
+            [item.code for item in graph.diagnostics],
+        )
+
+    def test_asset_graph_ignores_assignment_shaped_comments_and_strings(self):
+        config = b'''// globalConfig={cgiUrl:"/comment.cgi"};
+var note='globalConfig={cgiUrl:"/string.cgi"}';
+var pattern=/globalConfig={cgiUrl:"\/regex.cgi"}/;
+var commentProperty={/* cgiUrl:"/property-comment.cgi" */};'''
+        wrapper = b'''function D(){this.srcUrl=globalConfig.cgiUrl;
+this.post=function(x){x.topicurl=this.topicurl;x=JSON.stringify(x);
+$.ajax({url:this.srcUrl,type:"POST",dataType:"json",data:x});};}
+D.prototype.run=function(x){return this.topicurl="run",this.post(x)};'''
+        assets = tuple(FrontendAssetInput(
+            SourceArtifactEntry(path, path, "file", len(content),
+                                hashlib.sha256(content).hexdigest()), content,
+        ) for path, content in (("www/config.js", config),
+                                ("www/topicurl.js", wrapper)))
+
+        graph = discover_frontend_asset_graph(assets)
+
+        self.assertEqual(CoverageStatus.COMPLETED, graph.coverage_status)
+        self.assertEqual((), graph.bindings)
+        self.assertFalse(any(
+            candidate.source_construct == "shared-cgi.topicurl.cross-resource"
+            for result in graph.results for candidate in result.candidates
+        ))
+
     def test_page_model_urls_become_read_and_write_request_candidates(self):
         content = b"""var pageModel = R.pageModel({
     getUrl: \"goform/GetStaticRouteCfg\",

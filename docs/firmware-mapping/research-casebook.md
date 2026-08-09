@@ -95,7 +95,8 @@ TOTOLINK X5000R V9.1.0u.6118 的页面不是为每个功能构造独立路径，
 
 ```mermaid
 flowchart LR
-    UI["config_ie.js / topicurl.js"] -->|"POST JSON"| CGI["/cgi-bin/cstecgi.cgi"]
+    CFG["config.js: globalConfig.cgiUrl"] --> WRAP["topicurl.js wrapper"]
+    WRAP -->|"method dynamic / JSON"| CGI["/cgi-bin/cstecgi.cgi"]
     CGI --> SEL["topicurl selector"]
     L["lighttpd :80 / :8080"] --> NS["/www + /cgi-bin CGI executor"]
     NS --> BIN["MIPS cstecgi.cgi"]
@@ -104,13 +105,15 @@ flowchart LR
 
 这个案例证明路径本身不是完整接口身份：若只按 URL 聚类，所有逻辑操作会被压成
 一个接口；若只做 strings，又会把 selector 的存在误写成 handler binding。当前
-系统已确认物理入口、至少一个 JSON selector、CGI execution namespace 和目标
-二进制，但诚实保留两项边界：`globalConfig.cgiUrl` 定义在 `config.js`、wrapper
-位于 `topicurl.js`，完整动作面需要跨资源符号解析；selector 到 Native handler
-仍需确定性 dispatcher Profile 或隔离 Ghidra Candidate Worker 后由 Validator 重放。
+系统已用 Frontend Asset Graph 将 `config.js` 中的 `globalConfig.cgiUrl` 绑定到
+`topicurl.js` wrapper，并恢复 199 个静态枚举 operation；定义端与消费端仍保存为
+不同 EvidenceAtom。真实 wrapper 通过 `this.type` 动态选择方法，因此不能把所有动作
+写成 POST。selector 到 Native handler/value-flow 仍需确定性 dispatcher Profile，
+或由隔离 Ghidra Candidate Worker 枚举候选后交给核心 Validator 重放。
 
-论文中可将它用于 shared-endpoint operation identity、path-only 消融和开放义务
-案例；不能据此声称所有 selector 已恢复、运行时可达、认证状态或漏洞数据流已确认。
+论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
+“跨资源义务关闭但 Native 义务仍开放”的阶段性案例；不能据此声称动态 selector
+全集、运行时可达、认证状态、具体 handler 或漏洞数据流已确认。
 
 ## 3. 后续案例准入触发器
 

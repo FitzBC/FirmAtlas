@@ -13,12 +13,14 @@ from firmatlas.mapping import (
     CaseObligation,
     CaseObligationStatus,
     CaseStage,
+    FrontendAssetInput,
     ResearchCaseInput,
     NativeRouteAnchor,
     SourceArtifactEntry,
     build_research_case,
     discover_arm_pic_callsite_bindings,
     discover_frontend_requests,
+    discover_frontend_asset_graph,
     discover_native_hints,
     discover_web_configuration,
     validate_research_case_corpus,
@@ -338,8 +340,23 @@ class ResearchCaseTests(unittest.TestCase):
             )
             return producer(source, content)
 
+        frontend_assets = []
+        for relative_path in (
+            "www/static/js/config.js",
+            "www/static/js/config_ie.js",
+            "www/static/js/topicurl.js",
+        ):
+            content = (X5000R_ROOT / relative_path).read_bytes()
+            frontend_assets.append(FrontendAssetInput(
+                SourceArtifactEntry(
+                    relative_path, relative_path, "file", len(content),
+                    hashlib.sha256(content).hexdigest(),
+                ),
+                content,
+            ))
+        frontend_graph = discover_frontend_asset_graph(tuple(frontend_assets))
         results = (
-            analyze("www/static/js/config_ie.js", discover_frontend_requests),
+            *frontend_graph.results,
             analyze("lighttp/lighttpd.conf", discover_web_configuration),
             analyze("www/cgi-bin/cstecgi.cgi", discover_native_hints),
         )
@@ -365,6 +382,26 @@ class ResearchCaseTests(unittest.TestCase):
                 reference["producer"],
                 "{}@{}".format(atom.producer, atom.producer_version),
             )
+        self.assertEqual(1, len(frontend_graph.bindings))
+        self.assertEqual(
+            199,
+            sum(
+                parameter.is_operation_selector
+                for result in frontend_graph.results
+                for parameter in result.parameters
+                if parameter.source_construct == "shared-cgi.topicurl"
+            ),
+        )
+        obligations = {
+            item["obligation_id"]: item for item in case["obligations"]
+        }
+        self.assertEqual(
+            "resolved",
+            obligations["obligation:x5000r-cross-resource-endpoint"]["status"],
+        )
+        self.assertEqual(
+            "open", obligations["obligation:x5000r-selector-handler"]["status"]
+        )
 
 
 if __name__ == "__main__":

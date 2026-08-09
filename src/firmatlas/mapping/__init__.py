@@ -43,6 +43,9 @@ from .evidence import (
 )
 from .frontend import (
     FRONTEND_RESULT_SCHEMA_VERSION,
+    FrontendAssetBinding,
+    FrontendAssetGraphResult,
+    FrontendAssetInput,
     FrontendEndpointShape,
     FrontendDiagnostic,
     FrontendParameterCandidate,
@@ -53,6 +56,7 @@ from .frontend import (
     FrontendRequestCandidate,
     FrontendRequestRole,
     discover_frontend_requests,
+    discover_frontend_asset_graph,
 )
 from .inventory import (
     INVENTORY_SCHEMA_VERSION,
@@ -219,6 +223,9 @@ __all__ = (
     "capture_evidence",
     "replay_evidence",
     "FRONTEND_RESULT_SCHEMA_VERSION",
+    "FrontendAssetBinding",
+    "FrontendAssetGraphResult",
+    "FrontendAssetInput",
     "FrontendEndpointShape",
     "FrontendDiagnostic",
     "FrontendParameterCandidate",
@@ -229,6 +236,7 @@ __all__ = (
     "FrontendRequestCandidate",
     "FrontendRequestRole",
     "discover_frontend_requests",
+    "discover_frontend_asset_graph",
     "InventoryPolicy",
     "INVENTORY_SCHEMA_VERSION",
     "InventoryDiagnostic",

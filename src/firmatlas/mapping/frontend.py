@@ -100,6 +100,32 @@ class FrontendDiagnostic:
 
 
 @dataclass(frozen=True)
+class FrontendAssetInput:
+    source: SourceArtifactEntry
+    content: bytes
+
+
+@dataclass(frozen=True)
+class FrontendAssetBinding:
+    binding_id: str
+    symbol: str
+    value: str
+    definition_source_path: str
+    consumer_source_path: str
+    request_candidate_ids: Tuple[str, ...]
+    evidence_ids: Tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class FrontendAssetGraphResult:
+    coverage_status: CoverageStatus
+    processed_bytes: int
+    results: Tuple["FrontendProducerResult", ...]
+    bindings: Tuple[FrontendAssetBinding, ...]
+    diagnostics: Tuple[FrontendDiagnostic, ...] = ()
+
+
+@dataclass(frozen=True)
 class _Token:
     kind: str
     value: bytes
@@ -771,7 +797,9 @@ def _function_owner(tokens: Tuple[_Token, ...], function_index: int) -> Optional
     return None
 
 
-def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
+def _shared_cgi_topicurl_calls(
+    content: bytes, external_bindings: Optional[dict] = None
+) -> tuple:
     """Resolve a shared CGI wrapper plus prototype-level operation selectors.
 
     Some firmware frontends keep one physical CGI URL in configuration, assign it
@@ -792,6 +820,8 @@ def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
             for key, value in properties:
                 if key.value.lower() == b"cgiurl":
                     endpoint_properties[(tokens[index].value, b"cgiurl")] = value
+    for identity, endpoint in (external_bindings or {}).items():
+        endpoint_properties.setdefault(identity, endpoint)
 
     wrappers = {}
     for function_index, token in enumerate(tokens):
@@ -807,6 +837,9 @@ def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
             continue
         body_end = _matching_close(tokens, body_open)
         endpoint_token = None
+        endpoint_value = None
+        endpoint_identity = None
+        cross_resource = False
         for index in range(body_open + 1, max(body_open + 1, body_end - 6)):
             if (
                 tuple(item.value for item in tokens[index : index + 4])
@@ -815,9 +848,22 @@ def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
                 and tokens[index + 5].value == b"."
                 and tokens[index + 6].value.lower() == b"cgiurl"
             ):
-                endpoint_token = endpoint_properties.get(
+                resolved = endpoint_properties.get(
                     (tokens[index + 4].value, tokens[index + 6].value.lower())
                 )
+                endpoint_identity = (
+                    tokens[index + 4].value, tokens[index + 6].value.lower()
+                )
+                if isinstance(resolved, _Token):
+                    endpoint_token = resolved
+                    endpoint_value = resolved.value
+                elif isinstance(resolved, bytes):
+                    endpoint_token = _Token(
+                        "identifier", resolved,
+                        tokens[index + 4].start, tokens[index + 6].end,
+                    )
+                    endpoint_value = resolved
+                    cross_resource = True
                 break
         if endpoint_token is None:
             continue
@@ -826,7 +872,6 @@ def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
             (b"JSON", b".", b"stringify", b"("),
             (b"$", b".", b"ajax", b"("),
             (b"url", b":", b"this", b".", b"srcUrl"),
-            (b"type", b":", b"POST"),
             (b"dataType", b":", b"json"),
         )
         if not all(
@@ -834,7 +879,19 @@ def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
             for sequence in required_sequences
         ):
             continue
-        wrappers[owner] = endpoint_token
+        literal_post = _contains_token_sequence(
+            tokens, body_open + 1, body_end, (b"type", b":", b"POST")
+        )
+        dynamic_method = _contains_token_sequence(
+            tokens, body_open + 1, body_end,
+            (b"type", b":", b"this", b".", b"type"),
+        )
+        if not literal_post and not dynamic_method:
+            continue
+        wrappers[owner] = (
+            endpoint_token, endpoint_value, endpoint_identity, cross_resource,
+            "POST" if literal_post else None,
+        )
 
     results = []
     for index in range(0, max(0, len(tokens) - 7)):
@@ -847,9 +904,10 @@ def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
             and tokens[index + 6].value == b"function"
         ):
             continue
-        endpoint_token = wrappers.get(tokens[index].value)
-        if endpoint_token is None:
+        wrapper = wrappers.get(tokens[index].value)
+        if wrapper is None:
             continue
+        endpoint_token, endpoint_value, endpoint_identity, cross_resource, method = wrapper
         body_open = index + 7
         while body_open < len(tokens) and tokens[body_open].value != b"{":
             body_open += 1
@@ -882,13 +940,22 @@ def _shared_cgi_topicurl_calls(content: bytes) -> tuple:
             )
             results.append(
                 (
-                    endpoint_token.value.decode("utf-8"),
+                    endpoint_value.decode("utf-8"),
                     endpoint_token.start,
                     endpoint_token.end,
-                    FrontendRequestRole.WRITE,
-                    "POST",
+                    (
+                        FrontendRequestRole.WRITE
+                        if method == "POST"
+                        else FrontendRequestRole.UNSPECIFIED
+                    ),
+                    method,
                     "json",
                     (parameter,),
+                    (
+                        "shared-cgi.topicurl.cross-resource"
+                        if cross_resource else "shared-cgi.topicurl"
+                    ),
+                    endpoint_identity,
                 )
             )
             break
@@ -962,7 +1029,9 @@ def _html_form_requests(content: bytes) -> tuple:
     return tuple(parser.requests)
 
 
-def _request_literals(content: bytes, source_path: str) -> tuple:
+def _request_literals(
+    content: bytes, source_path: str, external_bindings: Optional[dict] = None
+) -> tuple:
     discoveries = []
     page_model_discoveries = []
     for key, endpoint, start_byte, end_byte in _page_model_url_properties(content):
@@ -1069,7 +1138,9 @@ def _request_literals(content: bytes, source_path: str) -> tuple:
         method,
         representation,
         parameters,
-    ) in _shared_cgi_topicurl_calls(content):
+        source_construct,
+        _endpoint_identity,
+    ) in _shared_cgi_topicurl_calls(content, external_bindings):
         discoveries.append(
             (
                 endpoint,
@@ -1079,7 +1150,7 @@ def _request_literals(content: bytes, source_path: str) -> tuple:
                 role,
                 method,
                 representation,
-                "shared-cgi.topicurl",
+                source_construct,
                 parameters,
             )
         )
@@ -1159,11 +1230,20 @@ def discover_frontend_requests(
             ),
         )
 
+    return _discover_frontend_requests(source, content, policy, None)
+
+
+def _discover_frontend_requests(
+    source: SourceArtifactEntry,
+    content: bytes,
+    policy: FrontendPolicy,
+    external_bindings: Optional[dict],
+) -> FrontendProducerResult:
     candidates = {}
     parameter_candidates = {}
     evidence_atoms = {}
     diagnostics = []
-    matches = _request_literals(content, source.canonical_path)
+    matches = _request_literals(content, source.canonical_path, external_bindings)
     selected_matches = matches[: policy.max_candidates]
     if len(matches) > len(selected_matches):
         diagnostics.append(
@@ -1205,7 +1285,11 @@ def discover_frontend_requests(
                 subject_ref=candidate_id,
                 predicate="constructs_request",
                 object_value=endpoint,
-                observation_kind=ObservationKind.DIRECT_STATIC,
+                observation_kind=(
+                    ObservationKind.DETERMINISTIC_DERIVED
+                    if source_construct == "shared-cgi.topicurl.cross-resource"
+                    else ObservationKind.DIRECT_STATIC
+                ),
                 capability="constructs_request",
                 confidence=1.0,
             ),
@@ -1338,5 +1422,323 @@ def discover_frontend_requests(
         candidates=tuple(candidates.values()),
         parameters=tuple(parameter_candidates.values()),
         evidence_atoms=tuple(evidence_atoms.values()),
+        diagnostics=tuple(diagnostics),
+    )
+
+
+def _asset_symbol_definitions(asset: FrontendAssetInput) -> tuple:
+    try:
+        asset.content.decode("utf-8")
+    except UnicodeDecodeError:
+        return ()
+    definitions = []
+    pattern = re.compile(
+        rb"(?<![A-Za-z0-9_$])(?P<owner>[A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*\{"
+        rb"[^{}]{0,8192}?(?P<key>\bcgiUrl)\s*:\s*"
+        rb"(?P<quote>[\"'])(?P<value>[^\"']+)(?P=quote)",
+        re.DOTALL,
+    )
+    matches = tuple(pattern.finditer(asset.content))
+    code_offsets = _javascript_code_offsets(
+        asset.content,
+        tuple(
+            offset
+            for match in matches
+            for offset in (match.start("owner"), match.start("key"))
+        ),
+    )
+    for match in matches:
+        if not {
+            match.start("owner"), match.start("key")
+        } <= code_offsets:
+            continue
+        owner = match.group("owner")
+        value = _Token(
+            "string", match.group("value"),
+            match.start("value"), match.end("value"),
+        )
+        definitions.append((
+            (owner, b"cgiurl"),
+            "{}.cgiUrl".format(owner.decode("utf-8")),
+            value,
+        ))
+    return tuple(definitions)
+
+
+def _javascript_code_offsets(content: bytes, offsets: tuple) -> set:
+    """Return requested offsets that begin in JavaScript code.
+
+    Asset binding discovery deliberately uses a bounded pattern instead of a
+    full JavaScript parser because representative firmware ships old, minified
+    sources.  This small lexical guard prevents assignment-shaped text inside
+    comments, strings, templates, and regular-expression literals from becoming
+    endpoint definitions while preserving byte offsets for evidence capture.
+    """
+
+    requested = set(offsets)
+    if not requested:
+        return set()
+    accepted = set()
+    state = "code"
+    quote = None
+    escaped = False
+    regex_class = False
+    previous_significant = None
+    index = 0
+    limit = max(requested)
+    regex_prefix = b"=(:,![{;?&|+-*%^~<>"
+    while index <= limit and index < len(content):
+        if index in requested and state == "code":
+            accepted.add(index)
+        byte = content[index]
+        following = content[index + 1] if index + 1 < len(content) else None
+        if state == "line_comment":
+            if byte in (ord("\n"), ord("\r")):
+                state = "code"
+            index += 1
+            continue
+        if state == "block_comment":
+            if byte == ord("*") and following == ord("/"):
+                state = "code"
+                index += 2
+            else:
+                index += 1
+            continue
+        if state in {"string", "template"}:
+            if escaped:
+                escaped = False
+            elif byte == ord("\\"):
+                escaped = True
+            elif byte == quote:
+                state = "code"
+                previous_significant = byte
+            index += 1
+            continue
+        if state == "regex":
+            if escaped:
+                escaped = False
+            elif byte == ord("\\"):
+                escaped = True
+            elif byte == ord("["):
+                regex_class = True
+            elif byte == ord("]"):
+                regex_class = False
+            elif byte == ord("/") and not regex_class:
+                state = "code"
+                previous_significant = byte
+            index += 1
+            continue
+        if byte == ord("/") and following == ord("/"):
+            state = "line_comment"
+            index += 2
+            continue
+        if byte == ord("/") and following == ord("*"):
+            state = "block_comment"
+            index += 2
+            continue
+        if byte in (ord('"'), ord("'")):
+            state = "string"
+            quote = byte
+            escaped = False
+            index += 1
+            continue
+        if byte == ord("`"):
+            state = "template"
+            quote = byte
+            escaped = False
+            index += 1
+            continue
+        if byte == ord("/") and (
+            previous_significant is None
+            or previous_significant in regex_prefix
+        ):
+            state = "regex"
+            regex_class = False
+            escaped = False
+            index += 1
+            continue
+        if byte not in b" \t\r\n":
+            previous_significant = byte
+        index += 1
+    return accepted
+
+
+def _asset_binding_id(
+    symbol: str, value: str, definition_path: str, consumer_path: str
+) -> str:
+    payload = json.dumps(
+        {
+            "consumer": consumer_path,
+            "definition": definition_path,
+            "symbol": symbol,
+            "value": value,
+        },
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return "frontend-asset-binding:{}".format(hashlib.sha256(payload).hexdigest())
+
+
+def discover_frontend_asset_graph(
+    assets: Tuple[FrontendAssetInput, ...],
+    policy: FrontendPolicy = FrontendPolicy(),
+) -> FrontendAssetGraphResult:
+    """Resolve conservative cross-resource request bindings for an asset set."""
+
+    paths = tuple(asset.source.canonical_path for asset in assets)
+    if len(paths) != len(set(paths)):
+        raise ValueError("frontend asset graph requires unique source paths")
+
+    baseline = tuple(
+        discover_frontend_requests(asset.source, asset.content, policy)
+        for asset in assets
+    )
+    definitions = {}
+    for asset, result in zip(assets, baseline):
+        if result.coverage_status is not CoverageStatus.COMPLETED:
+            continue
+        for identity, symbol, token in _asset_symbol_definitions(asset):
+            definitions.setdefault(identity, []).append((asset, symbol, token))
+
+    resolved = {}
+    diagnostics = []
+    for identity, candidates in definitions.items():
+        values = {token.value for _, _, token in candidates}
+        if len(values) == 1 and len(candidates) == 1:
+            resolved[identity] = candidates[0]
+        else:
+            diagnostics.append(FrontendDiagnostic(
+                (
+                    "frontend.asset_symbol_conflict"
+                    if len(values) > 1
+                    else "frontend.asset_symbol_ambiguous"
+                ),
+                (
+                    "conflicting endpoint definitions prevented cross-resource resolution"
+                    if len(values) > 1
+                    else "repeated endpoint definitions prevented cross-resource resolution"
+                ),
+            ))
+
+    results = []
+    bindings = []
+    for asset, original in zip(assets, baseline):
+        external = {
+            identity: token.value
+            for identity, (definition_asset, _, token) in resolved.items()
+            if definition_asset.source.canonical_path != asset.source.canonical_path
+        }
+        if not external or original.coverage_status is not CoverageStatus.COMPLETED:
+            results.append(original)
+            continue
+        enriched = _discover_frontend_requests(
+            asset.source, asset.content, policy, external
+        )
+        candidate_identities = {
+            _candidate_id(
+                asset.source.canonical_path,
+                endpoint,
+                FrontendEndpointShape.EXACT_LITERAL,
+                role,
+                method,
+                representation,
+                source_construct,
+                parameters,
+            ): identity
+            for (
+                endpoint, _start, _end, role, method, representation,
+                parameters, source_construct, identity,
+            ) in _shared_cgi_topicurl_calls(asset.content, external)
+            if source_construct == "shared-cgi.topicurl.cross-resource"
+        }
+        candidates = list(enriched.candidates)
+        evidence_atoms = {atom.evidence_id: atom for atom in enriched.evidence_atoms}
+        for candidate_index, candidate in enumerate(candidates):
+            if candidate.source_construct != "shared-cgi.topicurl.cross-resource":
+                continue
+            identity = candidate_identities.get(candidate.candidate_id)
+            resolved_definition = resolved.get(identity)
+            matching = (
+                ((identity, *resolved_definition),)
+                if resolved_definition is not None
+                and resolved_definition[0].source.canonical_path
+                != asset.source.canonical_path
+                else ()
+            )
+            for _, definition_asset, symbol, token in matching:
+                atom = capture_evidence(
+                    source=definition_asset.source,
+                    content=definition_asset.content,
+                    selection=SpanSelection(
+                        SpanKind.TEXT_UTF8, token.start, token.end
+                    ),
+                    claim=EvidenceClaim(
+                        subject_ref=candidate.candidate_id,
+                        predicate="resolves_endpoint",
+                        object_value=candidate.endpoint,
+                        observation_kind=ObservationKind.DIRECT_STATIC,
+                        capability="resolves_endpoint_binding",
+                        confidence=1.0,
+                    ),
+                    producer=_PRODUCER,
+                )
+                evidence_atoms[atom.evidence_id] = atom
+                evidence_ids = tuple(dict.fromkeys(
+                    (*candidate.evidence_ids, atom.evidence_id)
+                ))
+                candidate = FrontendRequestCandidate(
+                    candidate.candidate_id, candidate.endpoint,
+                    candidate.endpoint_shape, candidate.request_role,
+                    candidate.method, candidate.representation,
+                    candidate.source_construct, evidence_ids,
+                )
+                candidates[candidate_index] = candidate
+                binding_id = _asset_binding_id(
+                    symbol, candidate.endpoint,
+                    definition_asset.source.canonical_path,
+                    asset.source.canonical_path,
+                )
+                bindings.append(FrontendAssetBinding(
+                    binding_id, symbol, candidate.endpoint,
+                    definition_asset.source.canonical_path,
+                    asset.source.canonical_path,
+                    (candidate.candidate_id,), (atom.evidence_id,),
+                ))
+        results.append(FrontendProducerResult(
+            source_path=enriched.source_path,
+            coverage_status=enriched.coverage_status,
+            processed_bytes=enriched.processed_bytes,
+            producer=enriched.producer,
+            candidates=tuple(candidates),
+            parameters=enriched.parameters,
+            evidence_atoms=tuple(evidence_atoms.values()),
+            diagnostics=enriched.diagnostics,
+        ))
+
+    statuses = tuple(result.coverage_status for result in results)
+    coverage_status = (
+        CoverageStatus.PARTIAL
+        if diagnostics or any(status is not CoverageStatus.COMPLETED for status in statuses)
+        else CoverageStatus.COMPLETED
+    )
+    binding_map = {}
+    for binding in bindings:
+        existing = binding_map.get(binding.binding_id)
+        if existing is None:
+            binding_map[binding.binding_id] = binding
+            continue
+        binding_map[binding.binding_id] = FrontendAssetBinding(
+            binding.binding_id, binding.symbol, binding.value,
+            binding.definition_source_path, binding.consumer_source_path,
+            tuple(dict.fromkeys(
+                (*existing.request_candidate_ids, *binding.request_candidate_ids)
+            )),
+            tuple(dict.fromkeys((*existing.evidence_ids, *binding.evidence_ids))),
+        )
+    return FrontendAssetGraphResult(
+        coverage_status=coverage_status,
+        processed_bytes=sum(result.processed_bytes for result in results),
+        results=tuple(results),
+        bindings=tuple(binding_map.values()),
         diagnostics=tuple(diagnostics),
     )

@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-14 X5000R 共享 CGI 已验证；当前 gate 为 `partial`
+> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-15 X5000R 跨资源 Frontend Asset Graph 已验证；当前 gate 为 `partial`
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -74,6 +74,7 @@
 | [M1-12 研究案例合同记录](./progress/2026-08-09-m1-12-research-casebook.md) | TDD、AC9 首例、Ghidra 调研与回归证据 | 案例 schema、准入 gate 或案例 corpus 变化时 |
 | [M1-13 chroot symlink Inventory 记录](./progress/2026-08-09-m1-13-chroot-symlink-inventory.md) | 固件内绝对/链式链接、安全边界、DAP-3520 重放与 corpus 晋级 | Inventory symlink 语义、运行时 namespace 或代表样本变化时 |
 | [M1-14 X5000R 共享 CGI 记录](./progress/2026-08-09-m1-14-x5000r-shared-cgi.md) | 隔离解包、lighttpd CGI、selector、MIPS 目标与研究义务 | shared-CGI、跨资源前端或 Native dispatcher 证据变化时 |
+| [M1-15 X5000R Frontend Asset Graph](./progress/2026-08-09-m1-15-frontend-asset-graph.md) | config.js → topicurl.js、199 operations、双来源证据与义务演进 | asset graph、动态 method 或 Native handler 证据变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -146,8 +147,9 @@ M1 工作项：
 | M1-12 | 复杂通信架构研究案例合同与案例库 | 已验证 | M1-03/05/06A/10B | 12 contract tests + 内容寻址 AC9 跨层案例 + 7 EvidenceAtom 重放 + full regression |
 | M1-13 | 固件 chroot symlink Inventory | 已验证 | M1-02/02B/11A | Inventory v1alpha2 + escape/cycle/missing/depth tests + DAP-3520 753-node completed replay |
 | M1-14 | X5000R shared-CGI 真实固件链 | 已验证 | M1-02B/04/05/06A/11/12/13 | completed 912-node Inventory + lighttpd/selector/MIPS evidence + verified CGI category + research case |
+| M1-15 | X5000R 跨资源 Frontend Asset Graph | 已验证 | M1-04/08/11/12/14 | 唯一符号绑定 + 双来源 EvidenceAtom + 199 operation + frontend 义务关闭 |
 
-**下一项建议**：继续 M1-11。M1-14 已使共享 CGI 类别晋级 `verified`；下一步建立 `config.js → topicurl.js` 跨资源 asset graph，并为 MIPS selector dispatcher 尝试确定性 Profile，无法关闭 handler 义务时才触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 样本。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
+**下一项建议**：继续 M1-11。M1-15 已用 `config.js → topicurl.js` Asset Graph 恢复 199 个 shared-CGI operation，并关闭跨资源 endpoint 义务；下一步为 MIPS selector dispatcher 尝试确定性 Profile，无法关闭 handler/value-flow 义务时才触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 样本。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
 
 ## 7. 跨会话无缝工作协议
 

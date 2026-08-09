@@ -260,8 +260,8 @@ class CorpusReportContractTests(unittest.TestCase):
             if item.sample_id == "totolink-x5000r-shared-cgi"
         )
         self.assertEqual(CorpusSampleStatus.VERIFIED, x5000r.status)
-        self.assertEqual(139, x5000r.candidate_count)
-        self.assertEqual(145, x5000r.evidence_count)
+        self.assertEqual(339, x5000r.candidate_count)
+        self.assertEqual(942, x5000r.evidence_count)
         self.assertEqual((), x5000r.missing_capabilities)
 
     def test_open_obligation_prevents_verified_status(self):
