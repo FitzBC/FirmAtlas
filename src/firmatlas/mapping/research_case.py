@@ -33,6 +33,7 @@ class CaseEvidenceKind(str, Enum):
     NATIVE_VALUE_FLOW = "native_value_flow"
     NATIVE_PROTECTION = "native_protection"
     NATIVE_SERVICE_ASSEMBLY = "native_service_assembly"
+    NATIVE_RELATIONSHIP = "native_relationship"
     SET_DIFFERENCE = "set_difference"
     COVERAGE_LEDGER = "coverage_ledger"
     RUNTIME_OBSERVATION = "runtime_observation"

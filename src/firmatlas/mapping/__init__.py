@@ -75,6 +75,15 @@ from .response_fixture import (
     ResponseFixtureResult,
     discover_response_fixture,
 )
+from .native_relationship import (
+    NATIVE_RELATIONSHIP_SCHEMA_VERSION,
+    NativeRelationship,
+    NativeRelationshipBindingStatus,
+    NativeRelationshipKind,
+    NativeRelationshipPolicy,
+    NativeRelationshipResult,
+    discover_native_relationships,
+)
 from .inventory import (
     INVENTORY_SCHEMA_VERSION,
     InventoryDiagnostic,
@@ -213,6 +222,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V7,
     BUILTIN_ANALYZER_REGISTRY_V6,
     BUILTIN_ANALYZER_REGISTRY_V5,
     BUILTIN_ANALYZER_REGISTRY_V1,
@@ -342,6 +352,13 @@ from .research_case import (
 )
 
 __all__ = (
+    "NATIVE_RELATIONSHIP_SCHEMA_VERSION",
+    "NativeRelationship",
+    "NativeRelationshipBindingStatus",
+    "NativeRelationshipKind",
+    "NativeRelationshipPolicy",
+    "NativeRelationshipResult",
+    "discover_native_relationships",
     "RESPONSE_FIXTURE_SCHEMA_VERSION",
     "ResponseFixtureBindingStatus",
     "ResponseFixtureField",
@@ -526,6 +543,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V7",
     "BUILTIN_ANALYZER_REGISTRY_V6",
     "BUILTIN_ANALYZER_REGISTRY_V5",
     "BUILTIN_ANALYZER_REGISTRY_V1",

@@ -13,6 +13,7 @@ from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom
 from .frontend import FrontendProducerResult
 from .parameter_clue import FrontendParameterClueIndex
 from .response_fixture import ResponseFixtureResult
+from .native_relationship import NativeRelationshipResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -52,6 +53,7 @@ class DiscoveryProducerKind(str, Enum):
     UBUS_BACKEND = "ubus_backend"
     PARAMETER_CLUE = "parameter_clue"
     RESPONSE_FIXTURE = "response_fixture"
+    NATIVE_RELATIONSHIP = "native_relationship"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -77,6 +79,7 @@ class DiscoveryCandidateKind(str, Enum):
     UBUS_ACCESS_GRANT = "ubus_access_grant"
     PARAMETER_CLUE_ASSESSMENT = "parameter_clue_assessment"
     RESPONSE_FIXTURE_CONTRACT = "response_fixture_contract"
+    NATIVE_RELATIONSHIP = "native_relationship"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -124,6 +127,17 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("response-fixture-producer", "0.1.0")
         )
         return cls(DiscoveryProducerKind.RESPONSE_FIXTURE, producer, scope, results)
+
+    @classmethod
+    def native_relationship(
+        cls, results: Tuple[NativeRelationshipResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-embedded-command-relationship", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.NATIVE_RELATIONSHIP, producer, scope, results)
 
     @classmethod
     def web_configuration(
@@ -396,6 +410,15 @@ def _stable_id(prefix: str, *values: str) -> str:
 def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog:
     """Project versioned producer batches into one deterministic no-seed catalog."""
 
+    known_source_paths = {
+        result.source_path
+        for batch in value.batches
+        for result in batch.results
+        if hasattr(result, "source_path")
+    }
+    source_paths_by_basename = {}
+    for path in sorted(known_source_paths):
+        source_paths_by_basename.setdefault(path.rsplit("/", 1)[-1], []).append(path)
     candidates = []
     parameters = []
     evidence = {}
@@ -542,6 +565,55 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                         False,
                         result.schema_version,
                         item.evidence_ids,
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE_RELATIONSHIP:
+                for item in result.relationships:
+                    target_artifact_paths = source_paths_by_basename.get(
+                        item.target, ()
+                    )
+                    parts = [
+                        result.source_path,
+                        item.action,
+                        item.target,
+                    ]
+                    if item.topic is not None:
+                        parts.append("topic={}".format(item.topic))
+                    if item.operation is not None:
+                        parts.append("op={}".format(item.operation))
+                    candidates.append(DiscoveryCandidate(
+                        item.relationship_id,
+                        DiscoveryCandidateKind.NATIVE_RELATIONSHIP,
+                        "|".join(parts),
+                        DiscoveryClaimStatus.CANDIDATE,
+                        result.source_path,
+                        result.schema_version,
+                        item.evidence_ids,
+                        tuple(
+                            (key, raw) for key, raw in (
+                                ("relationship_kind", item.kind.value),
+                                ("binding_status", item.binding_status.value),
+                                ("source_component", result.source_path),
+                                ("action", item.action),
+                                ("target_component", item.target),
+                                ("command", item.command),
+                                ("target_artifact_paths", json.dumps(
+                                    target_artifact_paths,
+                                    separators=(",", ":"),
+                                )),
+                                (
+                                    "target_resolution_status",
+                                    "resolved_same_firmware"
+                                    if target_artifact_paths
+                                    else "unresolved_in_analyzed_sources",
+                                ),
+                                ("topic", item.topic),
+                                ("operation", item.operation),
+                                ("arguments", json.dumps(
+                                    list(item.arguments), separators=(",", ":")
+                                )),
+                                ("open_obligation", result.open_obligation),
+                            ) if raw is not None
+                        ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.WEB_CONFIGURATION:
                 for item in result.findings:

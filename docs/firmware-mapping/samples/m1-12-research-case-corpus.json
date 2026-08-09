@@ -1178,7 +1178,7 @@
       ]
     },
     {
-      "case_id": "research-case:50159a27cea9864902f926709ae2c8e08aa0acd8a70e0868fbf575c7079db5dc",
+      "case_id": "research-case:551e34f27e925d64ac9cacb0460be0f414729072167d9b4bb61d69be70270557",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1187,7 +1187,9 @@
         "frontend_response_fixture",
         "unresolved_goform_binding",
         "minidlna_supervisor",
-        "usb_media_mount"
+        "usb_media_mount",
+        "embedded_process_ipc_relationships",
+        "missing_target_component"
       ],
       "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers?",
       "evidence": [
@@ -1388,6 +1390,33 @@
           "locator": "binary:bytes=96365-96373",
           "capability": "monitors_media_daemon",
           "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
+          "kind": "native_relationship",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103416-103440",
+          "capability": "declares_native_relationship",
+          "producer": "native-embedded-command-relationship@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
+          "kind": "native_relationship",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=870164-870183",
+          "capability": "declares_native_relationship",
+          "producer": "native-embedded-command-relationship@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-native-relationship-target-resolution",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-11-vendor-tenda-ac9-native-relationships.json",
+          "source_artifact_sha256": "7beba6946739c7852ca92c9d355955803b27882fe415038bb8953f39fb954bc9",
+          "locator": "json:$.dlna_relationships",
+          "capability": "resolves_target_component_presence",
+          "producer": "native-relationship-report@v1alpha1"
         }
       ],
       "claims": [
@@ -1435,6 +1464,16 @@
           "status": "supported"
         },
         {
+          "claim_id": "claim:dlna-native-relationships",
+          "statement": "Embedded commands establish httpd signaling minidlna and time_check posting literal topic 51 operation 6 to netctrl; the minidlna target artifact is absent from this rootfs.",
+          "evidence_refs": [
+            "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
+            "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
+            "coverage:ac9-native-relationship-target-resolution"
+          ],
+          "status": "supported"
+        },
+        {
           "claim_id": "claim:dlna-handler-owner",
           "statement": "No exact Native registration or handler binding currently connects the frontend/fixture contract to a goform execution path.",
           "evidence_refs": [
@@ -1459,7 +1498,10 @@
             "evidence:b8bd263c2d1f1138b69416a5b690c13ee88c30f25be69c78e17f505066675934",
             "evidence:a91ac0adceb329031f0138e1a02e904b98c3be19d2b694b848af01ad06c9ae07",
             "evidence:eb542224a941cff16d8d415c4c11d2aa07ab214b1ab056cbe483694195816289",
-            "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78"
+            "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78",
+            "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
+            "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
+            "coverage:ac9-native-relationship-target-resolution"
           ],
           "status": "unresolved"
         }
@@ -1500,6 +1542,18 @@
           "creates_obligations": [],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-native-relationships",
+          "order": 4,
+          "interpretation": "Recover embedded process/IPC edges and verify target presence without promoting them to executed callsites.",
+          "claim_ids": [
+            "claim:dlna-native-relationships",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -1514,17 +1568,20 @@
       "counterfactuals": [
         "Treating a response fixture filename as a route table would invent a handler binding.",
         "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
-        "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts."
+        "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
+        "Treating an embedded command as an executed callsite would conceal the absent minidlna target component."
       ],
       "paper_uses": [
         "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
         "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
-        "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping."
+        "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
+        "Missing-component example where an exact process target is named but absent from the analyzed rootfs."
       ],
       "limitations": [
         "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
         "The fixture may be development data and does not establish runtime response values.",
-        "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made."
+        "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
+        "The exact topic 51 operation 6 command is not yet tied by a code callsite to the nearby minidlna state strings."
       ]
     }
   ],
@@ -1532,7 +1589,7 @@
     "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
     "paper_ready": true,
     "case_count": 3,
-    "evidence_line_count": 10,
+    "evidence_line_count": 11,
     "issues": []
   }
 }

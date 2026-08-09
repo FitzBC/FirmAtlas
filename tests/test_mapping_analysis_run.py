@@ -48,6 +48,11 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             (root / "etc/nginx/nginx.conf").write_text(
                 'server { listen 80; root /www; }', encoding="utf-8"
             )
+            (root / "bin").mkdir()
+            (root / "bin/time_check").write_bytes(
+                b"\x7fELF\x01\x01" + b"\x00" * 58
+                + b"cfm post netctrl 51?op=6\x00"
+            )
             artifact_sha256 = hashlib.sha256(b"uploaded-firmware").hexdigest()
 
             first = analyze_extracted_root(MappingAnalysisRequest(
@@ -67,6 +72,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "script_backend", "native", "native_ubus_registration",
                 "arm_pic_callsite", "arm_pic_registrar", "set_difference",
                 "parameter_clue", "response_fixture", "ubus_backend",
+                "native_relationship",
                 "scheduler", "catalog",
             },
             {stage.stage_name for stage in first.stages},
@@ -82,6 +88,14 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 for item in first.catalog.candidates
                 if item.candidate_kind
                 is DiscoveryCandidateKind.RESPONSE_FIXTURE_CONTRACT
+            },
+        )
+        self.assertIn(
+            "bin/time_check|post|netctrl|topic=51|op=6",
+            {
+                item.canonical_identity
+                for item in first.catalog.candidates
+                if item.candidate_kind is DiscoveryCandidateKind.NATIVE_RELATIONSHIP
             },
         )
         self.assertIn(
@@ -163,8 +177,12 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             ))
 
         kinds = {item.source_path: item.analyzer_kinds for item in result.source_plan}
-        self.assertEqual(("native",), kinds["usr/sbin/uhttpd"])
-        self.assertEqual(("native",), kinds["www/cgi-bin/tool.cgi"])
+        self.assertEqual(
+            ("native", "native_relationship"), kinds["usr/sbin/uhttpd"]
+        )
+        self.assertEqual(
+            ("native", "native_relationship"), kinds["www/cgi-bin/tool.cgi"]
+        )
 
     def test_auto_profile_closes_real_ac9_native_ubus_registration_work(self):
         if not self.AC9_ROOT.is_dir():
@@ -195,9 +213,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v7", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v8", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v7",
+            "firmatlas.mapping.analyzer-registry/builtin-v8",
             result.analyzer_registry_id,
         )
 

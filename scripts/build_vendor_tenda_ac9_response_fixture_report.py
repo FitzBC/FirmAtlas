@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V7,
     DiscoveryCandidateKind,
     EvidenceClaim,
     HistoricalVulnerabilityRecord,
@@ -81,8 +82,8 @@ def _architecture_clues() -> list[dict]:
 
 def build() -> dict:
     run = analyze_extracted_root(MappingAnalysisRequest(
-        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto()
-    ))
+        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v7()
+    ), registry=BUILTIN_ANALYZER_REGISTRY_V7)
     fixture_candidates = [
         item for item in run.catalog.candidates
         if item.candidate_kind is DiscoveryCandidateKind.RESPONSE_FIXTURE_CONTRACT

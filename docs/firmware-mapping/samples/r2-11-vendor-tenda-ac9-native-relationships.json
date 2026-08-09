@@ -1,0 +1,2696 @@
+{
+  "analysis_run_id": "mapping-analysis-run:aae712fde1641225546b5592ca33f45e80156b07e7ba6fe7a388e2ce67278a87",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v8",
+  "catalog_id": "discovery-catalog:eaff279a74d8b82396469a24e4c4bea9bb1342170b4b382d9e440a5578ce87c7",
+  "coverage_status": "completed",
+  "dlna_relationship_evidence": [
+    {
+      "capability": "declares_native_relationship",
+      "confidence": 0.75,
+      "evidence_id": "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
+      "object_value": "netctrl",
+      "observation_kind": "direct_static",
+      "predicate": "embeds_command_target",
+      "producer": "native-embedded-command-relationship",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 103440,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "792f9dab6208ab9141a6a2d14656f370cf3f3eb35e99fe628471084eca9fd1c0",
+        "locator": "binary:bytes=103416-103440",
+        "span_kind": "binary",
+        "start_byte": 103416,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-relationship:0e41cf33f373a6a625074c38939bdef3018b3e3edd28529471f7f04d39de7622"
+    },
+    {
+      "capability": "declares_native_relationship",
+      "confidence": 0.75,
+      "evidence_id": "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
+      "object_value": "minidlna",
+      "observation_kind": "direct_static",
+      "predicate": "embeds_command_target",
+      "producer": "native-embedded-command-relationship",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 870183,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "b52d0c136dc08cdbfe6ef0fa91205143e506a62f1f0649e1d31d6b89a0b4a922",
+        "locator": "binary:bytes=870164-870183",
+        "span_kind": "binary",
+        "start_byte": 870164,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-relationship:31eb97ba0e8fa6c5022ca657d2c194496f8e79c2af5fef315f3fdbbdba902ef8"
+    }
+  ],
+  "dlna_relationships": [
+    {
+      "action": "post",
+      "arguments": [],
+      "binding_status": "embedded_command",
+      "command": "cfm post netctrl 51?op=6",
+      "evidence_ids": [
+        "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "6",
+      "relationship_id": "native-relationship:0e41cf33f373a6a625074c38939bdef3018b3e3edd28529471f7f04d39de7622",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/time_check",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "51"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 minidlna",
+      "evidence_ids": [
+        "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:31eb97ba0e8fa6c5022ca657d2c194496f8e79c2af5fef315f3fdbbdba902ef8",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [],
+      "target_component": "minidlna",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    }
+  ],
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "historical_expectation_entries": [
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "list"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetIPTVCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5836"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "security"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/WifiBasicSet",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45427"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "WANS"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/WizardHandle",
+      "missing_parameters": [
+        "WANS"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6016"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "PPPOEPassword"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/QuickIndex",
+      "missing_parameters": [
+        "PPPOEPassword"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6015"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/WifiWpsStart",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45429"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "rebootTime"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetSysAutoRebbotCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45428"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "remoteIp"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetRemoteWebCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5847"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/cgi-bin/DownloadCfg.jpg",
+      "missing_parameters": [],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-14286"
+    },
+    {
+      "applicability": "exact_artifact",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetSambaCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22949"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "lanMask"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/AdvSetLanip",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5839"
+    },
+    {
+      "applicability": "exact_artifact",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetOnlineDevName",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22946"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/exeCommand",
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10443"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/exeCommand",
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10442"
+    }
+  ],
+  "historical_expectation_summary": {
+    "not_assessable": 5,
+    "observed": 8
+  },
+  "interpretation": {
+    "not_claimed": "embedded commands executed, targets were live, routes were reachable, or historical vulnerabilities are present",
+    "supported": "complete embedded commands establish candidate sender-to-target process-control and CFM IPC relationships, with literal topic, operation, and argument fields preserved when present",
+    "unresolved": "the DLNA fixture/state clues are not yet connected by a proven code callsite to the exact time_check topic 51 operation 6 command"
+  },
+  "mapping_summary": {
+    "candidate_count": 4348,
+    "evidence_count": 11537,
+    "native_relationship_count": 101,
+    "native_relationship_source_count": 17,
+    "open_obligation_count": 59,
+    "parameter_count": 688,
+    "potential_hidden_interface_count": 107,
+    "resolved_target_count": 92
+  },
+  "profile_id": "firmatlas.mapping.profile/auto-v8",
+  "relationship_distribution": {
+    "by_binding_status": {
+      "embedded_command": 90,
+      "embedded_command_template": 11
+    },
+    "by_kind": {
+      "ipc_command": 14,
+      "process_control": 87
+    },
+    "top_targets": [
+      {
+        "count": 15,
+        "target_component": "netctrl"
+      },
+      {
+        "count": 8,
+        "target_component": "wan_surf"
+      },
+      {
+        "count": 5,
+        "target_component": "dnrd"
+      },
+      {
+        "count": 5,
+        "target_component": "time_check"
+      },
+      {
+        "count": 4,
+        "target_component": "pptp_callmgr"
+      },
+      {
+        "count": 3,
+        "target_component": "cfmd"
+      },
+      {
+        "count": 3,
+        "target_component": "dhcps"
+      },
+      {
+        "count": 3,
+        "target_component": "dhttpd"
+      },
+      {
+        "count": 3,
+        "target_component": "dnrd-guest"
+      },
+      {
+        "count": 3,
+        "target_component": "httpd"
+      },
+      {
+        "count": 3,
+        "target_component": "miniupnpd"
+      },
+      {
+        "count": 3,
+        "target_component": "multiWAN"
+      },
+      {
+        "count": 3,
+        "target_component": "pptpd"
+      },
+      {
+        "count": 2,
+        "target_component": "3322ip"
+      },
+      {
+        "count": 2,
+        "target_component": "88ip"
+      },
+      {
+        "count": 2,
+        "target_component": "arpbrocast"
+      },
+      {
+        "count": 2,
+        "target_component": "auto_discover"
+      },
+      {
+        "count": 2,
+        "target_component": "business_proc"
+      },
+      {
+        "count": 2,
+        "target_component": "dnrd-wisp"
+      },
+      {
+        "count": 2,
+        "target_component": "logserver"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 3322ip",
+      "evidence_ids": [
+        "evidence:0b36a9227e6b02f2d9ca7e1855ca49852a5b8854e0df3ec74a97d374fd38e0a6"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:04b6183348d5aefcba5b03f4a1e3d04803d1fd037c932db8a4b28f25613b7059",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/3322ip"
+      ],
+      "target_component": "3322ip",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhcps",
+      "evidence_ids": [
+        "evidence:15cba02ee57da1634b851cea5ccd3be235f5ba508630f71e59d0c5ca2645714e"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:0590efd96fa8844040c3ecaeeeed41d34a6f3eb74f7caab52bc6901f365f9d6e",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/dhcps"
+      ],
+      "target_component": "dhcps",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 sntp",
+      "evidence_ids": [
+        "evidence:724edfa5d1d98023454b50e554dda9db178689dc8107f617c0aa7bf2dc407057"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:06f7d87632aba140859ac4a08f69d6966f7335ca35aca73356d9ad275f980804",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/sntp"
+      ],
+      "target_component": "sntp",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 httpd",
+      "evidence_ids": [
+        "evidence:b4b3b3c43e2c1c3467899a5e6b843f21e60c7c16be552a719b7e09d3b6366fc5"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:0a33a67a36a84b85bb57e6c42be6dc19dd766803d548365c27b8bf673d9089de",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/httpd"
+      ],
+      "target_component": "httpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [],
+      "binding_status": "embedded_command",
+      "command": "cfm post netctrl 51?op=6",
+      "evidence_ids": [
+        "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "6",
+      "relationship_id": "native-relationship:0e41cf33f373a6a625074c38939bdef3018b3e3edd28529471f7f04d39de7622",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/time_check",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "51"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhcpcd_wan2",
+      "evidence_ids": [
+        "evidence:5505e564ba16810187c07572c19f6e6b0f27e9d1addea2ea9c73917328d21f21"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:0ea9a9a656f446431c0832d0df1a4eebf6f147a55d099e978169fcca4354e322",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/dhcpcd_wan2"
+      ],
+      "target_component": "dhcpcd_wan2",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 business_proc",
+      "evidence_ids": [
+        "evidence:e5c2fee191e528c7b2fc2bf31d8faa8ad42316f7cc3dcb659cd01db54d30b048"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:1186860df3cd1227e9c840fad8c3e4837158fc3a61a3780ced91f7b28486acbd",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/business_proc"
+      ],
+      "target_component": "business_proc",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd-wisp",
+      "evidence_ids": [
+        "evidence:92412ba128e042ce5abbba49e83774734ec59f01b5597c2b7bf19b90f4a85391"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:13a9e32ff97ceaea9009d989a77d71f6027c4c702c2a0c88377965c248d39c5e",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/dnrd-wisp"
+      ],
+      "target_component": "dnrd-wisp",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:129c0a518346f14e2a37894fc5ea4effe45f77fa9e06eee42a433735a3cfccb4"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:1400b01569987986469871d8372ae40b1ab1cade00dd99fdcad45677ea575e2c",
+      "relationship_kind": "process_control",
+      "source_component": "bin/dhcpcd",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:22496461b37c30b4201295313b54d4fd8640788ecb60ba4f1c063835a2958b8d"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:1565a49dd5a378d6207fe7c6202298fceb979a8773338a84f2d02e04d3e8a8bd",
+      "relationship_kind": "process_control",
+      "source_component": "bin/dhcpcd_wan3",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 multiWAN",
+      "evidence_ids": [
+        "evidence:bce2186212017c688e792c93851427a0e5cd7cda9f545b22477b1f598f456fbe"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:15853b7fa2198b914deef8b09eabbd019c32705c8a1a76266bb12724336abce2",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/multiWAN"
+      ],
+      "target_component": "multiWAN",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl %d?op=%d",
+      "evidence_ids": [
+        "evidence:d53122ab0f69f761db805e943ff2b80678d076038e545bca0d87e0df4d74d816"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:168bf8276a58345173e644a9658cdbd541a53e58c930601465f9bfafc8ff51f8",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:7b7a7afc39eb56241be6aee207af36fd0716dc1c34309ba5ef5f009976a3e65f"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:1a474fe1601f8777806934d8a94db77bf745018a3e1823c66df354bcb3ca5e3d",
+      "relationship_kind": "process_control",
+      "source_component": "bin/dhcpcd_lan",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl %d?op=%d",
+      "evidence_ids": [
+        "evidence:0498d1eb27900cbd0c6bd9ceea5ff20b33349ad4b2c2d14c74542c3024bd7bc1"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:26b712f8c74d9f04281c09c2afd520d07c54ee36d95f23d07e7dd965ffd73b9a",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 arpbrocast",
+      "evidence_ids": [
+        "evidence:2313bbc33e018675e1d9bfe6150fa71c4b98067e92b646ae6d9a3b32cae6ccce"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:28b2785ccef76585e6d37a689a1ea888eda67cf9556ae8efcb2e1aeb4339009a",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [],
+      "target_component": "arpbrocast",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 cfmd",
+      "evidence_ids": [
+        "evidence:56e45f61e7340fcf67ba745b1fe43863514ef087493ea851385137844fbc509b"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:2ea3c4f4f7af21ad5482d1d56e6f7c97be0772b5f74fe626cb4025436c1dbcbc",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/cfmd"
+      ],
+      "target_component": "cfmd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 telnetd",
+      "evidence_ids": [
+        "evidence:8dd1b043ce90dcc376b061cef5324322b1baf46309e126f762942cf839dc2fc5"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:309eaeb13dd1e4a3bb1e585dcfec26c28b58c1ebb908abd615bf2126f00c9622",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "usr/sbin/telnetd"
+      ],
+      "target_component": "telnetd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 minidlna",
+      "evidence_ids": [
+        "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:31eb97ba0e8fa6c5022ca657d2c194496f8e79c2af5fef315f3fdbbdba902ef8",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [],
+      "target_component": "minidlna",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 88ip",
+      "evidence_ids": [
+        "evidence:aa17f4c1cd5037b009e32405039e405739ea0217194ac04a5011e66ed3e41a39"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:35714c8ed53c021122c620cdf425f5334d7dcd83b3cb9c73a5f964f00784fcac",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/88ip"
+      ],
+      "target_component": "88ip",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 pptp_callmgr",
+      "evidence_ids": [
+        "evidence:5a10ea7fcbbcb85ac931dde2aefcaaf766e73243e2703c28376d11adc510d4eb"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:39009c69d08af8aa057d2652e0bc75b0a3a5c7c43152267894e82b9cffb299c4",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/pptp_callmgr"
+      ],
+      "target_component": "pptp_callmgr",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 pptpd",
+      "evidence_ids": [
+        "evidence:a2a15dcd77add012ac82aabece5d2db401e1ef6ca449870ca5aff222671032ad"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:3b75d49b18ac38ee643037295570acac1a506faf965f4f5c4bc78637e44f8e61",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/pptpd"
+      ],
+      "target_component": "pptpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 miniupnpd",
+      "evidence_ids": [
+        "evidence:6511cc5ab86193c8d1d63aa58bbd79336a7e1b6bb916999a45b51a175ab0532a"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:45d3af2fd5c186e42da57f148b6e85acc09d5e52cb51bf0924a1d00799754f50",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/miniupnpd"
+      ],
+      "target_component": "miniupnpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:0278f1c1c21f71c9317a2b7a935196d0d9f2b9a9315d0bae574a054566ad43dd"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:466ea3ace70567d4bebb207cddad87cd5751f69e7a869703c967948f79f86232",
+      "relationship_kind": "process_control",
+      "source_component": "bin/dhcpcd_wan1",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhcps",
+      "evidence_ids": [
+        "evidence:cc7d7c30f4c9f39c35212dbef153d0d3907ff60e86ecf7cb793e07077eb66ab7"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:469bc9e6b30ec8fa4c7a6015f1c22836a4c92539506bdadd31fe50c3fda796fd",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/dhcps"
+      ],
+      "target_component": "dhcps",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 arpbrocast",
+      "evidence_ids": [
+        "evidence:e92e83eb4f50669479431668f6c784bae2761d1ef708901f9db265fbdcb82c8b"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:46b53880221651c55f1ec255c1014769fb641d09da33bfc0496ea702a21ceae8",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [],
+      "target_component": "arpbrocast",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-SIGUSR2"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -SIGUSR2 dnrd-guest",
+      "evidence_ids": [
+        "evidence:7df4732a58f537743cdaafbcc2a098951ff1080dd856c9a22969b2bc7055eaf4"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:49812c77b0157a598924ef5af4506a30b5a1e89058c9be6134c82e1ee0df709d",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libcommon.so",
+      "target_artifact_paths": [
+        "bin/dnrd-guest"
+      ],
+      "target_component": "dnrd-guest",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:9c3376067114f28b2c8ed21443f4e5d64cd438a8790a4d32d29b71941b5ac084"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:4b296476351bc27d78b70c7af9d97d065e19ce75ab720b9fa4de18100332bc88",
+      "relationship_kind": "process_control",
+      "source_component": "bin/dhcpcd_wan4",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd-wisp",
+      "evidence_ids": [
+        "evidence:94962c44f8d26355dc1830f1b8235058c2cc036039fe7491420e750fcef4a17b"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:4bb16c870e7a518f83daff7435d794d2b41af6635b4cdb0a8375097c663aea31",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/dnrd-wisp"
+      ],
+      "target_component": "dnrd-wisp",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 business_proc",
+      "evidence_ids": [
+        "evidence:5c33f0f00dc2505d696522305ade7d2971236e0f3663607f58082730eaf86793"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:4ea0fcd85102e927407b1cbc80c13261c2e9082d20776ca7e555c3f34d214e0c",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/business_proc"
+      ],
+      "target_component": "business_proc",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 smbd",
+      "evidence_ids": [
+        "evidence:ef9c8bff330f4dd5f9951bdf1708edab07c76d8cf1ce0587fad7f8e99ed10d81"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:51a8c8793d2305986d88a0e39b2ef53618956d7013b61dcf070276878300f9d9",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "usr/sbin/smbd"
+      ],
+      "target_component": "smbd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "string_info=%s"
+      ],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl %d?op=%d,string_info=%s",
+      "evidence_ids": [
+        "evidence:4f687ea1ef667e5cc737865c8fa5dc534d63dda350804712bf58ccabc6f1c38c"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:53e70bc41427c697192aab9758bbaee99052efd66f49b0714bf285c973b5015b",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd-guest",
+      "evidence_ids": [
+        "evidence:093a58df0475450d008a2509082f8548c6bced586f1ffdfae32a54cc73ae1a29"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:5bdb1e516ee873df320ea177baca5f975bf1ea007c583dd5dacf681ccba3d88c",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/dnrd-guest"
+      ],
+      "target_component": "dnrd-guest",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 ucloud_v2",
+      "evidence_ids": [
+        "evidence:fe5acee37799dd88a0bc56bca4940d4494028dc7ee466d23f7ccc54fc8fd6560"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:5e01a82b06af154284c0d4b21a9b493de91f05b0731734437a0a8b6f59658d2a",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/ucloud_v2"
+      ],
+      "target_component": "ucloud_v2",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 netctrl",
+      "evidence_ids": [
+        "evidence:609332b7105377f33110aa661b62b0fdd813e6372f1a18bcf7c8d31669fecfbb"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:5e5354340947682c2579ed6ade443d2d13828aa7984b7ffb7e2c2930bdd35c80",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wps_monitor",
+      "evidence_ids": [
+        "evidence:9283606ad2928d85769478e194d4cbd0e57b03cd02c0289b07d0c4fc88b5afe1"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:5eafe5d2a39fb41ca42b547792149cbb873aeedcf960d9f1a8c901dd5a56e198",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/wps_monitor"
+      ],
+      "target_component": "wps_monitor",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "wan_id=%d"
+      ],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl %d?op=%d,wan_id=%d",
+      "evidence_ids": [
+        "evidence:3ef03b22bf260b361a6267e2c88e6f53715a47b522a3e6e9b1c75763d7bccf05"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:5f1441ee7063b2f18ef7341c3ae96e2b66d0635f844cab6ca46205603db3399e",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/wan_surf",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 sntp",
+      "evidence_ids": [
+        "evidence:c865403df2770487c062a1fe1f845d7e1e47a72b1cb6895af246ff1f26fa8555"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:60dd4ed4927f4815de93c758a55c8257615c22b406e2a877bb18d59bbc20c31a",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/sntp"
+      ],
+      "target_component": "sntp",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "wl_rate=24"
+      ],
+      "binding_status": "embedded_command",
+      "command": "cfm post netctrl 19?op=3,wl_rate=24",
+      "evidence_ids": [
+        "evidence:069b6a90b8e52e2fc7badb571d351bc3e0cf353d69409ef8d9733e1c53abaf21"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "3",
+      "relationship_id": "native-relationship:61b14f6227791a026c8057da578c068f3207827ef62c10f8b11187fc7921b0e1",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/time_check",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "19"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 pptp_callmgr",
+      "evidence_ids": [
+        "evidence:23552dd3bfe2345a77feed6790cc671ebea1021fa77d690f7a15f9f617b68588"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:6a1db5cfa07acb4d17575a9199f0d639b400afbfb049316cfd583f4be3d3a30c",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/pptp_callmgr"
+      ],
+      "target_component": "pptp_callmgr",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 nmbd",
+      "evidence_ids": [
+        "evidence:a4c6cfb5083dac05e278b0c4e1ef790c9e7ce70af41a42ba47db94dd2603b1d4"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:6b37fedd724c027705b247890d235412c3b05fa3afa5244448bc144dd867d2a9",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [],
+      "target_component": "nmbd",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "wl_rate=5"
+      ],
+      "binding_status": "embedded_command",
+      "command": "cfm post netctrl 19?op=3,wl_rate=5",
+      "evidence_ids": [
+        "evidence:11503e862b2d95b5faae25913f6c42faececc5656e6bedb055a720d6fa060045"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "3",
+      "relationship_id": "native-relationship:7441b4a18f88e6c267477c5b294d374e9a7c7a55e14004d5451958089ea43b10",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/time_check",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "19"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-SIGUSR2"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -SIGUSR2 dnrd",
+      "evidence_ids": [
+        "evidence:6ef8ce32a7aa6da69caa469aa42ae1caab2ef2edd61d548ebb7c46b8811ff109"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:77da59a8db19519421106581e97719decab3924d6f3cfe63fcfdbd27a6d32ba8",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libcommon.so",
+      "target_artifact_paths": [
+        "bin/dnrd"
+      ],
+      "target_component": "dnrd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 inadyn",
+      "evidence_ids": [
+        "evidence:24a95a46fbff15307f55203f705b0486625692f327fb940db07f24f76f13519b"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:7a00dc8490be0fa79dede490725373f328ec267913d659d7f09c3c3896fbe10f",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/inadyn"
+      ],
+      "target_component": "inadyn",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "string_info=%s"
+      ],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post time_check %d?op=%d,string_info=%s",
+      "evidence_ids": [
+        "evidence:878a8e62a2f5a78aa6dc9496d966e1e3ee9dd404060541b7c6031e3c32081b02"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:7fdd583086bdf4028bb198e5c9b48f1a243a3a546e7ee6c720a968d803ca931d",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/business_proc",
+      "target_artifact_paths": [
+        "bin/time_check"
+      ],
+      "target_component": "time_check",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 pptppppd",
+      "evidence_ids": [
+        "evidence:9e6560345f9bb03dcda28f953e897ccde73e31bb4283073df8a36a1472eb5c4c"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:80a072e0fcfb1038339413d2d8f6a9a5f3ee1958f5096e7f88ac022db0470303",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/pptppppd"
+      ],
+      "target_component": "pptppppd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 netctrl",
+      "evidence_ids": [
+        "evidence:932be52e2e5a432d7850d614db856cf5c828131fc0a6cd80d4a4d21eeac554bc"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:8343e8c76960f7030b513d4a132a9e0706352af07866b57f97d3295e9e4e5e2a",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd-guest",
+      "evidence_ids": [
+        "evidence:7f4193efcff19af245e5b1448566f770563e4b527c601525a388dd9c6b65551a"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:834c5ecbb851ced755644ca658da992021ac9acfe5a2429f54a362c5dd4d32f0",
+      "relationship_kind": "process_control",
+      "source_component": "bin/multiWAN",
+      "target_artifact_paths": [
+        "bin/dnrd-guest"
+      ],
+      "target_component": "dnrd-guest",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 httpd",
+      "evidence_ids": [
+        "evidence:c204987f3ef67abe836a578feedd0ef4d475dfd21ac0e95194dcf5ebb0653da5"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:868258f4ba59fe16b6fc15dcf656f9bbd2ff98cb19536a7ced8cb3312e592f0c",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/httpd"
+      ],
+      "target_component": "httpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 88ip",
+      "evidence_ids": [
+        "evidence:d1cec574c0c5b86991a2166fa612c3a1eeafd1ec68ad5fc411ea0ffb7bfe05ba"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:8879d898ef4c009b31aed855896a2e772a1d4b1ce36d1d3dd233d7d2dd8c8967",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/88ip"
+      ],
+      "target_component": "88ip",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 httpd",
+      "evidence_ids": [
+        "evidence:613f34f72d7b070f1b056693f1dc488ce7a603726ccf2436797a49b46580a200"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:892ab06b11914e385f1f27de974be6ea3bbfac93bad8411389f65db53409546e",
+      "relationship_kind": "process_control",
+      "source_component": "bin/business_proc",
+      "target_artifact_paths": [
+        "bin/httpd"
+      ],
+      "target_component": "httpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 eapd",
+      "evidence_ids": [
+        "evidence:f4ff147dad49b85aaa83f97f70c69792a700fcb12753ef34d0148ebb30c29c00"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:8b6511fb2a442977a6be1b2a649b8f9cf73d639cae595840bd24f3b9be535a49",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "usr/bin/eapd"
+      ],
+      "target_component": "eapd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 auto_discover",
+      "evidence_ids": [
+        "evidence:fc426bae99300ad731b29c9446ae5bd4662135fcdbbce5b739496edccb27de37"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:8b7ecabd38dc6b884f168612e7609068db601d8f34c075ca14f87a01280f6618",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/auto_discover"
+      ],
+      "target_component": "auto_discover",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "wl_rate=5"
+      ],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl %d?op=%d,wl_rate=5",
+      "evidence_ids": [
+        "evidence:90085387611b6dc7cd1d0eaf7c5e738659bcac066fa6ee479e89c57088696982"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:8ce5a2eb611d44753bef39c0fba95fcbf6fd372af3d4c692a07fecac7352e136",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/time_check",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhcpcd_wan1",
+      "evidence_ids": [
+        "evidence:e0488ce8814e158727cfcc46560893eefaf43103a8220ee118cb4d3eec28365a"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:8e857438e5cd324305d43aa72e42cd41da3be12f2441af337921e8e147a2e2d8",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/dhcpcd_wan1"
+      ],
+      "target_component": "dhcpcd_wan1",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhcps-guest",
+      "evidence_ids": [
+        "evidence:2ecb2e5dfef0463bdb864ee8883133a495522dc3f93430e2b60e5fbc8c4228e7"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:91d562c6bc7b044ae1743959e8a01eca4bf6f215d9e1ee511f54c4a48c535fb5",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/dhcps-guest"
+      ],
+      "target_component": "dhcps-guest",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 pptp_callmgr",
+      "evidence_ids": [
+        "evidence:e0e466e2a455ebfec045f0b348928f3b8e390e95c5d1c14be7a51e68b7de3ee5"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:98fb1d7ae52cb538209742fc220a30545ea1610ecd1e559ca2fb50a6eae04bc2",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/pptp_callmgr"
+      ],
+      "target_component": "pptp_callmgr",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 nmbd",
+      "evidence_ids": [
+        "evidence:1d6211f239be87ae282d08bd1461cd38b75f475d3df4f65d4dab62ed5ee5ba58"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:9b6f419db02eb7d6242751addf43114ed940aa46580d440cf12f5d73e77371c9",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [],
+      "target_component": "nmbd",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post time_check %d?op=%d",
+      "evidence_ids": [
+        "evidence:fd296b985adc062e9451d7f040ae067b0da9cde01b69a2bc1e5249a11a3eb121"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:9f661cbde96d35d25f0439550fdd07f0e32e2cb24d748da8baa0e87c0d868dc5",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/time_check"
+      ],
+      "target_component": "time_check",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 logserver",
+      "evidence_ids": [
+        "evidence:e8b8dc8b9b51cb776a8528c2f5ff3dd1c1ddd9070748dde1cf543a57545ddbf3"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:a0fc1f2af3d284df82f467f2483702d6d4fe7e30a231f49fd571654ff54bef3a",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/logserver"
+      ],
+      "target_component": "logserver",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 pptpd",
+      "evidence_ids": [
+        "evidence:d2efb8ca049425e1906030e5c427f0f6f4101d5e632536c31ea42580cc95b20c"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:a2ac69a32ce343bc51dc8be00609726c7797d440f9729f500c3ec17b349ce6cd",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/pptpd"
+      ],
+      "target_component": "pptpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-3"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -3 pptppppd",
+      "evidence_ids": [
+        "evidence:a06776306dca3a3a029e748b356d7cdcb539ba3cc2c8aa2dabc099fd8f0d9fb1"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:a2fcc67e275f4b8e2963693d54cb944001c538079ca66b6807d76abf7b630d70",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/pptppppd"
+      ],
+      "target_component": "pptppppd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 pppd_wan1",
+      "evidence_ids": [
+        "evidence:9737f6c648f184de93b85bbadc3e62c8ba6b1ab52a87a6438d92390996d7f78d"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:a329d7b216579d40790f5a18094ae9ff79b358513abbd83b36c9abac6e05ccc5",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/pppd_wan1"
+      ],
+      "target_component": "pppd_wan1",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:aa267cf1590b6f9d6a7dc632a9c65d1422f7db639f7b1ad32a8fdb4dc42d211f"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:a3614f2684a7c370e9a7b440d9e3f3ac7f76b629274cd13371ee0816207ad9c8",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "wl_rate=24"
+      ],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl %d?op=%d,wl_rate=24",
+      "evidence_ids": [
+        "evidence:3290c21428928aa977123fccd553abc797b291e4399a1ef8f238c4c11e7572b2"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:a38a8724d0f77773794425449ddda6c4260b49016125f5baa521b7064716c71d",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/time_check",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:09f1346828606e589cee46cab972e7f8a33d79fe8e2a14c8f01a0043e7e9fff9"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:a63fd96d5e7f694f8df5594beec08eed17d0594c54fbf899e630c580e91312ef",
+      "relationship_kind": "process_control",
+      "source_component": "bin/dhcpcd_wan2",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 stupid-ftpd",
+      "evidence_ids": [
+        "evidence:9907ec52f681e129f014033cd0181effb5a4e690beb6b6d96a1bcf871a64ac88"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:a82ab8aa310547717061998234bfda6f829887fcfe071bebdddfb1cd0ef6f8e1",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [],
+      "target_component": "stupid-ftpd",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 time_check",
+      "evidence_ids": [
+        "evidence:fc3a01bac8f54f59b916ce317f6f2fddecbeafa3e1e2f4b02b1dd1d9e573d3c6"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:aac157c0775231998bc07f6fd3b1d74536504018b776b232b573a96e0db80d4e",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/time_check"
+      ],
+      "target_component": "time_check",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 wan_surf",
+      "evidence_ids": [
+        "evidence:06e014311296427b365817f01e7de76bec4739c12b193adbd44699b1d23831c3"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:ab91e4c4539da945c6e7e9e97e1af4e2508e7b5a81807a1378c7ced7ff4f20a4",
+      "relationship_kind": "process_control",
+      "source_component": "bin/multiWAN",
+      "target_artifact_paths": [
+        "bin/wan_surf"
+      ],
+      "target_component": "wan_surf",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 pptp_callmgr",
+      "evidence_ids": [
+        "evidence:199fa2b5baa454ee794f8e0fecf8391fc6bca357dc7952ca434e36495f709417"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:ac358af2931b8813198874ccfb6d363aee0f219d19303d4e62c9675f48c10cd3",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/pptp_callmgr"
+      ],
+      "target_component": "pptp_callmgr",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhcps",
+      "evidence_ids": [
+        "evidence:ade9f9bacdf01c36c7525380e560c4a923d8157f3e3b5ffce90741e8069bc78f"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:acd5d2b8b075bdaae7d019f91223c20d0f2dbc458b8470654c3605ace2fe1552",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/dhcps"
+      ],
+      "target_component": "dhcps",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 miniupnpd",
+      "evidence_ids": [
+        "evidence:211416d4585541150aa98d2b12214cf3defae60f21e2a0db7020ac639b2cc1b3"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:aed82c5b128556e9e974aa3dd8942c94fedb154c52fd2778a00a5784e3d767f2",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/miniupnpd"
+      ],
+      "target_component": "miniupnpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 gnway",
+      "evidence_ids": [
+        "evidence:992f977c265d24c586ed9290a0c95f1661e48b7625b0fdf09418622bb5ade8d3"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:b07ceea0ba58ccb9d31dbb50480ffb80b65b22ed70fe1fcec18f4a1b3b76e99a",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [],
+      "target_component": "gnway",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhttpd",
+      "evidence_ids": [
+        "evidence:1c5b54701a45f4ee38510bdb0ac846212863a6680b373a54ca04725badd64e1e"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:b352ee7ba803c64d26c0c25166ec84c563dec7e75c34d555e7bb74c76a46f220",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/dhttpd"
+      ],
+      "target_component": "dhttpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "string_info=%s"
+      ],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl %d?op=%d,string_info=%s",
+      "evidence_ids": [
+        "evidence:869db64ac1f88048f7a6520a8cfee0528d91d5eb9c642569da81c89d316bd6ee"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:b415d276cc8fe7bc3a7ddf6bd334d6a9913567dc7d4413c4321188c2aff504ca",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/time_check",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "post",
+      "arguments": [],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post time_check %d?op=%d",
+      "evidence_ids": [
+        "evidence:168a99f77bfc1527203c884294f5c4129192678b83106a3f594b53813ef50e43"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "%d",
+      "relationship_id": "native-relationship:b51f3ada6c8ec0f9ba3984571c9eb12612437607adce9905676d2837d18b1535",
+      "relationship_kind": "ipc_command",
+      "source_component": "bin/business_proc",
+      "target_artifact_paths": [
+        "bin/time_check"
+      ],
+      "target_component": "time_check",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "%d"
+    },
+    {
+      "action": "post",
+      "arguments": [
+        "string_info=%s"
+      ],
+      "binding_status": "embedded_command_template",
+      "command": "cfm post netctrl 51?op=3,string_info=%s",
+      "evidence_ids": [
+        "evidence:5b64271497f9f5a1e4418f5bf8a5bc94245e9700902ed62037d85020336f12d5"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": "3",
+      "relationship_id": "native-relationship:bbad33bcb6e262fc8a0b9ecc69225e782e2ec5399bbaebc6fd7acbe723942686",
+      "relationship_kind": "ipc_command",
+      "source_component": "usr/bin/app_data_center",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": "51"
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 stupid-ftpd",
+      "evidence_ids": [
+        "evidence:7c230c81627c569dc255bd5f496733e2de65062a60156239cd4b28b7d3a29546"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:be0780efa5489fab9104300f58a20e296e69f890ec44c824a62e8a656ac61cb2",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [],
+      "target_component": "stupid-ftpd",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 miniupnpd",
+      "evidence_ids": [
+        "evidence:d2471a3fca534e17722939637d6642ac0cc6b9cfd8c0987e6c93d09c164998fa"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:beccfaf4516bbe78f9adcfd1eb212b64095f6181a20b0abdd8ef9b7fa1005952",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/miniupnpd"
+      ],
+      "target_component": "miniupnpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 cfmd",
+      "evidence_ids": [
+        "evidence:393b00f0593726d12665ea55fdb9c3206ce565b4d40c52d394566b8aa46ba128"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:c458bf3a68ac0fd0e952f1f060c15890682ea054bd4d7518d740ee1c77d0bd17",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/cfmd"
+      ],
+      "target_component": "cfmd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 acsd",
+      "evidence_ids": [
+        "evidence:a539171ee22c27fe8fb3c7fec1c8dfa5813580cddf888f4756061fbb671ff492"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:c7040071472830ff166bbdd1247602aaa9a5f548beee3e871c8b84e3e51eb511",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "usr/sbin/acsd"
+      ],
+      "target_component": "acsd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 cfmd",
+      "evidence_ids": [
+        "evidence:f46d0ab8ac085b4b70991ff0d0edb878661364c7960ed1051f48e9f160b5f312"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:c82ad21253bd6a860848f50a62cbf53af56c2674b2ac24ef5b1538e2a2018505",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/cfmd"
+      ],
+      "target_component": "cfmd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhttpd",
+      "evidence_ids": [
+        "evidence:8c4805d739f939377ac086b6e380c187273e3c29dbc1c196e26c9d469813b898"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:c883d8cfef8eaee5c269385fe9b4842c3beed7701df2355f2f8ecb1c42cf3fb2",
+      "relationship_kind": "process_control",
+      "source_component": "bin/dhttpd",
+      "target_artifact_paths": [
+        "bin/dhttpd"
+      ],
+      "target_component": "dhttpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 udhcpc",
+      "evidence_ids": [
+        "evidence:6600919ca81640811e0e5a3bf70db5670f1cb2459c6cceb6fdf70cf5aae8a3a2"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:c8a518165b7b686ea0a1c1c76cb5413c24b524c102279e37a6165675dfb819a0",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "usr/sbin/udhcpc"
+      ],
+      "target_component": "udhcpc",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 3322ip",
+      "evidence_ids": [
+        "evidence:85e113f3a6365735dafce7a113382236c2071fbdacc184e64824f121018a3fb1"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:c8e109ffbaf8cb2fd79b0e54534c3374e497a8b5906d531c0dd6cfbd3fcb0b8d",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/3322ip"
+      ],
+      "target_component": "3322ip",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd",
+      "evidence_ids": [
+        "evidence:7b036b28123af26a39bf11b794c61423f655400111aaf8c40617ea5d612b2f4e"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:ca17846d5b798809d95e957f00209194995907fa636dca2bc5ec9badae305cba",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/dnrd"
+      ],
+      "target_component": "dnrd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 netctrl",
+      "evidence_ids": [
+        "evidence:64e6460bc80dac3fd7d56446b9beb2d5e413d9317c8b607c2cad56a0e9d72994"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:cd1ef9f7c04685312bf8f3a391949028e89ce17705e058bdd5c32523d10ad9e1",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 logserver",
+      "evidence_ids": [
+        "evidence:52e89a3a7c4b0ba075b2e08f2e82ba91f232ea81f54de56cdf71743b90eb998e"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:d04140755d880d439fcea888270d8ed2b12045a7265234101933bfcaee1881d0",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/logserver"
+      ],
+      "target_component": "logserver",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 multiWAN",
+      "evidence_ids": [
+        "evidence:e306309d88771a394bc37a426fd14d7a7995fdaeac676803849b26f9306b1b68"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:d8a774e76924ba649a1968061e051b04b7f36e38380e86209c6dfd31530a971f",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/multiWAN"
+      ],
+      "target_component": "multiWAN",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dhttpd",
+      "evidence_ids": [
+        "evidence:8c95e002a955979de888f885050412643c15f8db9f77166c8502edae4d0344ae"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:dd8e6d83238c6c6760984556354d23e89d9a4d56e4c3f1e1952d96efe1cab161",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libcommon.so",
+      "target_artifact_paths": [
+        "bin/dhttpd"
+      ],
+      "target_component": "dhttpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 multiWAN",
+      "evidence_ids": [
+        "evidence:3e235a6538f84b18e8bafac3f09e9d25c86e1d87f35ebafb166a52a5e0af38a5"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:df5024f1480a5d7aa975311c9f1e70ed9053eb673af9f57f4d536dfd3983c7b2",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/multiWAN"
+      ],
+      "target_component": "multiWAN",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 ucloud_v2",
+      "evidence_ids": [
+        "evidence:1509bda8e3e58b5e7be7b5fa310f4b7a9513fbe038f267fa9b7ef4c95e0b62fd"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:e1359a1472300ee345422ed1b8e2e7187cea65ebce5bb4027cfdc487edebb057",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/ucloud_v2"
+      ],
+      "target_component": "ucloud_v2",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-15"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -15 pptpd",
+      "evidence_ids": [
+        "evidence:3ff32dad00cfa50be710d7555ee653ecf57cf52160846ce047d5c4ac4800d448"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:e15730055c6c7ad50be53ed758ccc5b0bab4916fd906caaec5b0f1fb898a4de0",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/pptpd"
+      ],
+      "target_component": "pptpd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd",
+      "evidence_ids": [
+        "evidence:c8be85e41b369a2989d3df4c888c99558d7360e12c48160be9cdc69fa15ca71b"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:e28a716291da11568b1d7c359901ea1c3fe030d324625bd44cbfdfccf0175158",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/dnrd"
+      ],
+      "target_component": "dnrd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 netctrl",
+      "evidence_ids": [
+        "evidence:8c4de4f0e807fc1d7e8fc1f178048f6faf5eaeb3dce2c4b15fa7ac55baf01ab1"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:e35fb563f391183cb2efb2311afaf0f60425f0db02f0717de4b6632405641ae4",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/netctrl"
+      ],
+      "target_component": "netctrl",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd",
+      "evidence_ids": [
+        "evidence:3908ebdf699fdedf82631051c8cf444605b06112b632f07f4af532529208e3f0"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:ea5394a779d7f38d322733417b853ef8511579a74f5e900569c596a0d116f0f4",
+      "relationship_kind": "process_control",
+      "source_component": "bin/netctrl",
+      "target_artifact_paths": [
+        "bin/dnrd"
+      ],
+      "target_component": "dnrd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 auto_discover",
+      "evidence_ids": [
+        "evidence:c08ab15b6d5fea30d0c693c48a9be00f7e0bfab997ea8bce45a503c498841010"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:ed8c669fd74a1485207410f74b10f4d5453d0ac7a34221ea3582a6e0a5b88ef2",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "bin/auto_discover"
+      ],
+      "target_component": "auto_discover",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 time_check",
+      "evidence_ids": [
+        "evidence:b7fb088d2d5aa701bedd9571207ea814f38263b7493b201d2abf00158a1a1804"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:eead3cdbbff0e9fadb72c99f9fefaf85c958f19d4360a029685285d254c6dd6c",
+      "relationship_kind": "process_control",
+      "source_component": "bin/upgrade",
+      "target_artifact_paths": [
+        "bin/time_check"
+      ],
+      "target_component": "time_check",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 pppd_wan2",
+      "evidence_ids": [
+        "evidence:2b74aa5ea472c18fb9bde8b7c7de1fcb560e9edf0d95e38aa9fabcbb86f172aa"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:eee1d958e1cb675db0df41b287320c843b0ef1e8301512029dae3964baa3b4dd",
+      "relationship_kind": "process_control",
+      "source_component": "bin/httpd",
+      "target_artifact_paths": [
+        "bin/pppd_wan2"
+      ],
+      "target_component": "pppd_wan2",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 dnrd",
+      "evidence_ids": [
+        "evidence:710828f1663cbc9214746b6f11f633268e9f368027c30fd0d74dd50fda99dec6"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:f40592b593c3c4b44b0178d98fffc717e42764afdafede97143be4953de998a2",
+      "relationship_kind": "process_control",
+      "source_component": "bin/multiWAN",
+      "target_artifact_paths": [
+        "bin/dnrd"
+      ],
+      "target_component": "dnrd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 pppoecd",
+      "evidence_ids": [
+        "evidence:af1354fa9c2bf09dc78824881efa3d46dfb951e059f93d5937dd11d04add01de"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:fb7ed213611bf467f6871113d029218837a9a1ffd27263980b235e9243faa2af",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [],
+      "target_component": "pppoecd",
+      "target_resolution_status": "unresolved_in_analyzed_sources",
+      "topic": null
+    },
+    {
+      "action": "signal",
+      "arguments": [
+        "-9"
+      ],
+      "binding_status": "embedded_command",
+      "command": "killall -9 smbd",
+      "evidence_ids": [
+        "evidence:782d6953d88e66ac770511002e6b99d837e41cf01434d78c85f216b8089328f7"
+      ],
+      "open_obligation": "embedded commands require a code callsite or runtime observation",
+      "operation": null,
+      "relationship_id": "native-relationship:ff164c80e173d65bca5ba9b180fd22fa90d704243096f375981e65a8d539aa55",
+      "relationship_kind": "process_control",
+      "source_component": "lib/libtpi.so",
+      "target_artifact_paths": [
+        "usr/sbin/smbd"
+      ],
+      "target_component": "smbd",
+      "target_resolution_status": "resolved_same_firmware",
+      "topic": null
+    }
+  ],
+  "sample_role": "primary-vendor-tenda-ac9-native-relationship-iteration",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-11/v1alpha1",
+  "stages": [
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "inventory",
+      "output_count": 1038
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "source_plan",
+      "output_count": 529
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend",
+      "output_count": 119
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend_asset_graph",
+      "output_count": 31
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 451,
+      "name": "parameter_clue",
+      "output_count": 135
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 111,
+      "name": "response_fixture",
+      "output_count": 553
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native_relationship",
+      "output_count": 101
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "web_configuration",
+      "output_count": 5
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "script_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native",
+      "output_count": 3187
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no selected sources"
+      ],
+      "input_count": 0,
+      "name": "native_ubus_registration",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "arm_pic_callsite",
+      "output_count": 64
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "arm_pic_registrar",
+      "output_count": 187
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "set_difference",
+      "output_count": 112
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no ubus operations"
+      ],
+      "input_count": 0,
+      "name": "ubus_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "no_eligible_analyzer"
+      ],
+      "input_count": 187,
+      "name": "scheduler",
+      "output_count": 59
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "open obligations remain but no unattempted eligible analyzer is available"
+      ],
+      "input_count": 529,
+      "name": "catalog",
+      "output_count": 4348
+    }
+  ],
+  "vulnerability_scope_summary": {
+    "category_counts": {
+      "compared_interface": 13,
+      "no_structured_communication": 9,
+      "not_analyzed": 46,
+      "parameter_only": 3
+    },
+    "exact_artifact_expectation_count": 2,
+    "exact_artifact_observed_count": 2,
+    "total_vulnerability_count": 71
+  }
+}

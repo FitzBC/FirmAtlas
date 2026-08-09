@@ -139,7 +139,7 @@ PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
   --output mapping-analysis-run.json
 ```
 
-该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。当前默认 `auto-v7` 在 `auto-v6` 基线上加入固件内 JSON response-fixture 契约恢复，把 endpoint clue 和嵌套 response JSON pointer 发布为明确的 `fixture_declared` Catalog candidate/parameter，并要求 route binding 或 runtime observation 才能晋级；`auto-v6` 及更早 Profile 继续冻结重放。首要样本最新结果见 [R2-10 原厂 Tenda AC9](./docs/firmware-mapping/progress/2026-08-09-r2-10-ac9-response-fixture-contracts.md)，同硬件 OpenWrt 对照见 [R2-02 OpenWrt AC9](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。参数线索索引对已验证的前端请求参数执行有界同固件精确 token 检索，显式发布阳性、阴性与覆盖受限结果，但不会把字符串共现冒充数据流。
+该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。当前默认 `auto-v8` 在 `auto-v7` 基线上从 ELF 内完整命令恢复进程信号与 CFM IPC 组件边，区分常量命令和格式模板，保存 topic、operation、arguments，并将目标组件名解析回同固件制品路径；这些边只标记为 `embedded_command` candidate，仍要求代码 callsite 或运行时观察才能晋级。`auto-v7` 及更早 Profile 继续冻结重放。首要样本最新结果见 [R2-11 原厂 Tenda AC9](./docs/firmware-mapping/progress/2026-08-09-r2-11-ac9-native-relationships.md)，同硬件 OpenWrt 对照见 [R2-02 OpenWrt AC9](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。参数线索索引对已验证的前端请求参数执行有界同固件精确 token 检索，显式发布阳性、阴性与覆盖受限结果，但不会把字符串共现冒充数据流。
 
 历史漏洞接口只能在声明版本与当前制品范围明确后用于测绘差异，不能直接当作固件真值：
 

@@ -35,6 +35,10 @@ from .response_fixture import (
     ResponseFixturePolicy,
     discover_response_fixture,
 )
+from .native_relationship import (
+    NativeRelationshipPolicy,
+    discover_native_relationships,
+)
 from .native import discover_native_hints
 from .native_deep import (
     ArmPicCallsiteProfile,
@@ -78,7 +82,8 @@ _AUTO_V1_ANALYZERS = _BASE_ANALYZERS + (
 _AUTO_V2_ANALYZERS = _AUTO_V1_ANALYZERS + ("frontend_asset_graph",)
 _AUTO_V5_ANALYZERS = _AUTO_V2_ANALYZERS + ("arm_pic_registrar", "set_difference")
 _AUTO_V6_ANALYZERS = _AUTO_V5_ANALYZERS + ("parameter_clue",)
-_AUTO_ANALYZERS = _AUTO_V6_ANALYZERS + ("response_fixture",)
+_AUTO_V7_ANALYZERS = _AUTO_V6_ANALYZERS + ("response_fixture",)
+_AUTO_ANALYZERS = _AUTO_V7_ANALYZERS + ("native_relationship",)
 
 
 @dataclass(frozen=True)
@@ -98,7 +103,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v7", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v8", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v7(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v7", _AUTO_V7_ANALYZERS)
 
     @classmethod
     def auto_v6(cls) -> "MappingAnalysisProfile":
@@ -138,7 +147,11 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v7", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v8", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v7(cls) -> "MappingAnalyzerRegistry":
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v7", _AUTO_V7_ANALYZERS)
 
     @classmethod
     def builtin_v6(cls) -> "MappingAnalyzerRegistry":
@@ -187,6 +200,7 @@ class MappingAnalyzerRegistry:
             "native": discover_native_hints,
             "native_ubus_registration": discover_native_ubus_registrations,
             "response_fixture": discover_response_fixture,
+            "native_relationship": discover_native_relationships,
         }
         if analyzer_name not in self.analyzer_names or analyzer_name not in analyzers:
             raise ValueError("source analyzer is unavailable: {}".format(analyzer_name))
@@ -194,6 +208,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V7 = MappingAnalyzerRegistry.builtin_v7()
 BUILTIN_ANALYZER_REGISTRY_V6 = MappingAnalyzerRegistry.builtin_v6()
 BUILTIN_ANALYZER_REGISTRY_V5 = MappingAnalyzerRegistry.builtin_v5()
 BUILTIN_ANALYZER_REGISTRY_V4 = MappingAnalyzerRegistry.builtin_v4()
@@ -210,6 +225,7 @@ class MappingAnalysisRequest:
     profile: MappingAnalysisProfile = MappingAnalysisProfile.auto()
     parameter_clue_policy: ParameterCluePolicy = ParameterCluePolicy()
     response_fixture_policy: ResponseFixturePolicy = ResponseFixturePolicy()
+    native_relationship_policy: NativeRelationshipPolicy = NativeRelationshipPolicy()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "root", Path(self.root))
@@ -275,6 +291,8 @@ def _classify(
     enabled = set(profile.enabled_analyzers)
     if content.startswith(b"\x7fELF"):
         kinds = ["native"] if "native" in enabled else []
+        if "native_relationship" in enabled:
+            kinds.append("native_relationship")
         if (
             "native_ubus_registration" in enabled
             and path.startswith("usr/lib/rpcd/")
@@ -426,12 +444,14 @@ def analyze_extracted_root(
             request.profile.profile_id in {
                 "firmatlas.mapping.profile/auto-v6",
                 "firmatlas.mapping.profile/auto-v7",
+                "firmatlas.mapping.profile/auto-v8",
             }
         ),
         enable_tenda_get_set_data=(
             request.profile.profile_id in {
                 "firmatlas.mapping.profile/auto-v6",
                 "firmatlas.mapping.profile/auto-v7",
+                "firmatlas.mapping.profile/auto-v8",
             }
         ),
     )
@@ -491,6 +511,13 @@ def analyze_extracted_root(
         )
         for source, content, kinds in selected
         if "response_fixture" in kinds
+    )
+    native_relationships = tuple(
+        discover_native_relationships(
+            source, content, request.native_relationship_policy
+        )
+        for source, content, kinds in selected
+        if "native_relationship" in kinds
     )
     web = tuple(
         registry.analyze_source("web_configuration", source, content)
@@ -624,6 +651,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v5",
                     "firmatlas.mapping.profile/auto-v6",
                     "firmatlas.mapping.profile/auto-v7",
+                    "firmatlas.mapping.profile/auto-v8",
                 }
                 else ()
             )
@@ -637,6 +665,7 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v5",
                         "firmatlas.mapping.profile/auto-v6",
                         "firmatlas.mapping.profile/auto-v7",
+                        "firmatlas.mapping.profile/auto-v8",
                     }
                 ),
             )
@@ -664,6 +693,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.response_fixture,
             response_fixtures,
             "auto:response-fixture",
+        ))
+    if "native_relationship" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_relationship,
+            native_relationships,
+            "auto:native-relationship",
         ))
     if "arm_pic_callsite" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -738,6 +773,12 @@ def analyze_extracted_root(
             "response_fixture",
             response_fixtures,
             sum(len(item.fields) for item in response_fixtures),
+        ))
+    if "native_relationship" in request.profile.enabled_analyzers:
+        stages.insert(6, _stage(
+            "native_relationship",
+            native_relationships,
+            sum(len(item.relationships) for item in native_relationships),
         ))
     if "native_ubus_registration" in request.profile.enabled_analyzers:
         stages.append(_stage(

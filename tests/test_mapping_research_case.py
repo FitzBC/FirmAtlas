@@ -247,7 +247,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][0]
 
         self.assertTrue(corpus["validation"]["paper_ready"])
-        self.assertEqual(10, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(11, corpus["validation"]["evidence_line_count"])
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
             [case["claims"][index]["status"] for index in (2, 3, 4)],
@@ -269,7 +269,7 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual("tenda-ac9-dlna-fixture-daemon-split", case["case_key"])
         self.assertEqual(3, corpus["validation"]["case_count"])
         self.assertEqual(
-            ["supported", "supported", "supported", "unresolved"],
+            ["supported", "supported", "supported", "supported", "unresolved"],
             [claim["status"] for claim in case["claims"]],
         )
         self.assertEqual(
@@ -282,6 +282,22 @@ class ResearchCaseTests(unittest.TestCase):
         ]
         self.assertEqual(1, len(frontend))
         self.assertEqual("constructs_request", frontend[0]["capability"])
+        relationships = [
+            item for item in case["evidence"]
+            if item["kind"] == "native_relationship"
+        ]
+        self.assertEqual(2, len(relationships))
+        resolution = next(
+            item for item in case["evidence"]
+            if item["evidence_ref"]
+            == "coverage:ac9-native-relationship-target-resolution"
+        )
+        self.assertEqual("coverage_ledger", resolution["kind"])
+        report_path = Path(resolution["source_path"])
+        self.assertEqual(
+            hashlib.sha256(report_path.read_bytes()).hexdigest(),
+            resolution["source_artifact_sha256"],
+        )
 
     def test_real_ac9_case_evidence_replays_from_current_producers(self) -> None:
         root = Path(

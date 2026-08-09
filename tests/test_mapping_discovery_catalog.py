@@ -30,10 +30,58 @@ from firmatlas.mapping import (
     ParameterClueArtifactRole,
     trace_frontend_parameter_clues,
     discover_response_fixture,
+    discover_native_relationships,
 )
 
 
 class DiscoveryCatalogContractTests(unittest.TestCase):
+    def test_native_relationship_batch_publishes_graph_ready_component_edges(self):
+        content = (
+            b"\x7fELF\x01\x01" + b"\x00" * 58
+            + b"cfm post netctrl 51?op=6\x00"
+        )
+        result = discover_native_relationships(
+            self.source("bin/time_check", content), content
+        )
+        target_content = b"\x7fELF\x01\x01" + b"\x00" * 58
+        target = discover_native_relationships(
+            self.source("bin/netctrl", target_content), target_content
+        )
+
+        catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
+            firmware_artifact_sha256="1" * 64,
+            source_inventory_sha256="2" * 64,
+            batches=(
+                DiscoveryProducerBatch.native_relationship(
+                    (result, target), "native:embedded-commands"
+                ),
+            ),
+        ))
+
+        candidate = catalog.candidates[0]
+        self.assertEqual("native_relationship", candidate.candidate_kind.value)
+        self.assertEqual(
+            "bin/time_check|post|netctrl|topic=51|op=6",
+            candidate.canonical_identity,
+        )
+        self.assertEqual("candidate", candidate.claim_status.value)
+        self.assertEqual("netctrl", dict(candidate.attributes)["target_component"])
+        self.assertEqual("51", dict(candidate.attributes)["topic"])
+        self.assertEqual("6", dict(candidate.attributes)["operation"])
+        self.assertEqual(
+            '["bin/netctrl"]',
+            dict(candidate.attributes)["target_artifact_paths"],
+        )
+        self.assertEqual(
+            "resolved_same_firmware",
+            dict(candidate.attributes)["target_resolution_status"],
+        )
+        self.assertEqual(
+            "cfm post netctrl 51?op=6",
+            dict(candidate.attributes)["command"],
+        )
+        self.assertEqual(result.relationships[0].evidence_ids, candidate.evidence_ids)
+
     def test_response_fixture_batch_publishes_candidate_response_parameters(self):
         content = b'{"dlnaEn":"1","deviceList":[{"fileName":"usb"}]}'
         source = self.source("webroot_ro/goform/GetDlnaCfg.txt", content)

@@ -228,6 +228,8 @@ flowchart LR
 
 论文可用它展示负向完整性结论、response-contract/execution-ownership 分层，以及更深分析增加架构信息却不关闭核心义务的案例。限制是当前静态缺失不能区分死 UI、版本错配、哈希分发、生成式注册或缺失的条件组件；也没有运行时启动、请求、认证或漏洞结论。机器记录 `tenda-ac9-dlna-fixture-daemon-split` 已进入 corpus，义务 `obligation:dlna-handler-owner` 保持 open。
 
+R2-11 又增加了一层不能被 hindsight 改写的中间状态。通用 Native embedded-command producer 从 `bin/httpd` 恢复 `killall -9 minidlna`，从 `bin/time_check` 恢复 `cfm post netctrl 51?op=6`；后者的 `netctrl` 可解析到 `bin/netctrl`，但 Inventory 中不存在名为 `minidlna` 的制品。这支持两条候选组件边及“目标组件缺失”事实，却仍不证明 topic 51/op 6 与附近 minidlna 状态字符串处于同一调用路径，也不证明任何命令执行。因此案例增加 `stage:dlna-native-relationships` 和 supported 架构 claim，但 handler obligation 继续 open。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：

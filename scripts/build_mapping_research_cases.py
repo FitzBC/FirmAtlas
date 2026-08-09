@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -26,6 +27,9 @@ HTTPD_SHA256 = "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b
 X5000R_FIRMWARE_SHA256 = "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9"
 AC9_R2_10_REPORT = Path(
     "docs/firmware-mapping/samples/r2-10-vendor-tenda-ac9-response-fixtures.json"
+)
+AC9_R2_11_REPORT = Path(
+    "docs/firmware-mapping/samples/r2-11-vendor-tenda-ac9-native-relationships.json"
 )
 
 
@@ -1001,27 +1005,35 @@ def build_ac9_dlna_fixture_split_case():
     """Preserve the unresolved split between UI contract and daemon architecture."""
 
     report = json.loads(AC9_R2_10_REPORT.read_text(encoding="utf-8"))
+    relationship_report = json.loads(
+        AC9_R2_11_REPORT.read_text(encoding="utf-8")
+    )
     atoms = (
         *report["dlna_response_fixture_evidence"],
         *report["dlna_architecture_evidence"],
+        *relationship_report["dlna_relationship_evidence"],
     )
     selected = []
     for atom in atoms:
         source_path = atom["source_span"]["artifact_path"]
         capability = atom["capability"]
         if (
-            source_path == "webroot_ro/js/dlna.js"
-            and capability == "constructs_request"
-            and "expandDlnaFile" in atom["object_value"]
-        ) or source_path == "webroot_ro/goform/expandDlnaFile.txt" \
-                or capability in {
+            (
+                source_path == "webroot_ro/js/dlna.js"
+                and capability == "constructs_request"
+                and "expandDlnaFile" in atom["object_value"]
+            )
+            or source_path == "webroot_ro/goform/expandDlnaFile.txt"
+            or capability in {
                     "prepares_media_mount",
                     "aliases_media_download",
                     "reads_dlna_state",
                     "monitors_media_daemon",
-                }:
+            }
+            or atom["producer"] == "native-embedded-command-relationship"
+        ):
             selected.append(atom)
-    evidence = tuple(
+    atom_evidence = tuple(
         CaseEvidenceReference(
             atom["evidence_id"],
             (
@@ -1029,6 +1041,8 @@ def build_ac9_dlna_fixture_split_case():
                 if atom["producer"] == "frontend-request-producer"
                 else CaseEvidenceKind.RESPONSE_FIXTURE
                 if atom["producer"] == "response-fixture-producer"
+                else CaseEvidenceKind.NATIVE_RELATIONSHIP
+                if atom["producer"] == "native-embedded-command-relationship"
                 else CaseEvidenceKind.WEB_CONFIGURATION
                 if atom["source_span"]["artifact_path"].startswith("etc_ro/")
                 else CaseEvidenceKind.NATIVE_HINT
@@ -1041,6 +1055,16 @@ def build_ac9_dlna_fixture_split_case():
         )
         for atom in selected
     )
+    target_resolution_ref = CaseEvidenceReference(
+        "coverage:ac9-native-relationship-target-resolution",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_11_REPORT.as_posix(),
+        hashlib.sha256(AC9_R2_11_REPORT.read_bytes()).hexdigest(),
+        "json:$.dlna_relationships",
+        "resolves_target_component_presence",
+        "native-relationship-report@v1alpha1",
+    )
+    evidence = (*atom_evidence, target_resolution_ref)
     by_capability = {}
     for item in evidence:
         by_capability.setdefault(item.capability, []).append(item.evidence_ref)
@@ -1058,6 +1082,11 @@ def build_ac9_dlna_fixture_split_case():
             "monitors_media_daemon",
         }
     )
+    relationship_refs = tuple(
+        item.evidence_ref for item in evidence
+        if item.kind is CaseEvidenceKind.NATIVE_RELATIONSHIP
+    )
+    target_resolution_refs = (target_resolution_ref.evidence_ref,)
     return build_research_case(ResearchCaseInput(
         case_key="tenda-ac9-dlna-fixture-daemon-split",
         title="Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1067,6 +1096,8 @@ def build_ac9_dlna_fixture_split_case():
             "unresolved_goform_binding",
             "minidlna_supervisor",
             "usb_media_mount",
+            "embedded_process_ipc_relationships",
+            "missing_target_component",
         ),
         research_question=(
             "Do bundled DLNA request code and JSON response fixtures prove that "
@@ -1091,10 +1122,20 @@ def build_ac9_dlna_fixture_split_case():
                 architecture_refs,
             ),
             CaseClaim(
+                "claim:dlna-native-relationships",
+                "Embedded commands establish httpd signaling minidlna and "
+                "time_check posting literal topic 51 operation 6 to netctrl; "
+                "the minidlna target artifact is absent from this rootfs.",
+                (*relationship_refs, *target_resolution_refs),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
                 "No exact Native registration or handler binding currently connects "
                 "the frontend/fixture contract to a goform execution path.",
-                (*frontend_refs, *fixture_refs, *architecture_refs),
+                (
+                    *frontend_refs, *fixture_refs, *architecture_refs,
+                    *relationship_refs, *target_resolution_refs,
+                ),
                 CaseClaimStatus.UNRESOLVED,
             ),
         ),
@@ -1115,6 +1156,12 @@ def build_ac9_dlna_fixture_split_case():
                 "Recover the independent media mount and daemon supervision branch.",
                 ("claim:dlna-daemon-architecture", "claim:dlna-handler-owner"),
             ),
+            CaseStage(
+                "stage:dlna-native-relationships", 4,
+                "Recover embedded process/IPC edges and verify target presence "
+                "without promoting them to executed callsites.",
+                ("claim:dlna-native-relationships", "claim:dlna-handler-owner"),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1128,16 +1175,19 @@ def build_ac9_dlna_fixture_split_case():
             "Treating a response fixture filename as a route table would invent a handler binding.",
             "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
             "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
+            "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
             "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
             "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
+            "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
             "The fixture may be development data and does not establish runtime response values.",
             "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
+            "The exact topic 51 operation 6 command is not yet tied by a code callsite to the nearby minidlna state strings.",
         ),
     ))
 
