@@ -133,6 +133,8 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py
 4. 继续解释剩余 77/11 差集与 branch-aware parameter-to-sink flow；
 5. 在确定性 Profile 不再足够时实现隔离 Ghidra Candidate Worker。
 
+后续 [M1-21](./2026-08-09-m1-21-x5000r-request-protection.md) 已处理第 1 项：认证逻辑位于 vendor-modified `usr/sbin/lighttpd`，但 `/cgi-bin/cstecgi.cgi` 被其静态 suffix/path gate 排除；运行时可达义务仍保持开放。
+
 ## 9. 验证记录
 
 - Python 全量回归：`311 tests`，全部通过；

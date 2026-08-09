@@ -1,0 +1,407 @@
+{
+  "schema_version": "firmatlas.mapping.x5000r-request-protection/v1alpha1",
+  "source": {
+    "path": "usr/sbin/lighttpd",
+    "content_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+    "size": 184220
+  },
+  "protection_analysis": {
+    "schema_version": "firmatlas.mapping.mips-request-protection-result/v1alpha1",
+    "source_path": "usr/sbin/lighttpd",
+    "coverage_status": "completed",
+    "producer": {
+      "name": "native-mips-request-protection",
+      "version": "0.1.0"
+    },
+    "profile": "mips32-lighttpd-custom-session-path-gate/v1",
+    "processed_instructions": 636,
+    "assessments": [
+      {
+        "assessment_id": "mips-request-protection:688114240598449a543213dab07361ba21652611b37f89e39d69573c161afc74",
+        "target_ref": "mips-nested-dispatch:6ef4b240a7fbeced5979138dcece07993fbabe0b1436008fd3b1b9883730f8ac",
+        "request_path": "/cgi-bin/cstecgi.cgi",
+        "protection_status": "excluded_from_path_gate",
+        "guard_patterns": [
+          ".asp",
+          ".html",
+          ".htm",
+          "config.dat",
+          "/login/login.cgi"
+        ],
+        "response_hook_identity": "usr/sbin/lighttpd@0x004079fc",
+        "response_hook_address": 4225532,
+        "auth_hook_identity": "usr/sbin/lighttpd@0x00409300",
+        "auth_hook_address": 4231936,
+        "auth_callsite": 4225836,
+        "enforcement_address": 4225856,
+        "denial_status": 302,
+        "authenticator_identity": "usr/sbin/lighttpd@0x00408978",
+        "authenticator_address": 4229496,
+        "authenticator_callsite": 4232168,
+        "cookie_name": "SESSION_ID",
+        "cookie_callsite": 4229788,
+        "session_lookup_callsite": 4229812,
+        "source_construct": "elf.mips32-lighttpd-custom-session-path-gate/v1:custom-session-path-gate",
+        "evidence_ids": [
+          "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+          "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+          "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+          "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+          "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977"
+        ]
+      },
+      {
+        "assessment_id": "mips-request-protection:b64d9859c878117c69d91f5bd536a51dd6d2146c7ad7eede51e03f8a440a2473",
+        "target_ref": "page:advance-config",
+        "request_path": "/advance/config.html",
+        "protection_status": "guarded_by_path_gate",
+        "guard_patterns": [
+          ".asp",
+          ".html",
+          ".htm",
+          "config.dat",
+          "/login/login.cgi"
+        ],
+        "response_hook_identity": "usr/sbin/lighttpd@0x004079fc",
+        "response_hook_address": 4225532,
+        "auth_hook_identity": "usr/sbin/lighttpd@0x00409300",
+        "auth_hook_address": 4231936,
+        "auth_callsite": 4225836,
+        "enforcement_address": 4225856,
+        "denial_status": 302,
+        "authenticator_identity": "usr/sbin/lighttpd@0x00408978",
+        "authenticator_address": 4229496,
+        "authenticator_callsite": 4232168,
+        "cookie_name": "SESSION_ID",
+        "cookie_callsite": 4229788,
+        "session_lookup_callsite": 4229812,
+        "source_construct": "elf.mips32-lighttpd-custom-session-path-gate/v1:custom-session-path-gate",
+        "evidence_ids": [
+          "evidence:eba3c7af4e92cbad710c0ac46a2f4e71d2235549280c3878db21581680ef9e23",
+          "evidence:e884a4e21a570e5e0f31f5a4c2da512e1b8a54a9f67a5b20da5e1c915630fa13",
+          "evidence:4b1a7b9220262212d3cfcb8a14f92486738307b041d69ee17dd9197843d31bd1",
+          "evidence:a4fdfacbe4837d60365933643a9d00da3504872998885dc77b332778fe4ade84",
+          "evidence:792b9325f0d683829499ab2014532db332cbc1c3cd10e9fd2fe26e1b9674e219"
+        ]
+      }
+    ],
+    "evidence_atoms": [
+      {
+        "evidence_id": "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+        "subject_ref": "mips-request-protection:688114240598449a543213dab07361ba21652611b37f89e39d69573c161afc74",
+        "predicate": "selects_protection_scope",
+        "object_value": ".asp|.html|.htm|config.dat|/login/login.cgi",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31380-31520",
+          "span_kind": "binary",
+          "start_byte": 31380,
+          "end_byte": 31520,
+          "excerpt_sha256": "bfedfef1aa4ddafaa6245b9c0fbc7b44453c4a39470340b4bd1ceeedf7833e0c",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "selects_protection_scope",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+        "subject_ref": "mips-request-protection:688114240598449a543213dab07361ba21652611b37f89e39d69573c161afc74",
+        "predicate": "invokes_authenticator",
+        "object_value": "usr/sbin/lighttpd@0x00408978",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=37860-37872",
+          "span_kind": "binary",
+          "start_byte": 37860,
+          "end_byte": 37872,
+          "excerpt_sha256": "b6b09b33c94b15a91e070f6c31711e90a0a2f472f39513a1d1afc244188a9c72",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "invokes_authenticator",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+        "subject_ref": "mips-request-protection:688114240598449a543213dab07361ba21652611b37f89e39d69573c161afc74",
+        "predicate": "validates_session_cookie",
+        "object_value": "SESSION_ID->form_get_idx_by_sessionid",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=35464-35524",
+          "span_kind": "binary",
+          "start_byte": 35464,
+          "end_byte": 35524,
+          "excerpt_sha256": "a4e36a6be9cdc9b39aab27baa85df40ef73dda84786b78a7086bd7cc0768bb49",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "validates_session_cookie",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+        "subject_ref": "mips-request-protection:688114240598449a543213dab07361ba21652611b37f89e39d69573c161afc74",
+        "predicate": "enforces_auth_redirect",
+        "object_value": "HTTP 302",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31520-31568",
+          "span_kind": "binary",
+          "start_byte": 31520,
+          "end_byte": 31568,
+          "excerpt_sha256": "c1d6ee1efe6b5a1996529e64b2b3c4bea88755be31c1cd7158dce1cad7ba91c7",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "enforces_auth_redirect",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977",
+        "subject_ref": "mips-request-protection:688114240598449a543213dab07361ba21652611b37f89e39d69573c161afc74",
+        "predicate": "classifies_request_scope",
+        "object_value": "/cgi-bin/cstecgi.cgi->excluded_from_path_gate",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31380-31520",
+          "span_kind": "binary",
+          "start_byte": 31380,
+          "end_byte": 31520,
+          "excerpt_sha256": "bfedfef1aa4ddafaa6245b9c0fbc7b44453c4a39470340b4bd1ceeedf7833e0c",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "classifies_request_scope",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:eba3c7af4e92cbad710c0ac46a2f4e71d2235549280c3878db21581680ef9e23",
+        "subject_ref": "mips-request-protection:b64d9859c878117c69d91f5bd536a51dd6d2146c7ad7eede51e03f8a440a2473",
+        "predicate": "selects_protection_scope",
+        "object_value": ".asp|.html|.htm|config.dat|/login/login.cgi",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31380-31520",
+          "span_kind": "binary",
+          "start_byte": 31380,
+          "end_byte": 31520,
+          "excerpt_sha256": "bfedfef1aa4ddafaa6245b9c0fbc7b44453c4a39470340b4bd1ceeedf7833e0c",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "selects_protection_scope",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:e884a4e21a570e5e0f31f5a4c2da512e1b8a54a9f67a5b20da5e1c915630fa13",
+        "subject_ref": "mips-request-protection:b64d9859c878117c69d91f5bd536a51dd6d2146c7ad7eede51e03f8a440a2473",
+        "predicate": "invokes_authenticator",
+        "object_value": "usr/sbin/lighttpd@0x00408978",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=37860-37872",
+          "span_kind": "binary",
+          "start_byte": 37860,
+          "end_byte": 37872,
+          "excerpt_sha256": "b6b09b33c94b15a91e070f6c31711e90a0a2f472f39513a1d1afc244188a9c72",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "invokes_authenticator",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:4b1a7b9220262212d3cfcb8a14f92486738307b041d69ee17dd9197843d31bd1",
+        "subject_ref": "mips-request-protection:b64d9859c878117c69d91f5bd536a51dd6d2146c7ad7eede51e03f8a440a2473",
+        "predicate": "validates_session_cookie",
+        "object_value": "SESSION_ID->form_get_idx_by_sessionid",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=35464-35524",
+          "span_kind": "binary",
+          "start_byte": 35464,
+          "end_byte": 35524,
+          "excerpt_sha256": "a4e36a6be9cdc9b39aab27baa85df40ef73dda84786b78a7086bd7cc0768bb49",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "validates_session_cookie",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:a4fdfacbe4837d60365933643a9d00da3504872998885dc77b332778fe4ade84",
+        "subject_ref": "mips-request-protection:b64d9859c878117c69d91f5bd536a51dd6d2146c7ad7eede51e03f8a440a2473",
+        "predicate": "enforces_auth_redirect",
+        "object_value": "HTTP 302",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31520-31568",
+          "span_kind": "binary",
+          "start_byte": 31520,
+          "end_byte": 31568,
+          "excerpt_sha256": "c1d6ee1efe6b5a1996529e64b2b3c4bea88755be31c1cd7158dce1cad7ba91c7",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "enforces_auth_redirect",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      },
+      {
+        "evidence_id": "evidence:792b9325f0d683829499ab2014532db332cbc1c3cd10e9fd2fe26e1b9674e219",
+        "subject_ref": "mips-request-protection:b64d9859c878117c69d91f5bd536a51dd6d2146c7ad7eede51e03f8a440a2473",
+        "predicate": "classifies_request_scope",
+        "object_value": "/advance/config.html->guarded_by_path_gate",
+        "source_span": {
+          "artifact_path": "usr/sbin/lighttpd",
+          "artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31380-31520",
+          "span_kind": "binary",
+          "start_byte": 31380,
+          "end_byte": 31520,
+          "excerpt_sha256": "bfedfef1aa4ddafaa6245b9c0fbc7b44453c4a39470340b4bd1ceeedf7833e0c",
+          "start_line": null,
+          "start_column": null,
+          "end_line": null,
+          "end_column": null
+        },
+        "producer": "native-mips-request-protection",
+        "producer_version": "0.1.0",
+        "observation_kind": "deterministic_derived",
+        "capability": "classifies_request_scope",
+        "confidence": 1.0,
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+      }
+    ],
+    "diagnostics": []
+  },
+  "architecture_contrast": [
+    {
+      "request_path": "/advance/config.html",
+      "status": "guarded_by_path_gate",
+      "reason": "the .html suffix enters userloginAuth, then checkLoginUser extracts SESSION_ID and resolves the session table"
+    },
+    {
+      "request_path": "/cgi-bin/cstecgi.cgi",
+      "status": "excluded_from_path_gate",
+      "reason": "the CGI path matches none of the five suffix/path literals that guard the userloginAuth call"
+    }
+  ],
+  "cross_binary_path": [
+    {
+      "stage": "web_response_path_gate",
+      "binary": "usr/sbin/lighttpd",
+      "identity": "usr/sbin/lighttpd@0x004079fc",
+      "guard_patterns": [
+        ".asp",
+        ".html",
+        ".htm",
+        "config.dat",
+        "/login/login.cgi"
+      ]
+    },
+    {
+      "stage": "session_authenticator_for_matching_pages",
+      "binary": "usr/sbin/lighttpd",
+      "identity": "usr/sbin/lighttpd@0x00408978",
+      "cookie": "SESSION_ID",
+      "callsite": "0x004093e8"
+    },
+    {
+      "stage": "excluded_upload_cgi",
+      "binary": "usr/sbin/lighttpd",
+      "request_path": "/cgi-bin/cstecgi.cgi",
+      "status": "excluded_from_path_gate"
+    },
+    {
+      "stage": "nested_upload_dispatch",
+      "binary": "www/cgi-bin/cstecgi.cgi",
+      "value": "action=upload -> setting/setUploadSetting",
+      "identity": "www/cgi-bin/cstecgi.cgi@0x0042e390"
+    },
+    {
+      "stage": "upload_handler",
+      "binary": "www/cgi-bin/cstecgi.cgi",
+      "identity": "www/cgi-bin/cstecgi.cgi@0x0042bf14",
+      "registration": "0x0044a124"
+    }
+  ],
+  "interpretation_boundary": {
+    "supported": "the shipped lighttpd path gate protects matching HTML/config responses with SESSION_ID validation but excludes the upload CGI path before cstecgi.cgi performs native dispatch",
+    "not_claimed": "live deployment reachability, external mediators, authorization policy, exploitability, or a vulnerability verdict"
+  },
+  "ghidra_trigger": {
+    "triggered": false,
+    "reason": "the three protection functions are bounded exported symbols; their direct/GOT calls, branch targets, SESSION_ID constant, session lookup, and HTTP 302 enforcement replay deterministically",
+    "future_trigger": "use the isolated Ghidra Candidate Worker when stripped variants hide the auth hook, session flow, or branch corridor"
+  },
+  "obligation_transition": {
+    "rejected": "obligation:x5000r-upload-auth-guard",
+    "retained": "obligation:x5000r-upload-runtime-reachability",
+    "reason": "the expected pre-upload auth guard is absent from the proved static HTTP/CGI path; runtime reachability remains a separate claim"
+  }
+}

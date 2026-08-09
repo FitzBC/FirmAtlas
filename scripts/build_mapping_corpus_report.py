@@ -16,6 +16,7 @@ from firmatlas.mapping import (
     DiscoveryProducerBatch,
     InventoryPolicy,
     MipsNestedDispatchAnchor,
+    MipsRequestProtectionAnchor,
     NativeRouteAnchor,
     SourceArtifactEntry,
     assemble_discovery_catalog,
@@ -27,6 +28,7 @@ from firmatlas.mapping import (
     discover_mips_inline_route_bindings,
     discover_mips_handler_value_flows,
     discover_mips_cgi_nested_dispatch,
+    discover_mips_request_protection,
     discover_native_hints,
     discover_script_backend,
     discover_web_configuration,
@@ -167,6 +169,7 @@ def _x5000r_catalog(root: Path):
     paths = {
         "web": "lighttp/lighttpd.conf",
         "native": "www/cgi-bin/cstecgi.cgi",
+        "server": "usr/sbin/lighttpd",
     }
     if not all(
         (root / path).is_file()
@@ -233,6 +236,15 @@ def _x5000r_catalog(root: Path):
             upload_operation.literal_value,
         ),),
     )
+    server_content = (root / paths["server"]).read_bytes()
+    protection = discover_mips_request_protection(
+        _source(paths["server"], server_content),
+        server_content,
+        (MipsRequestProtectionAnchor(
+            nested_dispatch.paths[0].path_id,
+            "/cgi-bin/cstecgi.cgi",
+        ),),
+    )
     web_content = (root / paths["web"]).read_bytes()
     web = discover_web_configuration(
         _source(paths["web"], web_content), web_content
@@ -259,6 +271,9 @@ def _x5000r_catalog(root: Path):
             ),
             DiscoveryProducerBatch.native_nested_dispatch(
                 (nested_dispatch,), paths["native"] + ":main:upload"
+            ),
+            DiscoveryProducerBatch.native_request_protection(
+                (protection,), paths["server"] + ":custom-auth"
             ),
         ),
         set_difference=set_difference,

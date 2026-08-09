@@ -227,7 +227,7 @@ def build_ac9_split_web_stack_case():
 
 
 def build_x5000r_shared_cgi_case():
-    """Preserve a shared physical CGI with a still-open native-dispatch proof."""
+    """Preserve shared-CGI dispatch and cross-binary protection scope."""
 
     return build_research_case(ResearchCaseInput(
         case_key="totolink-x5000r-shared-cgi-selector-dispatch",
@@ -235,11 +235,12 @@ def build_x5000r_shared_cgi_case():
         firmware_artifact_sha256=X5000R_FIRMWARE_SHA256,
         architecture_tags=(
             "lighttpd_cgi", "shared_cgi_dispatcher", "json_topicurl_selector",
-            "hybrid_query_and_json_dispatch",
+            "hybrid_query_and_json_dispatch", "custom_session_path_gate",
         ),
         research_question=(
             "How can operations sharing /cgi-bin/cstecgi.cgi be kept distinct, "
-            "and which native dispatch structure implements each selector?"
+            "which native dispatch structure implements each selector, and which "
+            "static request-protection gates actually cover that CGI path?"
         ),
         evidence=(
             CaseEvidenceReference(
@@ -484,6 +485,49 @@ def build_x5000r_shared_cgi_case():
                 "json:$.native_dispatch", "binds_upload_mode",
                 "nested-dispatch-report@v1alpha1",
             ),
+            CaseEvidenceReference(
+                "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+                CaseEvidenceKind.NATIVE_PROTECTION, "usr/sbin/lighttpd",
+                "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+                "binary:bytes=31380-31520", "selects_protection_scope",
+                "native-mips-request-protection@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+                CaseEvidenceKind.NATIVE_PROTECTION, "usr/sbin/lighttpd",
+                "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+                "binary:bytes=37860-37872", "invokes_authenticator",
+                "native-mips-request-protection@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+                CaseEvidenceKind.NATIVE_PROTECTION, "usr/sbin/lighttpd",
+                "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+                "binary:bytes=35464-35524", "validates_session_cookie",
+                "native-mips-request-protection@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+                CaseEvidenceKind.NATIVE_PROTECTION, "usr/sbin/lighttpd",
+                "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+                "binary:bytes=31520-31568", "enforces_auth_redirect",
+                "native-mips-request-protection@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977",
+                CaseEvidenceKind.NATIVE_PROTECTION, "usr/sbin/lighttpd",
+                "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+                "binary:bytes=31380-31520", "classifies_request_scope",
+                "native-mips-request-protection@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "coverage:x5000r-request-protection",
+                CaseEvidenceKind.COVERAGE_LEDGER,
+                "docs/firmware-mapping/samples/m1-21-x5000r-request-protection.json",
+                "3d80257d965110ed58bb4b12caadee6e1ee2684183605dd4747f4be666ace030",
+                "json:$.protection_analysis", "maps_auth_guard",
+                "request-protection-report@v1alpha1",
+            ),
         ),
         claims=(
             CaseClaim(
@@ -581,6 +625,18 @@ def build_x5000r_shared_cgi_case():
                     "coverage:x5000r-nested-upload-dispatch",
                 ),
             ),
+            CaseClaim(
+                "claim:x5000r-custom-auth-path-exclusion",
+                "The vendor-modified lighttpd protects matching .asp/.html/.htm/config.dat/login CGI response paths through userloginAuth, checkLoginUser, SESSION_ID extraction, session-table lookup, and HTTP 302 denial, but /cgi-bin/cstecgi.cgi matches none of those path gates and therefore reaches the separately proved upload dispatcher outside this static guard scope.",
+                (
+                    "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+                    "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+                    "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+                    "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+                    "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977",
+                    "coverage:x5000r-request-protection",
+                ),
+            ),
         ),
         stages=(
             CaseStage(
@@ -645,6 +701,12 @@ def build_x5000r_shared_cgi_case():
                     "obligation:x5000r-upload-auth-guard",
                 ),
                 resolves_obligations=("obligation:x5000r-upload-mode-owner",),
+            ),
+            CaseStage(
+                "stage:x5000r-custom-auth-path-exclusion", 10,
+                "Trace the custom lighttpd suffix gate into SESSION_ID validation and HTTP 302 enforcement, then compare its exact protected path set with the upload CGI path instead of inferring authentication from the presence of login functions.",
+                ("claim:x5000r-custom-auth-path-exclusion",),
+                rejects_obligations=("obligation:x5000r-upload-auth-guard",),
             ),
         ),
         obligations=(
@@ -721,7 +783,15 @@ def build_x5000r_shared_cgi_case():
             CaseObligation(
                 "obligation:x5000r-upload-auth-guard",
                 "Recover authentication and authorization guards applied before the upload-mode branch.",
-                "maps_auth_guard", CaseObligationStatus.OPEN,
+                "maps_auth_guard", CaseObligationStatus.REJECTED,
+                (
+                    "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+                    "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+                    "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+                    "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+                    "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977",
+                    "coverage:x5000r-request-protection",
+                ),
             ),
         ),
         counterfactuals=(
@@ -734,6 +804,7 @@ def build_x5000r_shared_cgi_case():
             "Substring matching would misclassify loginAuth as an exact cross-native occurrence because usr/sbin/lighttpd contains userloginAuth; the suffix-token variant remains only a candidate clue.",
             "Analyzing only shared wrapper files would leave three implemented operations labeled Native-only; conversely, flattening the multipart URL would hide the distinct outer upload mode and inner setUploadSetting selector.",
             "Treating the setUploadSetting table entry alone as proof would miss the preceding action=upload branch, multipart parser, query-segment transfer, and slash normalization that make the handler reachable from this request shape.",
+            "Finding SESSION_ID and checkLoginUser in lighttpd would falsely imply that every CGI request is protected; only branch-level comparison shows that the suffix gate excludes /cgi-bin/cstecgi.cgi.",
         ),
         paper_uses=(
             "Motivating example for operation identity below a shared physical endpoint.",
@@ -744,6 +815,7 @@ def build_x5000r_shared_cgi_case():
             "Evidence-backed case study showing how frontend/native set differences expose incomplete asset scope, wrapper-only declarations, and native registrations without inventing backend equivalence.",
             "Scope-expansion example showing three request architectures behind one CGI: direct literal request, inherited kr.request default with payload-variable selector, and multipart upload URL with nested selectors.",
             "Instruction-level nested-dispatch example showing why a firmware map can identify the correct binary and handler where endpoint text or vulnerability prose cannot.",
+            "Cross-binary protection-scope example showing why page authentication and CGI operation authorization must be mapped independently before reasoning about a vulnerability mechanism.",
         ),
         limitations=(
             "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
@@ -752,6 +824,7 @@ def build_x5000r_shared_cgi_case():
             "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
             "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof.",
             "The deterministic Profile proves the static native control-flow edge from action=upload to setUploadSetting, but it does not prove runtime reachability, authentication state, or exploitability.",
+            "The custom-auth Profile rejects a guard only within the shipped lighttpd response path and cstecgi dispatcher evidence; external proxies, runtime configuration changes, network policy, and exploitability remain outside this static claim.",
         ),
     ))
 

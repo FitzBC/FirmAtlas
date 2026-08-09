@@ -99,6 +99,9 @@ flowchart LR
     WRAP -->|"method dynamic / JSON"| CGI["/cgi-bin/cstecgi.cgi"]
     CGI --> SEL["topicurl selector"]
     L["lighttpd :80 / :8080"] --> NS["/www + /cgi-bin CGI executor"]
+    L --> GATE["custom suffix/path session gate"]
+    GATE -->|".asp/.html/.htm/config.dat/login.cgi"| AUTH["userloginAuth → SESSION_ID"]
+    GATE -. "excludes /cgi-bin/cstecgi.cgi" .-> CGI
     NS --> BIN["MIPS cstecgi.cgi"]
     SEL -->|"123/199 selectors"| TAB["get/set/del/other_handle_t"]
     TAB -->|"executable pointer"| BIN
@@ -126,14 +129,19 @@ flowchart LR
 MIPS Nested Dispatch Profile 随后证明 `main` 以 `action=upload` 进入上传分支，提取
 第二个 `&` 分段，经 `cutUploadFile` 处理 body，把该分段写入 JSON `topicurl`，在读取后
 选择 `/` 后缀 `setUploadSetting`，再进入 `set_handle_t@0x0044a124` 并调用
-`handler@0x0042bf14`。该静态 owner 义务已关闭，运行时可达和认证 guard 仍开放。对
+`handler@0x0042bf14`。随后 Request Protection Profile 在另一个执行主体
+`usr/sbin/lighttpd` 中证明五个 suffix/path gate、`userloginAuth → checkLoginUser`、
+`SESSION_ID → form_get_idx_by_sessionid` 和 HTTP 302 拒绝链；`/advance/config.html`
+进入该门，而 `/cgi-bin/cstecgi.cgi` 不匹配任何 gate。由此“upload 被这一个静态门
+保护”的义务被证据拒绝，但真实服务装配、外部中介、运行时可达与漏洞可利用性仍未
+确认。对
 `setLanCfg@0x004209b8`，系统进一步从
 dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 `lanIp→lan_ipaddr`、`lanNetmask→lan_netmask` 两条请求参数—配置状态链，并在
 `0x00420ad8` 的首个条件分支停止；DHCP 分支和敏感 sink 仍未确认。
 
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
-“跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、multipart nested dispatch 关闭、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、运行时可达、认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
+“跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、multipart nested dispatch 关闭、跨二进制保护范围排除、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、真实运行时可达、整体认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
 
 ## 3. 后续案例准入触发器
 

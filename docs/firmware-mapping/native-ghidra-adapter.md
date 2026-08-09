@@ -17,6 +17,11 @@
 > 均可从原始 MIPS 字节确定性重放，因此仍不触发 Ghidra。缺少这些稳定边的固件变体
 > 才进入 Candidate Worker。
 
+> M1-21 触发审计：vendor lighttpd 的 `http_response_write_header`、`userloginAuth` 与
+> `checkLoginUser` 都是带边界的 exported dynamic symbol；路径 gate、direct/GOT call、
+> `SESSION_ID`、session lookup 和 302 分支可由原始字节重放，因此未触发 Ghidra。
+> stripped 变体隐藏函数边界或会话流时，再使用相邻项目思路编写 headless candidate script。
+
 AC9 当前 ARM PIC 注册模式已由小型确定性 Validator 从原始 ELF 字节直接证明，
 因此没有为了“使用 Ghidra”而增加工具依赖。Ghidra Adapter 只在复杂控制流、间接
 调用、跨函数数据流、未知 ISA profile 或参数 getter 追踪确实需要时启动。

@@ -247,7 +247,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][0]
 
         self.assertTrue(corpus["validation"]["paper_ready"])
-        self.assertEqual(7, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(8, corpus["validation"]["evidence_line_count"])
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
             [case["claims"][index]["status"] for index in (2, 3, 4)],
@@ -337,6 +337,9 @@ class ResearchCaseTests(unittest.TestCase):
         from scripts.build_x5000r_nested_dispatch_report import (
             build_analysis as build_nested_analysis,
         )
+        from scripts.build_x5000r_request_protection_report import (
+            build_analysis as build_protection_analysis,
+        )
 
         if not X5000R_ROOT.exists():
             self.skipTest("local X5000R representative sample is unavailable")
@@ -389,6 +392,7 @@ class ResearchCaseTests(unittest.TestCase):
             _, expanded_frontend, _, _, _, expanded_difference
         ) = build_expanded_analysis(X5000R_ROOT)
         *_, nested_dispatch = build_nested_analysis(X5000R_ROOT)
+        _, _, protection = build_protection_analysis(X5000R_ROOT)
         results = (
             *frontend_graph.results,
             analyze("lighttp/lighttpd.conf", discover_web_configuration),
@@ -399,6 +403,7 @@ class ResearchCaseTests(unittest.TestCase):
             *expanded_frontend.results,
             expanded_difference,
             nested_dispatch,
+            protection,
         )
         replayed = {
             atom.evidence_id: atom
@@ -465,7 +470,7 @@ class ResearchCaseTests(unittest.TestCase):
             obligations["obligation:x5000r-upload-runtime-reachability"]["status"],
         )
         self.assertEqual(
-            "open", obligations["obligation:x5000r-upload-auth-guard"]["status"]
+            "rejected", obligations["obligation:x5000r-upload-auth-guard"]["status"]
         )
         self.assertEqual(124, len(deep.bindings))
         self.assertEqual(123, len({item.route_token for item in deep.bindings}))
@@ -500,6 +505,16 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual(
             nested_coverage["source_artifact_sha256"],
             hashlib.sha256(nested_report_path.read_bytes()).hexdigest(),
+        )
+        protection_coverage = next(
+            item for item in case["evidence"]
+            if item["evidence_ref"] == "coverage:x5000r-request-protection"
+        )
+        protection_report_path = Path(protection_coverage["source_path"])
+        self.assertTrue(protection_report_path.is_file())
+        self.assertEqual(
+            protection_coverage["source_artifact_sha256"],
+            hashlib.sha256(protection_report_path.read_bytes()).hexdigest(),
         )
 
 

@@ -178,6 +178,17 @@ from .native_nested_dispatch import (
     MipsNestedDispatchResult,
     discover_mips_cgi_nested_dispatch,
 )
+from .native_request_protection import (
+    MIPS_REQUEST_PROTECTION_RESULT_SCHEMA_VERSION,
+    MipsRequestProtectionAnchor,
+    MipsRequestProtectionAssessment,
+    MipsRequestProtectionDiagnostic,
+    MipsRequestProtectionPolicy,
+    MipsRequestProtectionProfile,
+    MipsRequestProtectionResult,
+    RequestProtectionStatus,
+    discover_mips_request_protection,
+)
 from .set_difference import (
     SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION,
     AttributionArtifact,
@@ -382,6 +393,15 @@ __all__ = (
     "MipsNestedDispatchProfile",
     "MipsNestedDispatchResult",
     "discover_mips_cgi_nested_dispatch",
+    "MIPS_REQUEST_PROTECTION_RESULT_SCHEMA_VERSION",
+    "MipsRequestProtectionAnchor",
+    "MipsRequestProtectionAssessment",
+    "MipsRequestProtectionDiagnostic",
+    "MipsRequestProtectionPolicy",
+    "MipsRequestProtectionProfile",
+    "MipsRequestProtectionResult",
+    "RequestProtectionStatus",
+    "discover_mips_request_protection",
     "SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION",
     "AttributionArtifact",
     "AttributionArtifactRole",

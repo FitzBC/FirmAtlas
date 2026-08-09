@@ -158,6 +158,8 @@ MIPS handler value-flow Profile 必须覆盖 local/global GOT callee、GP 的 st
 
 MIPS Nested Dispatch 回归必须从公开 Interface 同时验证 transport branch、第二 query segment 的 index/delimiter、multipart parser、payload topicurl、slash suffix、operation table loop 和 exact handler entry。真实 X5000R 固定为 `action=upload → setting/setUploadSetting → set_handle_t@0x0044a124 → 0x0042bf14`。将 segment index 改为 2、清除 upload guard branch、清除表项匹配后的间接调用或篡改持久化 table claim 时，结果必须 partial/rejected，不能由 strings 或表项补偿。
 
+MIPS Request Protection 回归必须从公开 Interface 同时验证路径 gate 的 auth/skip 两类分支、`userloginAuth → checkLoginUser`、`SESSION_ID` cookie、session-table lookup 和拒绝状态写入。真实 X5000R 固定对照 `/advance/config.html → guarded_by_path_gate` 与 `/cgi-bin/cstecgi.cgi → excluded_from_path_gate`；清除 auth call、将 302 改为 200、篡改 cookie key、违反 source digest/预算或反转分类时必须 fail closed。
+
 PIC call-site Profile 还需覆盖：单一二参数调用不足以推断 registrar、错误 relocation type、错误参数寄存器、无法建立 GOT 基址、非 executable symbol、跨调用拼接和篡改 Worker/Result proof。真实样本回归必须同时断言 route、handler、callsite、registrar、同组规模和 Scheduler 精确关闭数量，不能只断言“发现大于零”。
 
 代表性 corpus gate 必须把证据层级作为一等字段：旧 Binwalk 派生目录、合成 fixture 与漏洞线索不得计入 real-firmware verified 数量。每个样本显式声明 required/forbidden Evidence Capability；Artifact SHA 不匹配、coverage 非 completed、能力缺失/越界或任一开放义务都必须降为 coverage gap。未提供任何样本的 required category 也必须出现在报告中并标记 acquisition gap，不能从聚合结果消失。
