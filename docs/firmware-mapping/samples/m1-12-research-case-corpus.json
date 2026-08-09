@@ -215,7 +215,7 @@
       ]
     },
     {
-      "case_id": "research-case:3862d836927f97fc670547036d644ad9c0b12faa569d91966536799869a4270f",
+      "case_id": "research-case:a7f688f621d0b804864013a0e2ff6140dd613e95a22c455c0238441f1b8e6f39",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "totolink-x5000r-shared-cgi-selector-dispatch",
       "title": "TOTOLINK X5000R: one CGI endpoint, multiple logical operations",
@@ -380,6 +380,42 @@
           "locator": "json:$.coverage",
           "capability": "bounds_value_flow_scope",
           "producer": "mips-handler-value-flow-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+          "kind": "set_difference",
+          "source_path": "www/advance/dos.html",
+          "source_artifact_sha256": "d024fbc7305e5f777b41084e3b3bed3ae3a3169f7d9b6ceccdf18ddca0b0511b",
+          "locator": "text_utf8:bytes=3306-3315;lines=58:765-58:774",
+          "capability": "mentions_operation_token",
+          "producer": "frontend-native-set-difference@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+          "kind": "set_difference",
+          "source_path": "www/wan_ie.html",
+          "source_artifact_sha256": "3c6be0fc821f033fc3af38b3b9ee688120b5368a2dc800a560a74c4a9f380820",
+          "locator": "text_utf8:bytes=10173-10184;lines=1:10174-1:10185",
+          "capability": "mentions_operation_token",
+          "producer": "frontend-native-set-difference@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+          "kind": "set_difference",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=11640-11653",
+          "capability": "mentions_operation_variant",
+          "producer": "frontend-native-set-difference@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-set-difference-attribution",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-18-x5000r-set-difference.json",
+          "source_artifact_sha256": "2ffa037bfabd11e6db47769b1f3acfd79fe08b82fbe2a2cff3859b06dd74f99b",
+          "locator": "json:$.attribution_counts",
+          "capability": "attributes_set_difference",
+          "producer": "set-difference-report@v1alpha1"
         }
       ],
       "claims": [
@@ -447,6 +483,17 @@
             "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
             "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f",
             "coverage:x5000r-setlancfg-handler-prefix"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-set-difference-attribution",
+          "statement": "A bounded scan attributes the 76 frontend-only operations as 38 auxiliary-page consumers and 38 wrapper-only declarations, while the 14 native-only registrations contain three frontend-scope gaps, one cross-native suffix-token variant, and ten registrations without a frontend reference; these are evidence shapes and search hypotheses, not proof of runtime ownership or causality.",
+          "evidence_refs": [
+            "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+            "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+            "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+            "coverage:x5000r-set-difference-attribution"
           ],
           "status": "supported"
         }
@@ -524,10 +571,26 @@
             "claim:x5000r-setlancfg-prefix-value-flow"
           ],
           "creates_obligations": [
-            "obligation:x5000r-branched-value-flow"
+            "obligation:x5000r-branched-value-flow",
+            "obligation:x5000r-set-difference-shape"
           ],
           "resolves_obligations": [
             "obligation:x5000r-setlancfg-prefix-value-flow"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-set-difference-attribution",
+          "order": 7,
+          "interpretation": "Classify both sides of the frontend/native difference with exact, bounded auxiliary evidence; keep suffix-token variants separate from exact matches and retain unresolved runtime causes.",
+          "claim_ids": [
+            "claim:x5000r-set-difference-attribution"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-frontend-scope-expansion"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-set-difference-shape"
           ],
           "rejects_obligations": []
         }
@@ -566,6 +629,25 @@
           "required_capability": "traces_branched_value_flow",
           "status": "open",
           "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:x5000r-set-difference-shape",
+          "statement": "Attribute the observed 76 frontend-only and 14 native-only operations without converting string similarity into a handler binding.",
+          "required_capability": "attributes_set_difference",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+            "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+            "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+            "coverage:x5000r-set-difference-attribution"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-frontend-scope-expansion",
+          "statement": "Expand the first-class frontend asset graph to cover wan_ie.html and advance/config.html, then determine whether their three exact selectors change the dispatcher comparison.",
+          "required_capability": "expands_frontend_scope",
+          "status": "open",
+          "closure_evidence_refs": []
         }
       ],
       "counterfactuals": [
@@ -574,20 +656,23 @@
         "A native string hit alone would incorrectly imply a proved selector-to-handler binding.",
         "A single-resource frontend pass would miss 199 wrapper operations whose endpoint is defined in another asset.",
         "Treating a selector string hit as a binding would hide the 76 frontend-only and 14 Native-only operation differences.",
-        "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow."
+        "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow.",
+        "Substring matching would misclassify loginAuth as an exact cross-native occurrence because usr/sbin/lighttpd contains userloginAuth; the suffix-token variant remains only a candidate clue."
       ],
       "paper_uses": [
         "Motivating example for operation identity below a shared physical endpoint.",
         "Ablation of path-only, frontend-plus-config, and native-dispatch analysis.",
         "Evidence-preserving example of closing a cross-resource JavaScript obligation while retaining a native value-flow obligation.",
         "Frontend/native set-difference experiment for version drift, dead UI code, and alternate backend hypotheses.",
-        "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state."
+        "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state.",
+        "Evidence-backed case study showing how frontend/native set differences expose incomplete asset scope, wrapper-only declarations, and native registrations without inventing backend equivalence."
       ],
       "limitations": [
         "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
         "Only the branch-free setLanCfg prefix is proven; DHCP branches, commits, network reconfiguration, and sensitive sinks remain open.",
         "CGI execution configuration does not prove runtime reachability or authentication state.",
-        "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access."
+        "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
+        "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof."
       ]
     }
   ],
@@ -595,7 +680,7 @@
     "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
     "paper_ready": true,
     "case_count": 2,
-    "evidence_line_count": 6,
+    "evidence_line_count": 7,
     "issues": []
   }
 }

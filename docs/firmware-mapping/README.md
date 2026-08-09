@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-17 X5000R MIPS handler-prefix value-flow 已验证；当前 gate 为 `partial`
+> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-18 X5000R 前端 / Native 集合差异归因已验证；当前 gate 为 `partial`
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -77,6 +77,7 @@
 | [M1-15 X5000R Frontend Asset Graph](./progress/2026-08-09-m1-15-frontend-asset-graph.md) | config.js → topicurl.js、199 operations、双来源证据与义务演进 | asset graph、动态 method 或 Native handler 证据变化时 |
 | [M1-16 X5000R MIPS Inline Dispatcher](./progress/2026-08-09-m1-16-x5000r-mips-inline-dispatch.md) | 四张导出表、123/199 handler binding、前后端差集与 Ghidra 触发决策 | MIPS table、差集归因或 handler value-flow 变化时 |
 | [M1-17 X5000R MIPS Value Flow](./progress/2026-08-09-m1-17-x5000r-mips-value-flow.md) | `setLanCfg` getter→state 五线证据、控制流边界、Catalog/案例投影 | MIPS GOT、寄存器 provenance、分支或 sink 证据变化时 |
+| [M1-18 X5000R 集合差异归因](./progress/2026-08-09-m1-18-x5000r-set-difference.md) | 76/14 差集的五类证据形状、范围缺口、字符串变体负例与 Catalog 投影 | 前端范围、差集策略或辅助制品证据变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -152,8 +153,9 @@ M1 工作项：
 | M1-15 | X5000R 跨资源 Frontend Asset Graph | 已验证 | M1-04/08/11/12/14 | 唯一符号绑定 + 双来源 EvidenceAtom + 199 operation + frontend 义务关闭 |
 | M1-16 | X5000R MIPS inline dispatcher | 已验证 | M1-06A/08/11/12/15 | 138 registrations + 123/199 selector binding + 四线证据 + 差集开放义务 |
 | M1-17 | X5000R MIPS handler-prefix value-flow | 已验证 | M1-08/11/12/16 | 2 parameter→state flows + 10 EvidenceAtoms + first-branch scope boundary |
+| M1-18 | X5000R Frontend / Native 集合差异归因 | 已验证 | M1-08/11/12/16/17 | 76/14 operations → 38/38/3/1/10 evidence shapes + Catalog/API/UI projection |
 
-**下一项建议**：继续 M1-11。M1-17 已在 `setLanCfg` 首个无分支前缀证明 2 条 parameter→state flow；下一步解释 76 个 Frontend-only 与 14 个 Native-only 差集，并以 CFG-aware 分析恢复 DHCP 分支及 commit/network/sensitive sink。确定性 Profile 无法重放跨块或跨函数 witness 时再触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 固件样本，M1-02B 仍需从仓库固定 Dockerfile 独立重建正式镜像。
+**下一项建议**：继续 M1-11。M1-18 已把 76/14 集合差异分成可检索的五类静态证据形状；下一步把三个范围缺口纳入一等 Frontend Asset Graph，并分别验证 consumer/native-absent、wrapper-only 与 native-no-reference 的运行时原因，同时以 CFG-aware 分析恢复 DHCP 分支及 commit/network/sensitive sink。确定性 Profile 无法重放跨块或跨函数 witness 时再触发隔离 Ghidra Candidate Worker。同时摄取真实脚本后端与 Native-only 固件样本，M1-02B 仍需从仓库固定 Dockerfile 独立重建正式镜像。
 
 ## 7. 跨会话无缝工作协议
 

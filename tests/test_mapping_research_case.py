@@ -247,7 +247,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][0]
 
         self.assertTrue(corpus["validation"]["paper_ready"])
-        self.assertEqual(6, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(7, corpus["validation"]["evidence_line_count"])
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
             [case["claims"][index]["status"] for index in (2, 3, 4)],
@@ -330,6 +330,7 @@ class ResearchCaseTests(unittest.TestCase):
 
     def test_real_x5000r_case_evidence_replays_from_current_producers(self) -> None:
         from scripts.build_mapping_corpus_report import X5000R_ROOT
+        from scripts.build_x5000r_set_difference_report import build_analysis
 
         if not X5000R_ROOT.exists():
             self.skipTest("local X5000R representative sample is unavailable")
@@ -377,12 +378,14 @@ class ResearchCaseTests(unittest.TestCase):
         value_flow = discover_mips_handler_value_flows(
             binary_source, binary_content, 0x004209B8
         )
+        _, _, set_difference = build_analysis(X5000R_ROOT)
         results = (
             *frontend_graph.results,
             analyze("lighttp/lighttpd.conf", discover_web_configuration),
             analyze("www/cgi-bin/cstecgi.cgi", discover_native_hints),
             deep,
             value_flow,
+            set_difference,
         )
         replayed = {
             atom.evidence_id: atom
@@ -432,6 +435,14 @@ class ResearchCaseTests(unittest.TestCase):
         )
         self.assertEqual(
             "open", obligations["obligation:x5000r-branched-value-flow"]["status"]
+        )
+        self.assertEqual(
+            "resolved",
+            obligations["obligation:x5000r-set-difference-shape"]["status"],
+        )
+        self.assertEqual(
+            "open",
+            obligations["obligation:x5000r-frontend-scope-expansion"]["status"],
         )
         self.assertEqual(124, len(deep.bindings))
         self.assertEqual(123, len({item.route_token for item in deep.bindings}))

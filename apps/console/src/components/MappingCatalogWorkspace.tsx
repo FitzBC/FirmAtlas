@@ -8,6 +8,8 @@ const kinds = [
   ['', '全部能力'], ['request_interface', '请求接口'], ['web_configuration', 'Web 配置'],
   ['script_route', '脚本路由'], ['native_hint', '原生提示'],
   ['native_route_binding', 'Native 绑定'], ['native_handler', 'Native Handler'],
+  ['native_parameter_state_flow', '参数状态流'],
+  ['set_difference_attribution', '集合差异'],
   ['candidate_association', '跨层关联'],
 ] as const
 

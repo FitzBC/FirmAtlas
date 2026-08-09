@@ -16,6 +16,7 @@ from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
 from .native_deep import NativeDeepResult
 from .native_value_flow import MipsHandlerValueFlowResult
+from .set_difference import SetDifferenceAttributionResult
 from .correlation import FrontendNativeCorrelationResult
 from .scheduler import (
     ObligationSchedulerResult,
@@ -36,6 +37,7 @@ class DiscoveryProducerKind(str, Enum):
     NATIVE = "native"
     NATIVE_DEEP = "native_deep"
     NATIVE_VALUE_FLOW = "native_value_flow"
+    SET_DIFFERENCE = "set_difference"
     CORRELATION = "correlation"
     SCHEDULER = "scheduler"
 
@@ -52,6 +54,7 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_ROUTE_BINDING = "native_route_binding"
     NATIVE_HANDLER = "native_handler"
     NATIVE_PARAMETER_STATE_FLOW = "native_parameter_state_flow"
+    SET_DIFFERENCE_ATTRIBUTION = "set_difference_attribution"
     CANDIDATE_ASSOCIATION = "candidate_association"
 
 
@@ -146,6 +149,7 @@ class DiscoveryCatalogInput:
     batches: Tuple[DiscoveryProducerBatch, ...]
     correlation: Optional[FrontendNativeCorrelationResult] = None
     scheduler: Optional[ObligationSchedulerResult] = None
+    set_difference: Optional[SetDifferenceAttributionResult] = None
     source_inventory_coverage_status: CoverageStatus = CoverageStatus.COMPLETED
 
     def __post_init__(self) -> None:
@@ -524,6 +528,47 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
             batch.scope, batch.producer_kind, batch.producer.name,
             batch.producer.version, status, batch.required, len(batch.results), diagnostic,
         ))
+    if value.set_difference is not None:
+        result = value.set_difference
+        for atom in (*result.upstream_evidence_atoms, *result.evidence_atoms):
+            existing = evidence.get(atom.evidence_id)
+            if existing is not None and existing != atom:
+                raise ValueError("conflicting set-difference evidence identity")
+            evidence[atom.evidence_id] = atom
+        for item in result.attributions:
+            proof_ids = tuple(dict.fromkeys(
+                (*item.upstream_evidence_ids, *item.evidence_ids)
+            ))
+            source_path = evidence[proof_ids[-1]].source_span.artifact_path
+            candidates.append(DiscoveryCandidate(
+                item.attribution_id,
+                DiscoveryCandidateKind.SET_DIFFERENCE_ATTRIBUTION,
+                item.token,
+                DiscoveryClaimStatus.SUPPORTED,
+                source_path,
+                result.schema_version,
+                proof_ids,
+                (
+                    ("difference_side", item.side.value),
+                    ("attribution_kind", item.kind.value),
+                    ("matched_artifact_paths", json.dumps(
+                        item.matched_artifact_paths, separators=(",", ":")
+                    )),
+                    ("interpretation", item.interpretation),
+                    ("open_obligation", item.open_obligation),
+                ),
+            ))
+        coverage.append(DiscoveryCoverage(
+            "catalog/set-difference",
+            DiscoveryProducerKind.SET_DIFFERENCE,
+            result.producer.name,
+            result.producer.version,
+            result.coverage_status,
+            True,
+            1,
+            "; ".join(item.message for item in result.diagnostics) or None,
+        ))
+
     candidate_ids = {item.candidate_id for item in candidates}
     if value.correlation is not None:
         for item in value.correlation.associations:

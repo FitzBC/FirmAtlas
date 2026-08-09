@@ -54,6 +54,10 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(
     catalog.catalog_id, expect.objectContaining({ kind: 'request_interface' }), expect.any(AbortSignal),
   ))
+  fireEvent.click(screen.getByRole('button', { name: '集合差异' }))
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(
+    catalog.catalog_id, expect.objectContaining({ kind: 'set_difference_attribution' }), expect.any(AbortSignal),
+  ))
   fireEvent.click(screen.getByRole('button', { name: /查看候选/ }))
   expect(await screen.findByText('devName')).toBeInTheDocument()
   expect(screen.getByText('架构与分析属性')).toBeInTheDocument()

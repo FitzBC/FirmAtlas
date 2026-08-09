@@ -26,6 +26,7 @@
 - [M1-15 X5000R Frontend Asset Graph](./m1-15-x5000r-frontend-asset-graph.json)：跨 `config.js/topicurl.js` 的唯一 endpoint binding、199 个 operation、逐候选双来源证据、动态 method 未决状态和 Native handler 开放义务；进度说明见 [M1-15 记录](../progress/2026-08-09-m1-15-frontend-asset-graph.md)。
 - [M1-16 X5000R MIPS dispatcher](./m1-16-x5000r-mips-dispatch.json)：四张 `char[64]+handler` 导出表、138 registrations、123/199 selector binding、76/14 双向差集、重复注册和开放 value-flow 义务；进度说明见 [M1-16 记录](../progress/2026-08-09-m1-16-x5000r-mips-inline-dispatch.md)。
 - [M1-17 X5000R MIPS handler value-flow](./m1-17-x5000r-mips-value-flow.json)：`setLanCfg` 无分支前缀内两条 `websGetVar(parameter) → nvram_set(state)` 五线证据链、首个条件分支边界与开放的 DHCP/sink 义务；进度说明见 [M1-17 记录](../progress/2026-08-09-m1-17-x5000r-mips-value-flow.md)。
+- [M1-18 X5000R frontend/native 集合差异](./m1-18-x5000r-set-difference.json)：将 76 个 Frontend-only 与 14 个 Native-only operation 分为 38/38/3/1/10 五类证据形状，保留精确 token、suffix 变体负例和开放因果义务；进度说明见 [M1-18 记录](../progress/2026-08-09-m1-18-x5000r-set-difference.md)。
 - [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；M1-13 重放后上游 Inventory 与 Catalog 均为 completed。
 - [M1-12 AC9 research-case corpus](./m1-12-research-case-corpus.json)：将 `/goform` 与 nginx/FastCGI 分支不相交、httpd/dhttpd 候选对照和 ARM PIC 最终 binding 保存为内容寻址的证据时间线，并附反事实、论文用途和局限。
 

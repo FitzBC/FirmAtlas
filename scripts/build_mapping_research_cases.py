@@ -363,6 +363,35 @@ def build_x5000r_shared_cgi_case():
                 "json:$.coverage", "bounds_value_flow_scope",
                 "mips-handler-value-flow-report@v1alpha1",
             ),
+            CaseEvidenceReference(
+                "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+                CaseEvidenceKind.SET_DIFFERENCE, "www/advance/dos.html",
+                "d024fbc7305e5f777b41084e3b3bed3ae3a3169f7d9b6ceccdf18ddca0b0511b",
+                "text_utf8:bytes=3306-3315;lines=58:765-58:774",
+                "mentions_operation_token", "frontend-native-set-difference@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+                CaseEvidenceKind.SET_DIFFERENCE, "www/wan_ie.html",
+                "3c6be0fc821f033fc3af38b3b9ee688120b5368a2dc800a560a74c4a9f380820",
+                "text_utf8:bytes=10173-10184;lines=1:10174-1:10185",
+                "mentions_operation_token", "frontend-native-set-difference@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+                CaseEvidenceKind.SET_DIFFERENCE, "usr/sbin/lighttpd",
+                "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+                "binary:bytes=11640-11653", "mentions_operation_variant",
+                "frontend-native-set-difference@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "coverage:x5000r-set-difference-attribution",
+                CaseEvidenceKind.COVERAGE_LEDGER,
+                "docs/firmware-mapping/samples/m1-18-x5000r-set-difference.json",
+                "2ffa037bfabd11e6db47769b1f3acfd79fe08b82fbe2a2cff3859b06dd74f99b",
+                "json:$.attribution_counts", "attributes_set_difference",
+                "set-difference-report@v1alpha1",
+            ),
         ),
         claims=(
             CaseClaim(
@@ -424,6 +453,16 @@ def build_x5000r_shared_cgi_case():
                     "coverage:x5000r-setlancfg-handler-prefix",
                 ),
             ),
+            CaseClaim(
+                "claim:x5000r-set-difference-attribution",
+                "A bounded scan attributes the 76 frontend-only operations as 38 auxiliary-page consumers and 38 wrapper-only declarations, while the 14 native-only registrations contain three frontend-scope gaps, one cross-native suffix-token variant, and ten registrations without a frontend reference; these are evidence shapes and search hypotheses, not proof of runtime ownership or causality.",
+                (
+                    "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+                    "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+                    "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+                    "coverage:x5000r-set-difference-attribution",
+                ),
+            ),
         ),
         stages=(
             CaseStage(
@@ -459,8 +498,18 @@ def build_x5000r_shared_cgi_case():
                 "stage:x5000r-setlancfg-prefix-value-flow", 6,
                 "Resolve GP/GOT calls and register provenance only through the first branch, proving two request-parameter to configuration-state mappings while preserving the branched suffix as unknown.",
                 ("claim:x5000r-setlancfg-prefix-value-flow",),
-                creates_obligations=("obligation:x5000r-branched-value-flow",),
+                creates_obligations=(
+                    "obligation:x5000r-branched-value-flow",
+                    "obligation:x5000r-set-difference-shape",
+                ),
                 resolves_obligations=("obligation:x5000r-setlancfg-prefix-value-flow",),
+            ),
+            CaseStage(
+                "stage:x5000r-set-difference-attribution", 7,
+                "Classify both sides of the frontend/native difference with exact, bounded auxiliary evidence; keep suffix-token variants separate from exact matches and retain unresolved runtime causes.",
+                ("claim:x5000r-set-difference-attribution",),
+                creates_obligations=("obligation:x5000r-frontend-scope-expansion",),
+                resolves_obligations=("obligation:x5000r-set-difference-shape",),
             ),
         ),
         obligations=(
@@ -492,6 +541,22 @@ def build_x5000r_shared_cgi_case():
                 "Recover branch-dependent DHCP state writes and downstream commit/network/sensitive sinks without merging mutually exclusive paths.",
                 "traces_branched_value_flow", CaseObligationStatus.OPEN,
             ),
+            CaseObligation(
+                "obligation:x5000r-set-difference-shape",
+                "Attribute the observed 76 frontend-only and 14 native-only operations without converting string similarity into a handler binding.",
+                "attributes_set_difference", CaseObligationStatus.RESOLVED,
+                (
+                    "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+                    "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+                    "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+                    "coverage:x5000r-set-difference-attribution",
+                ),
+            ),
+            CaseObligation(
+                "obligation:x5000r-frontend-scope-expansion",
+                "Expand the first-class frontend asset graph to cover wan_ie.html and advance/config.html, then determine whether their three exact selectors change the dispatcher comparison.",
+                "expands_frontend_scope", CaseObligationStatus.OPEN,
+            ),
         ),
         counterfactuals=(
             "Path-only grouping would collapse many distinct operations into one CGI interface.",
@@ -500,6 +565,7 @@ def build_x5000r_shared_cgi_case():
             "A single-resource frontend pass would miss 199 wrapper operations whose endpoint is defined in another asset.",
             "Treating a selector string hit as a binding would hide the 76 frontend-only and 14 Native-only operation differences.",
             "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow.",
+            "Substring matching would misclassify loginAuth as an exact cross-native occurrence because usr/sbin/lighttpd contains userloginAuth; the suffix-token variant remains only a candidate clue.",
         ),
         paper_uses=(
             "Motivating example for operation identity below a shared physical endpoint.",
@@ -507,12 +573,14 @@ def build_x5000r_shared_cgi_case():
             "Evidence-preserving example of closing a cross-resource JavaScript obligation while retaining a native value-flow obligation.",
             "Frontend/native set-difference experiment for version drift, dead UI code, and alternate backend hypotheses.",
             "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state.",
+            "Evidence-backed case study showing how frontend/native set differences expose incomplete asset scope, wrapper-only declarations, and native registrations without inventing backend equivalence.",
         ),
         limitations=(
             "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
             "Only the branch-free setLanCfg prefix is proven; DHCP branches, commits, network reconfiguration, and sensitive sinks remain open.",
             "CGI execution configuration does not prove runtime reachability or authentication state.",
             "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
+            "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof.",
         ),
     ))
 

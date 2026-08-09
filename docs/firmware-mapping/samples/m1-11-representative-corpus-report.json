@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:a7b78437a6feac90dd72f01956c352d5bbb8b941b7b7c25ef0dabb0f03454cc1",
+  "report_id": "corpus-report:d55f004a788af10de4392de33de900940aa6f357887abbea9834df15871fc0b6",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -192,7 +192,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:0416439303aa0adf65a8281e1c6881e7376ca26436050d6406a9e8e780d1d257",
+      "catalog_id": "discovery-catalog:f710150342045b38e7c1a0b9a57daec377ffb158b5fef19b4fb00f193dcaa61d",
       "required_capabilities": [
         "binds_handler",
         "constructs_request",
@@ -211,6 +211,8 @@
         "maps_namespace",
         "maps_parameter_to_state",
         "mentions_endpoint",
+        "mentions_operation_token",
+        "mentions_operation_variant",
         "reads_request_parameter",
         "registers_route",
         "resolves_endpoint_binding",
@@ -227,10 +229,11 @@
         "native_parameter_state_flow",
         "native_route_binding",
         "request_interface",
+        "set_difference_attribution",
         "web_configuration"
       ],
-      "candidate_count": 589,
-      "evidence_count": 1448,
+      "candidate_count": 679,
+      "evidence_count": 1580,
       "open_obligation_count": 0
     }
   ],
@@ -254,6 +257,8 @@
         "maps_namespace",
         "maps_parameter_to_state",
         "mentions_endpoint",
+        "mentions_operation_token",
+        "mentions_operation_variant",
         "reads_request_parameter",
         "registers_route",
         "resolves_endpoint_binding",
@@ -268,6 +273,7 @@
         "native_parameter_state_flow",
         "native_route_binding",
         "request_interface",
+        "set_difference_attribution",
         "web_configuration"
       ],
       "open_obligation_count": 0

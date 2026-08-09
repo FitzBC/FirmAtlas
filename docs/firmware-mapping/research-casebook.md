@@ -114,15 +114,17 @@ flowchart LR
 不同 EvidenceAtom。真实 wrapper 通过 `this.type` 动态选择方法，因此不能把所有动作
 写成 POST。随后 MIPS Inline Table Profile 从四个带大小的动态符号恢复 138 条注册，
 为 123/199 个前端 selector 建立 124 条 handler proof；`getTelnetCfg` 的两条相同注册
-作为重复事实保留。76 个 Frontend-only 与 14 个 Native-only operation 继续作为版本、
-条件构建、死代码或替代处理主体假设。对 `setLanCfg@0x004209b8`，系统进一步从
+作为重复事实保留。系统进一步对 76 个 Frontend-only 与 14 个 Native-only operation
+做了有界归因：38 个由辅助功能页消费但 dispatcher 无注册、38 个只有 wrapper 声明、
+3 个是原三文件前端图的范围缺口、1 个是 `loginAuth` / `userloginAuth` 后缀变体、10 个
+只有 native registration 且无前端引用。这些是静态证据形状，不是版本、死代码或
+替代处理主体的因果证明。对 `setLanCfg@0x004209b8`，系统进一步从
 dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 `lanIp→lan_ipaddr`、`lanNetmask→lan_netmask` 两条请求参数—配置状态链，并在
 `0x00420ad8` 的首个条件分支停止；DHCP 分支和敏感 sink 仍未确认。
 
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
-“跨资源义务关闭、Native 子集绑定、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此
-声称动态 selector 全集、76/14 差集原因、运行时可达、认证状态或漏洞数据流已确认。
+“跨资源义务关闭、Native 子集绑定、差集形状归因、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、76/14 差集的运行时原因、运行时可达、认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
 
 ## 3. 后续案例准入触发器
 

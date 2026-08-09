@@ -18,6 +18,7 @@ from firmatlas.mapping import (
     InventoryPolicy,
     NativeRouteAnchor,
     SourceArtifactEntry,
+    attribute_frontend_native_set_difference,
     assemble_discovery_catalog,
     build_inventory,
     build_corpus_report,
@@ -33,6 +34,17 @@ from firmatlas.mapping import (
     native_deep_scheduler_analyzer,
     run_obligation_scheduler,
 )
+
+if __package__:
+    from scripts.build_x5000r_set_difference_report import (
+        _auxiliary_artifacts as _x5000r_auxiliary_artifacts,
+        _probe_anchors as _x5000r_probe_anchors,
+    )
+else:
+    from build_x5000r_set_difference_report import (
+        _auxiliary_artifacts as _x5000r_auxiliary_artifacts,
+        _probe_anchors as _x5000r_probe_anchors,
+    )
 
 
 AC9_FIRMWARE_SHA256 = "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296"
@@ -185,6 +197,14 @@ def _x5000r_catalog(root: Path):
             and parameter.source_construct == "shared-cgi.topicurl"
         ),
     )
+    table_inventory = discover_mips_inline_route_bindings(
+        native_source, native_content, _x5000r_probe_anchors(native_content)
+    )
+    set_difference = attribute_frontend_native_set_difference(
+        frontend_graph,
+        table_inventory,
+        _x5000r_auxiliary_artifacts(root),
+    )
     value_flow = discover_mips_handler_value_flows(
         native_source, native_content, 0x004209B8
     )
@@ -213,6 +233,7 @@ def _x5000r_catalog(root: Path):
                 (value_flow,), paths["native"] + ":setLanCfg"
             ),
         ),
+        set_difference=set_difference,
         source_inventory_coverage_status=inventory.coverage_status,
     ))
 
