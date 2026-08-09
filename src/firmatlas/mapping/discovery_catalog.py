@@ -11,6 +11,7 @@ from typing import Optional, Tuple
 
 from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom
 from .frontend import FrontendProducerResult
+from .parameter_clue import FrontendParameterClueIndex
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -48,6 +49,7 @@ class DiscoveryProducerKind(str, Enum):
     CORRELATION = "correlation"
     SCHEDULER = "scheduler"
     UBUS_BACKEND = "ubus_backend"
+    PARAMETER_CLUE = "parameter_clue"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -71,6 +73,7 @@ class DiscoveryCandidateKind(str, Enum):
     RUNTIME_PRINCIPAL = "runtime_principal"
     UBUS_BACKEND_BINDING = "ubus_backend_binding"
     UBUS_ACCESS_GRANT = "ubus_access_grant"
+    PARAMETER_CLUE_ASSESSMENT = "parameter_clue_assessment"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -96,6 +99,17 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("frontend-request-producer", "0.1.0")
         )
         return cls(DiscoveryProducerKind.FRONTEND, producer, scope, results)
+
+    @classmethod
+    def parameter_clue(
+        cls, results: Tuple[FrontendParameterClueIndex, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("frontend-parameter-clue", "0.2.0")
+        )
+        return cls(DiscoveryProducerKind.PARAMETER_CLUE, producer, scope, results)
 
     @classmethod
     def web_configuration(
@@ -417,6 +431,48 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                         (item.literal_value,) if item.literal_value is not None else (),
                         item.is_operation_selector, item.source_construct,
                         item.evidence_ids,
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.PARAMETER_CLUE:
+                request_identities = {
+                    item.candidate_id: item.canonical_identity
+                    for item in candidates
+                    if item.candidate_kind is DiscoveryCandidateKind.REQUEST_INTERFACE
+                }
+                for item in result.assessments:
+                    endpoint = request_identities.get(
+                        item.request_candidate_id, item.request_candidate_id
+                    )
+                    proof_ids = tuple(dict.fromkeys((
+                        *item.frontend_evidence_ids,
+                        *(hit.evidence_id for hit in item.occurrences),
+                    )))
+                    source_path = (
+                        item.occurrences[0].artifact_path
+                        if item.occurrences
+                        else evidence[proof_ids[0]].source_span.artifact_path
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        _stable_id(
+                            "parameter-clue-assessment",
+                            item.parameter_id,
+                            item.assessment_status,
+                            *(hit.evidence_id for hit in item.occurrences),
+                        ),
+                        DiscoveryCandidateKind.PARAMETER_CLUE_ASSESSMENT,
+                        "{}|{}".format(endpoint, item.parameter_name),
+                        DiscoveryClaimStatus.CANDIDATE,
+                        source_path,
+                        result.schema_version,
+                        proof_ids,
+                        (
+                            ("target_ref", item.parameter_id),
+                            ("assessment_status", item.assessment_status),
+                            ("occurrence_count", str(len(item.occurrences))),
+                            ("artifact_paths", json.dumps(
+                                sorted({hit.artifact_path for hit in item.occurrences}),
+                                separators=(",", ":"),
+                            )),
+                        ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.WEB_CONFIGURATION:
                 for item in result.findings:

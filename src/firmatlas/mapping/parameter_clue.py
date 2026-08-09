@@ -12,7 +12,7 @@ from .frontend import FrontendAssetGraphResult, FrontendParameterDirection
 from .inventory import SourceArtifactEntry
 
 PARAMETER_CLUE_SCHEMA_VERSION = "firmatlas.mapping.parameter-clue/v1alpha1"
-_PRODUCER = AnalyzerIdentity("frontend-parameter-clue", "0.1.0")
+_PRODUCER = AnalyzerIdentity("frontend-parameter-clue", "0.2.0")
 _IDENTIFIER_BYTES = frozenset(b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$")
 
 
@@ -39,7 +39,7 @@ class ParameterCluePolicy:
     max_artifacts: int = 10_000
     max_total_bytes: int = 256 * 1024 * 1024
     max_parameters: int = 10_000
-    max_hits_per_parameter: int = 100
+    max_hits_per_parameter: int = 1_000
 
     def __post_init__(self) -> None:
         if min(self.max_artifacts, self.max_total_bytes, self.max_parameters, self.max_hits_per_parameter) <= 0:
@@ -91,6 +91,16 @@ def _exact_offsets(content: bytes, token: bytes):
         start = offset + 1
 
 
+def _span_kind(artifact: ParameterClueArtifact) -> SpanKind:
+    if artifact.role is ParameterClueArtifactRole.NATIVE:
+        return SpanKind.BINARY
+    try:
+        artifact.content.decode("utf-8")
+    except UnicodeDecodeError:
+        return SpanKind.BINARY
+    return SpanKind.TEXT_UTF8
+
+
 def trace_frontend_parameter_clues(
     frontend_graph: FrontendAssetGraphResult,
     artifacts: Tuple[ParameterClueArtifact, ...],
@@ -138,12 +148,16 @@ def trace_frontend_parameter_clues(
                     break
                 atom = capture_evidence(
                     artifact.source, artifact.content,
-                    SpanSelection(SpanKind.BINARY if artifact.role is ParameterClueArtifactRole.NATIVE else SpanKind.TEXT_UTF8, offset, offset + len(token)),
+                    SpanSelection(_span_kind(artifact), offset, offset + len(token)),
                     EvidenceClaim(parameter.parameter_id, "has_same_firmware_token_clue", parameter.name, ObservationKind.DIRECT_STATIC, "external_parameter_token", 0.55),
                     _PRODUCER,
                 )
                 evidence[atom.evidence_id] = atom
                 occurrences.append(ParameterClueOccurrence(artifact.source.canonical_path, artifact.role, offset, offset + len(token), atom.evidence_id))
+                # One minimal representative span per artifact is sufficient to
+                # establish token presence and prevents common names from
+                # flooding the evidence ledger.
+                break
             if hit_limited:
                 diagnostics.append("parameter_clue.hit_budget_exhausted")
                 break

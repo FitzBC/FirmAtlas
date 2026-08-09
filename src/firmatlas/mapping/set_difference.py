@@ -395,6 +395,12 @@ def attribute_frontend_native_set_difference(
         for parameter in result.parameters:
             if not parameter.is_operation_selector or parameter.literal_value is None:
                 continue
+            # Low-entropy scalar values (for example ``action=1``) are valid
+            # parameter facts but not useful identities for cross-binary route
+            # set comparison; scanning them would turn ubiquitous constants
+            # into misleading associations and exhaust the evidence budget.
+            if not any(character.isalpha() for character in parameter.literal_value):
+                continue
             if any(evidence_id not in frontend_evidence for evidence_id in parameter.evidence_ids):
                 raise ValueError("frontend selector references unknown evidence")
             frontend_members.setdefault(parameter.literal_value, set()).update(

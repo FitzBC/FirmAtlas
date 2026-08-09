@@ -30,6 +30,7 @@ _SUPPORTED_CONSTRUCTS = (
     "jQuery.post",
     "jQuery.ajax",
     "custom.request",
+    "custom.GetSetData.setData",
     "custom.file-upload-property",
     "shared-cgi.topicurl",
     "LuCI.rpc.declare",
@@ -66,6 +67,8 @@ class FrontendParameterDirection(str, Enum):
 class FrontendPolicy:
     max_source_bytes: int = 8 * 1024 * 1024
     max_candidates: int = 10_000
+    enable_inline_form_literal: bool = True
+    enable_tenda_get_set_data: bool = True
 
     def __post_init__(self) -> None:
         if self.max_source_bytes <= 0 or self.max_candidates <= 0:
@@ -616,7 +619,9 @@ def _assigned_parameters(tokens: Tuple[_Token, ...]) -> dict:
     return assignments
 
 
-def _jquery_post_calls(content: bytes) -> tuple:
+def _jquery_post_calls(
+    content: bytes, enable_inline_form_literal: bool = True
+) -> tuple:
     tokens = _tokenize_javascript(content)
     assignments = _assigned_parameters(tokens)
     results = []
@@ -628,6 +633,32 @@ def _jquery_post_calls(content: bytes) -> tuple:
         if value.kind == "string":
             parameters = ()
             if (
+                index + 6 < len(tokens)
+                and tokens[index + 5].value == b","
+                and tokens[index + 6].kind == "string"
+                and enable_inline_form_literal
+            ):
+                payload = tokens[index + 6]
+                parameters = tuple(
+                    _ParameterLiteral(
+                        name=match.group(1).decode("ascii"),
+                        name_start=payload.start + match.start(1),
+                        name_end=payload.start + match.end(1),
+                        namespace=FrontendParameterNamespace.FORM,
+                        literal_value=match.group(2).decode("utf-8"),
+                        value_start=payload.start + match.start(2),
+                        value_end=payload.start + match.end(2),
+                        is_operation_selector=(
+                            match.group(1).lower() in {b"action", b"cmd", b"operation", b"op"}
+                        ),
+                        source_construct="jQuery.post.form-urlencoded",
+                    )
+                    for match in re.finditer(
+                        rb"(?:^|&)([A-Za-z_][A-Za-z0-9_.-]*)=([^&]*)",
+                        payload.value,
+                    )
+                )
+            elif (
                 index + 6 < len(tokens)
                 and tokens[index + 5].value == b","
                 and tokens[index + 6].kind == "identifier"
@@ -672,6 +703,51 @@ def _jquery_get_json_calls(content: bytes) -> tuple:
         results.append(
             (value.value.decode("utf-8"), value.start, value.end, shape)
         )
+    return tuple(results)
+
+
+def _get_set_data_calls(content: bytes) -> tuple:
+    """Recover Tenda's bounded ``$.GetSetData.setData`` request wrapper."""
+    tokens = _tokenize_javascript(content)
+    results = []
+    prefix = (b"$", b".", b"GetSetData", b".", b"setData", b"(")
+    for index in range(0, max(0, len(tokens) - len(prefix) + 1)):
+        if tuple(item.value for item in tokens[index:index + 6]) != prefix:
+            continue
+        endpoint = tokens[index + 6] if index + 6 < len(tokens) else None
+        if endpoint is None or endpoint.kind != "string":
+            continue
+        comma_index = index + 7
+        while comma_index < len(tokens) and tokens[comma_index].value != b",":
+            comma_index += 1
+        if comma_index + 1 >= len(tokens):
+            continue
+        payload = tokens[comma_index + 1]
+        properties = ()
+        if payload.value == b"{":
+            properties, _ = _object_properties(tokens, comma_index + 1)
+        elif payload.kind == "identifier":
+            properties = _identifier_object_properties(tokens, payload.value, 0, index)
+        parameters = tuple(
+            _ParameterLiteral(
+                name=key.value.decode("utf-8"),
+                name_start=key.start,
+                name_end=key.end,
+                namespace=FrontendParameterNamespace.FORM,
+                literal_value=value.value.decode("utf-8") if value.kind == "string" else None,
+                value_start=value.start if value.kind == "string" else None,
+                value_end=value.end if value.kind == "string" else None,
+                is_operation_selector=False,
+                source_construct="custom.GetSetData.setData",
+            )
+            for key, value in properties
+        )
+        shape = (
+            FrontendEndpointShape.LITERAL_PREFIX
+            if index + 7 < len(tokens) and tokens[index + 7].value == b"+"
+            else FrontendEndpointShape.EXACT_LITERAL
+        )
+        results.append((endpoint.value.decode("utf-8"), endpoint.start, endpoint.end, shape, parameters))
     return tuple(results)
 
 
@@ -1419,6 +1495,7 @@ def _request_literals(
     source_path: str,
     external_bindings: Optional[dict] = None,
     page_model_set_method: Optional[str] = None,
+    policy: FrontendPolicy = FrontendPolicy(),
 ) -> tuple:
     discoveries = []
     luci_rpc, _, _ = _luci_rpc_declarations(content)
@@ -1490,7 +1567,9 @@ def _request_literals(
             module_parameters,
         )
     discoveries.extend(page_model_discoveries)
-    for endpoint, start_byte, end_byte, parameters in _jquery_post_calls(content):
+    for endpoint, start_byte, end_byte, parameters in _jquery_post_calls(
+        content, policy.enable_inline_form_literal
+    ):
         discoveries.append(
             (
                 endpoint,
@@ -1518,6 +1597,21 @@ def _request_literals(
                 (),
             )
         )
+    if policy.enable_tenda_get_set_data:
+        for endpoint, start_byte, end_byte, shape, parameters in _get_set_data_calls(content):
+            discoveries.append(
+                (
+                    endpoint,
+                    start_byte,
+                    end_byte,
+                    shape,
+                    FrontendRequestRole.WRITE,
+                    "POST",
+                    "form_urlencoded",
+                    "custom.GetSetData.setData",
+                    parameters,
+                )
+            )
     for (
         endpoint,
         start_byte,
@@ -1710,6 +1804,7 @@ def _discover_frontend_requests(
         source.canonical_path,
         external_bindings,
         page_model_set_method,
+        policy,
     )
     selected_matches = matches[: policy.max_candidates]
     if len(matches) > len(selected_matches):

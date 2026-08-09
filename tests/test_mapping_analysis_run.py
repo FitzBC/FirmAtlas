@@ -62,7 +62,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "web_configuration",
                 "script_backend", "native", "native_ubus_registration",
                 "arm_pic_callsite", "arm_pic_registrar", "set_difference",
-                "ubus_backend", "scheduler", "catalog",
+                "parameter_clue", "ubus_backend", "scheduler", "catalog",
             },
             {stage.stage_name for stage in first.stages},
         )
@@ -80,6 +80,15 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertIn("hostname", {item.name for item in first.catalog.parameters})
         self.assertIn("mode", {item.name for item in first.catalog.parameters})
+        self.assertEqual(
+            {"/admin/apply|hostname"},
+            {
+                item.canonical_identity
+                for item in first.catalog.candidates
+                if item.candidate_kind
+                is DiscoveryCandidateKind.PARAMETER_CLUE_ASSESSMENT
+            },
+        )
         self.assertTrue(first.source_plan)
 
     def test_producer_failure_is_preserved_in_a_partial_run(self):
@@ -172,9 +181,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v5", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v6", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v5",
+            "firmatlas.mapping.analyzer-registry/builtin-v6",
             result.analyzer_registry_id,
         )
 
@@ -232,10 +241,13 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertEqual(187, registrar_stage.output_count)
         hidden = build_potential_hidden_interface_index(result.catalog)
         self.assertEqual(CoverageStatus.COMPLETED, hidden.coverage_status)
-        self.assertEqual(110, len(hidden.items))
+        self.assertEqual(107, len(hidden.items))
         hidden_tokens = {item.operation_token for item in hidden.items}
         self.assertIn("GetDeviceDetail", hidden_tokens)
         self.assertNotIn("SetSambaCfg", hidden_tokens)
+        self.assertFalse({
+            "setUsbUnload", "setNotUpgrade", "setPptpUserList",
+        } & hidden_tokens)
         recovered = {
             item.canonical_identity: dict(item.attributes).get("handler_symbol")
             for item in result.catalog.candidates

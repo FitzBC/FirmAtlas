@@ -24,10 +24,59 @@ from firmatlas.mapping import (
     discover_script_backend,
     discover_web_configuration,
     discover_native_hints,
+    discover_frontend_asset_graph,
+    FrontendAssetInput,
+    ParameterClueArtifact,
+    ParameterClueArtifactRole,
+    trace_frontend_parameter_clues,
 )
 
 
 class DiscoveryCatalogContractTests(unittest.TestCase):
+    def test_parameter_clue_batch_publishes_positive_and_negative_assessments(self):
+        frontend_content = b'''var pageModel=R.pageModel({setUrl:"/save"});
+var moduleModel=R.moduleModel({getSubmitData:function(){return "name="+n+"&mode="+m;}});'''
+        frontend_source = self.source("www/app.js", frontend_content)
+        frontend_graph = discover_frontend_asset_graph((
+            FrontendAssetInput(frontend_source, frontend_content),
+        ))
+        config_content = b"name=router"
+        config_source = self.source("etc/app.conf", config_content)
+        clues = trace_frontend_parameter_clues(
+            frontend_graph,
+            (ParameterClueArtifact(
+                config_source, config_content,
+                ParameterClueArtifactRole.CONFIGURATION,
+            ),),
+        )
+
+        result = assemble_discovery_catalog(DiscoveryCatalogInput(
+            firmware_artifact_sha256="1" * 64,
+            source_inventory_sha256="2" * 64,
+            batches=(
+                DiscoveryProducerBatch.frontend(frontend_graph.results, "www"),
+                DiscoveryProducerBatch.parameter_clue((clues,), "rootfs/non-frontend"),
+            ),
+        ))
+
+        assessments = {
+            item.canonical_identity: item
+            for item in result.candidates
+            if item.candidate_kind.value == "parameter_clue_assessment"
+        }
+        self.assertEqual({"/save|name", "/save|mode"}, set(assessments))
+        self.assertEqual(
+            "external_clue_observed",
+            dict(assessments["/save|name"].attributes)["assessment_status"],
+        )
+        self.assertEqual(
+            "no_external_clue",
+            dict(assessments["/save|mode"].attributes)["assessment_status"],
+        )
+        self.assertEqual(
+            "candidate", assessments["/save|name"].claim_status.value
+        )
+
     @staticmethod
     def source(path, content):
         return SourceArtifactEntry(

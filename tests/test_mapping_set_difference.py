@@ -71,6 +71,25 @@ function Dispatcher() {
 
 
 class FrontendNativeSetDifferenceContractTests(unittest.TestCase):
+    def test_low_entropy_selector_value_is_not_compared_as_route_identity(self):
+        frontend = discover_frontend_asset_graph((
+            _asset(
+                "www/dlna.js",
+                b'$.post("/goform/refreshDLNA", "action=1", callback);',
+            ),
+        ))
+        _, native = _upstreams((), ("refreshDLNA", "NativeOnly"))
+
+        result = attribute_frontend_native_set_difference(
+            frontend, native, (), SetDifferencePolicy.route_aware()
+        )
+
+        self.assertEqual(1, result.frontend_token_count)
+        self.assertNotIn("1", {item.token for item in result.attributions})
+        self.assertEqual(
+            {"NativeOnly"}, {item.token for item in result.attributions}
+        )
+
     def test_dispatcher_self_literal_is_a_clue_only_for_frontend_missing_route(self):
         frontend = discover_frontend_asset_graph((
             _asset("www/page.js", b'$.post("goform/MissingRoute", {});'),

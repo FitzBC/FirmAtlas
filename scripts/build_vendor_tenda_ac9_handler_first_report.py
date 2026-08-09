@@ -5,14 +5,14 @@ from __future__ import annotations
 
 import json
 
-from firmatlas.mapping import BUILTIN_ANALYZER_REGISTRY, MappingAnalysisProfile
+from firmatlas.mapping import BUILTIN_ANALYZER_REGISTRY_V5, MappingAnalysisProfile
 from build_vendor_tenda_ac9_registrar_inventory_report import build_report
 
 
 def build_handler_first_report() -> dict:
     report = build_report(
-        profile=MappingAnalysisProfile.auto(),
-        registry=BUILTIN_ANALYZER_REGISTRY,
+        profile=MappingAnalysisProfile.auto_v5(),
+        registry=BUILTIN_ANALYZER_REGISTRY_V5,
         selected_routes=("GetUpnpCfg", "GetSySLogCfg"),
     )
     report["schema_version"] = "firmatlas.mapping.vendor-tenda-ac9-r2-07/v1alpha1"

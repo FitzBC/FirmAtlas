@@ -1,0 +1,979 @@
+{
+  "analysis_run_id": "mapping-analysis-run:89c54b488e485be140f9964228069eaa28664a5597c81b5641f8aa7e5fc70ea6",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v6",
+  "catalog_id": "discovery-catalog:a48c540e82bfbc02ad9959ac690576f2fbf2d1691919647a2ec960193af59e0a",
+  "coverage_status": "completed",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "frontend_wrapper_recovery": {
+    "hidden_interface_count_after": 107,
+    "hidden_interface_count_before": 110,
+    "new_dlna_parameters": [
+      "folderGrade",
+      "filePath",
+      "action"
+    ],
+    "new_request_operations": [
+      "goform/expandDlnaFile?",
+      "goform/setNotUpgrade",
+      "goform/setPptpUserList",
+      "goform/setUsbUnload",
+      "goform/setThundercfg"
+    ],
+    "removed_from_hidden": [
+      "setNotUpgrade",
+      "setPptpUserList",
+      "setUsbUnload"
+    ]
+  },
+  "historical_expectation_diff": {
+    "catalog_coverage_status": "completed",
+    "catalog_id": "discovery-catalog:a48c540e82bfbc02ad9959ac690576f2fbf2d1691919647a2ec960193af59e0a",
+    "entries": [
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "candidate_ids": [
+          "frontend-request:e4c940ef585000e9154d57d3e86a15dbdb80c8a733b5a657cf712eec5f1cfa97"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:09fb8b16e830a4ce2ac79f819f748884ce499040e448423367e2caca5cfdfbb9",
+          "evidence:5df8574f4a59f1bf16bd162d5b7e20c77fc753d042feb1de54031f06cb98b59a",
+          "evidence:7a5ceff2ee8edf6928376b0af2f9cb99114e2b5011950821b456f632db64151d",
+          "evidence:86de5269fb44914c2bd9637b383a6f93edd114f11224bccf8bc375a0941cc7e1",
+          "evidence:98110847d7b0ab67d7164d43ca65203f8239cde91a8c661c7b53b4ecb55d0da5",
+          "evidence:c92b460e4aad21e31fca1ea1f4b9472bf091f32ae3c429ee46fe19f23d0a2b1a",
+          "evidence:f54db6b465bd4eefe6590813ef0cdfc43c8b9407dfd0b7210273e062cb29944b"
+        ],
+        "claimed_versions": [
+          "15.03.02.13"
+        ],
+        "expectation_id": "historical-expectation:27507b29a4a11d602df0166818dc613878e45160893937c1ed39c9ad1b95487f",
+        "expected_parameters": [
+          "list"
+        ],
+        "gap_reason": "none",
+        "handler_value": "formSetIptv",
+        "interface_value": "/goform/SetIPTVCfg",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "igmpEn",
+          "iptvType",
+          "list",
+          "stbEn",
+          "vlanId"
+        ],
+        "source_ref": "semantic-analysis:CVE-2025-5836",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-5836"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+        "candidate_ids": [
+          "frontend-request:d98ff4fc82f197c0aca5705356103c0f4cc143327c5031d58effe812acb19480"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:0f0a0ac7be63c7f5ed18668ee46c8c4ccce6eac0e158c3747e1fe7559294a0d6",
+          "evidence:1e14b35994472b4c1cd176de9a7ccc1c6ceba6835c1c50868dc58ce27fa2df4f",
+          "evidence:3f4a21dc761dbe86b68c0419257b62795c22e54d9ccf391a868f4a5e60a80de6",
+          "evidence:6ce519e48e5919331565bce50aaa2a40ccef63ac480c72f66484b323f0a4928a",
+          "evidence:87b6ad7d0c74807c550af22a388ba493b41228fe8e3d349d37440c41490037bc",
+          "evidence:a19dd23f4ccec5c995b8b0904bc49378ea8e748cc8b37b58c153c7b8d6473921",
+          "evidence:c8d427934ae0ddfacc8f23ba18e5dae49458f51785577d5a18658980be0e7a38",
+          "evidence:cf6ccb23c9677e412a9a6c4f65ea6adf96ce66954b6a088c927fd3df218f5318",
+          "evidence:d9596068c1710b0e613f39c5c55ad5a4af51f5c6a7b4509986be64363b794ff0",
+          "evidence:dafab95fd6a633653d810b37d466b3ef5bf1686f9cf38c6992b0b9a4299c2629",
+          "evidence:e1a7c280a59af3f6ca548fdad09f23401559bfc9f9c88e742c96f240af5a863a",
+          "evidence:fb9cfd02b13ebeae2dc10fba9b53b4b64c6341b7a2f471ea0325d086659da7a4"
+        ],
+        "claimed_versions": [
+          "15.03.05.14_multi"
+        ],
+        "expectation_id": "historical-expectation:2923eb6bb309ffe4e847cb002272e556f30ecbd4ab9d0c83f409e0aa40908a7e",
+        "expected_parameters": [
+          "security"
+        ],
+        "gap_reason": "none",
+        "handler_value": "formWifiBasicSet",
+        "interface_value": "/goform/WifiBasicSet",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "hideSsid",
+          "hideSsid_5g",
+          "security",
+          "security_5g",
+          "ssid",
+          "ssid_5g",
+          "wrlEn",
+          "wrlEn_5g",
+          "wrlPwd",
+          "wrlPwd_5g"
+        ],
+        "source_ref": "nvd:CVE-2025-45427",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-45427"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "candidate_ids": [
+          "native-route-binding:646bea552a24f1df74d337c0a322dac3f5e7ee230e696dd80726881984802e9b"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:234fc5c72fbb9c6aa2ffb34e1a9309a38daae7905704b2a7bd1d120d36c0ee26",
+          "evidence:36c88a8b04b153f5378b9e37f34a145ba5e136a5bec68d10a75fa438a5bb7930",
+          "evidence:3c13038adb71a60ff256903daab9389ee34af40139f22e333c3af4b9df1ddefc",
+          "evidence:7988335bd4e748f991bfd798a419ae807b321dec5f69ca7b3c4ae7a11ee60a3f",
+          "evidence:cc8843ad55899c07e8f01bd4d51a7bde98dd6df1c2aaac100a607f1e668493c9"
+        ],
+        "claimed_versions": [
+          "15.03.02.13"
+        ],
+        "expectation_id": "historical-expectation:3eee213d610220f8d486d51172253d4ce999d44429c09e62e28883ff93aaffcc",
+        "expected_parameters": [
+          "WANS"
+        ],
+        "gap_reason": "artifact_out_of_scope",
+        "handler_value": "decodePwd",
+        "interface_value": "/goform/WizardHandle",
+        "method": null,
+        "missing_parameters": [
+          "WANS"
+        ],
+        "observed_methods": [],
+        "observed_parameters": [],
+        "source_ref": "semantic-analysis:CVE-2026-6016",
+        "status": "not_assessable",
+        "vulnerability_identifier": "CVE-2026-6016"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "candidate_ids": [
+          "native-hint:7164c51edc27945663af79dc0ad17337089d2a3562c6e4a890e17a75d6065a97",
+          "native-route-binding:69d9e12838e14c8c929dd7cbdc78c9a9dca3fb1ac4a3dc7bc4634b09155481ab"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:1b65782a2576a3defbf15dcbb85d3807b4a4bb416e452808e7057325ccfa483d",
+          "evidence:3adb869c7320cac73e987272d867260fce70590a35016536553b111f3e375174",
+          "evidence:54faa8a8554777491a17c74887820e9a143b367768faec0523f25f192c11d107",
+          "evidence:af7c0c3e19688619b2524e906caa9c30d9239c34b38c617a1862bc73328aa159",
+          "evidence:d835de5e105dc6ac64fa1256201e4ad77aafe5ffaf30453959c0e19f7e81d6da",
+          "evidence:f0a4a306da7472de8d6ffda2fa60f0af1e2e80a5d3d690e6d108b169ae53850b"
+        ],
+        "claimed_versions": [
+          "15.03.02.13"
+        ],
+        "expectation_id": "historical-expectation:47a8b6f2d711c01c814f28c22c3b9ec0396922ed9497c86eea6ee9da8b70e7fc",
+        "expected_parameters": [
+          "PPPOEPassword"
+        ],
+        "gap_reason": "artifact_out_of_scope",
+        "handler_value": "formQuickIndex",
+        "interface_value": "/goform/QuickIndex",
+        "method": null,
+        "missing_parameters": [
+          "PPPOEPassword"
+        ],
+        "observed_methods": [],
+        "observed_parameters": [],
+        "source_ref": "semantic-analysis:CVE-2026-6015",
+        "status": "not_assessable",
+        "vulnerability_identifier": "CVE-2026-6015"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+        "candidate_ids": [
+          "frontend-request:fad45ec738d85f243e65e874368c113a538fc16bbb898815ab8a09e747520189"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:27281df33e020345ad7245b587948673ed1c2c54224fbcd8e60d3372cb78381c",
+          "evidence:31d45fc305b1f2787b23aa56a0f17b79939f2e042fdc460af820965b2c0c6a0a",
+          "evidence:9f3e4adda357b14aa53b78ecf34d6fefae2482d0d6027948b26e352e807f14c1"
+        ],
+        "claimed_versions": [
+          "15.03.05.14_multi"
+        ],
+        "expectation_id": "historical-expectation:4a51df8b66a2d5d93c7fa1e7823877776e78be698ccc762b202587c62f39b54a",
+        "expected_parameters": [],
+        "gap_reason": "none",
+        "handler_value": null,
+        "interface_value": "/goform/WifiWpsStart",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "action"
+        ],
+        "source_ref": "semantic-analysis:CVE-2025-45429",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-45429"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+        "candidate_ids": [
+          "frontend-request:4191ecb870ebeec133d9a9813e31fd8bacd3ae5f3861d04be1501e4482218c2c"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:94117abc882da02d8f0e6ca66777f35ea6613ceddd9c1fcd578002361bf5b26b",
+          "evidence:9c7e8d67899f0825dbbdc9282ba7046b8ce1578e1fe075039d8223709bb1bdf1",
+          "evidence:dfa5b06bd332ec726d5080807515500fec20124b661103928eccf8a09f5fffbd",
+          "evidence:e4a07cf6da375ec9e0617959be3b97dd05b23b32589b2f925adc2e11fd2434d0",
+          "evidence:f83b813c3108bb5d9da9e5ef1d79e359628267badf0848fe30bf577172d65bb4"
+        ],
+        "claimed_versions": [
+          "15.03.05.14_multi"
+        ],
+        "expectation_id": "historical-expectation:5f90d35dfc0c71aa7d4fd84ebcd56b677b0fa9a0fe3392508856fa6cc27a889e",
+        "expected_parameters": [
+          "rebootTime"
+        ],
+        "gap_reason": "none",
+        "handler_value": null,
+        "interface_value": "/goform/SetSysAutoRebbotCfg",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "autoRebootEn",
+          "delayRebootEn",
+          "rebootTime"
+        ],
+        "source_ref": "nvd:CVE-2025-45428",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-45428"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "candidate_ids": [
+          "frontend-request:d3d4f84dd763e749235427f382d3bf0b232a4ddacc366f7fdf7849b1d103dc9e"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:09f041c0215da0a43ccc6143e527bd643e37a0308fda5252b33ce77987a89aee",
+          "evidence:1e0cd6538dd355d7ed17b9f0455c9d71b614c71584cfe3acae79ac7f7a767299",
+          "evidence:4446c074b1d5c5180350c45a2ef26f005d47fc5f737ed35893ed67625075900e",
+          "evidence:635b7493643e057926576959280cc4fec700e149db31c2df51966619764071ae",
+          "evidence:896d94adab7a4c852f688ab63e38c6792d4a6bf7c8ea516daf5cb6f8ebf2733f",
+          "evidence:a7f2d7331412d29c2d06d5745a9ac224dc4bccbcf4d348f70ae80f2f14347e5f",
+          "evidence:c743926d502399b86b5a1224c63e7d0683d9d2f4c1b04f0a0b3b406667ec5676",
+          "evidence:c9eb8e3311ddb968b9241df88fe522ab2e93a68308387748d1a2910bff92745f"
+        ],
+        "claimed_versions": [
+          "15.03.02.13"
+        ],
+        "expectation_id": "historical-expectation:61f009ae1ce245360dccd6e118111f7445840aecfefd2442ff43d76b915686ea",
+        "expected_parameters": [
+          "remoteIp"
+        ],
+        "gap_reason": "none",
+        "handler_value": "formSetSafeWanWebMan",
+        "interface_value": "/goform/SetRemoteWebCfg",
+        "method": "POST",
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "remoteIp",
+          "remotePort",
+          "remoteWebEn"
+        ],
+        "source_ref": "semantic-analysis:CVE-2025-5847",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-5847"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+        "candidate_ids": [],
+        "catalog_evidence_ids": [],
+        "claimed_versions": [
+          "15.03.05.14_multi"
+        ],
+        "expectation_id": "historical-expectation:6a89310326d92fc4f827cdc04270257b0b8694c6ab06708d6c6d7d5d09f8c0cc",
+        "expected_parameters": [],
+        "gap_reason": "artifact_out_of_scope",
+        "handler_value": null,
+        "interface_value": "/cgi-bin/DownloadCfg.jpg",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [],
+        "observed_parameters": [],
+        "source_ref": "semantic-analysis:CVE-2025-14286",
+        "status": "not_assessable",
+        "vulnerability_identifier": "CVE-2025-14286"
+      },
+      {
+        "applicability": "exact_artifact",
+        "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19",
+        "candidate_ids": [
+          "frontend-request:f9ad52d1518c2b6d9c0788373ccd0b7123d520204f35c12ec6fd6cb3f8cfad8f"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:1b692bf882f91e5ab121537ab94e58940bc78ea8b68e80e063ff09b10eb32d0e",
+          "evidence:2c6b001e96fdc0b0b93272b1150be389f6a4cec975cdeedaf6703b3a21a5220a",
+          "evidence:41c736c458d87debd7896c9041ca0c6d30a222cdd54190946f96772643abd695",
+          "evidence:59573773ad228cdf2185d6303c5b6da2ceb3e745e03d7defa28548fcd057de63",
+          "evidence:6d50d3cc67c0640bb9b185541b5a978e5a79b8ab154664a48780b32637b921b4",
+          "evidence:709671f501568ddea58b32cf08761eda4124a2f7954ded10263ecc5f9c3a35fd",
+          "evidence:7e7131d3aebdb504df03fadec888fa9141256f78e4da33aaec68aaa8c3ab7ae0",
+          "evidence:880fb474e75dbf62fe7ea3030bc9200529d480e0f49723ebbb4613a2422ae517",
+          "evidence:fb0cf3279e277ffbd2c9ec3ad33ddaff2641cccfe144df489260d858cf08dad9"
+        ],
+        "claimed_versions": [
+          "15.03.05.19"
+        ],
+        "expectation_id": "historical-expectation:71d0f9c5b81c78c9ea46ab9e787cb79b66e8257e3e425cc552603088ab173d6b",
+        "expected_parameters": [],
+        "gap_reason": "none",
+        "handler_value": null,
+        "interface_value": "/goform/SetSambaCfg",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "fileCode",
+          "guestaccess",
+          "guestpwd",
+          "guestuser",
+          "internetPort",
+          "password",
+          "premitEn"
+        ],
+        "source_ref": "semantic-analysis:CVE-2025-22949",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-22949"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "candidate_ids": [
+          "frontend-request:15313f290a8e59e0101f09b26c681d4b3f961b9c99b0da1f8fc7f7084071be13"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:10106c486f0bb7cd25d6a4f2ab818a8b2acd75304982caa0515da3018d56a26b",
+          "evidence:2efa78e14df45a16b256694e8fc671caea497ee15ea3895771a9cb4a644a1838",
+          "evidence:3359b358bb897ce6112dbca9ccce67494216a9d1f75f8b391131510ac33a6d2b",
+          "evidence:35afc4d1ba808cc3eaf2aa6ccfab873ef0d3dd8bfe08cad174d452f75e520fa5",
+          "evidence:3713d0fb14e8610f4b9372e8b6020034decfdcadb0b82d1bc3fc7585ffffe6ed",
+          "evidence:4292b91acb1a281d9e7dc71783ca955cf2b51fae18c51970336cb16b88d4f168",
+          "evidence:a77b2b2ba9249bb555257aa9e20d6ad08d3ecbfcc851748ef04b4f0c1eca75b2",
+          "evidence:c0fb4d51e680b3eb8fb33266f830cfea79cfb61c6c3b0ff9e0e281b217bc20ec",
+          "evidence:cef4be09aa6ef8e3dfdaa72ed3d198ae6495dd842ddef1de4684e3a3e7041db3",
+          "evidence:d8bd6b19af04cd99c880bcb26d6ea6ca0194ad56d38e89396b59d40e37bb5e75",
+          "evidence:ebc1dae2914ffbc640deb3e0ae652c71ab9dd6ed4c2417f43bfa778d4f1ca8ba"
+        ],
+        "claimed_versions": [
+          "15.03.02.13"
+        ],
+        "expectation_id": "historical-expectation:a34517e78cde71017a9e991ac1a1a4ca08cd17040cfc4b68a8dcf2a41d2e52b2",
+        "expected_parameters": [
+          "lanMask"
+        ],
+        "gap_reason": "none",
+        "handler_value": "fromAdvSetLanip",
+        "interface_value": "/goform/AdvSetLanip",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "dhcpEn",
+          "endIp",
+          "lanDns1",
+          "lanDns2",
+          "lanDnsAuto",
+          "lanIp",
+          "lanMask",
+          "leaseTime",
+          "startIp"
+        ],
+        "source_ref": "semantic-analysis:CVE-2025-5839",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-5839"
+      },
+      {
+        "applicability": "exact_artifact",
+        "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19",
+        "candidate_ids": [
+          "frontend-request:30a992559e38517b9ef11e7a9880599fd6a6a7d53c714ba945dc9655f717b0f1",
+          "frontend-request:513a146d995ad9f930a316ed9361de24b36c04c5fcfa6208d3af6b490b9959e1",
+          "frontend-request:867f27ff10d0b9e0a5eeb6e48cc186ad68243298cfb1dc4ca2238b4025728159",
+          "frontend-request:8f8a50020c71bc62bd5b5f665959524aa949af50aa49975d6f209af78bb31d29"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:0d9f944d4b49d0a020d330a242a83dd18cfe2469dfca0747811b597440f1e00a",
+          "evidence:21b00efacd8603336bf79a222508fb50cfcf290ff3f2a70613b07d2150f2724c",
+          "evidence:24317743b44162d49496c2ae54bbad0ecb1883e83bd0370cf82cefc950acaf89",
+          "evidence:2eecdb27e453c93d359cfd4be2a28aa214d236c98ae3efa449bac2e7867571a1",
+          "evidence:47d4aad76a52544c2dae608fd742831361be3e6f57b15375de5af8c90b10c31a",
+          "evidence:5b21e6fa0b299cd3883df69399a9f7cdc9d8f9738651e5cd2a49da204a878396",
+          "evidence:70c22c87a15d30bdb9bb3d5463df5e6cef2d7568dc8280deca1b5581c5bb4678",
+          "evidence:75c6f1a0b5e22b009e88cc3104335fefb8f404cbda2d95b3ad80c8b82d3f5b6f",
+          "evidence:7c6471bacf59d9117208724df20d96be2edbb3c2cf967e51334d98dcfa676bfd",
+          "evidence:8adc67a5d46a9d3582908da3634361b8ca62fccd5a4152f20cf98bdd2675dfc5",
+          "evidence:a29b032a873a3eb4bbaeb716f401fdf29e185cee3b2f40baa2d34169765ee9eb",
+          "evidence:bc09a0001bde158ae3a37d6e133b04be1473eba36e26d9c4b98d29453336b018",
+          "evidence:cca023c92c8d3ca17aca7f643ff5df1e6845a22e4f67600bd1b53218ac9d7e30",
+          "evidence:d3d5de1845e467631231ace50287eb99002f81b199b5f57f64d3391c4c331a9a",
+          "evidence:fe1b8e3cbd1ee9bba401c224a77a83d1df3257d1b7d16b77b85233e2140081a3"
+        ],
+        "claimed_versions": [
+          "15.03.05.19"
+        ],
+        "expectation_id": "historical-expectation:afb7be89f141baacd95bfec69956e37543f84bf4608e8182fad3dfe52405a3cb",
+        "expected_parameters": [],
+        "gap_reason": "none",
+        "handler_value": null,
+        "interface_value": "/goform/SetOnlineDevName",
+        "method": null,
+        "missing_parameters": [],
+        "observed_methods": [
+          "POST"
+        ],
+        "observed_parameters": [
+          "devName",
+          "mac"
+        ],
+        "source_ref": "semantic-analysis:CVE-2025-22946",
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2025-22946"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.05.14/15.03.05.18, not the selected artifact",
+        "candidate_ids": [],
+        "catalog_evidence_ids": [],
+        "claimed_versions": [
+          "15.03.05.14",
+          "15.03.05.18"
+        ],
+        "expectation_id": "historical-expectation:e15842fd299ec7cf1948ae9c8f73b209849422fc0d63e283d6dd6928827053ed",
+        "expected_parameters": [
+          "cmdinput"
+        ],
+        "gap_reason": "artifact_out_of_scope",
+        "handler_value": "formexeCommand",
+        "interface_value": "/goform/exeCommand",
+        "method": null,
+        "missing_parameters": [
+          "cmdinput"
+        ],
+        "observed_methods": [],
+        "observed_parameters": [],
+        "source_ref": "semantic-analysis:CVE-2025-10443",
+        "status": "not_assessable",
+        "vulnerability_identifier": "CVE-2025-10443"
+      },
+      {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.05.14, not the selected 15.03.05.19 artifact",
+        "candidate_ids": [],
+        "catalog_evidence_ids": [],
+        "claimed_versions": [
+          "15.03.05.14"
+        ],
+        "expectation_id": "historical-expectation:eab3df130c9abf85bc8933241dd22afbdb59355d49d499962198372d6ce40583",
+        "expected_parameters": [
+          "cmdinput"
+        ],
+        "gap_reason": "artifact_out_of_scope",
+        "handler_value": "formexeCommand",
+        "interface_value": "/goform/exeCommand",
+        "method": null,
+        "missing_parameters": [
+          "cmdinput"
+        ],
+        "observed_methods": [],
+        "observed_parameters": [],
+        "source_ref": "semantic-analysis:CVE-2025-10442",
+        "status": "not_assessable",
+        "vulnerability_identifier": "CVE-2025-10442"
+      }
+    ],
+    "inventory_coverage_status": "completed",
+    "report_id": "historical-expectation-diff:476d1f05533e14fbaeeab3929f29c2f076dcd5b1c0a338c31988233b3dd5ee9f",
+    "schema_version": "firmatlas.mapping.historical-expectation-diff/v1alpha1",
+    "summary": {
+      "not_assessable": 5,
+      "observed": 8
+    }
+  },
+  "interpretation": {
+    "not_claimed": "token clues are parameter-to-state flows, runtime reachability, authentication state, vulnerability presence, or exploitability",
+    "supported": "auto-v6 recovers Tenda GetSetData requests and inline jQuery form parameters, publishes bounded parameter-clue assessments in the catalog, and reduces evidence-complete native-only candidates from 110 to 107"
+  },
+  "mapping_summary": {
+    "candidate_count": 4136,
+    "evidence_count": 9929,
+    "open_obligation_count": 59,
+    "parameter_count": 135
+  },
+  "parameter_clue_summary": {
+    "assessment_count": 135,
+    "selected_dlna_assessments": [
+      {
+        "attributes": {
+          "artifact_paths": "[]",
+          "assessment_status": "no_external_clue",
+          "occurrence_count": "0",
+          "target_ref": "frontend-parameter:6f239346d1770374a0e85313ae8d6c4eb552ac83b19a9bb31dfac45faafb1ceb"
+        },
+        "canonical_identity": "goform/expandDlnaFile?|folderGrade",
+        "evidence_ids": [
+          "evidence:164bbc98bd42b1b7103ad5a5e9128a2c076993e6b17fa425a1a285ef4f43ec1f",
+          "evidence:aaf147b475aebab21c302fa1cf31b5cb53507e871ef7bba51cc7b3255edfb218"
+        ],
+        "source_path": "webroot_ro/js/dlna.js"
+      },
+      {
+        "attributes": {
+          "artifact_paths": "[]",
+          "assessment_status": "no_external_clue",
+          "occurrence_count": "0",
+          "target_ref": "frontend-parameter:8d93cccdb27288b9fc5f8a1826f2a55689201660f7fd4a95de579c099d1f213a"
+        },
+        "canonical_identity": "goform/expandDlnaFile?|filePath",
+        "evidence_ids": [
+          "evidence:3f5609d9951f6c1dd8c72ddb297dfc19ecd3b6f45f0bbf957c97ce667c9e5dde",
+          "evidence:cf18a38d0a4035e45dc7375bda634a4e73d41097ba13d3476e22542246ce34d4"
+        ],
+        "source_path": "webroot_ro/js/dlna.js"
+      },
+      {
+        "attributes": {
+          "artifact_paths": "[\"bin/3322ip\",\"bin/ash\",\"bin/busybox\",\"bin/cat\",\"bin/chmod\",\"bin/cp\",\"bin/cttyhack\",\"bin/date\",\"bin/dd\",\"bin/df\",\"bin/dhttpd\",\"bin/dmesg\",\"bin/dosfsck\",\"bin/echo\",\"bin/false\",\"bin/fdisk\",\"bin/getopt\",\"bin/grep\",\"bin/httpd\",\"bin/hush\",\"bin/ip\",\"bin/kill\",\"bin/ln\",\"bin/login\",\"bin/ls\",\"bin/miniupnpd\",\"bin/mkdir\",\"bin/mknod\",\"bin/more\",\"bin/mount\",\"bin/msh\",\"bin/mv\",\"bin/netstat\",\"bin/ping\",\"bin/ping6\",\"bin/ps\",\"bin/pwd\",\"bin/rm\",\"bin/rmdir\",\"bin/sed\",\"bin/sh\",\"bin/sleep\",\"bin/su\",\"bin/tar\",\"bin/touch\",\"bin/true\",\"bin/umount\",\"bin/uname\",\"bin/usleep\",\"bin/vi\",\"bin/wps_monitor\",\"init\",\"lib/libtpi.so\",\"lib/modules/bm.ko\",\"lib/modules/loadbalance.ko\",\"lib/modules/mac_filter.ko\",\"lib/modules/url_filter.ko\",\"sbin/arp\",\"sbin/blkid\",\"sbin/depmod\",\"sbin/eject\",\"sbin/getty\",\"sbin/halt\",\"sbin/ifconfig\",\"sbin/init\",\"sbin/insmod\",\"sbin/klogd\",\"sbin/logread\",\"sbin/lsmod\",\"sbin/makedevs\",\"sbin/mdev\",\"sbin/modprobe\",\"sbin/ping6\",\"sbin/pivot_root\",\"sbin/poweroff\",\"sbin/reboot\",\"sbin/rmmod\",\"sbin/route\",\"sbin/slattach\",\"sbin/sulogin\",\"sbin/sysctl\",\"sbin/syslogd\",\"sbin/vconfig\",\"usr/bin/[\",\"usr/bin/[[\",\"usr/bin/app_data_center\",\"usr/bin/arping\",\"usr/bin/awk\",\"usr/bin/basename\",\"usr/bin/clear\",\"usr/bin/cryptpw\",\"usr/bin/cut\",\"usr/bin/diff\",\"usr/bin/dirname\",\"usr/bin/du\",\"usr/bin/env\",\"usr/bin/expr\",\"usr/bin/find\",\"usr/bin/free\",\"usr/bin/hd\",\"usr/bin/head\",\"usr/bin/hexdump\",\"usr/bin/hostid\",\"usr/bin/id\",\"usr/bin/ipcs\",\"usr/bin/killall\",\"usr/bin/killall5\",\"usr/bin/less\",\"usr/bin/logger\",\"usr/bin/mesg\",\"usr/bin/mkfifo\",\"usr/bin/nslookup\",\"usr/bin/passwd\",\"usr/bin/printf\",\"usr/bin/reset\",\"usr/bin/sync\",\"usr/bin/tail\",\"usr/bin/telnet\",\"usr/bin/test\",\"usr/bin/tftp\",\"usr/bin/top\",\"usr/bin/tr\",\"usr/bin/traceroute\",\"usr/bin/unzip\",\"usr/bin/uptime\",\"usr/bin/wc\",\"usr/bin/wget\",\"usr/bin/which\",\"usr/bin/xargs\",\"usr/bin/yes\",\"usr/lib/libxtables.so.7\",\"usr/lib/libxtables.so.7.0.0\",\"usr/sbin/ip6tables\",\"usr/sbin/ip6tables-restore\",\"usr/sbin/ip6tables-save\",\"usr/sbin/iptables\",\"usr/sbin/iptables-restore\",\"usr/sbin/iptables-save\",\"usr/sbin/rdate\",\"usr/sbin/smbd\",\"usr/sbin/telnetd\",\"usr/sbin/wl\",\"usr/sbin/xtables-multi\"]",
+          "assessment_status": "external_clue_observed",
+          "occurrence_count": "143",
+          "target_ref": "frontend-parameter:3d8129b4bc83e55155ff9ab9562e8c29be7488936adadc7c849ff65278369aa1"
+        },
+        "canonical_identity": "/goform/refreshDLNA|action",
+        "evidence_ids": [
+          "evidence:31b2a402824fcceb1777a5af86a987fc031569d0cc16900f25fc354b6f3f9672",
+          "evidence:d7e0a280b61da88f435abfb133e96067750a984e242c4da174170a1979868439",
+          "evidence:ea830847364271aff62411368e86d8dc5e3670d4adceaa72a9245463cc5d29e1",
+          "evidence:b261123c1316bd01f3eab4da58302516bb4078f6ddf6342aedbd78cc7f64f2df",
+          "evidence:aba0a290dcb3ecea3322cbc06c24cab4d64aad6e258b9c72b0b1bd66440c9ff5",
+          "evidence:dda4f2d7e4174b466daf0a8c800b524f56382707d2fc3f1b3e9acf926d9ef96f",
+          "evidence:4b9787835a01a386c342dcf323206931a54e3ebe18237f02f7a0daa05a8fbcb3",
+          "evidence:06cdf2d1ac9ad75ebb811392c43e6bb7e847f48caf297de559cd3e6ab2b588ab",
+          "evidence:4756bdf9c60c6f00073a4ac3a16fc394d1e813c00ec3085c0829ba4dd8316ae5",
+          "evidence:ec6d9a150bf1c1ac6f8a6a065b5508d74492b300969e7cc2d46d227ad7a96382",
+          "evidence:06061c378406d1183480557d933d63936d1f89397f1c6263aeaf5e1c5b91568c",
+          "evidence:f19e6a652bb12c200e4b45a5792c34b1f028d50857694b13188902ab7779b33f",
+          "evidence:be75c9efb2a18d4daf4b606a74b1d4ee408646fa319d881fd434e68118833c1f",
+          "evidence:8c50a4fcd9b47ee54847331c7f7d686829d863c5a70ce7c6f079dc6e99a9a10c",
+          "evidence:558f3ac0805359f16421e7ccb467aac0db6e80d61b863f3e01f893e9020fa3bc",
+          "evidence:128bbad0898b635ef0f6eb0bb34a13157ed5a0fc43ab8ff10c82a7a46d2d2a80",
+          "evidence:712a2c7b8085b8812069d74a235662a73273326db915b9b6383596fc27e01c79",
+          "evidence:7581607ece6824da329ec38e7f790a8bd6d2ed1b2fe928d909c221faa7676d2c",
+          "evidence:30e582e25aa73653ff895872140c7f8aa209c117a240f98ce2c8c1eb2a2237a9",
+          "evidence:22b2907ad23be9675db76eece8e1edad9a9e403a622d4a7f3dbdec1815ca11f0",
+          "evidence:b616cc645898aa52c02e6b99b14ce961a25086f653379c33911e88e332862f44",
+          "evidence:5f62aa7bc64d44fc7ac792176f20d3f5c900990d6777d5a156f321a18db0bba9",
+          "evidence:8f20287b69725c6754139a918f7512aceca9b3f2556daab50c6b89e0a60a4800",
+          "evidence:dc40c15faf84e49c03f456b7ce9ec8c373ae5bb425b59336d7bf13048be53e96",
+          "evidence:f0ce25b909ed24e49513d54d05d71b7807c784838cf87f2efea6f40a33d2f3f4",
+          "evidence:49271ee1c4cc18bd35e706d14b9c170bd1fe3dc1d4b73660b951d8b267c89ac4",
+          "evidence:e69b75b638906fd4a9385b981d7711b475d34cc291fbc59a5bcadf744f605f90",
+          "evidence:d8f5de0804734740258ec3e8889db990279abe3a2c5cd7892f6b685ad7fa927d",
+          "evidence:0f40d2d69e84763eccf135739f68365acdc954b32e7cbd745accee21cc43d8db",
+          "evidence:b74b50de6c24fa795478f6a3f346de9ff97713c96507b339bd8820e01973dacc",
+          "evidence:ebb1bd1b6161fdb21cf5d1c3ab4a5a43cb2afcc3475ea55af50e6c1a9d22ed52",
+          "evidence:766f4e3efbb773727d8fb1b3d7178843e82d9e43cd7c5a1605437da3877bf3f6",
+          "evidence:92468f4759785b29e07b8d78813d25e0723a0c4d43240d72a106766c7dac4086",
+          "evidence:bde0c07235f300de8c5dd0a09dc5c74c9ae87b8a0a13dfdcec0cec04d4b226c8",
+          "evidence:9336d02c44dd712eb641742f26ca0a4ff0cd4dd7298b09b73cf2f3db33d7f0dd",
+          "evidence:cced389bd01c860865b03103612bc06633abe1f5079ea50e0bec1b0a39b6c17e",
+          "evidence:4ca51c00eeb1d62226f442ed814a63f516cf443a1da0a6f39a534c40500ac3a0",
+          "evidence:ea1b7570b473aa3b1d3549ccb321927fe85c3d281c46c71f10ee852f30a4b4ab",
+          "evidence:fc6733760200cbd8e16e9720fba43eabc928ece475c2bdc7c0551b8f1148ef2a",
+          "evidence:79f0709d4e6d6747e661c1e5a447002c7251395961513e600c51d1e6e89a4324",
+          "evidence:fde18baeef568ee970dcf3b04fe06196584032e34048f80edcbccce0f332627c",
+          "evidence:5798122769813a108f0f381df59b1766662660786792989d5b19bd7edadb1be0",
+          "evidence:d197a4366ffd9c29f40683247c3ebb3ce6590c54f1df89564608103bb40675cc",
+          "evidence:d2322df253f9c78a693f54dd7909193469ca6399f6de15f22775bb88dbbb7ca8",
+          "evidence:580c4604f2acdfe24f97b0de3450440a82f08f9ca1933cc3ee6817d5daa2270a",
+          "evidence:11bee670ecab0bb9a01e132417ec4501ebc3e6fbbff271eb7bd50dbb4febbed8",
+          "evidence:4e890c3a4f3785e7203148850bf7c2a4d20356e41415b45ed13dce4d98b114df",
+          "evidence:a55de108a46579e35973579a87994c787c2d2d8e2e26d3426806f61f7ff688d9",
+          "evidence:8a39a36a335d562cd09fbe65f91d0131529bc95e5719d45cc1a58b04992f7e3b",
+          "evidence:7962c8d9a2f9cc6e9dd0d35d933f11ee44365dd7a0b3302b2b0c6d5504a4a92e",
+          "evidence:b4581d47ac93d8bc248150db19d4ce26af100737343c2579946b4c7880864919",
+          "evidence:266600c2131afbcf06b5b21fd556ca3c1c61ec3291aa8da6ecfbd64c0a5a54d9",
+          "evidence:fa7684a9bfbd6755f4bd91052b9abe2a5e966557f5457e7b1efc7e92ef6f4b19",
+          "evidence:677a7a32215b52fdaf89ce10fc0f64494497717d1b71cd9951748dfda9ac5fd5",
+          "evidence:237e70609c62a2aaf834ae0173b907c2ddff75ceae3e6d9d0a13cd8d53d0dcca",
+          "evidence:3342c049f80501d84a36641339caa99fd7182b59a803087d9d095ba79742d47e",
+          "evidence:8d49caa0f8a18a209f3c2c175d0e936d728209ad8015cdd803bfeb2f5b9e6fd0",
+          "evidence:79bfa0547a2b60b48a9f67394bce64b1e7d495d09545c7a5f8d0b3ed04a3b04f",
+          "evidence:026fe66823e4aabf960fbf02e1a8e8e5fdd7fd1786b399f9d3de96de1dfd06da",
+          "evidence:976efc5152cb8e75246748ce080ca148f9fc2d99d8865f6b2fb75ca1b1439ef8",
+          "evidence:029a40c9e8a37ee9418880302812eb75f7b93a56174ac1c6bc073ca2ed4d9060",
+          "evidence:1b715167bcdd822cb0f63bcaa6bb68d43a5f2a552c4ed98947b14f2f8f6cc973",
+          "evidence:946333111906141659ed7f2a53904b7d60a3968fbf48ee15491ccd63fd498fa6",
+          "evidence:f1edad7458fc6a9529599a7a44a8c456e7a8fc37eb45992fc4e80f9a043334f1",
+          "evidence:5594e758cbafbbf143fa8b8ba87f362bdf9232433b132b7d0f359a03ffeae5fe",
+          "evidence:be686ce3700f6348c9985b286acedd99dc86592c4c379509fd7eb27d736e6f25",
+          "evidence:a52c5ebfa339faaa0aa0c60db3842f2d624cd20a937d4542315d3cc91b12d7a7",
+          "evidence:2d24dadca26d2021a70d216ed703df8925127ce23eb7189967e6c28f1024cb25",
+          "evidence:87dfdbc429da1b7e391480e57f2f090546f616b3f702402452c87b847a25801b",
+          "evidence:5fa29bffea8d85485a1a0b4ef99af38470495f0d9d4c97ff951ff023b7c77de7",
+          "evidence:297088120c0258e5382f4f22bdfdb5f237ff4a1b7e98084f6b6e09817b3fb2e3",
+          "evidence:992f6ca295bb9d5706c7e12dce0ca6864db7ff708b6e43d9863dd376ffc9c219",
+          "evidence:8e59dc32865484c1fd7b40a17edba3a5a7a3b37fadfe4f9b63d24c3a798f53c9",
+          "evidence:ab5efcf019b2a4bd3c5c6ba348a889c90d9d8b275ab4620f443595281e034112",
+          "evidence:180e0be1f66bcf1a1da4eb81e3531ace168571f7447d30604388f45c1f4c7616",
+          "evidence:26335530059eea79d8cd93e755afe7772497a60a366f21b6b985842547c51631",
+          "evidence:5d09a01e01ea1dbf6d756d7b91fbd1fb9a38de0ac85397cb7e855ab3d894883c",
+          "evidence:755e710625cd7cff5669e3b6b35e3795e41159a5fe984475ebac9dbcbd2235bc",
+          "evidence:e460e3239d5b9ecf3d5840b2fe6b662571a15246f5ba04e23a45941e076c5b0d",
+          "evidence:768a2b37c102bb098395bd42c35e0001ec6ff9c2389ce56059b0aae7e66c19b0",
+          "evidence:2faf3d8e9f32ad2c5ed0de5a4ee5bf703df19ab868ceff8999ac2e1ff6fd9a9c",
+          "evidence:c7d501e1917d97131100b7b264f96d4411b4d07f223889682301d62b0c4c2c6e",
+          "evidence:95009b89eaa655d04825654e01eea83ce87943a95672e7fc079020babecd3fbc",
+          "evidence:7dfc94935de0f4b5fcb06d6309ee11096884a5248465a9840c657d31fd46732d",
+          "evidence:d72ff50184ee1d20ba0b45b176f6e5ae82c09a44a19d4257be5dec2f2ec732e2",
+          "evidence:c3e0cfafb57f577d8f4570d24e389c750d3c345b2a7854c422aa4faf02fce1a5",
+          "evidence:f7df707ab78f77acdc7282d246e10756b8018092ce946da7badc186acc4a66dc",
+          "evidence:5501f11ec6455710253539a495c4619b8d3aa58cbcf2767c71667b14eda8aaaf",
+          "evidence:829610b995534907cdffc9f806ca17319f407976f5352453db88612ae02e1937",
+          "evidence:30cea8db9cb04819465b6f7c286c22e301c5f3cb09b8889ebf55df48e28d2880",
+          "evidence:c3637666d5896727116cb7761a1d697add0acefc9ec77aa283c9ca2d66c8d1b7",
+          "evidence:d59e527c90421c091d647d988d4ae5d40f201df554278ecc63600359e690242a",
+          "evidence:df69a903c196c827ebd2200e8bf697fe8506696549a505caea7248bf5260c1c9",
+          "evidence:64862d9602cf81f4ab5c1d7913a2671b49af403ea5492d3c1639d236325b2193",
+          "evidence:975f33408324665f78d6d093eba586681aeffbf09868d586296a54802ac9c5cc",
+          "evidence:8fefd66bb943e2fae6104860dab57dc41f3d073d5806d43107afe0b7e51988fe",
+          "evidence:494d2025dbc2a7cf54b5ccff1133c854d74a228e4a27860a419a857c9e5520ba",
+          "evidence:b9ee1c3f365ffa99409ef45c84435c15f2fe726f2a9cd5a4ebfa69d92028c018",
+          "evidence:f8568fac0d7f28a33b47aea703ab7b6690b886132fcf55059a468657b25c34fb",
+          "evidence:53580fe7f53278f934e4559ceef39bb080be057375117b87db07212c3416dd72",
+          "evidence:4d05d6d083b372ed7639b414ec5270b46bc422406892e0575d1baff135887882",
+          "evidence:a0530c459b5b5b0943ed8d3c8c506e330daf8c5441424d617d73c24a35c06a2d",
+          "evidence:4d1f7aee389fe1e738a71c6c7af1026c59f7b9adaa4abd568009999319754279",
+          "evidence:dd8c33102063af07a5650692849de97b5d9c0525ccc85ba674e7a911c50bd3d7",
+          "evidence:6c39d0f74948aeeee21bf9264ca3acd9cee7dbd670c8a509f1025b2a855f83bc",
+          "evidence:9c148a10b2cdf20cb8fefa7f9ae1273d867f8a8a5af2d48c2e9e061478b63364",
+          "evidence:25a68bae3f73500b411c701f1c6a68e528b8324f7427fd261deb4c8836330e0f",
+          "evidence:79cc3a21d982f399ad9b24637e63a557718712133a01de2d1034e7ca4648342e",
+          "evidence:5009166c50914509f9baa4c856001ced415d89b8cfb95f2073e14141b34e1864",
+          "evidence:b76ae225df31a0152af0ea502bea0c56e6d931853728205cd17e0a35fd52fefb",
+          "evidence:b335afbe6adc84f9dc5f339892157b1a782b28c4296953ba92d326153d3ef4e1",
+          "evidence:92f3bab38913c32bb86dec16cdf43604548b16f467e3738b3d36299d70f0f663",
+          "evidence:6738484a0d19b2e8f4b28ae19fd281e542e3f57b9a86eb35cb09a2dcca5d6c94",
+          "evidence:812ef761dfc66dd4b69546a76ab9b7844682c772a1b5b89d74bb1e70e68078f2",
+          "evidence:a5cad1b0b9648aba9ec758f9eaec6caf366bac90a14088b4694b0ff63bc66899",
+          "evidence:53198e02f006f175e64020b375852befd07b27f5af90457c00d9029df9fe99f1",
+          "evidence:4734ebe5cb361a1632bbb86841b6de7085a8e3a9f94865cf20c9ff02c6847853",
+          "evidence:4af3e736ef5e98a925921df2d6775404ade325f45962da553751186ac78591b5",
+          "evidence:caefa8c8375f4e6c11a94b2a4ec6492e227e231f08b78baffeee43f6e4436421",
+          "evidence:c28e7bf191b202163cd35607fffd18e87339c09428090c342a5070b4e0c7f305",
+          "evidence:e85f114bf95d4b1dc283205621cfaf13520ff86ce8755373b34fdf9752fc5c7b",
+          "evidence:ca4e77c4be66b06c9834f62e213dc3201a1231e3098aef1d1982123ee8d7a507",
+          "evidence:2bdb13118c7a9eeeec6dc4af426b6c04d7034a5f5392bcbcebb6352c65934b7e",
+          "evidence:9c77dade3f26876765783860204d5177eec5344841f0f87a328c9fa1925cdd81",
+          "evidence:ce328b7f1729426d774f72ce88f6a9e41d9fadccb43af144bdfac4cd129aae99",
+          "evidence:d2c27f42f62956c05a455cec5e8ca3be00e03ba010b848ea65176bba56c5cc02",
+          "evidence:592faa33342d0401f9f0724a5e9b3a9491a666632cf0e2001d1de1c1e455209b",
+          "evidence:95fbe69496a2d95a1666877ed85f3b6c0c85be0cd2ae17211a640fc84a8fd46a",
+          "evidence:9d93ab43d5869258d7eb6a4b60dae0aa64291d81c86e0b43e4743ac0ab53485d",
+          "evidence:954fe6538ae659684ccda4d55d089ec9f72237fe731680b4bde43c869778efba",
+          "evidence:4177e9a678c18960210a240e175902c1ee5e9ce5ef010114e70c2603d425277f",
+          "evidence:d8a2adb09db4a14eaed88eb195d81f8aaf25e8193d1f12af006bd1a43537d117",
+          "evidence:3a75eebab5b8945d51182db860776d8f60a940a30f317f05c724abb055c0b2d3",
+          "evidence:6e1f67bc22fa509b50114023116605300a833a97139276951c11a2856884bd5e",
+          "evidence:642827e665d270123066ba336392b30f95abf47e7c08efa4a9cb92b561747ca4",
+          "evidence:a507d7fe17fa9496ffc80fda6f1d6e7851e4faadb6b24d34262fdaf391eac444",
+          "evidence:30698eb39c8fef7ed039a06cff0e854c0389690ce42b2fcec59626ca50b14c86",
+          "evidence:091572c199b692c5d700140d721394568827ba029dd2209b6106430d68529715",
+          "evidence:efddb3247792afce8ee3d550cf492edd0553f19bbe8601d458217d2aeff87003",
+          "evidence:c6e13bfc5a30484af36ddc5ccf0e8e151f1abbffa3aff91ce4997320ac4e7121",
+          "evidence:b47ae3153d3c3b866a66d8674f7713066c3ebe11c4305cacc2b51b6b6498b2b5",
+          "evidence:c72a992cd0bb75b7fbe1c09d9b3b0593c4589ff63822af9a550a2b5b71caa2d4",
+          "evidence:aba746edbe42a57774274899440e16bbdaa01371c257ea68b1c58c36424a4470",
+          "evidence:cca5fe728283bd7d95ea34b68e13d7eba8f542ea7f8f02d8d19e1ebe5b83603a",
+          "evidence:650f7cb330e52beb8fd4fe5b0f4f003128d8b4250ff23a497c124049427730cb"
+        ],
+        "source_path": "bin/3322ip"
+      },
+      {
+        "attributes": {
+          "artifact_paths": "[]",
+          "assessment_status": "no_external_clue",
+          "occurrence_count": "0",
+          "target_ref": "frontend-parameter:f7861b2ccd1ac182192ceec9aeb37b57d044bb0e070db06931239b8322425a1a"
+        },
+        "canonical_identity": "goform/SetDlnaCfg|dlnaEn",
+        "evidence_ids": [
+          "evidence:d77b98274f66deb99b7bf503be7a564c82559848cfa8a3fb15031caeb3a4e615"
+        ],
+        "source_path": "webroot_ro/js/dlna.js"
+      },
+      {
+        "attributes": {
+          "artifact_paths": "[]",
+          "assessment_status": "no_external_clue",
+          "occurrence_count": "0",
+          "target_ref": "frontend-parameter:8819543cea38952495d5ef06ec85fb8df8852ffff21abf0f3aca69b419cb32e2"
+        },
+        "canonical_identity": "goform/SetDlnaCfg|scanList",
+        "evidence_ids": [
+          "evidence:ab10dacc146cc6844db980e665d26c2af702d7f6c1a46613f5bf32a60a23db8d"
+        ],
+        "source_path": "webroot_ro/js/dlna.js"
+      },
+      {
+        "attributes": {
+          "artifact_paths": "[\"bin/httpd\"]",
+          "assessment_status": "external_clue_observed",
+          "occurrence_count": "1",
+          "target_ref": "frontend-parameter:55ee54ffda46d91931357e5dedd74f8393dd815846c03143b9cddbd347f3aabe"
+        },
+        "canonical_identity": "goform/SetDlnaCfg|deviceName",
+        "evidence_ids": [
+          "evidence:b5a098bbe72f321b6ca0c3736d470686abfc496642aea7fff1607a3771d7c066",
+          "evidence:2e685d1904c7775a358cc8b945ae644fdda5baa9356a677712a567143cc44bfb"
+        ],
+        "source_path": "bin/httpd"
+      }
+    ],
+    "status_counts": {
+      "external_clue_observed": 126,
+      "no_external_clue": 9
+    }
+  },
+  "potential_hidden_interface_summary": {
+    "coverage_status": "completed",
+    "item_count": 107
+  },
+  "profile_id": "firmatlas.mapping.profile/auto-v6",
+  "sample_role": "primary-vendor-tenda-ac9-wrapper-and-parameter-clue-iteration",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-09/v1alpha1",
+  "stages": [
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "inventory",
+      "output_count": 1038
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "source_plan",
+      "output_count": 418
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend",
+      "output_count": 119
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend_asset_graph",
+      "output_count": 31
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 451,
+      "name": "parameter_clue",
+      "output_count": 135
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "web_configuration",
+      "output_count": 5
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "script_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native",
+      "output_count": 3187
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no selected sources"
+      ],
+      "input_count": 0,
+      "name": "native_ubus_registration",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "arm_pic_callsite",
+      "output_count": 64
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "arm_pic_registrar",
+      "output_count": 187
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "set_difference",
+      "output_count": 112
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no ubus operations"
+      ],
+      "input_count": 0,
+      "name": "ubus_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "no_eligible_analyzer"
+      ],
+      "input_count": 187,
+      "name": "scheduler",
+      "output_count": 59
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "open obligations remain but no unattempted eligible analyzer is available"
+      ],
+      "input_count": 418,
+      "name": "catalog",
+      "output_count": 4136
+    }
+  ],
+  "vulnerability_scope_audit": {
+    "audit_id": "historical-vulnerability-audit:b039b922a71334c48b3d905dfc3d63aae8159376c9f515f7d14029687a8d52b4",
+    "category_counts": {
+      "compared_interface": 13,
+      "no_structured_communication": 9,
+      "not_analyzed": 46,
+      "parameter_only": 3
+    },
+    "compared_interface_identifiers": [
+      "CVE-2025-10442",
+      "CVE-2025-10443",
+      "CVE-2025-14286",
+      "CVE-2025-22946",
+      "CVE-2025-22949",
+      "CVE-2025-45427",
+      "CVE-2025-45428",
+      "CVE-2025-45429",
+      "CVE-2025-5836",
+      "CVE-2025-5839",
+      "CVE-2025-5847",
+      "CVE-2026-6015",
+      "CVE-2026-6016"
+    ],
+    "exact_artifact_expectation_count": 2,
+    "exact_artifact_observed_count": 2,
+    "expectation_diff_id": "historical-expectation-diff:476d1f05533e14fbaeeab3929f29c2f076dcd5b1c0a338c31988233b3dd5ee9f",
+    "no_structured_communication_identifiers": [
+      "CVE-2022-28560",
+      "CVE-2024-24543",
+      "CVE-2024-25746",
+      "CVE-2024-25748",
+      "CVE-2024-25751",
+      "CVE-2024-25753",
+      "CVE-2024-25756",
+      "CVE-2025-5900",
+      "CVE-2025-9731"
+    ],
+    "not_analyzed_identifiers": [
+      "CVE-2017-16923",
+      "CVE-2017-16936",
+      "CVE-2018-18728",
+      "CVE-2020-26728",
+      "CVE-2022-25414",
+      "CVE-2022-25417",
+      "CVE-2022-25418",
+      "CVE-2022-25427",
+      "CVE-2022-25428",
+      "CVE-2022-25429",
+      "CVE-2022-25431",
+      "CVE-2022-25433",
+      "CVE-2022-25434",
+      "CVE-2022-25435",
+      "CVE-2022-25437",
+      "CVE-2022-25438",
+      "CVE-2022-25439",
+      "CVE-2022-25440",
+      "CVE-2022-25441",
+      "CVE-2022-26278",
+      "CVE-2022-27016",
+      "CVE-2022-27022",
+      "CVE-2022-36273",
+      "CVE-2022-36568",
+      "CVE-2022-36569",
+      "CVE-2022-36570",
+      "CVE-2022-36571",
+      "CVE-2023-41552",
+      "CVE-2023-41553",
+      "CVE-2023-41554",
+      "CVE-2023-41556",
+      "CVE-2023-41559",
+      "CVE-2023-41560",
+      "CVE-2023-41561",
+      "CVE-2023-41562",
+      "CVE-2023-41563",
+      "CVE-2024-42634",
+      "CVE-2025-29384",
+      "CVE-2025-29385",
+      "CVE-2025-29386",
+      "CVE-2025-29387",
+      "CVE-2025-44872",
+      "CVE-2025-44877",
+      "CVE-2025-45042",
+      "CVE-2025-57638",
+      "CVE-2025-57639"
+    ],
+    "parameter_only_identifiers": [
+      "CVE-2021-42659",
+      "CVE-2026-2191",
+      "CVE-2026-2192"
+    ],
+    "schema_version": "firmatlas.mapping.historical-vulnerability-audit/v1alpha1",
+    "total_vulnerability_count": 71
+  }
+}

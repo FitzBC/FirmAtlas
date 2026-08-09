@@ -18,6 +18,57 @@ from firmatlas.mapping import (
 
 
 class FrontendRequestProducerContractTests(unittest.TestCase):
+    def test_jquery_post_form_encoded_literal_publishes_request_parameter(self):
+        content = b'''function refreshDLNA() {
+    $.post("/goform/refreshDLNA", "action=1", callback);
+}'''
+        source = SourceArtifactEntry(
+            "webroot_ro/js/dlna.js", "webroot_ro/js/dlna.js", "file",
+            len(content), hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(["/goform/refreshDLNA"], [x.endpoint for x in result.candidates])
+        self.assertEqual(["action"], [x.name for x in result.parameters])
+        self.assertEqual(["1"], [x.literal_value for x in result.parameters])
+        self.assertEqual(
+            [FrontendParameterNamespace.FORM],
+            [x.namespace for x in result.parameters],
+        )
+        self.assertEqual(
+            {result.candidates[0].candidate_id},
+            {x.request_candidate_id for x in result.parameters},
+        )
+
+    def test_tenda_get_set_data_wrapper_publishes_prefix_and_object_parameters(self):
+        content = b'''var subData = {
+    "folderGrade": "primary",
+    "filePath": node.attr("data-path")
+};
+$.GetSetData.setData("goform/expandDlnaFile?" + Math.random(), subData, callback);'''
+        source = SourceArtifactEntry(
+            "webroot_ro/js/dlna.js", "webroot_ro/js/dlna.js", "file",
+            len(content), hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(["goform/expandDlnaFile?"], [x.endpoint for x in result.candidates])
+        self.assertEqual(
+            [FrontendEndpointShape.LITERAL_PREFIX],
+            [x.endpoint_shape for x in result.candidates],
+        )
+        self.assertEqual(["folderGrade", "filePath"], [x.name for x in result.parameters])
+        self.assertEqual(
+            {FrontendParameterNamespace.FORM},
+            {x.namespace for x in result.parameters},
+        )
+        self.assertEqual(
+            {"custom.GetSetData.setData"},
+            {x.source_construct for x in result.parameters},
+        )
+
     def test_luci_rpc_declare_preserves_logical_operation_and_parameters(self):
         content = (
             b"var callInfo=rpc.declare({object:'system',method:'info',"
@@ -492,6 +543,7 @@ D.prototype.run=function(x){return this.topicurl="run",this.post(x)};'''
                 "jQuery.post",
                 "jQuery.ajax",
                 "custom.request",
+                "custom.GetSetData.setData",
                 "custom.file-upload-property",
                 "shared-cgi.topicurl",
                 "LuCI.rpc.declare",

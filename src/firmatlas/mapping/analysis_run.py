@@ -20,10 +20,17 @@ from .discovery_catalog import (
 from .domain import CoverageStatus
 from .frontend import (
     FrontendAssetInput,
+    FrontendPolicy,
     discover_frontend_asset_graph,
     discover_frontend_requests,
 )
 from .inventory import InventoryPolicy, SourceArtifactEntry, build_inventory
+from .parameter_clue import (
+    ParameterClueArtifact,
+    ParameterClueArtifactRole,
+    ParameterCluePolicy,
+    trace_frontend_parameter_clues,
+)
 from .native import discover_native_hints
 from .native_deep import (
     ArmPicCallsiteProfile,
@@ -65,7 +72,8 @@ _AUTO_V1_ANALYZERS = _BASE_ANALYZERS + (
     "arm_pic_callsite", "native_ubus_registration", "ubus_backend",
 )
 _AUTO_V2_ANALYZERS = _AUTO_V1_ANALYZERS + ("frontend_asset_graph",)
-_AUTO_ANALYZERS = _AUTO_V2_ANALYZERS + ("arm_pic_registrar", "set_difference")
+_AUTO_V5_ANALYZERS = _AUTO_V2_ANALYZERS + ("arm_pic_registrar", "set_difference")
+_AUTO_ANALYZERS = _AUTO_V5_ANALYZERS + ("parameter_clue",)
 
 
 @dataclass(frozen=True)
@@ -85,11 +93,15 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v5", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v6", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v5(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v5", _AUTO_V5_ANALYZERS)
 
     @classmethod
     def auto_v4(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v4", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v4", _AUTO_V5_ANALYZERS)
 
     @classmethod
     def auto_v3(cls) -> "MappingAnalysisProfile":
@@ -117,11 +129,15 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v5", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v6", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v5(cls) -> "MappingAnalyzerRegistry":
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v5", _AUTO_V5_ANALYZERS)
 
     @classmethod
     def builtin_v4(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v4", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v4", _AUTO_V5_ANALYZERS)
 
     @classmethod
     def builtin_v3(cls) -> "MappingAnalyzerRegistry":
@@ -164,6 +180,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V5 = MappingAnalyzerRegistry.builtin_v5()
 BUILTIN_ANALYZER_REGISTRY_V4 = MappingAnalyzerRegistry.builtin_v4()
 BUILTIN_ANALYZER_REGISTRY_V3 = MappingAnalyzerRegistry.builtin_v3()
 BUILTIN_ANALYZER_REGISTRY_V2 = MappingAnalyzerRegistry.builtin_v2()
@@ -176,6 +193,7 @@ class MappingAnalysisRequest:
     firmware_artifact_sha256: str
     inventory_policy: InventoryPolicy = InventoryPolicy()
     profile: MappingAnalysisProfile = MappingAnalysisProfile.auto()
+    parameter_clue_policy: ParameterCluePolicy = ParameterCluePolicy()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "root", Path(self.root))
@@ -360,11 +378,13 @@ def analyze_extracted_root(
     registry.validate_profile(request.profile)
     inventory = build_inventory(request.root, request.inventory_policy)
     selected = []
+    inventory_contents = []
     for source in inventory.entries:
         if source.kind not in {"file", "hardlink"} or source.content_sha256 is None:
             continue
         path = request.root.joinpath(*source.canonical_path.split("/"))
         content = path.read_bytes()
+        inventory_contents.append((source, content))
         kinds = _classify(source.canonical_path, content, request.profile)
         if kinds:
             selected.append((source, content, kinds))
@@ -378,6 +398,14 @@ def analyze_extracted_root(
         (source, content)
         for source, content, kinds in selected if "frontend" in kinds
     )
+    frontend_policy = FrontendPolicy(
+        enable_inline_form_literal=(
+            request.profile.profile_id == "firmatlas.mapping.profile/auto-v6"
+        ),
+        enable_tenda_get_set_data=(
+            request.profile.profile_id == "firmatlas.mapping.profile/auto-v6"
+        ),
+    )
     frontend_graph = None
     if (
         "frontend_asset_graph" in request.profile.enabled_analyzers
@@ -386,12 +414,47 @@ def analyze_extracted_root(
         frontend_graph = discover_frontend_asset_graph(tuple(
             FrontendAssetInput(source, content)
             for source, content in frontend_sources
-        ))
+        ), frontend_policy)
         frontend = frontend_graph.results
     else:
         frontend = tuple(
-            registry.analyze_source("frontend", source, content)
+            discover_frontend_requests(source, content, frontend_policy)
             for source, content in frontend_sources
+        )
+    parameter_clues = None
+    parameter_clue_artifacts = ()
+    if (
+        "parameter_clue" in request.profile.enabled_analyzers
+        and frontend_graph is not None
+    ):
+        frontend_paths = {source.canonical_path for source, _ in frontend_sources}
+        parameter_clue_artifacts = tuple(
+            ParameterClueArtifact(
+                source,
+                content,
+                ParameterClueArtifactRole.NATIVE
+                if content.startswith(b"\x7fELF")
+                else ParameterClueArtifactRole.CONFIGURATION
+                if source.canonical_path.startswith("etc/")
+                or Path(source.canonical_path).suffix.lower()
+                in {".conf", ".cfg", ".ini", ".xml"}
+                else ParameterClueArtifactRole.SCRIPT
+                if Path(source.canonical_path).suffix.lower()
+                in {".sh", ".lua", ".php", ".cgi"}
+                else ParameterClueArtifactRole.OTHER,
+            )
+            for source, content in inventory_contents
+            if (
+                source.canonical_path not in frontend_paths
+                and not source.canonical_path.split("/", 1)[0].lower().startswith(
+                    ("www", "webroot")
+                )
+            )
+        )
+        parameter_clues = trace_frontend_parameter_clues(
+            frontend_graph,
+            parameter_clue_artifacts,
+            request.parameter_clue_policy,
         )
     web = tuple(
         registry.analyze_source("web_configuration", source, content)
@@ -521,7 +584,7 @@ def analyze_extracted_root(
                     for source, content, kinds in selected if "native" in kinds
                 )
                 if request.profile.profile_id
-                == "firmatlas.mapping.profile/auto-v5"
+                in {"firmatlas.mapping.profile/auto-v5", "firmatlas.mapping.profile/auto-v6"}
                 else ()
             )
             set_difference = attribute_frontend_native_set_difference(
@@ -530,7 +593,7 @@ def analyze_extracted_root(
                 attribution_artifacts,
                 SetDifferencePolicy.route_aware(
                     frontend_auxiliary_only=request.profile.profile_id
-                    == "firmatlas.mapping.profile/auto-v5"
+                    in {"firmatlas.mapping.profile/auto-v5", "firmatlas.mapping.profile/auto-v6"}
                 ),
             )
     initial_obligations = (
@@ -546,6 +609,12 @@ def analyze_extracted_root(
         _batch(DiscoveryProducerBatch.script_backend, scripts, "auto:script-backend"),
         _batch(DiscoveryProducerBatch.native, native, "auto:native"),
     ]
+    if "parameter_clue" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.parameter_clue,
+            (parameter_clues,) if parameter_clues is not None else (),
+            "auto:parameter-clue",
+        ))
     if "arm_pic_callsite" in request.profile.enabled_analyzers:
         batches.append(_batch(
             DiscoveryProducerBatch.native_deep,
@@ -603,6 +672,16 @@ def analyze_extracted_root(
             len(frontend_graph.bindings) if frontend_graph is not None else 0,
             tuple(item.code for item in frontend_graph.diagnostics)
             if frontend_graph is not None else ("no frontend sources",),
+        ))
+    if "parameter_clue" in request.profile.enabled_analyzers:
+        stages.insert(4, MappingAnalysisStage(
+            "parameter_clue",
+            parameter_clues.coverage_status if parameter_clues is not None
+            else CoverageStatus.NOT_APPLICABLE,
+            len(parameter_clue_artifacts),
+            len(parameter_clues.assessments) if parameter_clues is not None else 0,
+            parameter_clues.diagnostics
+            if parameter_clues is not None else ("frontend asset graph unavailable",),
         ))
     if "native_ubus_registration" in request.profile.enabled_analyzers:
         stages.append(_stage(
