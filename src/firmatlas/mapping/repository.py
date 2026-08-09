@@ -13,6 +13,7 @@ from typing import Any, Optional
 
 from .discovery_catalog import DiscoveryCatalog
 from .hidden_interface import project_potential_hidden_interface_document
+from .snapshot_diff import MappingReleaseContext, compare_mapping_catalog_documents
 
 
 class CatalogConflictError(RuntimeError):
@@ -66,6 +67,13 @@ class DiscoveryCatalogRepository:
                 );
                 CREATE INDEX IF NOT EXISTS idx_mapping_catalog_firmware
                     ON mapping_discovery_catalogs(firmware_artifact_sha256, published_at DESC);
+                CREATE TABLE IF NOT EXISTS mapping_catalog_release_contexts (
+                    catalog_id TEXT PRIMARY KEY,
+                    context_sha256 TEXT NOT NULL,
+                    context_json TEXT NOT NULL,
+                    FOREIGN KEY(catalog_id) REFERENCES mapping_discovery_catalogs(catalog_id)
+                        ON DELETE CASCADE
+                );
                 CREATE TABLE IF NOT EXISTS mapping_discovery_candidates (
                     catalog_id TEXT NOT NULL,
                     candidate_id TEXT NOT NULL,
@@ -260,12 +268,15 @@ class DiscoveryCatalogRepository:
                 "SELECT COUNT(*) FROM mapping_discovery_catalogs"
             ).fetchone()[0]
             rows = self._connection.execute(
-                """SELECT c.*,
+                """SELECT c.*, r.context_json,
                     (SELECT COUNT(*) FROM mapping_discovery_candidates x WHERE x.catalog_id=c.catalog_id) candidate_count,
                     COALESCE(json_array_length(c.document_json, '$.parameters'), 0) parameter_count,
                     COALESCE(json_array_length(c.document_json, '$.associations'), 0) association_count,
                     COALESCE(json_array_length(c.document_json, '$.open_obligations'), 0) open_obligation_count
-                FROM mapping_discovery_catalogs c ORDER BY published_at DESC, catalog_id LIMIT ? OFFSET ?""",
+                FROM mapping_discovery_catalogs c
+                LEFT JOIN mapping_catalog_release_contexts r
+                  ON r.catalog_id = c.catalog_id
+                ORDER BY published_at DESC, c.catalog_id LIMIT ? OFFSET ?""",
                 (limit, offset),
             ).fetchall()
         return {"items": [self._catalog_summary(x) for x in rows], "total": total,
@@ -287,7 +298,46 @@ class DiscoveryCatalogRepository:
             summary["source_inventory_coverage_status"] = document.get(
                 "source_inventory_coverage_status", "completed"
             )
+        if "context_json" in keys:
+            summary["release_context"] = (
+                json.loads(row["context_json"])
+                if row["context_json"] is not None else None
+            )
         return summary
+
+    def register_release_context(
+        self, catalog_id: str, context: MappingReleaseContext
+    ) -> dict:
+        """Attach one immutable, evidence-backed release identity to a catalog."""
+
+        payload = context.to_dict()
+        encoded = _encoded(payload)
+        digest = hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+        with self._lock, self._connection:
+            catalog = self._connection.execute(
+                "SELECT 1 FROM mapping_discovery_catalogs WHERE catalog_id = ?",
+                (catalog_id,),
+            ).fetchone()
+            if catalog is None:
+                raise ValueError("mapping catalog does not exist")
+            existing = self._connection.execute(
+                """SELECT context_sha256 FROM mapping_catalog_release_contexts
+                   WHERE catalog_id = ?""",
+                (catalog_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing["context_sha256"] != digest:
+                    raise CatalogConflictError(
+                        "mapping release context is immutable"
+                    )
+                return {"catalog_id": catalog_id, "created": False}
+            self._connection.execute(
+                """INSERT INTO mapping_catalog_release_contexts (
+                    catalog_id, context_sha256, context_json
+                ) VALUES (?, ?, ?)""",
+                (catalog_id, digest, encoded),
+            )
+        return {"catalog_id": catalog_id, "created": True}
 
     def get_catalog(self, catalog_id: str) -> Optional[dict]:
         with self._lock:
@@ -296,6 +346,37 @@ class DiscoveryCatalogRepository:
                 (catalog_id,),
             ).fetchone()
         return json.loads(row["document_json"]) if row else None
+
+    def compare_catalogs(
+        self, base_catalog_id: str, target_catalog_id: str
+    ) -> Optional[dict]:
+        """Compare two immutable published catalogs through the domain seam."""
+
+        with self._lock:
+            rows = self._connection.execute(
+                """SELECT c.catalog_id, c.document_json, r.context_json
+                   FROM mapping_discovery_catalogs c
+                   LEFT JOIN mapping_catalog_release_contexts r
+                     ON r.catalog_id = c.catalog_id
+                   WHERE c.catalog_id IN (?, ?)""",
+                (base_catalog_id, target_catalog_id),
+            ).fetchall()
+        documents = {
+            row["catalog_id"]: json.loads(row["document_json"]) for row in rows
+        }
+        if base_catalog_id not in documents or target_catalog_id not in documents:
+            return None
+        contexts = {
+            row["catalog_id"]: (
+                MappingReleaseContext(**json.loads(row["context_json"]))
+                if row["context_json"] is not None else None
+            )
+            for row in rows
+        }
+        return compare_mapping_catalog_documents(
+            documents[base_catalog_id], documents[target_catalog_id],
+            contexts[base_catalog_id], contexts[target_catalog_id],
+        ).to_dict()
 
     def query_candidates(
         self, catalog_id: str, query: str = "", candidate_kind: str = "",

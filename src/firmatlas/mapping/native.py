@@ -185,6 +185,16 @@ def _parse_elf(content: bytes) -> _ElfMetadata:
     section_entry_size = values[10]
     section_count = values[11]
     expected_section_size = 40 if bitness == 32 else 64
+    if section_count == 0 and section_offset == 0:
+        return _ElfMetadata(
+            bitness=bitness,
+            endianness=endianness,
+            endian_prefix=endian_prefix,
+            machine=_MACHINES.get(
+                machine_number, "machine-{}".format(machine_number)
+            ),
+            sections=(),
+        )
     if section_count <= 0 or section_entry_size < expected_section_size:
         raise ValueError("ELF section table is missing or malformed")
     _checked_slice(content, section_offset, section_entry_size * section_count)

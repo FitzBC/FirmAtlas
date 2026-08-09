@@ -115,6 +115,7 @@ HTTP 只是 Adapter，建议资源合同如下：
 | `GET /api/mappings/{snapshot_id}/architecture` | 查询通信架构子图 |
 | `GET /api/mapping/entities/{entity_id}/evidence` | 展开证据路径 |
 | `GET /api/mappings/{snapshot_id}/obligations` | 查询未决义务和可执行深分析 |
+| `GET /api/mappings/compare?base=...&target=...` | 覆盖感知地比较两个不可变目录的接口、参数和潜在隐藏接口变化 |
 | `POST /api/mappings/{snapshot_id}/deepen` | 针对实体或义务创建子快照 |
 | `POST /api/interface-associations/search` | 多视图接口/固件关联检索 |
 | `GET /api/vulnerabilities/{id}/mechanisms` | 漏洞机制路径和固件差异 |
@@ -140,6 +141,7 @@ HTTP 只是 Adapter，建议资源合同如下：
 - 通信架构图；
 - 未决义务及“深化分析”入口；
 - 同版本历史 Snapshot 差异。
+- 同型号发行版本对比：先显示 coverage/profile 边界，再展示稳定身份的增删改与证据详情。
 
 ### 6.2 接口调查面板
 

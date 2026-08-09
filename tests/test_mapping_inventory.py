@@ -196,6 +196,23 @@ class SourceInventoryContractTests(unittest.TestCase):
             self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
             self.assertEqual((), inventory.diagnostics)
 
+    def test_kernel_runtime_namespace_target_is_not_a_source_coverage_gap(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "etc").mkdir()
+            (root / "etc" / "mtab").symlink_to("/proc/mounts")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            link = inventory.entries[0]
+            self.assertEqual(
+                "recorded_runtime_target_not_materialized",
+                link.expansion_status,
+            )
+            self.assertEqual("proc/mounts", link.resolved_path)
+            self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
+            self.assertEqual((), inventory.diagnostics)
+
     def test_target_under_declared_empty_runtime_tree_is_not_a_source_gap(self):
         with tempfile.TemporaryDirectory() as root_dir:
             root = Path(root_dir)

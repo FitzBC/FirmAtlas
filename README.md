@@ -54,6 +54,7 @@ FirmAtlas 是一个证据驱动的一体化固件分析平台。它聚合固件�
 | 接口测绘 | 从漏洞证据提取路径、CGI、HTTP 方法、参数与安全影响 | 接口原文、所属类别、参数上下文、关联 CVE |
 | 架构聚类 | 表单处理器、CGI 网关、管理路由、动态页面、资源型 API、HNAP/SOAP | 相似接口、命中理由、厂商与固件型号分布 |
 | 潜在隐藏接口 | 全固件 Native 注册减去 completed 客户端范围，默认选择每个固件最新目录 | 注册二进制、handler、覆盖 scope、证据 identity、运行时原因义务 |
+| 固件版本结构差异 | 覆盖感知地对齐同型号不可变测绘目录，比较接口、参数与潜在隐藏接口 | 发行身份依据、coverage/profile 边界、增删改置信度、BASE/TARGET 证据 |
 | 调查体验 | 固件 ↔ 漏洞 ↔ 接口多级下钻，不丢失列表与筛选上下文 | 分层面板、逐级回退、父级可见、移动端全屏层级 |
 | 大规模检索 | SQLite FTS5、字段索引、服务端分页与输入防抖 | 17 万级候选无需全量加载到浏览器 |
 
@@ -135,7 +136,7 @@ make mapping-inventory ROOT=/path/to/extracted-root
 
 Inventory 条目现在可以通过统一的证据捕获 Interface 转换为 `firmatlas.mapping.evidence/v1alpha1` EvidenceAtom。文本与二进制证据都会校验源文件摘要、精确字节选区及选区摘要；文本另外保存可回放的 UTF-8 行列。真实 Tenda AC9 中间结果见 [M1-03 EvidenceAtom 样例](./docs/firmware-mapping/samples/tenda-ac9-m1-evidence-atoms.json)。
 
-Frontend Request Producer 已能从声明范围内的 HTML Form、Tenda `R.pageModel/R.moduleModel`、jQuery `getJSON/post/ajax`、对象式 `request` 和同制品 shared-CGI wrapper 中恢复请求候选、方法、表示形式、参数与 operation selector，并以 EvidenceAtom 输出。它区分动态 URL 的 literal prefix、合并重复调用身份但保留多处证据；跨文件符号尚未解析时不会硬编码 endpoint。AC9、HNAP 与共享 CGI 的对比输出见 [M1-04 样例](./docs/firmware-mapping/samples/m1-04-frontend-producer-summary.json)。
+Frontend Request Producer 已能从声明范围内的 HTML Form、Tenda `R.pageModel/R.moduleModel`、jQuery `getJSON/post/ajax`、对象式 `request`、同制品 shared-CGI wrapper 和 LuCI `rpc.declare` 中恢复请求候选、方法、表示形式、参数与 operation selector，并以 EvidenceAtom 输出。LuCI RPC 使用 `ubus://object/method` 表示逻辑操作，不伪造固定 HTTP URL；动态 object/method 会使覆盖保持 partial。AC9、HNAP 与共享 CGI 的对比输出见 [M1-04 样例](./docs/firmware-mapping/samples/m1-04-frontend-producer-summary.json)。
 
 Web Configuration Producer 已能从 lighttpd、nginx、直接 POSIX shell 启动项和 proprietary httpd `Control/Alias/Location/External` 配置恢复 listener、docroot、namespace mapping、auth requirement、service start 与外部 handler binding。AC9 回放确认了 `:8180 → /cgi-bin/luci/ → 127.0.0.1:8188 → app_data_center`；DAP-3520 回放确认 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap`；X5000R 回放确认 `:80/:8080 → /www/ → /cgi-bin/ CGI executor`，均不从路径名称猜测未观察的处理器。
 
@@ -152,6 +153,8 @@ Discovery Catalog 通过单一 Interface 组装 Frontend、配置、脚本、Nat
 DAP-3520 HNAP/PHP-XGI Catalog 同样不使用漏洞文本或 seed，发布 273 个候选、1 个 selector 参数和 288 个可回放 EvidenceAtom。Catalog 会继承上游 Inventory coverage；chroot symlink 重放关闭原先误报缺口后，真实 HNAP/XGI 样本已晋级 `verified`。中间结果见 [M1-11A 样例](./docs/firmware-mapping/samples/m1-11a-dap3520-hnap-xgi-catalog-summary.json)。
 
 Discovery Catalog 现在可不可变地发布到 SQLite，并通过“通信测绘”工作区按目录版本、候选类型、接口 token 和来源构造查询。页面采用目录 → 候选 → 证据详情的稳定三级布局，详情同步展示参数、跨层关联、EvidenceAtom 定位、覆盖账本和开放义务；浏览器只读取服务端投影，不重新推断事实。
+
+“版本对比”视图会先核对不可变发行上下文和 Coverage Ledger，再按稳定身份比较候选、参数及潜在隐藏接口。真实 OpenWrt Tenda AC9 `18.06.7 → 19.07.8` 回放恢复了从旧 Lua 管理路由到 52 个 LuCI/ubus 逻辑操作的控制面迁移信号；由于仍有动态 `hostapd.%s` 未解析，系统把整体差异标记为 coverage-confounded，而不是冒充完整的固件功能变化。报告见 [M1-24 双版本实证](./docs/firmware-mapping/samples/m1-24-openwrt-ac9-version-diff.json)。
 
 Native Deep 的首个保守 Adapter 已支持命名 ELF `{route_ptr, handler_ptr}` 注册表：只有 route pointer、表项位置和 executable handler pointer 同时成立时，才发布 `native_route_binding` / `native_handler` 并关闭调度义务。合成 ARM ELF 展示了完整三段证据链；真实 AC9 因没有受信命名表保持 0 binding，明确转交后续 ARM PIC call-site Adapter。中间结果见 [M1-10 样例](./docs/firmware-mapping/samples/m1-10-native-deep-route-table-summary.json)。
 

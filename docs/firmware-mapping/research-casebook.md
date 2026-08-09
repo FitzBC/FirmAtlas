@@ -146,7 +146,15 @@ dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
 “跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、multipart nested dispatch 关闭、跨二进制保护范围排除、静态服务装配关闭、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例。完成前端范围后仍有 10 个具备 native registration 和 handler、但没有已观察前端引用的 operation；它们作为“潜在隐藏接口”首个集合持续记录，而不是被自动解释为后门。不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、真实运行时可达、整体认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
 
-## 3. 后续案例准入触发器
+## 3. OpenWrt AC9：URL 消失不等于功能删除
+
+同一 Tenda AC9 target 的 OpenWrt 18.06.7 与 19.07.8 提供了版本通信架构迁移案例。旧版可见 `/admin/status/realtime/*`、network status、flashops 与 UCI confirm 等服务端 LuCI Lua route；新版的前端资源则大量声明 `rpc.declare({object, method, params})`，形成 system、network、file、uci、iwinfo、luci-rpc 等 `ubus://object/method` 逻辑操作。
+
+如果只比较 URL，结论会是“22 个路由删除”；加入前端 RPC 语义后，更合理的研究假设是控制面从服务端 Lua 路由向前端 JSON-RPC/ubus 迁移。这个假设仍受 coverage 约束：新版存在一个动态 `hostapd.%s` object，且 `request.* / L.url` 尚未完整恢复，因此当前 diff 为 `coverage_confounded`，不能声称完整功能对应、漏洞修复或运行时可达。
+
+论文可用它展示 path-only diff 的消融失败，以及 Coverage Ledger 如何阻止“分析器漏报 → 固件功能删除”的错误因果。固定制品、解包谱系、候选与参数差异见 [M1-24 机器报告](./samples/m1-24-openwrt-ac9-version-diff.json)。
+
+## 4. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：
 
@@ -162,7 +170,7 @@ dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 准入不是要求案例必须成功解决。一个证据充分、局限明确且仍然 open 的案例同样
 有研究价值；但不得把 open 写成 supported。
 
-## 4. 案例模板
+## 5. 案例模板
 
 每个案例至少包含：
 

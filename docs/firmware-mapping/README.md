@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-23 全固件潜在隐藏接口目录与 UI 已验证；当前 gate 为 `partial`
+> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-24 覆盖感知版本对比与 LuCI RPC 实证已验证；当前 gate 为 `partial`
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -83,6 +83,7 @@
 | [M1-21 X5000R 请求保护范围](./progress/2026-08-09-m1-21-x5000r-request-protection.md) | lighttpd suffix gate、SESSION_ID、302 enforcement 与 CGI 排除边界 | 自定义认证 Profile、保护范围或跨二进制路径变化时 |
 | [M1-22 X5000R 静态服务装配](./progress/2026-08-09-m1-22-x5000r-service-assembly.md) | init_router、service group、argv、配置、CGI namespace 与目标制品十一段证明 | 初始化链、服务参数、namespace 或运行时边界变化时 |
 | [M1-23 全固件潜在隐藏接口目录](./progress/2026-08-09-m1-23-potential-hidden-interfaces.md) | completed coverage gate、跨固件持久化查询、证据下钻与 X5000R 10 条首个正例 | 覆盖范围、差集归因、最新目录选择或隐藏接口边界变化时 |
+| [M1-24 覆盖感知版本对比](./progress/2026-08-09-m1-24-version-aware-mapping-diff.md) | 不可变发行上下文、结构 diff、LuCI RPC 与 OpenWrt AC9 双版本实证 | 快照对齐、覆盖置信度、版本身份或 RPC 语义变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -164,8 +165,9 @@ M1 工作项：
 | M1-21 | X5000R 自定义认证路径保护范围 | 已验证 | M1-08/12/20 | `lighttpd path gate → userloginAuth → checkLoginUser → SESSION_ID`，并证明 `/cgi-bin/cstecgi.cgi` 不在该门范围内 |
 | M1-22 | X5000R 静态初始化与服务装配 | 已验证 | M1-05/08/12/20/21 | `init_router → start_services_once → start_httpd → lighttpd argv/config → /cgi-bin/ → cstecgi.cgi` 十一段确定性证据 |
 | M1-23 | 全固件潜在隐藏接口目录与 UI | 已验证 | M1-08/12/18/19/22 | completed coverage gate + 历史目录回填 + 跨固件 API/分布/搜索/证据下钻；X5000R 10 条首个正例 |
+| M1-24 | 覆盖感知版本通信结构对比 | 已验证 | M1-08/09/23 | immutable release context + candidate/parameter/hidden diff + LuCI RPC + OpenWrt AC9 18.06.7→19.07.8 实证 + Console 对比视图 |
 
-**下一项建议**：继续 M1-11 样本扩展，把 M1-23 投影应用到 AC9、DAP-3520 和新固件版本；优先实现通用 Scope Planner、同型号版本差异和 CFG-aware sink flow，并为潜在隐藏接口增加独立运行时验证。X5000R 10 条正例不能直接命名为后门或已确认可达接口。
+**下一项建议**：继续 M1-11 样本扩展；沿 M1-24 补全 LuCI `request.* / L.url` 与动态 ubus object，并把 RPC operation 绑定到 rpcd plugin / executable owner；随后加入带安全公告或补丁边界的厂商同型号版本。X5000R 10 条正例不能直接命名为后门或已确认可达接口。
 
 ## 7. 跨会话无缝工作协议
 

@@ -18,6 +18,72 @@ from firmatlas.mapping import (
 
 
 class FrontendRequestProducerContractTests(unittest.TestCase):
+    def test_luci_rpc_declare_preserves_logical_operation_and_parameters(self):
+        content = (
+            b"var callInfo=rpc.declare({object:'system',method:'info',"
+            b"params:['name','verbose'],expect:{result:{}}});"
+        )
+        source = SourceArtifactEntry(
+            "www/luci-static/resources/system.js",
+            "www/luci-static/resources/system.js",
+            "file",
+            len(content),
+            hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(1, len(result.candidates))
+        candidate = result.candidates[0]
+        self.assertEqual("ubus://system/info", candidate.endpoint)
+        self.assertEqual(
+            FrontendEndpointShape.LOGICAL_OPERATION,
+            candidate.endpoint_shape,
+        )
+        self.assertEqual(FrontendRequestRole.UNSPECIFIED, candidate.request_role)
+        self.assertEqual("POST", candidate.method)
+        self.assertEqual("json_rpc", candidate.representation)
+        self.assertEqual("LuCI.rpc.declare", candidate.source_construct)
+        self.assertEqual(
+            ["object", "method", "name", "verbose"],
+            [item.name for item in result.parameters],
+        )
+        self.assertEqual(
+            [("object", "system"), ("method", "info")],
+            [
+                (item.name, item.literal_value)
+                for item in result.parameters
+                if item.is_operation_selector
+            ],
+        )
+        self.assertEqual(
+            {"constructs_request", "serializes_parameter", "selects_operation"},
+            {item.capability for item in result.evidence_atoms},
+        )
+
+    def test_dynamic_luci_rpc_object_is_an_explicit_coverage_gap(self):
+        content = (
+            b"rpc.declare({object:'hostapd.%s'.format(ifname),method:'del_client',"
+            b"params:['addr']});"
+        )
+        source = SourceArtifactEntry(
+            "www/luci-static/resources/network.js",
+            "www/luci-static/resources/network.js",
+            "file",
+            len(content),
+            hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(CoverageStatus.PARTIAL, result.coverage_status)
+        self.assertEqual((), result.candidates)
+        self.assertEqual(
+            ["frontend.luci_rpc_dynamic_operation"],
+            [item.code for item in result.diagnostics],
+        )
+
     def test_documented_x5000r_asset_graph_is_exactly_replayable(self):
         from scripts.build_x5000r_frontend_asset_graph import (
             X5000R_ROOT,
@@ -343,6 +409,7 @@ D.prototype.run=function(x){return this.topicurl="run",this.post(x)};'''
                 "custom.request",
                 "custom.file-upload-property",
                 "shared-cgi.topicurl",
+                "LuCI.rpc.declare",
                 "HTML.form",
             },
             set(result.supported_constructs),

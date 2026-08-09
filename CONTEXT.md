@@ -231,3 +231,15 @@ _Avoid_: 接口功能、漏洞类型、已确认的软件组件、业务动作
 **接口结构推荐（Interface Structure Recommendation）**：
 以一个已知或未知的暴露接口为查询样本，根据其接口风格类别、后端通信架构风格和路径结构证据，返回可能采用相似后端控制面结构的接口及其关联漏洞、厂商和固件型号。推荐表达结构相似性，不构成代码同源或组件身份结论。
 _Avoid_: 模糊搜索、漏洞匹配、同源确认
+
+**测绘发行上下文（Mapping Release Context）**：
+附着于不可变 Discovery Catalog 的证据支持发行身份，包含厂商、产品、设备型号、固件版本、来源引用与身份依据。它用于限定版本比较的同家族边界，不从文件名或路径单独推断。
+_Avoid_: 固件候选、下载 URL、Catalog ID
+
+**测绘快照差异（Mapping Snapshot Diff）**：
+在先比较 Coverage Ledger 和分析 profile 后，对两个不可变通信测绘目录中的稳定候选、参数与潜在隐藏接口身份进行的结构差异。差异必须区分 `firmware_change_supported`、`observed_scope_only` 与 `coverage_confounded`，不能把分析覆盖变化冒充固件变化。
+_Avoid_: 原始 JSON diff、Git diff、漏洞修复结论
+
+**逻辑 RPC 操作（Logical RPC Operation）**：
+前端或客户端显式声明的远程过程身份，例如 LuCI `rpc.declare` 中由 `object + method` 组成的 `ubus://object/method`。它记录通信语义而不是猜测运行时解析出的固定 HTTP URL；动态 object/method 必须保留覆盖缺口。
+_Avoid_: HTTP endpoint、Native handler、已验证运行时服务

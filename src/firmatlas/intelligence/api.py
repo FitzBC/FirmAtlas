@@ -129,6 +129,16 @@ def create_handler(
                     limit=page_size,
                     offset=(page - 1) * page_size,
                 )
+            if method == "GET" and path == "/api/mappings/compare":
+                result = mappings.compare_catalogs(
+                    _one(query, "base"), _one(query, "target")
+                )
+                if result is None:
+                    raise ApiError(
+                        HTTPStatus.NOT_FOUND,
+                        "base or target mapping catalog not found",
+                    )
+                return HTTPStatus.OK, result
             mapping_prefix = "/api/mappings/catalogs/"
             if method == "GET" and path.startswith(mapping_prefix):
                 remainder = path[len(mapping_prefix):]

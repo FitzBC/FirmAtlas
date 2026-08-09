@@ -1,13 +1,15 @@
 import {
   Activity, Binary, Braces, ChevronRight, CircleDot, Database, EyeOff,
-  FileCode2, Radar, Search, ShieldQuestion, Waypoints,
+  FileCode2, GitCompareArrows, Minus, Plus, Radar, Search, ShieldQuestion,
+  TriangleAlert, Waypoints,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { intelligenceApi } from '../api/client'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type {
   MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
-  PotentialHiddenInterface, PotentialHiddenInterfacePage,
+  MappingSnapshotChange, MappingSnapshotDiff, PotentialHiddenInterface,
+  PotentialHiddenInterfacePage,
 } from '../types'
 
 const kinds = [
@@ -28,10 +30,14 @@ export function MappingCatalogWorkspace() {
   const [kind, setKind] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<'catalog' | 'hidden'>('catalog')
+  const [view, setView] = useState<'catalog' | 'hidden' | 'compare'>('catalog')
   const [hiddenQuery, setHiddenQuery] = useState('')
   const [hiddenPage, setHiddenPage] = useState<PotentialHiddenInterfacePage | null>(null)
   const [selectedHidden, setSelectedHidden] = useState<PotentialHiddenInterface | null>(null)
+  const [baseCatalogId, setBaseCatalogId] = useState('')
+  const [targetCatalogId, setTargetCatalogId] = useState('')
+  const [snapshotDiff, setSnapshotDiff] = useState<MappingSnapshotDiff | null>(null)
+  const [selectedChange, setSelectedChange] = useState<MappingSnapshotChange | null>(null)
   const debouncedQuery = useDebouncedValue(query, 180)
   const debouncedHiddenQuery = useDebouncedValue(hiddenQuery, 180)
 
@@ -40,6 +46,10 @@ export function MappingCatalogWorkspace() {
     void intelligenceApi.mappingCatalogs(controller.signal).then((page) => {
       setCatalogs(page.items)
       setCatalogId((current) => current || page.items[0]?.catalog_id || '')
+      if (page.items.length >= 2) {
+        setBaseCatalogId((current) => current || page.items[1].catalog_id)
+        setTargetCatalogId((current) => current || page.items[0].catalog_id)
+      }
       setError(null)
     }).catch((caught) => {
       if (!controller.signal.aborted) setError(caught instanceof Error ? caught.message : '目录加载失败')
@@ -84,6 +94,31 @@ export function MappingCatalogWorkspace() {
     return () => controller.abort()
   }, [view, debouncedHiddenQuery])
 
+  useEffect(() => {
+    if (view !== 'compare') return
+    if (!baseCatalogId || !targetCatalogId || baseCatalogId === targetCatalogId) {
+      setSnapshotDiff(null)
+      setSelectedChange(null)
+      return
+    }
+    const controller = new AbortController()
+    setLoading(true)
+    void intelligenceApi.compareMappingCatalogs(
+      baseCatalogId, targetCatalogId, controller.signal,
+    ).then((result) => {
+      setSnapshotDiff(result)
+      setSelectedChange((current) => result.changes.some(
+        (item) => item.change_id === current?.change_id,
+      ) ? current : null)
+      setError(null)
+    }).catch((caught) => {
+      if (!controller.signal.aborted) {
+        setError(caught instanceof Error ? caught.message : '版本测绘差异加载失败')
+      }
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    return () => controller.abort()
+  }, [view, baseCatalogId, targetCatalogId])
+
   const activeCatalog = useMemo(
     () => catalogs.find((item) => item.catalog_id === catalogId), [catalogId, catalogs],
   )
@@ -110,6 +145,7 @@ export function MappingCatalogWorkspace() {
           <div className="flex rounded-xl border border-white/[0.07] bg-black/20 p-1">
             <button type="button" onClick={() => setView('catalog')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'catalog' ? 'bg-white/[0.08] text-white' : 'text-slate-600 hover:text-slate-300'}`}>目录浏览</button>
             <button type="button" onClick={() => setView('hidden')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'hidden' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>潜在隐藏接口</button>
+            <button type="button" onClick={() => setView('compare')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'compare' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>版本对比</button>
           </div>
           {view === 'catalog' && activeCatalog && <StatusPill catalog={activeCatalog} />}
         </div>
@@ -120,6 +156,11 @@ export function MappingCatalogWorkspace() {
       {view === 'hidden' ? <HiddenInterfaceWorkspace
         page={hiddenPage} query={hiddenQuery} onQuery={setHiddenQuery}
         selected={selectedHidden} onSelect={setSelectedHidden} loading={loading}
+      /> : view === 'compare' ? <SnapshotComparisonWorkspace
+        catalogs={catalogs} baseCatalogId={baseCatalogId} targetCatalogId={targetCatalogId}
+        onBaseCatalog={setBaseCatalogId} onTargetCatalog={setTargetCatalogId}
+        result={snapshotDiff} selected={selectedChange} onSelect={setSelectedChange}
+        loading={loading}
       /> : !loading && catalogs.length === 0 ? <EmptyCatalog /> : (
         <div className="grid min-h-[640px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 backdrop-blur-xl xl:grid-cols-[260px_minmax(360px,0.9fr)_minmax(420px,1.1fr)]">
           <aside className="border-b border-white/[0.07] p-4 xl:border-b-0 xl:border-r">
@@ -158,6 +199,75 @@ export function MappingCatalogWorkspace() {
     </section>
   )
 }
+
+function SnapshotComparisonWorkspace({
+  catalogs, baseCatalogId, targetCatalogId, onBaseCatalog, onTargetCatalog,
+  result, selected, onSelect, loading,
+}: {
+  catalogs: MappingCatalogSummary[]
+  baseCatalogId: string
+  targetCatalogId: string
+  onBaseCatalog: (value: string) => void
+  onTargetCatalog: (value: string) => void
+  result: MappingSnapshotDiff | null
+  selected: MappingSnapshotChange | null
+  onSelect: (value: MappingSnapshotChange) => void
+  loading: boolean
+}) {
+  const [changeQuery, setChangeQuery] = useState('')
+  const [changeCategory, setChangeCategory] = useState('')
+  if (catalogs.length < 2) return <div className="grid min-h-[440px] place-items-center rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 p-8 text-center"><div><GitCompareArrows className="mx-auto text-cyan/35" size={38} /><h2 className="mt-4 text-sm text-slate-300">至少需要两个测绘目录</h2><p className="mt-2 text-xs text-slate-600">发布同型号的两个固件快照后才能比较通信结构。</p></div></div>
+  const summary = result?.summary
+  const structuralAdded = (summary?.added_candidate_count ?? 0) + (summary?.added_parameter_count ?? 0)
+  const structuralRemoved = (summary?.removed_candidate_count ?? 0) + (summary?.removed_parameter_count ?? 0)
+  const structuralChanged = (summary?.changed_candidate_count ?? 0) + (summary?.changed_parameter_count ?? 0)
+  const normalizedChangeQuery = changeQuery.trim().toLocaleLowerCase()
+  const visibleChanges = result?.changes.filter((item) => (
+    (!changeCategory || item.category === changeCategory)
+    && (!normalizedChangeQuery || `${item.display_identity} ${item.stable_identity}`.toLocaleLowerCase().includes(normalizedChangeQuery))
+  )) ?? []
+  const changeFilters = [
+    ['', '全部'], ['candidate', '接口 / 候选'], ['parameter', '参数'],
+    ['coverage', '覆盖'], ['potential_hidden_interface', '潜在隐藏'],
+  ]
+  return <div className="detail-enter space-y-4">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <SignalMetric icon={<Plus size={16} />} label="新增结构" value={structuralAdded} />
+      <SignalMetric icon={<Minus size={16} />} label="移除结构" value={structuralRemoved} />
+      <SignalMetric icon={<GitCompareArrows size={16} />} label="结构变化" value={structuralChanged} />
+      <SignalMetric icon={<EyeOff size={16} />} label="潜在隐藏新增" value={summary?.discovered_hidden_interface_count ?? 0} />
+    </div>
+    {result?.comparison_status === 'coverage_confounded' && <div className="flex items-start gap-3 rounded-xl border border-amber-400/20 bg-amber-400/[0.045] px-4 py-3"><TriangleAlert size={16} className="mt-0.5 shrink-0 text-amber-300" /><div><div className="text-xs font-medium text-amber-200">覆盖不可直接比较</div><p className="mt-1 text-[10px] leading-5 text-slate-500">Producer、版本、范围或完成状态不同。所有结构变化均降级为覆盖混杂，不能直接解释为固件代码变化。</p></div></div>}
+    {result?.comparison_status === 'coverage_equivalent_partial' && <div className="flex items-start gap-3 rounded-xl border border-cyan/15 bg-cyan/[0.035] px-4 py-3"><TriangleAlert size={16} className="mt-0.5 shrink-0 text-cyan" /><div><div className="text-xs font-medium text-cyan">覆盖一致但不完整</div><p className="mt-1 text-[10px] leading-5 text-slate-500">两个版本使用相同分析范围，但至少一个必需范围仍为 partial；差异仅在已观察范围内成立。</p></div></div>}
+    <div className="grid min-h-[620px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0f17]/80 backdrop-blur-xl xl:grid-cols-[300px_minmax(360px,0.9fr)_minmax(420px,1.1fr)]">
+      <aside className="border-b border-white/[0.07] p-5 xl:border-b-0 xl:border-r">
+        <div className="eyebrow"><GitCompareArrows size={12} /> Snapshot alignment</div>
+        <p className="mt-2 text-[10px] leading-5 text-slate-600">按稳定实体身份对齐，不使用 Evidence ID 或二进制地址漂移冒充接口变化。</p>
+        <SnapshotSelect label="基线目录" value={baseCatalogId} catalogs={catalogs} onChange={onBaseCatalog} />
+        <SnapshotSelect label="目标目录" value={targetCatalogId} catalogs={catalogs} onChange={onTargetCatalog} />
+        <div className={`mt-5 rounded-xl border p-3 ${result?.same_firmware_family_verified ? 'border-signal/15 bg-signal/[0.035]' : 'border-cyan/10 bg-cyan/[0.025]'}`}><div className={`text-[9px] uppercase tracking-[0.12em] ${result?.same_firmware_family_verified ? 'text-signal' : 'text-cyan'}`}>{result?.same_firmware_family_verified ? '同固件族身份已验证' : '比较边界'}</div><p className="mt-2 text-[10px] leading-5 text-slate-500">{result?.same_firmware_family_verified ? `${result.base.release_context?.device_model} · ${result.base.release_context?.firmware_version} → ${result.target.release_context?.firmware_version}` : '当前目录只携带制品身份，不能断言同型号版本谱系。需由 Firmware Release 关系单独证明。'}</p></div>
+        <div className="mt-5 space-y-2 text-[10px] text-slate-600"><div className="flex justify-between"><span>全部变化</span><span className="font-mono text-slate-300">{summary?.total_change_count ?? 0}</span></div><div className="flex justify-between"><span>Coverage 变化</span><span className="font-mono text-amber-300">{summary?.coverage_change_count ?? 0}</span></div><div className="flex justify-between"><span>潜在隐藏消失</span><span className="font-mono text-signal">{summary?.resolved_hidden_interface_count ?? 0}</span></div></div>
+      </aside>
+      <div className="border-b border-white/[0.07] xl:border-b-0 xl:border-r">
+        <div className="border-b border-white/[0.07] p-4"><div className="flex items-center justify-between"><div className="text-[10px] uppercase tracking-[0.13em] text-slate-500">结构变化时间线</div><div className="font-mono text-[9px] text-slate-700">{visibleChanges.length} / {result?.changes.length ?? 0}</div></div><label className="search-field mt-3"><Search size={14} /><input aria-label="搜索版本差异" placeholder="搜索接口、RPC operation 或稳定身份…" value={changeQuery} onChange={(event) => setChangeQuery(event.target.value)} /></label><div className="mt-3 flex gap-2 overflow-x-auto pb-1">{changeFilters.map(([value, label]) => <button key={value} type="button" onClick={() => setChangeCategory(value)} className={`shrink-0 rounded-lg border px-2.5 py-1.5 text-[9px] transition ${changeCategory === value ? 'border-cyan/25 bg-cyan/[0.08] text-cyan' : 'border-white/[0.06] text-slate-600 hover:text-slate-300'}`}>{label}</button>)}</div></div>
+        <div className="max-h-[560px] overflow-y-auto p-2">
+          {loading && <div className="p-8 text-center text-xs text-slate-600">正在对齐两个不可变目录…</div>}
+          {!loading && !visibleChanges.length && <div className="p-8 text-center text-xs text-slate-600">当前筛选范围没有观察到结构差异</div>}
+          {visibleChanges.map((item) => <button key={item.change_id} type="button" aria-label={`查看版本差异 ${item.display_identity}`} onClick={() => onSelect(item)} className={`group mb-1 w-full rounded-xl border p-3 text-left transition ${selected?.change_id === item.change_id ? 'border-cyan/25 bg-cyan/[0.055]' : 'border-transparent hover:border-white/[0.06] hover:bg-white/[0.025]'}`}><div className="flex items-start gap-3"><ChangeGlyph kind={item.change_kind} /><div className="min-w-0 flex-1"><div className="truncate font-mono text-xs text-slate-200">{item.display_identity}</div><div className="mt-1 flex flex-wrap gap-2 text-[8px] uppercase tracking-[0.08em]"><span className="text-cyan/65">{item.category.replaceAll('_', ' ')}</span><span className={item.confidence === 'firmware_change_supported' ? 'text-signal' : 'text-amber-300'}>{item.confidence.replaceAll('_', ' ')}</span></div></div><ChevronRight size={14} className="mt-2 text-slate-700 transition group-hover:translate-x-0.5 group-hover:text-cyan" /></div></button>)}
+        </div>
+      </div>
+      <div className="min-w-0 bg-[radial-gradient(circle_at_80%_10%,rgba(89,196,230,0.05),transparent_34%)]">{selected ? <SnapshotChangeEvidence item={selected} /> : <div className="grid h-full min-h-[420px] place-items-center p-8 text-center"><div><GitCompareArrows className="mx-auto text-cyan/35" size={36} /><h2 className="mt-4 text-sm font-medium text-slate-300">选择一条版本差异</h2><p className="mt-2 max-w-xs text-xs leading-5 text-slate-600">检查稳定身份、变化字段、基线/目标值与覆盖置信度。</p></div></div>}</div>
+    </div>
+  </div>
+}
+
+function SnapshotSelect({ label, value, catalogs, onChange }: { label: string; value: string; catalogs: MappingCatalogSummary[]; onChange: (value: string) => void }) { return <label className="mt-5 block"><span className="text-[9px] uppercase tracking-[0.12em] text-slate-600">{label}</span><select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-xl border border-white/[0.07] bg-[#080d14] px-3 py-2.5 font-mono text-[10px] text-slate-300 outline-none focus:border-cyan/30">{catalogs.map((catalog) => <option key={catalog.catalog_id} value={catalog.catalog_id}>{catalog.release_context ? `${catalog.release_context.device_model} · ${catalog.release_context.firmware_version}` : `${catalog.firmware_artifact_sha256.slice(0, 16)}…`} · {catalog.coverage_status}</option>)}</select></label> }
+
+function ChangeGlyph({ kind }: { kind: MappingSnapshotChange['change_kind'] }) { const style = kind === 'added' ? 'bg-signal/[0.08] text-signal' : kind === 'removed' ? 'bg-ember/[0.08] text-ember' : 'bg-cyan/[0.08] text-cyan'; return <div className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg ${style}`}>{kind === 'added' ? <Plus size={14} /> : kind === 'removed' ? <Minus size={14} /> : <GitCompareArrows size={14} />}</div> }
+
+function SnapshotChangeEvidence({ item }: { item: MappingSnapshotChange }) { return <article className="detail-enter max-h-[650px] overflow-y-auto p-5 sm:p-6"><div className="eyebrow"><GitCompareArrows size={12} /> Version-aware evidence diff</div><h2 className="mt-3 break-all font-mono text-lg font-semibold text-white">{item.display_identity}</h2><div className="mt-3 flex flex-wrap gap-2"><span className="rounded-md border border-cyan/15 bg-cyan/[0.04] px-2 py-1 text-[9px] uppercase text-cyan">{item.change_kind}</span><span className={`rounded-md border px-2 py-1 text-[9px] uppercase ${item.confidence === 'firmware_change_supported' ? 'border-signal/15 bg-signal/[0.04] text-signal' : 'border-amber-400/15 bg-amber-400/[0.04] text-amber-300'}`}>{item.confidence.replaceAll('_', ' ')}</span></div><p className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-[10px] leading-5 text-slate-500">{item.interpretation}</p><EvidenceSection title="变化字段"><div className="flex flex-wrap gap-2">{item.changed_fields.map((field) => <span key={field} className="rounded-md bg-cyan/[0.06] px-2 py-1 font-mono text-[9px] text-cyan">{field}</span>)}</div></EvidenceSection><div className="grid gap-3 sm:grid-cols-2"><SnapshotValue title="BASE" value={item.base} /><SnapshotValue title="TARGET" value={item.target} /></div><EvidenceSection title="稳定身份"><div className="break-all font-mono text-[9px] leading-5 text-slate-600">{item.stable_identity}</div></EvidenceSection></article> }
+
+function SnapshotValue({ title, value }: { title: string; value: Record<string, unknown> | null }) { return <div className="min-w-0 rounded-xl border border-white/[0.06] bg-black/20 p-3"><div className="text-[9px] uppercase tracking-[0.12em] text-slate-600">{title}</div>{value ? <div className="mt-3 space-y-2">{Object.entries(value).map(([key, entry]) => <div key={key}><div className="text-[8px] uppercase text-slate-700">{key}</div><div className="mt-0.5 break-all font-mono text-[9px] leading-4 text-slate-400">{typeof entry === 'string' ? entry : JSON.stringify(entry)}</div></div>)}</div> : <div className="mt-3 text-[10px] text-slate-700">不存在</div>}</div> }
 
 function HiddenInterfaceWorkspace({ page, query, onQuery, selected, onSelect, loading }: {
   page: PotentialHiddenInterfacePage | null

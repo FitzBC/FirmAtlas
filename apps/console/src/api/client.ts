@@ -22,6 +22,7 @@ import type {
   FirmwareCandidateDetail,
   FirmwareCandidate,
   MappingCatalogSummary,
+  MappingSnapshotDiff,
   MappingCandidatePage,
   MappingCandidateDetail,
   PotentialHiddenInterfacePage,
@@ -179,6 +180,14 @@ export const intelligenceApi = {
     return request<PotentialHiddenInterfacePage>(
       `/api/mappings/potential-hidden-interfaces?${params}`, { signal },
     )
+  },
+  compareMappingCatalogs: (
+    baseCatalogId: string, targetCatalogId: string, signal?: AbortSignal,
+  ) => {
+    const params = new URLSearchParams({
+      base: baseCatalogId, target: targetCatalogId,
+    })
+    return request<MappingSnapshotDiff>(`/api/mappings/compare?${params}`, { signal })
   },
   mappingCandidates: (
     catalogId: string, filters: { query?: string; kind?: string }, signal?: AbortSignal,

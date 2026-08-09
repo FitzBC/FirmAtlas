@@ -24,6 +24,47 @@ def _source(path: str, content: bytes) -> SourceArtifactEntry:
 
 
 class WebConfigurationProducerContractTests(unittest.TestCase):
+    def test_openwrt_uci_uhttpd_maps_listeners_root_cgi_and_lua_namespace(self):
+        content = b'''config uhttpd main
+  list listen_http 0.0.0.0:80
+  list listen_https '[::]:443'
+  option home /www
+  option cgi_prefix /cgi-bin
+  list lua_prefix "/cgi-bin/luci=/usr/lib/lua/luci/sgi/uhttpd.lua"
+'''
+
+        result = discover_web_configuration(
+            _source("etc/config/uhttpd", content), content
+        )
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual("uci_uhttpd", result.detected_format)
+        self.assertEqual(
+            [
+                (WebConfigFindingKind.LISTENER, None, "0.0.0.0:80", "http", "uhttpd"),
+                (WebConfigFindingKind.LISTENER, None, "[::]:443", "https", "uhttpd"),
+                (WebConfigFindingKind.DOCUMENT_ROOT, "/", "/www", None, None),
+                (
+                    WebConfigFindingKind.NAMESPACE_MAPPING,
+                    "/cgi-bin", "cgi", "cgi_executor", "/www",
+                ),
+                (
+                    WebConfigFindingKind.NAMESPACE_MAPPING,
+                    "/cgi-bin/luci", "/usr/lib/lua/luci/sgi/uhttpd.lua",
+                    "lua_handler", None,
+                ),
+            ],
+            [
+                (item.kind, item.namespace, item.value, item.qualifier, item.related_value)
+                for item in result.findings
+            ],
+        )
+        self.assertEqual(
+            {"listens_on", "maps_namespace", "binds_handler"},
+            {item.capability for item in result.evidence_atoms},
+        )
+        self.assertIn("uci_uhttpd", result.supported_formats)
+
     def test_lighttpd_cgi_namespace_preserves_listener_root_and_execution_mode(self):
         content = b'''server.port = 80
 server.document-root = "/www/"
@@ -152,7 +193,7 @@ CFG;
         self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
         self.assertEqual("nginx", result.detected_format)
         self.assertEqual(
-            {"lighttpd", "nginx", "posix_shell", "proprietary_httpd"},
+            {"lighttpd", "nginx", "posix_shell", "proprietary_httpd", "uci_uhttpd"},
             set(result.supported_formats),
         )
         self.assertEqual(

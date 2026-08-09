@@ -22,7 +22,7 @@ from .inventory import SourceArtifactEntry
 
 
 FRONTEND_RESULT_SCHEMA_VERSION = "firmatlas.mapping.frontend-result/v1alpha1"
-_PRODUCER = AnalyzerIdentity(name="frontend-request-producer", version="0.2.0")
+_PRODUCER = AnalyzerIdentity(name="frontend-request-producer", version="0.3.0")
 _SUPPORTED_CONSTRUCTS = (
     "R.pageModel",
     "R.moduleModel.getSubmitData",
@@ -32,6 +32,7 @@ _SUPPORTED_CONSTRUCTS = (
     "custom.request",
     "custom.file-upload-property",
     "shared-cgi.topicurl",
+    "LuCI.rpc.declare",
     "HTML.form",
 )
 
@@ -45,6 +46,7 @@ class FrontendRequestRole(str, Enum):
 class FrontendEndpointShape(str, Enum):
     EXACT_LITERAL = "exact_literal"
     LITERAL_PREFIX = "literal_prefix"
+    LOGICAL_OPERATION = "logical_operation"
 
 
 class FrontendParameterNamespace(str, Enum):
@@ -637,6 +639,113 @@ def _object_properties(tokens: Tuple[_Token, ...], open_index: int) -> tuple:
     return tuple(properties), cursor
 
 
+def _luci_rpc_declarations(content: bytes) -> tuple:
+    """Recover statically named LuCI ``rpc.declare`` ubus operations.
+
+    LuCI resolves the physical HTTP path at runtime, so the published identity is
+    deliberately a logical ``ubus://object/method`` operation rather than a
+    guessed URL. Dynamic object or method expressions remain an explicit gap.
+    """
+
+    tokens = _tokenize_javascript(content)
+    results = []
+    unsupported = 0
+    prefix = (b"rpc", b".", b"declare", b"(", b"{")
+    for index in range(0, max(0, len(tokens) - len(prefix) + 1)):
+        if tuple(item.value for item in tokens[index:index + 5]) != prefix:
+            continue
+        object_end = _matching_close(tokens, index + 4)
+        direct = {}
+        params = []
+        cursor = index + 5
+        depth = 1
+        while cursor < object_end:
+            token = tokens[cursor]
+            if token.value == b"{":
+                depth += 1
+            elif token.value == b"}":
+                depth -= 1
+            elif (
+                depth == 1
+                and token.kind in {"identifier", "string"}
+                and cursor + 2 < object_end
+                and tokens[cursor + 1].value == b":"
+            ):
+                key = token.value.lower()
+                value = tokens[cursor + 2]
+                if key in {b"object", b"method"}:
+                    following = (
+                        tokens[cursor + 3].value
+                        if cursor + 3 <= object_end else b"}"
+                    )
+                    if value.kind == "string" and following in {b",", b"}"}:
+                        direct[key] = (token, value)
+                elif key == b"params" and value.value == b"[":
+                    param_cursor = cursor + 3
+                    array_depth = 1
+                    while param_cursor < object_end and array_depth > 0:
+                        current = tokens[param_cursor]
+                        if current.value == b"[":
+                            array_depth += 1
+                        elif current.value == b"]":
+                            array_depth -= 1
+                        elif array_depth == 1 and current.kind == "string":
+                            params.append(current)
+                        param_cursor += 1
+                cursor += 2
+            cursor += 1
+        if b"object" not in direct or b"method" not in direct:
+            unsupported += 1
+            continue
+        object_key, object_value = direct[b"object"]
+        method_key, method_value = direct[b"method"]
+        endpoint = "ubus://{}/{}".format(
+            object_value.value.decode("utf-8"),
+            method_value.value.decode("utf-8"),
+        )
+        parameters = [
+            _ParameterLiteral(
+                name=name,
+                name_start=key.start,
+                name_end=key.end,
+                namespace=FrontendParameterNamespace.JSON,
+                literal_value=value.value.decode("utf-8"),
+                value_start=value.start,
+                value_end=value.end,
+                is_operation_selector=True,
+                source_construct="LuCI.rpc.declare",
+            )
+            for name, key, value in (
+                ("object", object_key, object_value),
+                ("method", method_key, method_value),
+            )
+        ]
+        parameters.extend(
+            _ParameterLiteral(
+                name=value.value.decode("utf-8"),
+                name_start=value.start,
+                name_end=value.end,
+                namespace=FrontendParameterNamespace.JSON,
+                literal_value=None,
+                value_start=None,
+                value_end=None,
+                is_operation_selector=False,
+                source_construct="LuCI.rpc.declare.params",
+            )
+            for value in params
+        )
+        results.append((
+            endpoint,
+            min(object_value.start, method_value.start),
+            max(object_value.end, method_value.end),
+            FrontendRequestRole.UNSPECIFIED,
+            "POST",
+            "json_rpc",
+            tuple(parameters),
+        ))
+    return tuple(results), unsupported
+
+
 def _jquery_ajax_calls(content: bytes) -> tuple:
     tokens = _tokenize_javascript(content)
     results = []
@@ -1186,6 +1295,27 @@ def _request_literals(
     content: bytes, source_path: str, external_bindings: Optional[dict] = None
 ) -> tuple:
     discoveries = []
+    luci_rpc, _ = _luci_rpc_declarations(content)
+    for (
+        endpoint,
+        start_byte,
+        end_byte,
+        role,
+        method,
+        representation,
+        parameters,
+    ) in luci_rpc:
+        discoveries.append((
+            endpoint,
+            start_byte,
+            end_byte,
+            FrontendEndpointShape.LOGICAL_OPERATION,
+            role,
+            method,
+            representation,
+            "LuCI.rpc.declare",
+            parameters,
+        ))
     page_model_discoveries = []
     for key, endpoint, start_byte, end_byte in _page_model_url_properties(content):
         role = (
@@ -1415,6 +1545,15 @@ def _discover_frontend_requests(
     parameter_candidates = {}
     evidence_atoms = {}
     diagnostics = []
+    _, unsupported_luci_rpc = _luci_rpc_declarations(content)
+    if unsupported_luci_rpc:
+        diagnostics.append(FrontendDiagnostic(
+            code="frontend.luci_rpc_dynamic_operation",
+            message=(
+                "{} LuCI rpc.declare operation(s) used a dynamic object or "
+                "method expression and were not published"
+            ).format(unsupported_luci_rpc),
+        ))
     matches = _request_literals(content, source.canonical_path, external_bindings)
     selected_matches = matches[: policy.max_candidates]
     if len(matches) > len(selected_matches):
@@ -1463,6 +1602,7 @@ def _discover_frontend_requests(
                         "shared-cgi.topicurl.cross-resource",
                         "custom.request.cross-resource-default",
                         "custom.file-upload-property",
+                        "LuCI.rpc.declare",
                     }
                     else ObservationKind.DIRECT_STATIC
                 ),

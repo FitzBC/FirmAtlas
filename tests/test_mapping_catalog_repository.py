@@ -1,6 +1,7 @@
 import hashlib
 import io
 import json
+import copy
 from contextlib import redirect_stdout
 from pathlib import Path
 import tempfile
@@ -9,6 +10,7 @@ import unittest
 from firmatlas.mapping import (
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
+    MappingReleaseContext,
     SourceArtifactEntry,
     assemble_discovery_catalog,
     discover_frontend_requests,
@@ -107,6 +109,63 @@ class DiscoveryCatalogRepositoryTests(unittest.TestCase):
         self.assertIsNone(self.repository.get_catalog("missing"))
         self.repository.publish(self.catalog)
         self.assertIsNone(self.repository.get_candidate(self.catalog.catalog_id, "missing"))
+
+    def test_compare_catalogs_uses_published_documents(self):
+        self.repository.publish(self.catalog)
+        target = copy.deepcopy(self.catalog.to_dict())
+        target["catalog_id"] = "discovery-catalog:" + "9" * 64
+        target["firmware_artifact_sha256"] = "9" * 64
+        request = next(
+            item for item in target["candidates"]
+            if item["candidate_kind"] == "request_interface"
+        )
+        request["attributes"] = [
+            [key, "PUT" if key == "method" else value]
+            for key, value in request["attributes"]
+        ]
+        self.repository.publish_dict(target)
+
+        result = self.repository.compare_catalogs(
+            self.catalog.catalog_id, target["catalog_id"]
+        )
+
+        self.assertEqual("coverage_equivalent", result["comparison_status"])
+        self.assertEqual(1, result["summary"]["changed_candidate_count"])
+        self.assertIsNone(self.repository.compare_catalogs("missing", target["catalog_id"]))
+
+    def test_release_context_makes_version_family_explicit_and_immutable(self):
+        self.repository.publish(self.catalog)
+        target = copy.deepcopy(self.catalog.to_dict())
+        target["catalog_id"] = "discovery-catalog:" + "8" * 64
+        target["firmware_artifact_sha256"] = "8" * 64
+        self.repository.publish_dict(target)
+        base_context = MappingReleaseContext(
+            "OpenWrt", "OpenWrt", "Tenda AC9", "18.06.7", "source:18", "official filename"
+        )
+        target_context = MappingReleaseContext(
+            "OpenWrt", "OpenWrt", "Tenda AC9", "19.07.8", "source:19", "official filename"
+        )
+        self.repository.register_release_context(self.catalog.catalog_id, base_context)
+        self.repository.register_release_context(target["catalog_id"], target_context)
+
+        result = self.repository.compare_catalogs(
+            self.catalog.catalog_id, target["catalog_id"]
+        )
+
+        self.assertTrue(result["same_firmware_family_verified"])
+        summaries = self.repository.list_catalogs()["items"]
+        self.assertEqual(
+            {"18.06.7", "19.07.8"},
+            {item["release_context"]["firmware_version"] for item in summaries},
+        )
+        with self.assertRaises(CatalogConflictError):
+            self.repository.register_release_context(
+                self.catalog.catalog_id,
+                MappingReleaseContext(
+                    "OpenWrt", "OpenWrt", "Other", "18.06.7",
+                    "source:other", "conflicting model",
+                ),
+            )
 
     def test_cli_publishes_document_and_lists_same_catalog(self):
         with tempfile.TemporaryDirectory() as directory:

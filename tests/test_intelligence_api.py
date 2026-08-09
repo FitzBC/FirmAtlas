@@ -1,11 +1,13 @@
 import json
 import hashlib
+import copy
 from pathlib import Path
 import tempfile
 import threading
 import unittest
 from dataclasses import replace
 from urllib.request import Request, urlopen
+from urllib.parse import urlencode
 
 from firmatlas.intelligence.api import create_handler
 from firmatlas.intelligence.relevance import FirmwareRelevanceClassifier
@@ -135,6 +137,28 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual(200, status)
         self.assertEqual(1, result["total"])
         self.assertEqual("hiddenOperation", result["items"][0]["operation_token"])
+
+    def test_mapping_snapshot_comparison_route(self) -> None:
+        base = _hidden_catalog().to_dict()
+        target = copy.deepcopy(base)
+        target["catalog_id"] = "discovery-catalog:" + "7" * 64
+        target["firmware_artifact_sha256"] = "7" * 64
+        target["candidates"] = [
+            item for item in target["candidates"]
+            if item["candidate_kind"] != "set_difference_attribution"
+        ]
+        self.mapping_repository.publish_dict(base)
+        self.mapping_repository.publish_dict(target)
+
+        status, result = self.get(
+            "/api/mappings/compare?" + urlencode({
+                "base": base["catalog_id"], "target": target["catalog_id"],
+            })
+        )
+
+        self.assertEqual(200, status)
+        self.assertEqual(1, result["summary"]["resolved_hidden_interface_count"])
+        self.assertFalse(result["same_firmware_family_verified"])
 
     def test_updates_relevance_policy_through_api(self) -> None:
         status, result = self.put(

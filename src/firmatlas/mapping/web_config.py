@@ -23,8 +23,10 @@ from .inventory import SourceArtifactEntry
 
 
 WEB_CONFIG_RESULT_SCHEMA_VERSION = "firmatlas.mapping.web-config-result/v1alpha1"
-_PRODUCER = AnalyzerIdentity(name="web-configuration-producer", version="0.3.0")
-_SUPPORTED_FORMATS = ("lighttpd", "nginx", "posix_shell", "proprietary_httpd")
+_PRODUCER = AnalyzerIdentity(name="web-configuration-producer", version="0.4.0")
+_SUPPORTED_FORMATS = (
+    "lighttpd", "nginx", "posix_shell", "proprietary_httpd", "uci_uhttpd"
+)
 
 
 class WebConfigFindingKind(str, Enum):
@@ -160,6 +162,11 @@ def _detect_format(path: str, text: str) -> Optional[str]:
     basename = posixpath.basename(path).lower()
     normalized = path.lower()
     static_text = re.sub(r"<\?.*?\?>", "", text, flags=re.DOTALL)
+    if (
+        normalized == "etc/config/uhttpd"
+        and re.search(r"(?m)^\s*config\s+uhttpd(?:\s|$)", text)
+    ):
+        return "uci_uhttpd"
     if basename in {"lighttpd.conf", "lighttp.conf"} or (
         "lighttp" in normalized
         and re.search(r"(?m)^\s*server\.(?:port|document-root)\s*=", text)
@@ -508,6 +515,72 @@ def _line_token(
     return _Token(value, offset, offset + len(encoded))
 
 
+def _parse_uci_uhttpd(
+    source: SourceArtifactEntry, content: bytes, policy: WebConfigPolicy
+) -> tuple:
+    directives = []
+    cursor = 0
+    for raw_line in content.splitlines(keepends=True):
+        line = raw_line.decode("utf-8")
+        try:
+            words = shlex.split(line, comments=True, posix=True)
+        except ValueError:
+            words = []
+        if len(words) >= 3 and words[0] in {"list", "option"}:
+            directives.append((words[0], words[1], words[2], cursor))
+        cursor += len(raw_line)
+
+    findings = []
+    evidence_atoms = {}
+    document_root = next(
+        (value for _, key, value, _ in directives if key == "home"), None
+    )
+    for directive, key, value, line_start in directives:
+        token = _line_token(content, line_start, value)
+        if directive == "list" and key in {"listen_http", "listen_https"}:
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.LISTENER, value, token, "listens_on",
+                qualifier="https" if key == "listen_https" else "http",
+                related_value="uhttpd",
+                source_construct="uci_uhttpd.{}".format(key),
+            )
+        elif directive == "option" and key == "home":
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.DOCUMENT_ROOT, value, token,
+                "maps_namespace", namespace="/",
+                source_construct="uci_uhttpd.home",
+            )
+        elif directive == "option" and key == "cgi_prefix":
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.NAMESPACE_MAPPING, "cgi", token,
+                "maps_namespace", namespace=value, qualifier="cgi_executor",
+                related_value=document_root,
+                source_construct="uci_uhttpd.cgi_prefix",
+            )
+        elif directive == "list" and key == "lua_prefix" and "=" in value:
+            namespace, handler = value.split("=", 1)
+            handler_token = _line_token(content, line_start, handler)
+            namespace_token = _line_token(content, line_start, namespace)
+            _publish(
+                source, content, findings, evidence_atoms,
+                WebConfigFindingKind.NAMESPACE_MAPPING, handler, handler_token,
+                "binds_handler", namespace=namespace, qualifier="lua_handler",
+                source_construct="uci_uhttpd.lua_prefix",
+                extra_tokens=(namespace_token,),
+            )
+        if len(findings) >= policy.max_findings:
+            return findings, evidence_atoms, (
+                WebConfigDiagnostic(
+                    "finding_budget_exceeded",
+                    "finding budget truncated UCI uhttpd analysis",
+                ),
+            )
+    return findings, evidence_atoms, ()
+
+
 def _parse_shell(
     source: SourceArtifactEntry, content: bytes, policy: WebConfigPolicy
 ) -> tuple:
@@ -726,6 +799,10 @@ def discover_web_configuration(
         )
     elif detected_format == "nginx":
         findings, evidence_atoms, diagnostics = _parse_nginx(source, content, policy)
+    elif detected_format == "uci_uhttpd":
+        findings, evidence_atoms, diagnostics = _parse_uci_uhttpd(
+            source, content, policy
+        )
     elif detected_format == "proprietary_httpd":
         findings, evidence_atoms, diagnostics = _parse_proprietary_httpd(
             source, content, policy

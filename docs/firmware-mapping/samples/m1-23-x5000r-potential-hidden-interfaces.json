@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.x5000r-potential-hidden-interfaces/v1alpha1",
-  "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+  "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
   "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
   "coverage": {
     "status": "completed",
@@ -23,8 +23,8 @@
   ],
   "items": [
     {
-      "interface_id": "potential-hidden-interface:356b0fc5c0711aab66a188420d67b337b30b426dcce65a3674590fa52988beb4",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:c2e51a5024ab2fafeee7e3051ff9af4a38c4952ce882a2b7a41c7403e9504fb9",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "UploadCustomModule",
       "attribution_id": "set-difference:2c52adab1ec92a15a5a16070709f11425115aea94811159db9f9803a8b761605",
@@ -50,8 +50,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:f193dc3604a800f31b386d07e3442e8eed865f0a36c798fab64fbc9ab2096f03",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:e5ec3821793c6f4b128488e5bf4272f20a398c46848881a25f58821a4de8cdc5",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "UploadFirmwareFile",
       "attribution_id": "set-difference:1d6b126e7b6a793536bea283ea6607400172a5a5ea3ae5d319e486a4a5bc1b16",
@@ -77,8 +77,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:c107649f5a558b6e72524dc674845c1a60dc3fd367ec27acb81d9a333f07dc09",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:58f318e45b1c98d302ce2dc82152a4d1f25964f7b96d6f4fd240e910d59f0c63",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "delIpsecNet2NetCfg",
       "attribution_id": "set-difference:fae35eb9c42f826c0e46ce31beefc9179c81c07a5fa886127ab992a131713cac",
@@ -104,8 +104,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:0fc6aa84c82fb75f199e978797b81fc68c2cf87fdc0820a267e3010d63ea4cfb",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:c13564fd08feaddb1ba093136f0f4a1c4d9214e20914ffbed3039def91cafaed",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "getCrpcConfig",
       "attribution_id": "set-difference:4f47572a3382e526d4287d62590b8087be2eccc0d26dac3f9872cdc646b86e8e",
@@ -131,8 +131,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:f3457192177a98fddeecf60a6857d3d2451de8ba1408bd2293198acde1b9bfc5",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:c23d3c809830e318eb84f22196a3fa1937b7d411173382dee499a7cc4f49fb8f",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "getIpsecHost2NetCfg",
       "attribution_id": "set-difference:30be4f29f75e646076c04623191f52eaba50f4bb887891f8e8cbc0833aad5039",
@@ -158,8 +158,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:06ce6da62e6989f79d20009e3cb87ca8b59032daa5f595d3b5a9ca52aeb93edf",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:6c65c43abe7e0074d469680b03bd62940df5b627fef90fe4e1694e1ab80cc8b6",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "getIpsecL2tpXauthCfg",
       "attribution_id": "set-difference:ff8bd3012b8fd3b144931660512d31df97148f62d31f73a450030ac11a2a0dec",
@@ -185,8 +185,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:0682ad8af952eb83e4ca409931917f0455a3e0ee9ac2f7a4260d0e1e7039af91",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:e4b42fd470ad4fa1c88d64dc287c0890663f4d443b1855905a97e1c7476f4e1c",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "getIpsecNet2NetCfg",
       "attribution_id": "set-difference:514d689a54ac1a8f4ea385ff7b098f6d5d45dd17b05bd60e16442f8171c07e05",
@@ -212,8 +212,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:f2fb84d8bcb33d120055023b6e566bc4296c7918b9982bc40cb53add3ab21228",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:4beb5b11e81ff056cfebbafa4bc835d10b576026e99b1197350d31336fbf9d3a",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "setIpsecHost2NetCfg",
       "attribution_id": "set-difference:10e9b68580ae37d1c3dd7368b78c909159b9402fcc15e3c81f20cf6ba5686f42",
@@ -239,8 +239,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:e996263418cfde26ed76d03cf3067cc2dd843aa0247be60d6c412df475476385",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:5334494355ff19127def2b3055ce75e49f549207c02a4f2bcca7a6c15d528a8d",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "setIpsecL2tpXauthCfg",
       "attribution_id": "set-difference:c5e0a87cadb9a101eea6094a09392e06c766f908c56a61405243204557f639dd",
@@ -266,8 +266,8 @@
       ]
     },
     {
-      "interface_id": "potential-hidden-interface:51a86be4092aee4a09c5083ee8fb338182c4530bb75ba3e3dd0cb0f4b26f2d1d",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "interface_id": "potential-hidden-interface:a8ee7739241e5af8c596ca7b4d1e905099d269c327ea931293d6cdb757c6188b",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
       "operation_token": "setIpsecNet2NetCfg",
       "attribution_id": "set-difference:f686f2c12b998e318408026203c460263b9323624014bf956553ae77c448a740",

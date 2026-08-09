@@ -209,6 +209,17 @@ from .hidden_interface import (
     build_potential_hidden_interface_index,
     project_potential_hidden_interface_document,
 )
+from .snapshot_diff import (
+    MAPPING_SNAPSHOT_DIFF_SCHEMA_VERSION,
+    MappingSnapshotChange,
+    MappingSnapshotDiff,
+    MappingSnapshotDiffDiagnostic,
+    MappingReleaseContext,
+    SnapshotChangeConfidence,
+    SnapshotChangeKind,
+    SnapshotComparisonStatus,
+    compare_mapping_catalog_documents,
+)
 from .set_difference import (
     SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION,
     AttributionArtifact,

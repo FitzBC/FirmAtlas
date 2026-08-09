@@ -178,7 +178,7 @@ def _resolve_firmware_symlink(
             if (
                 candidate_parts
                 and (
-                    candidate_parts[0] == "dev"
+                    candidate_parts[0] in {"dev", "proc", "run", "sys"}
                     or declared_empty_runtime_tree
                 )
                 and ".." not in pending

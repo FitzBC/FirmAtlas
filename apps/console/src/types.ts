@@ -270,6 +270,16 @@ export interface MappingCatalogSummary {
   parameter_count: number
   association_count: number
   open_obligation_count: number
+  release_context?: MappingReleaseContext | null
+}
+
+export interface MappingReleaseContext {
+  vendor: string
+  product: string
+  device_model: string
+  firmware_version: string
+  source_ref: string
+  evidence: string
 }
 
 export interface MappingCandidate {
@@ -352,6 +362,43 @@ export interface PotentialHiddenInterfacePage {
     }>
     artifact: Array<{ path: string; count: number }>
   }
+}
+
+export interface MappingSnapshotChange {
+  change_id: string
+  category: 'candidate' | 'parameter' | 'coverage' | 'potential_hidden_interface'
+  stable_identity: string
+  display_identity: string
+  change_kind: 'added' | 'removed' | 'changed'
+  confidence: 'firmware_change_supported' | 'observed_scope_only' | 'coverage_confounded'
+  changed_fields: string[]
+  base: Record<string, unknown> | null
+  target: Record<string, unknown> | null
+  interpretation: string
+}
+
+export interface MappingSnapshotDiff {
+  schema_version: string
+  comparison_id: string
+  base: { catalog_id: string; firmware_artifact_sha256: string; release_context?: MappingReleaseContext | null }
+  target: { catalog_id: string; firmware_artifact_sha256: string; release_context?: MappingReleaseContext | null }
+  comparison_status: 'coverage_equivalent' | 'coverage_equivalent_partial' | 'coverage_confounded'
+  same_firmware_family_verified: boolean
+  summary: {
+    added_candidate_count: number
+    removed_candidate_count: number
+    changed_candidate_count: number
+    added_parameter_count: number
+    removed_parameter_count: number
+    changed_parameter_count: number
+    discovered_hidden_interface_count: number
+    resolved_hidden_interface_count: number
+    changed_hidden_interface_count: number
+    coverage_change_count: number
+    total_change_count: number
+  }
+  changes: MappingSnapshotChange[]
+  diagnostics: Array<{ code: string; message: string }>
 }
 
 export interface SemanticInterfaceObservation {

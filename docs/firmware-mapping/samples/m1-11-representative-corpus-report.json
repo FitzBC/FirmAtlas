@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:23de0c2cac1c643e3b15c73dd426f14bfef4cbd945d764ad958fa27079ce77cc",
+  "report_id": "corpus-report:066138102baa35409d82e33925530c82039d0122f26be0baeb7ee5f189f94782",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -18,7 +18,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:580cdd0306769d61e63292345471a9559a0b22ca5245760ecfe5f70304162d1f",
+      "catalog_id": "discovery-catalog:2e8e59cac73f15b3ca5d751f59b80681f9b11fdce4bc493e7a0a0f44022d82b1",
       "required_capabilities": [
         "binds_handler",
         "maps_namespace",
@@ -77,7 +77,7 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:d98760ebb79832df8c53850a2d56f3ea2c7cb5f14e386facac1265c4f9a68a99",
+      "catalog_id": "discovery-catalog:771b317c9608c1765ea1e7b53043f5f5e32d86acc4b4047098d44ef0746ed338",
       "required_capabilities": [
         "constructs_request",
         "selects_operation"
@@ -128,7 +128,7 @@
       "role": "contract",
       "evidence_tier": "contract_fixture",
       "status": "contract_only",
-      "catalog_id": "discovery-catalog:72f87ed92d9d1395afbf95b409a33a1a9bcb089715cbae400266f895755908da",
+      "catalog_id": "discovery-catalog:a87f400a9d4ff86fe1741950474f70906fcc83fcec40770df15e813147987c14",
       "required_capabilities": [
         "constructs_request",
         "selects_operation"
@@ -155,7 +155,7 @@
       "role": "development",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:f65a775827dd28ec61ccafd233f2f827f68b1b873efe35c7fc34be8e3cde4e9a",
+      "catalog_id": "discovery-catalog:9a2ef8e63ef0e7d776314091f2f8997e34cfb318c55dd85f69e999bec19f7ff2",
       "required_capabilities": [
         "binds_handler",
         "constructs_request"
@@ -192,7 +192,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:63fba1561a4860f04c9b7f72f747d9baed40d3f3bdf128e886e5a92d21010826",
+      "catalog_id": "discovery-catalog:f7041941781372947108bd861d4afd08518505f8a2f29c739d41ab18934e89f1",
       "required_capabilities": [
         "binds_handler",
         "constructs_request",

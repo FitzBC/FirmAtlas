@@ -138,6 +138,23 @@ def _elf64_big_endian_fixture() -> bytes:
 
 
 class NativeShallowProducerContractTests(unittest.TestCase):
+    def test_sectionless_elf_keeps_metadata_and_printable_hint_coverage(self):
+        ident = b"\x7fELF" + bytes((1, 1, 1, 0)) + b"\x00" * 8
+        header = ident + struct.pack(
+            "<HHIIIIIHHHHHH",
+            2, 40, 1, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0,
+        )
+        content = header + b"\x00SetOnlineDevName\x00"
+
+        result = discover_native_hints(_source("usr/sbin/uhttpd", content), content)
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual("elf", result.detected_format)
+        self.assertEqual("ARM", result.machine)
+        self.assertEqual(
+            {"SetOnlineDevName"}, {item.value for item in result.hints}
+        )
+
     def test_elf_strings_and_dynamic_symbols_are_separate_hint_kinds(self):
         content = _elf32_fixture()
         source = _source("bin/httpd", content)

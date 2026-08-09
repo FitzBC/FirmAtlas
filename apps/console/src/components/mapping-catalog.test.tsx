@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { intelligenceApi } from '../api/client'
 import type {
   MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
-  PotentialHiddenInterfacePage,
+  MappingSnapshotDiff, PotentialHiddenInterfacePage,
 } from '../types'
 import { MappingCatalogWorkspace } from './MappingCatalogWorkspace'
 
@@ -68,6 +68,39 @@ const hiddenPage: PotentialHiddenInterfacePage = {
     artifact: [{ path: 'www/cgi-bin/cstecgi.cgi', count: 1 }],
   },
 }
+const targetCatalog: MappingCatalogSummary = {
+  ...catalog,
+  catalog_id: 'discovery-catalog:def',
+  firmware_artifact_sha256: '3'.repeat(64),
+  coverage_status: 'completed', source_inventory_coverage_status: 'completed',
+  published_at: '2026-08-10T00:00:00Z', candidate_count: 2,
+}
+const snapshotDiff: MappingSnapshotDiff = {
+  schema_version: 'firmatlas.mapping.snapshot-diff/v1alpha1',
+  comparison_id: 'mapping-snapshot-diff:1',
+  base: { catalog_id: catalog.catalog_id, firmware_artifact_sha256: catalog.firmware_artifact_sha256 },
+  target: { catalog_id: targetCatalog.catalog_id, firmware_artifact_sha256: targetCatalog.firmware_artifact_sha256 },
+  comparison_status: 'coverage_confounded', same_firmware_family_verified: false,
+  summary: {
+    added_candidate_count: 1, removed_candidate_count: 0, changed_candidate_count: 1,
+    added_parameter_count: 0, removed_parameter_count: 0, changed_parameter_count: 0,
+    discovered_hidden_interface_count: 1, resolved_hidden_interface_count: 0,
+    changed_hidden_interface_count: 0, coverage_change_count: 1, total_change_count: 4,
+  },
+  changes: [{
+    change_id: 'mapping-snapshot-change:1', category: 'candidate',
+    stable_identity: 'request_interface|/goform/SetOnlineDevName',
+    display_identity: '/goform/SetOnlineDevName', change_kind: 'changed',
+    confidence: 'coverage_confounded', changed_fields: ['attributes'],
+    base: { attributes: [['method', 'POST']] },
+    target: { attributes: [['method', 'PUT']] },
+    interpretation: 'observed structural difference may be caused by analysis coverage drift',
+  }],
+  diagnostics: [{
+    code: 'firmware_family_unverified',
+    message: 'catalogs do not carry a verified release-family relation',
+  }],
+}
 
 afterEach(() => {
   cleanup()
@@ -121,4 +154,35 @@ it('shows potential hidden interfaces as a coverage-gated cross-firmware view', 
   expect(screen.getByText('不是后门结论')).toBeInTheDocument()
   expect(screen.getByText('www/cgi-bin/cstecgi.cgi@0x00419e8c')).toBeInTheDocument()
   expect(hidden).toHaveBeenCalled()
+})
+
+it('compares two mapping snapshots without hiding coverage confounding', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
+    items: [targetCatalog, catalog], total: 2, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
+    items: [candidate], total: 1, limit: 100, offset: 0,
+  })
+  const compare = vi.spyOn(intelligenceApi, 'compareMappingCatalogs')
+    .mockResolvedValue(snapshotDiff)
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '版本对比' }))
+
+  expect(await screen.findByText('覆盖不可直接比较')).toBeInTheDocument()
+  expect(screen.getByText('新增结构')).toBeInTheDocument()
+  expect(screen.getByText('潜在隐藏新增')).toBeInTheDocument()
+  expect(screen.getByRole('textbox', { name: '搜索版本差异' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '接口 / 候选' })).toBeInTheDocument()
+  expect(screen.getByText('/goform/SetOnlineDevName')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: /查看版本差异/ }))
+  expect(screen.getAllByText('attributes').length).toBeGreaterThan(0)
+  expect(screen.getByText(/不能断言同型号版本谱系/)).toBeInTheDocument()
+  fireEvent.change(screen.getByRole('textbox', { name: '搜索版本差异' }), {
+    target: { value: 'ubus://' },
+  })
+  expect(screen.getByText('当前筛选范围没有观察到结构差异')).toBeInTheDocument()
+  expect(compare).toHaveBeenCalledWith(
+    catalog.catalog_id, targetCatalog.catalog_id, expect.any(AbortSignal),
+  )
 })

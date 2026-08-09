@@ -162,6 +162,8 @@ M1-22 增加 `discover_mips_service_assembly(artifacts, anchors, profile, policy
 
 M1-23 增加全固件 `potential_hidden_interface` 投影。Module 消费已验证 Native binding 与带 Coverage Ledger 的客户端范围，而不是重新按字符串搜索；Source Inventory、Frontend 和 Set Difference 缺一项 completed 都不会发布候选。SQLite 在 Catalog 发布和历史回填时保存投影，查询默认选择每个固件最新 Catalog，并按固件、处理二进制、handler 与归因原因聚合。UI 同时展示证据强度与“为何仍只是候选”的义务；没有完整范围时显示 coverage gap，不能用零引用制造隐藏接口结论。
 
+M1-24 增加 `compare_mapping_catalog_documents(base, target, release_contexts)`。Diff Module 先对齐 producer scope、版本与 coverage 状态，再比较 candidate、parameter 和 potential-hidden-interface 的专属稳定身份；Evidence ID 不作为结构身份。只有 coverage profile 等价且 required coverage completed 时才发布 `firmware_change_supported`，等价但不完整时为 `observed_scope_only`，其余均为 `coverage_confounded`。发行上下文通过 SQLite Adapter 不可变附着于 Catalog，只有 evidence-backed vendor/product/device model 同家族时才显示版本谱系。Frontend Producer 同步增加 LuCI `rpc.declare`，把静态 object/method 发布为 `ubus://object/method` 逻辑操作并保留 selector/parameter；动态表达式形成 partial coverage，不猜测 HTTP URL。
+
 未来 Ghidra Adapter 采用 `Candidate Worker → Core Validator`，而不是让反编译器成为事实来源。Worker 的 versioned manifest 固定 Ghidra/script/input SHA、language ID、image base、预算、xref/call-site/P-code candidates 与 coverage；stdout、自由文本反编译和启发式置信度都不能直接关闭义务。详细合同及从相邻项目吸收/拒绝的实现经验见 [Native Ghidra Adapter 设计](./native-ghidra-adapter.md)。
 
 M1-11 Corpus Report Module 的公开 Interface 是 `build_corpus_report(CorpusReportInput) -> CorpusReport`。它只读取不可变 Discovery Catalog 与显式研究样本定义，不重新分析源码，也不从路径风格推断架构类别。Module 分开记录 `real_firmware`、`derived_firmware`、`contract_fixture` 与 `external_lead`；只有 real firmware 的预期制品摘要与 Catalog 一致、coverage completed、所需 Evidence Capability 全部满足、禁止能力未出现且没有开放义务时，类别才能成为 `verified`。样本编排脚本是 benchmark Adapter，不属于 Mapper 核心 Interface。
