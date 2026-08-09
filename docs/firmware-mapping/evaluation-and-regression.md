@@ -156,6 +156,10 @@ PIC call-site Profile 还需覆盖：单一二参数调用不足以推断 regist
 
 Coverage 必须纵向单调传播：`Extraction/Inventory → Producer → Discovery Catalog → Corpus Report` 任一上游 required scope 非 completed，下游不得仅因选中文件成功而晋级 completed。Catalog identity 必须绑定源 Inventory coverage；同类别同时存在 contract fixture 成功与真实固件 coverage gap 时，类别显示 coverage gap，不能用合同通过掩盖真实样本缺口。
 
+Research Case 合同必须验证内容寻址确定性、Evidence/Coverage 引用完整性、Stage 顺序、Obligation 先创建后关闭，以及 `supported/unresolved/rejected` 状态不会被最终结果回写。论文案例准入至少需要两种独立 evidence kind、一个具体反事实、论文用途和局限；单线 strings 命中不得成为 `paper_ready`。机器可读案例必须能由构建脚本语义一致地重建。
+
+Ghidra Worker 实现后必须分别测试 candidate 产生和核心接受：被篡改的 image base、地址、xref、argument slot、script/tool SHA 或超预算结果不得关闭义务。自由文本反编译输出和 Worker confidence 不能替代原始 ELF 重放。
+
 ### 6.3 Module contract tests
 
 所有主要行为通过 `FirmwareMapper` Interface 测试：

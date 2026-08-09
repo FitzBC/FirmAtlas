@@ -156,6 +156,10 @@ Native Deep 的首个保守 Adapter 已支持命名 ELF `{route_ptr, handler_ptr
 
 ARM32 PIC Adapter 进一步从原始 ELF 验证 `.got` 基址、`R_ARM_GLOB_DAT`、`r0/r1` 参数装载与共同 `BL` registrar。真实 Tenda AC9 `online_list.js` 的 5 个接口已全部绑定到 5 个导出 handler，10/10 深分析义务关闭；这些绑定共享一个包含 131 个独立 route/handler 对的 registrar，形成可查询的后端注册架构信号。中间结果见 [M1-10B AC9 样例](./docs/firmware-mapping/samples/m1-10b-ac9-arm-pic-callsite-summary.json)。
 
+复杂通信结构现在会进入内容寻址的研究案例库，而不是只留在阶段性说明中。首个 AC9 案例完整保存了 `前端 /goform → nginx namespace 不相交 → ownership obligation → httpd/dhttpd shallow 对照 → ARM PIC call-site 确认 httpd::formSetDeviceName` 的认识演进、反事实和论文使用边界；详见[研究案例库](./docs/firmware-mapping/research-casebook.md)与[机器可读案例](./docs/firmware-mapping/samples/m1-12-research-case-corpus.json)。
+
+遇到复杂 Native 控制流时，规划使用隔离的 Ghidra Candidate Worker 枚举 xref、call-site 与 P-code value-flow，再由核心 Validator 从原始 ELF 重放后才发布事实。AC9 当前 Profile 可由确定性解码器完成，因此不会为了工具统一而引入不必要的 Ghidra 信任面；接入合同见 [Ghidra Adapter 设计](./docs/firmware-mapping/native-ghidra-adapter.md)。
+
 代表性 corpus gate 会把真实固件、旧解包派生源码、合成合同 fixture 与外部漏洞线索分层统计，只有带预期 Firmware Artifact SHA-256、覆盖完成、能力满足且无开放义务的真实目录才能把架构类别标为 `verified`。当前报告如实为 `partial`：AC9 `/goform` 已验证，HNAP/共享 CGI 仍是合同级，脚本后端和 Native-only 分别保留发布与样本缺口。可重复生成并与[机器可读报告](./docs/firmware-mapping/samples/m1-11-representative-corpus-report.json)比较：
 
 ```bash

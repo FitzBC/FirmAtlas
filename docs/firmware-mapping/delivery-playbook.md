@@ -59,7 +59,7 @@ docs/firmware-mapping/
 
 ### 2.5 Record
 
-创建 progress 记录，更新主控表和下一动作。若领域术语、难逆转决策或论文假设改变，同时更新 CONTEXT、ADR 或研究文档。
+创建 progress 记录，更新主控表和下一动作。若领域术语、难逆转决策或论文假设改变，同时更新 CONTEXT、ADR 或研究文档。若出现多进程分支、共享 dispatcher、误导候选、跨阶段义务或漏洞描述与内部实现偏差，按研究案例准入触发器评估；保存当时的 unresolved 状态，不能用最终成功叙事覆盖。
 
 ### 2.6 Release
 
@@ -147,6 +147,7 @@ docs/firmware-mapping/
 | producer/证据能力改变 | domain model、architecture、evaluation |
 | schema/持久化改变 | architecture、integration、migration tests |
 | 论文假设/指标改变 | theory、evaluation、dataset manifest |
+| 复杂架构或跨阶段义务 | research casebook、机器可读 case corpus、progress |
 | 里程碑状态改变 | master、progress record |
 | 部署方式改变 | `AGENTS.md`、`deploy/README.md` |
 

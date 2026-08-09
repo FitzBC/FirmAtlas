@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1-11 代表性架构 corpus 出口门进行中；当前 gate 为 `partial`
+> 当前状态：M1-11 代表性架构 corpus 出口门进行中；M1-12 研究案例合同已验证；当前 gate 为 `partial`
 > 最近更新：2026-08-09
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -69,6 +69,9 @@
 | [M1-10B ARM PIC 调用点记录](./progress/2026-08-09-m1-10b-arm-pic-callsite.md) | Worker/Validator seam、共同调用点证明、AC9 实证与误绑定控制 | Call-site Profile、Worker 合同或证据门限变化时 |
 | [M1-11 代表性 corpus gate 记录](./progress/2026-08-09-m1-11-representative-corpus-gate.md) | 证据层级、类别 gate、当前缺口与可重复报告 | corpus 类别、门限或样本证据层级变化时 |
 | [M1-11A DAP-3520 HNAP/XGI 记录](./progress/2026-08-09-m1-11a-dap3520-hnap-xgi.md) | proprietary httpd、PHP-XGI、Inventory coverage 传播与真实 Catalog | HNAP/XGI 语法、上游 coverage 或 DAP-3520 样本变化时 |
+| [通信测绘研究案例库](./research-casebook.md) | 复杂架构的证据时间线、反事实、局限和论文用途 | 新复杂架构或旧案例证据状态变化时 |
+| [Native Ghidra Adapter 设计](./native-ghidra-adapter.md) | 相邻项目经验、Worker/Validator seam、候选合同与实现触发器 | Ghidra Worker、Profile 或证据门限变化时 |
+| [M1-12 研究案例合同记录](./progress/2026-08-09-m1-12-research-casebook.md) | TDD、AC9 首例、Ghidra 调研与回归证据 | 案例 schema、准入 gate 或案例 corpus 变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -135,11 +138,12 @@ M1 工作项：
 | M1-08 | 发布候选目录、覆盖账本和未决义务 | 已验证 | M1-07 | 11 contract tests + AC9 395-candidate no-seed replay + full regression |
 | M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 已验证 | M1-08 | repository/API tests + React test + browser regression |
 | M1-10A | Native 命名 route-table 深绑定 Adapter | 已验证 | M1-09 | 10 contract tests + synthetic ARM ELF + AC9 negative control + obligation closure |
-| M1-10B | ARM PIC call-site/decompiler Adapter | 已验证 | M1-10A | 12 contract tests + AC9 5/5 binding + 10/10 obligation closure + browser regression |
+| M1-10B | ARM PIC call-site deterministic Adapter | 已验证 | M1-10A | 12 contract tests + AC9 5/5 binding + 10/10 obligation closure + browser regression |
 | M1-11 | 代表性架构 corpus 出口门 | 进行中 | M1-04/06B/10B | `/goform`、共享 CGI、HNAP/SOAP、脚本后端、Native-only 的可重复 coverage report；当前 `partial` |
 | M1-11A | DAP-3520 proprietary httpd / PHP-XGI Catalog | 已验证 | M1-02B/05/06B/08/11 | 273 candidates + 288 replayable evidence + upstream Inventory partial propagation |
+| M1-12 | 复杂通信架构研究案例合同与案例库 | 已验证 | M1-03/05/06A/10B | 12 contract tests + 内容寻址 AC9 跨层案例 + 7 EvidenceAtom 重放 + full regression |
 
-**下一项建议**：继续 M1-11。DAP-3520 proprietary httpd / PHP-XGI Catalog 已发布且正确保持 partial；下一步先为“固件 chroot 绝对 symlink”设计安全重定向解析策略，验证能否关闭 Inventory coverage，再摄取原始共享 CGI 与 Native-only 样本。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
+**下一项建议**：继续 M1-11。M1-12 已把 AC9 复杂分支沉淀为首个可复现论文案例；下一步为“固件 chroot 绝对 symlink”设计安全重定向解析策略，验证能否关闭 DAP-3520 Inventory coverage，再摄取原始共享 CGI 与 Native-only 样本。新样本同时按案例准入触发器审查。Ghidra Adapter 只在确定性 Native Profile 无法关闭真实义务时按设计触发。M1-02B 还需从仓库固定 Dockerfile 独立重建正式镜像并记录摘要。
 
 ## 7. 跨会话无缝工作协议
 
@@ -153,7 +157,8 @@ M1 工作项：
 6. 实现并执行受影响矩阵以及全量发布门禁；
 7. 创建一条 `progress/YYYY-MM-DD-<milestone>-<slug>.md`，记录测试、提交、部署和遗留义务；
 8. 更新本文状态、下一项建议以及受影响的设计文档；
-9. 提交、推送，从干净工作树运行 `make deploy`，远程核验后才能标记“已验证”。
+9. 若出现复杂分支、dispatcher、误导候选或跨阶段义务，按[研究案例库](./research-casebook.md)评估准入并保存认识时间线；
+10. 提交、推送；普通产品功能按 `AGENTS.md` 部署，用户明确排除的通信测绘研究范围记录为不适用。
 
 如果工作中发现设计与代码不一致，应先在进度记录中列为偏差；不能只修改代码而让主控文档继续陈述旧设计。
 

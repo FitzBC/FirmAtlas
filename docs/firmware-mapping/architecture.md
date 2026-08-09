@@ -143,7 +143,11 @@ M1-10A 的 Native Deep Interface 是 `discover_native_route_bindings(source, con
 
 M1-10B 在同一 Native Deep Module 增加 `discover_arm_pic_callsite_bindings(source, content, anchors, profile, policy)`。ARM32 Profile 验证函数内 PIC `.got` 基址、route relative literal、handler `R_ARM_GLOB_DAT` relocation、`r0/r1` 参数数据流与紧随其后的 `BL`；只有同一 callee 至少形成两个独立 route/handler 对时才把它识别为 registrar。当前规则可直接从原始 ELF 确定性验证，因此没有引入外部反编译 Worker；复杂控制流、间接调用和其他 ISA 后续再通过候选 Worker Adapter 接入，但仍必须由核心 Validator 重放原始字节。
 
+未来 Ghidra Adapter 采用 `Candidate Worker → Core Validator`，而不是让反编译器成为事实来源。Worker 的 versioned manifest 固定 Ghidra/script/input SHA、language ID、image base、预算、xref/call-site/P-code candidates 与 coverage；stdout、自由文本反编译和启发式置信度都不能直接关闭义务。详细合同及从相邻项目吸收/拒绝的实现经验见 [Native Ghidra Adapter 设计](./native-ghidra-adapter.md)。
+
 M1-11 Corpus Report Module 的公开 Interface 是 `build_corpus_report(CorpusReportInput) -> CorpusReport`。它只读取不可变 Discovery Catalog 与显式研究样本定义，不重新分析源码，也不从路径风格推断架构类别。Module 分开记录 `real_firmware`、`derived_firmware`、`contract_fixture` 与 `external_lead`；只有 real firmware 的预期制品摘要与 Catalog 一致、coverage completed、所需 Evidence Capability 全部满足、禁止能力未出现且没有开放义务时，类别才能成为 `verified`。样本编排脚本是 benchmark Adapter，不属于 Mapper 核心 Interface。
+
+M1-12 Research Case Module 的公开 Interface 是 `build_research_case(ResearchCaseInput) -> ResearchCase` 和 `validate_research_case_corpus(cases) -> CorpusValidation`。它不生成新的固件事实，只引用既有 EvidenceAtom 或 Coverage Ledger，保存 Claim 的 `supported/unresolved/rejected` 状态、分析 Stage、Obligation 创建/关闭时间线、反事实、论文用途和局限。内容寻址 identity 绑定完整案例叙事；未知引用、阶段乱序和无证据关闭会拒绝。该 Module 与 Corpus Report 不合并：Corpus Report 回答类别覆盖是否达到 gate，Research Case 回答一个复杂现象如何被证据逐步解释以及论文可以负责任地使用什么。
 
 ### S4 定向绑定
 
@@ -219,6 +223,7 @@ src/firmatlas/mapping/
 ├── relations.py           # 关系 IR、验证和闭包
 ├── graph.py               # 通信架构图与路径查询
 ├── fingerprint.py         # 六视图指纹
+├── research_case.py       # 证据时间线、反事实、论文案例准入
 ├── producers/             # 真实存在差异的内部 producer
 │   ├── frontend.py
 │   ├── web_config.py

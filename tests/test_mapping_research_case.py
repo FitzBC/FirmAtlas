@@ -1,0 +1,329 @@
+import unittest
+import hashlib
+from pathlib import Path
+from dataclasses import replace
+
+from scripts.build_mapping_research_cases import build_research_case_corpus
+
+from firmatlas.mapping import (
+    CaseClaim,
+    CaseClaimStatus,
+    CaseEvidenceKind,
+    CaseEvidenceReference,
+    CaseObligation,
+    CaseObligationStatus,
+    CaseStage,
+    ResearchCaseInput,
+    NativeRouteAnchor,
+    SourceArtifactEntry,
+    build_research_case,
+    discover_arm_pic_callsite_bindings,
+    discover_frontend_requests,
+    discover_native_hints,
+    discover_web_configuration,
+    validate_research_case_corpus,
+)
+
+
+FIRMWARE_SHA = "9" * 64
+
+
+def _ac9_case_input() -> ResearchCaseInput:
+    evidence = (
+        CaseEvidenceReference(
+            "frontend:goform", CaseEvidenceKind.FRONTEND_REQUEST,
+            "webroot_ro/js/online_list.js", "d" * 64,
+            "text:bytes=100-128", "constructs_request",
+            "frontend-request-producer@0.1.0",
+        ),
+        CaseEvidenceReference(
+            "config:fastcgi", CaseEvidenceKind.WEB_CONFIGURATION,
+            "etc_ro/nginx/conf/nginx.conf", "6" * 64,
+            "text:bytes=800-840", "maps_namespace",
+            "web-configuration-producer@0.1.0",
+        ),
+        CaseEvidenceReference(
+            "native:httpd", CaseEvidenceKind.NATIVE_BINDING,
+            "bin/httpd", "2" * 64,
+            "binary:bytes=240340-240368", "binds_handler",
+            "native-deep-producer@0.2.0",
+        ),
+    )
+    return ResearchCaseInput(
+        case_key="tenda-ac9-split-web-stack",
+        title="Tenda AC9 split nginx/FastCGI and goform backend",
+        firmware_artifact_sha256=FIRMWARE_SHA,
+        architecture_tags=("split_web_stack", "goform_registry", "fastcgi_sidecar"),
+        research_question=(
+            "Which process owns /goform when the observed nginx namespace only exposes LuCI?"
+        ),
+        evidence=evidence,
+        claims=(
+            CaseClaim(
+                "claim:namespace-divergence",
+                "The nginx/FastCGI branch does not cover the observed /goform namespace.",
+                ("frontend:goform", "config:fastcgi"),
+            ),
+            CaseClaim(
+                "claim:httpd-binding",
+                "The selected /goform route is registered by bin/httpd.",
+                ("frontend:goform", "native:httpd"),
+            ),
+        ),
+        stages=(
+            CaseStage(
+                "stage:config-gap", 1,
+                "Preserve backend ownership as unresolved after namespace comparison.",
+                ("claim:namespace-divergence",),
+                creates_obligations=("obligation:goform-owner",),
+            ),
+            CaseStage(
+                "stage:native-proof", 2,
+                "Resolve ownership only after native call-site validation.",
+                ("claim:httpd-binding",),
+                resolves_obligations=("obligation:goform-owner",),
+            ),
+        ),
+        obligations=(
+            CaseObligation(
+                "obligation:goform-owner",
+                "Identify the binary that registers the /goform route.",
+                "binds_handler",
+                CaseObligationStatus.RESOLVED,
+                ("native:httpd",),
+            ),
+        ),
+        counterfactuals=(
+            "Assigning /goform to nginx because it is in the same firmware "
+            "would select the wrong namespace branch.",
+            "Selecting dhttpd by filename alone would choose a binary with "
+            "no matching action-component evidence.",
+        ),
+        paper_uses=(
+            "Motivating example for evidence-backed backend ownership recovery.",
+        ),
+        limitations=(
+            "This case proves selected registrations, not every runtime-reachable route.",
+        ),
+    )
+
+
+class ResearchCaseTests(unittest.TestCase):
+    def test_builds_content_addressed_case_with_temporal_obligation_resolution(self) -> None:
+        case = build_research_case(_ac9_case_input())
+
+        self.assertTrue(case.case_id.startswith("research-case:"))
+        self.assertEqual("resolved", case.obligations[0].status.value)
+        self.assertEqual(CaseClaimStatus.SUPPORTED, case.claims[0].status)
+        self.assertEqual(
+            ("stage:config-gap", "stage:native-proof"),
+            tuple(stage.stage_id for stage in case.stages),
+        )
+        self.assertEqual(case.case_id, build_research_case(_ac9_case_input()).case_id)
+        self.assertEqual("supported", case.to_dict()["claims"][0]["status"])
+
+    def test_rejects_claim_with_unknown_evidence(self) -> None:
+        value = _ac9_case_input()
+        broken = ResearchCaseInput(
+            **{
+                **value.__dict__,
+                "claims": (CaseClaim("claim:bad", "Unsupported", ("missing",)),),
+            }
+        )
+
+        with self.assertRaisesRegex(ValueError, "unknown evidence"):
+            build_research_case(broken)
+
+    def test_rejects_obligation_resolved_before_a_stage_resolves_it(self) -> None:
+        value = _ac9_case_input()
+        broken = ResearchCaseInput(
+            **{**value.__dict__, "stages": value.stages[:1]}
+        )
+
+        with self.assertRaisesRegex(ValueError, "resolved obligation"):
+            build_research_case(broken)
+
+    def test_rejected_obligation_requires_an_explicit_rejection_stage(self) -> None:
+        value = _ac9_case_input()
+        rejected = CaseObligation(
+            "obligation:goform-owner",
+            "Test and reject a proposed owner.",
+            "binds_handler",
+            CaseObligationStatus.REJECTED,
+            ("native:httpd",),
+        )
+        stages = (
+            value.stages[0],
+            CaseStage(
+                "stage:reject", 2, "Reject the candidate.",
+                ("claim:httpd-binding",),
+                rejects_obligations=("obligation:goform-owner",),
+            ),
+        )
+
+        case = build_research_case(ResearchCaseInput(
+            **{**value.__dict__, "stages": stages, "obligations": (rejected,)}
+        ))
+
+        self.assertEqual(CaseObligationStatus.REJECTED, case.obligations[0].status)
+
+    def test_corpus_gate_requires_cross_line_evidence_and_paper_context(self) -> None:
+        case = build_research_case(_ac9_case_input())
+
+        validation = validate_research_case_corpus((case,))
+
+        self.assertTrue(validation.paper_ready)
+        self.assertEqual(1, validation.case_count)
+        self.assertEqual(3, validation.evidence_line_count)
+        self.assertEqual((), validation.issues)
+
+    def test_corpus_gate_does_not_promote_single_line_case(self) -> None:
+        value = _ac9_case_input()
+        single = ResearchCaseInput(
+            **{
+                **value.__dict__,
+                "case_key": "single-line",
+                "evidence": value.evidence[:1],
+                "claims": (
+                    CaseClaim("claim:single", "Only frontend evidence.", ("frontend:goform",)),
+                ),
+                "stages": (
+                    CaseStage("stage:single", 1, "Observe request.", ("claim:single",)),
+                ),
+                "obligations": (),
+            }
+        )
+
+        validation = validate_research_case_corpus((build_research_case(single),))
+
+        self.assertFalse(validation.paper_ready)
+        self.assertIn("single-line: fewer than two independent evidence lines", validation.issues)
+
+    def test_rejects_noncanonical_evidence_source_path(self) -> None:
+        with self.assertRaisesRegex(ValueError, "canonical evidence-relative"):
+            CaseEvidenceReference(
+                "evidence:path", CaseEvidenceKind.FRONTEND_REQUEST,
+                "www/../www/app.js", "1" * 64, "text:bytes=1-2",
+                "constructs_request", "producer@1",
+            )
+
+    def test_corpus_gate_rejects_tampered_case_identity_and_empty_corpus(self) -> None:
+        case = build_research_case(_ac9_case_input())
+
+        tampered = validate_research_case_corpus((replace(
+            case, case_id="research-case:" + "0" * 64
+        ),))
+        empty = validate_research_case_corpus(())
+
+        self.assertFalse(tampered.paper_ready)
+        self.assertIn(
+            "tenda-ac9-split-web-stack: case identity does not replay",
+            tampered.issues,
+        )
+        self.assertFalse(empty.paper_ready)
+        self.assertEqual(("case corpus is empty",), empty.issues)
+
+    def test_corpus_gate_reports_invalid_case_contract_without_crashing(self) -> None:
+        case = replace(build_research_case(_ac9_case_input()), title="")
+
+        validation = validate_research_case_corpus((case,))
+
+        self.assertFalse(validation.paper_ready)
+        self.assertIn(
+            "tenda-ac9-split-web-stack: invalid case contract",
+            validation.issues[0],
+        )
+
+    def test_stage_rejects_duplicate_references(self) -> None:
+        with self.assertRaisesRegex(ValueError, "stage claim_ids must be unique"):
+            CaseStage("stage:bad", 1, "Duplicate.", ("claim:a", "claim:a"))
+
+    def test_real_ac9_case_preserves_gap_and_later_native_resolution(self) -> None:
+        corpus = build_research_case_corpus()
+        case = corpus["cases"][0]
+
+        self.assertTrue(corpus["validation"]["paper_ready"])
+        self.assertEqual(5, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(
+            ["unresolved", "unresolved", "supported"],
+            [case["claims"][index]["status"] for index in (2, 3, 4)],
+        )
+        self.assertEqual(
+            ["obligation:goform-owner"],
+            list(case["stages"][1]["creates_obligations"]),
+        )
+        self.assertEqual(
+            ["obligation:goform-owner"],
+            list(case["stages"][3]["resolves_obligations"]),
+        )
+        self.assertIn("formSetDeviceName", case["claims"][4]["statement"])
+
+    def test_real_ac9_case_evidence_replays_from_current_producers(self) -> None:
+        root = Path(
+            "../iot_seedintelligentanalysis/_tenda_ac9.zip.extracted/squashfs-root"
+        )
+        if not root.exists():
+            self.skipTest("local AC9 representative sample is unavailable")
+
+        def analyze(relative_path, producer):
+            content = (root / relative_path).read_bytes()
+            source = SourceArtifactEntry(
+                relative_path, relative_path, "file", len(content),
+                hashlib.sha256(content).hexdigest(),
+            )
+            return source, content, producer(source, content)
+
+        _, _, frontend = analyze(
+            "webroot_ro/js/online_list.js", discover_frontend_requests
+        )
+        _, _, nginx = analyze(
+            "etc_ro/nginx/conf/nginx.conf", discover_web_configuration
+        )
+        _, _, startup = analyze(
+            "etc_ro/nginx/conf/nginx_init.sh", discover_web_configuration
+        )
+        httpd_source, httpd_content, shallow = analyze(
+            "bin/httpd", discover_native_hints
+        )
+        _, _, dhttpd = analyze("bin/dhttpd", discover_native_hints)
+        deep = discover_arm_pic_callsite_bindings(
+            httpd_source,
+            httpd_content,
+            (NativeRouteAnchor("anchor:set-online", "SetOnlineDevName"),),
+        )
+        replayed = {
+            atom.evidence_id: atom
+            for result in (frontend, nginx, startup, shallow, deep)
+            for atom in result.evidence_atoms
+        }
+        case = build_research_case_corpus()["cases"][0]
+        atom_refs = [
+            item for item in case["evidence"]
+            if item["evidence_ref"].startswith("evidence:")
+        ]
+
+        self.assertLessEqual(
+            {item["evidence_ref"] for item in atom_refs}, set(replayed)
+        )
+        for reference in atom_refs:
+            atom = replayed[reference["evidence_ref"]]
+            self.assertEqual(
+                reference["source_artifact_sha256"],
+                atom.source_span.artifact_sha256,
+            )
+            self.assertEqual(reference["locator"], atom.source_span.locator)
+            self.assertEqual(reference["capability"], atom.capability)
+            self.assertEqual(
+                reference["producer"],
+                "{}@{}".format(atom.producer, atom.producer_version),
+            )
+        selected = {
+            "GetStaticRouteCfg", "SetStaticRouteCfg", "SetOnlineDevName",
+            "getOnlineList", "setBlackRule", "delBlackRule",
+        }
+        self.assertTrue(selected <= {item.value for item in shallow.hints})
+        self.assertFalse(selected & {item.value for item in dhttpd.hints})
+
+
+if __name__ == "__main__":
+    unittest.main()

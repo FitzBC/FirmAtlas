@@ -174,6 +174,14 @@ External Input
 | H4 历史机制案例提升漏洞定位 | CPE/版本、CWE、纯 LLM、代码相似 | Recall@K、复核时间、路径正确率 |
 | H5 定向深分析提高单位资源收益 | 全量反编译、固定规则调度 | 正确关系/CPU-hour、目标覆盖率 |
 
+### 8.1 复杂架构案例研究方法
+
+定量主实验之外，选择能够暴露方法机制的代表性 case study。案例不是按“结果最漂亮”选择，而是预先定义准入现象：多进程/多 namespace 分支、共享 endpoint 二次分发、多个候选二进制、跨阶段未决义务或漏洞描述与内部实现偏差。每个案例保存内容寻址的 Evidence Reference、`supported/unresolved/rejected` Claim、分析 Stage、Obligation 转移、反事实和局限。
+
+AC9 首例用于展示：Frontend-only 能发现 `/goform`，Configuration-only 能恢复 nginx/FastCGI 分支但不能归属 `/goform`，Native shallow 能提高目标二进制排序但不能证明 binding，Native deep 才关闭 handler obligation。论文应同时报告各阶段的目标二进制 Top-K、开放义务、误绑定数量和分析成本，避免把最终成功倒写成早期证据已经充分。
+
+案例研究只解释“方法如何起作用以及在哪里失败”，不能替代 holdout 上的 Precision/Recall、关系正确率、资源收益或跨厂商泛化实验。
+
 ## 9. 论文主线建议
 
 第一篇论文应聚焦：

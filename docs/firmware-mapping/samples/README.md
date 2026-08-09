@@ -1,6 +1,6 @@
 # 代表性通信类别与样本基线
 
-> 基线版本：M1.2
+> 基线版本：M1.3
 > 数据观察日期：2026-08-09
 > 机器可读清单：[representative-corpus.json](./representative-corpus.json)
 
@@ -22,6 +22,7 @@
 - [M1-10B AC9 ARM PIC call-site 中间输出](./m1-10b-ac9-arm-pic-callsite-summary.json)：从 `online_list.js` 的 5 个接口关联到 `httpd` 的 5 个 handler、共同 131-pair registrar、五段证据链和 10/10 义务关闭。
 - [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；当前 gate 为 `partial`，不把合同 fixture 或漏洞线索冒充真实固件覆盖。
 - [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；上游 Inventory partial 被传播到 Catalog。
+- [M1-12 AC9 research-case corpus](./m1-12-research-case-corpus.json)：将 `/goform` 与 nginx/FastCGI 分支不相交、httpd/dhttpd 候选对照和 ARM PIC 最终 binding 保存为内容寻址的证据时间线，并附反事实、论文用途和局限。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -143,9 +144,9 @@ Tier C 同时是样本获取工作队列。没有固件制品前，只能验证�
 ## 6. 当前缺口
 
 - Tenda AC9 已完成 Inventory、Frontend、nginx/启动项、Native Shallow 与候选关联回放；D-Link DSL2877AL 已完成首轮 Script Backend 回放；
-- AC9 `/goform/*` 未被 nginx 配置覆盖，主 `dhttpd/httpd` 的启动与 route binding 仍未知；
+- AC9 `/goform/*` 未被 nginx 配置覆盖；该阶段形成的 ownership 义务已由 ARM PIC call-site 证据关闭为 `bin/httpd → formSetDeviceName` 等 5 个 binding，运行时可达性和认证状态仍未知；
 - 其他候选尚未由新 Mapping Module 自动解包和分析；
 - 当前类别来自漏洞文本路径规则，尚未由真实 dispatcher/binding 证据校准；
-- Native 函数、参数 getter 和 route binding 尚未建立真值；
+- 除 AC9 已验证的 5 个 route/handler 外，其他 Native 函数、参数 getter 和跨架构 binding 尚未建立真值；
 - 缺少跨厂商 OEM/代码血缘明确标注；
 - 数据许可和论文再分发范围仍需逐样本核查。

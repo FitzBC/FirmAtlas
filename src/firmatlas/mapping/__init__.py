@@ -165,6 +165,22 @@ from .corpus_report import (
     CorpusSampleStatus,
     build_corpus_report,
 )
+from .research_case import (
+    RESEARCH_CASE_CORPUS_VALIDATION_SCHEMA_VERSION,
+    RESEARCH_CASE_SCHEMA_VERSION,
+    CaseClaim,
+    CaseClaimStatus,
+    CaseEvidenceKind,
+    CaseEvidenceReference,
+    CaseObligation,
+    CaseObligationStatus,
+    CaseStage,
+    ResearchCase,
+    ResearchCaseCorpusValidation,
+    ResearchCaseInput,
+    build_research_case,
+    validate_research_case_corpus,
+)
 
 __all__ = (
     "AnalyzerIdentity",
@@ -308,4 +324,18 @@ __all__ = (
     "discover_arm_pic_callsite_bindings",
     "discover_native_route_bindings",
     "native_deep_scheduler_analyzer",
+    "RESEARCH_CASE_CORPUS_VALIDATION_SCHEMA_VERSION",
+    "RESEARCH_CASE_SCHEMA_VERSION",
+    "CaseClaim",
+    "CaseClaimStatus",
+    "CaseEvidenceKind",
+    "CaseEvidenceReference",
+    "CaseObligation",
+    "CaseObligationStatus",
+    "CaseStage",
+    "ResearchCase",
+    "ResearchCaseCorpusValidation",
+    "ResearchCaseInput",
+    "build_research_case",
+    "validate_research_case_corpus",
 )

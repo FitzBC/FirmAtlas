@@ -1,0 +1,128 @@
+# 通信测绘研究案例库
+
+> 文档 ID：FM-CASEBOOK
+> 状态：持续追加
+> 首个案例：Tenda AC9 split Web stack
+
+研究案例库用于保存“为什么必须做固件内部测绘”以及“系统如何避免错误归属”的
+可复现实例。它不是成功截图集合，也不是漏洞故事集。每个案例同时保存初始可见
+事实、当时不能下结论的原因、产生的未决义务、后续关闭义务的证据、反事实错误
+路径和结论局限。
+
+机器可读 Interface 是：
+
+```text
+build_research_case(ResearchCaseInput) -> ResearchCase
+validate_research_case_corpus(tuple[ResearchCase, ...]) -> CorpusValidation
+```
+
+案例为内容寻址对象。未知证据引用、重复身份、阶段乱序、在创建前关闭义务、已
+解决义务缺少证据都会拒绝构建。Corpus gate 要求至少两条独立证据线，并要求
+反事实、论文用途和局限，避免把单一字符串命中包装成论文案例。
+
+## 1. AC9：同一固件内的两套 Web 通信分支
+
+### 1.1 研究问题
+
+前端明确构造 `POST goform/SetOnlineDevName`，但已发现的 nginx 配置只暴露
+`/cgi-bin/luci/` 和 `/download/`。此时究竟应分析 `app_data_center`、`dhttpd`
+还是 `httpd`？
+
+### 1.2 证据演进
+
+```mermaid
+flowchart LR
+    F["前端：POST goform/SetOnlineDevName"]
+    N["nginx :8180"]
+    L["/cgi-bin/luci/"]
+    U["127.0.0.1:8188"]
+    A["app_data_center"]
+    O["未决义务：谁注册 /goform？"]
+    S["Native shallow：httpd 6/6，dhttpd 0/6"]
+    D["ARM PIC call-site"]
+    H["httpd::formSetDeviceName"]
+
+    N --> L --> U --> A
+    F -. "namespace 不相交" .-> O
+    A -. "不能据此归属 goform" .-> O
+    O --> S --> D --> H
+```
+
+| 阶段 | 可以发布的结论 | 必须保留的限制 |
+| --- | --- | --- |
+| Frontend | UI 构造了 `/goform/SetOnlineDevName` | 不知道后端进程和 handler |
+| Configuration | `:8180 → /cgi-bin/luci/ → 127.0.0.1:8188 → app_data_center` 是独立支持链 | nginx namespace 不包含 `/goform`，不能强行合并 |
+| Native shallow | `httpd` 含 6/6 选定 action component，`dhttpd` 为 0/6 | 只用于排序，字符串和符号名不能证明 binding |
+| Native deep | 同一 ARM PIC registrar call-site 将 route 放入 `r0`、handler 放入 `r1` | 证明静态注册，不等于运行时可达或认证状态 |
+| 最终 | `SetOnlineDevName → bin/httpd → formSetDeviceName@0x60ee8` | 不外推为全部 AC9 route 的动态行为 |
+
+关键点是 M1-05 的“未决”并没有被后来的成功覆盖。它记录了在仅有配置证据时
+正确的认识状态；M1-10B 用更强证据关闭同一个 obligation。这种时间线可以在论文
+中展示方法如何控制过早归因，而不仅是展示一个最终答案。
+
+### 1.3 如果没有测绘会发生什么
+
+- 只看前端路径，知道接口名却不知道应反编译哪个二进制；
+- 只看 nginx，容易把同一固件内并存的 FastCGI 分支误当成 `/goform` 后端；
+- 只看文件名，可能优先分析看起来更像 Web daemon 的 `dhttpd`；
+- 只做 strings，能选出 `httpd` 候选，但仍无法证明 route 和 handler 的关系；
+- 只有跨前端、配置、覆盖账本和 Native call-site 的证据链，才能把分析目标收敛到
+  `bin/httpd` 内的具体 handler。
+
+严谨的论文表述应是“在该案例中，缺少跨层测绘时，现有单线证据不足以确定目标
+二进制；完整测绘恢复了可验证归属”，而不是无法由单个案例证明的绝对命题。
+
+### 1.4 可用于论文的实验设计
+
+该案例适合作为：
+
+1. motivating example：展示路径风格和固件共存关系不足以确定后端；
+2. ablation：Frontend-only、Config-only、+Native shallow、+Native deep 四级对照；
+3. obligation-preservation case：衡量系统是否诚实保存未知，而不是输出空成功；
+4. target-selection case：比较目标二进制 Top-K、定位时间和无效深分析预算；
+5. false-merge case：验证 namespace 不相交时不会按厂商或 `/goform` 风格合并。
+
+不能从此案例单独声称跨厂商泛化、动态可达性或漏洞存在。后续必须用共享 CGI、
+HNAP、脚本—Native 混合、反向代理多跳和 Native-only 样本形成多案例证据。
+
+## 2. 后续案例准入触发器
+
+每轮测绘出现下列任一现象时，必须评估是否加入案例库：
+
+- 同一固件存在多个 listener、Web daemon、代理或 IPC 分支；
+- Frontend endpoint 与配置 namespace 不相交；
+- 一个接口候选同时出现在多个二进制，负面覆盖证据改变了目标排序；
+- 多个逻辑操作共享一个 CGI/HNAP/API endpoint，并由 selector 二次分发；
+- 页面、脚本、模板、配置和 Native 之间存在三层以上跨制品链；
+- 浅层证据看似充分，但深分析推翻候选或改变 handler 归属；
+- 未决义务跨越多个分析阶段后被解决、拒绝或保持开放；
+- 漏洞描述中的接口与真实固件内部实现、版本或补丁结构存在明显偏差。
+
+准入不是要求案例必须成功解决。一个证据充分、局限明确且仍然 open 的案例同样
+有研究价值；但不得把 open 写成 supported。
+
+## 3. 案例模板
+
+每个案例至少包含：
+
+| 字段 | 含义 |
+| --- | --- |
+| Firmware Artifact SHA-256 | 固定样本身份，不能只写型号和文件名 |
+| architecture tags | 通信结构，不是漏洞功能分类 |
+| research question | 当时真正未知的问题 |
+| evidence references | 捕获后的来源制品 SHA、规范相对路径、精确 locator、Producer/version、capability；外部公告也必须先成为可寻址制品，不直接保存易变 URL |
+| claims | `supported / unresolved / rejected`，逐条引用证据 |
+| stages | 按发生顺序保存认识演进 |
+| obligations | 创建、关闭或保持开放的能力缺口 |
+| counterfactuals | 不做该层分析时会出现的具体错误 |
+| paper uses | 可支撑的图、实验或论点 |
+| limitations | 案例不能证明的内容 |
+
+生成命令：
+
+```bash
+PYTHONPATH=src python scripts/build_mapping_research_cases.py
+```
+
+当前机器可读记录见
+[AC9 research-case corpus](./samples/m1-12-research-case-corpus.json)。
