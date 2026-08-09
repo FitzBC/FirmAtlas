@@ -8,6 +8,10 @@
 > 直接证明，因此未触发 Ghidra。76 个未绑定 frontend selector 和已绑定 handler 的
 > 跨函数 value-flow 仍可能成为首个 Ghidra Worker 触发点。
 
+> M1-17 触发审计：本机相邻项目配置所指 Ghidra 12.0.4 已不可用；系统明确记录工具
+> 缺失而不伪造候选。`setLanCfg` 首个无分支前缀已由 GP/GOT 确定性 Profile 证明两条
+> 参数—状态链，因此该窄范围仍不触发 Ghidra。分支后缀和跨函数 sink 保持触发候选。
+
 AC9 当前 ARM PIC 注册模式已由小型确定性 Validator 从原始 ELF 字节直接证明，
 因此没有为了“使用 Ghidra”而增加工具依赖。Ghidra Adapter 只在复杂控制流、间接
 调用、跨函数数据流、未知 ISA profile 或参数 getter 追踪确实需要时启动。

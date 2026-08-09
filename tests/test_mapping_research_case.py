@@ -22,6 +22,7 @@ from firmatlas.mapping import (
     discover_frontend_requests,
     discover_frontend_asset_graph,
     discover_mips_inline_route_bindings,
+    discover_mips_handler_value_flows,
     discover_native_hints,
     discover_web_configuration,
     validate_research_case_corpus,
@@ -246,7 +247,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][0]
 
         self.assertTrue(corpus["validation"]["paper_ready"])
-        self.assertEqual(5, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(6, corpus["validation"]["evidence_line_count"])
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
             [case["claims"][index]["status"] for index in (2, 3, 4)],
@@ -373,11 +374,15 @@ class ResearchCaseTests(unittest.TestCase):
         deep = discover_mips_inline_route_bindings(
             binary_source, binary_content, selector_anchors
         )
+        value_flow = discover_mips_handler_value_flows(
+            binary_source, binary_content, 0x004209B8
+        )
         results = (
             *frontend_graph.results,
             analyze("lighttp/lighttpd.conf", discover_web_configuration),
             analyze("www/cgi-bin/cstecgi.cgi", discover_native_hints),
             deep,
+            value_flow,
         )
         replayed = {
             atom.evidence_id: atom
@@ -420,6 +425,13 @@ class ResearchCaseTests(unittest.TestCase):
         )
         self.assertEqual(
             "open", obligations["obligation:x5000r-selector-handler"]["status"]
+        )
+        self.assertEqual(
+            "resolved",
+            obligations["obligation:x5000r-setlancfg-prefix-value-flow"]["status"],
+        )
+        self.assertEqual(
+            "open", obligations["obligation:x5000r-branched-value-flow"]["status"]
         )
         self.assertEqual(124, len(deep.bindings))
         self.assertEqual(123, len({item.route_token for item in deep.bindings}))

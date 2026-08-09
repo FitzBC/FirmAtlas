@@ -15,6 +15,7 @@ from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
 from .native_deep import NativeDeepResult
+from .native_value_flow import MipsHandlerValueFlowResult
 from .correlation import FrontendNativeCorrelationResult
 from .scheduler import (
     ObligationSchedulerResult,
@@ -34,6 +35,7 @@ class DiscoveryProducerKind(str, Enum):
     SCRIPT_BACKEND = "script_backend"
     NATIVE = "native"
     NATIVE_DEEP = "native_deep"
+    NATIVE_VALUE_FLOW = "native_value_flow"
     CORRELATION = "correlation"
     SCHEDULER = "scheduler"
 
@@ -49,6 +51,7 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_HINT = "native_hint"
     NATIVE_ROUTE_BINDING = "native_route_binding"
     NATIVE_HANDLER = "native_handler"
+    NATIVE_PARAMETER_STATE_FLOW = "native_parameter_state_flow"
     CANDIDATE_ASSOCIATION = "candidate_association"
 
 
@@ -119,6 +122,17 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("native-deep-route-table", "0.1.0")
         )
         return cls(DiscoveryProducerKind.NATIVE_DEEP, producer, scope, results)
+
+    @classmethod
+    def native_value_flow(
+        cls, results: Tuple[MipsHandlerValueFlowResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-mips-handler-value-flow", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.NATIVE_VALUE_FLOW, producer, scope, results)
 
     def __post_init__(self) -> None:
         if not self.scope.strip() or not self.producer.name.strip():
@@ -477,6 +491,26 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                         item.source_construct,
                         handler_evidence,
                         (*common_attributes, ("route_token", item.route_token)),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE_VALUE_FLOW:
+                for item in result.flows:
+                    candidates.append(DiscoveryCandidate(
+                        item.flow_id,
+                        DiscoveryCandidateKind.NATIVE_PARAMETER_STATE_FLOW,
+                        "{}->{}".format(item.parameter_name, item.state_key),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        result.profile,
+                        item.evidence_ids,
+                        (
+                            ("handler_identity", item.handler_identity),
+                            ("parameter_name", item.parameter_name),
+                            ("state_key", item.state_key),
+                            ("getter_symbol", item.getter_symbol),
+                            ("setter_symbol", item.setter_symbol),
+                            ("getter_callsite", "0x{:x}".format(item.getter_callsite)),
+                            ("setter_callsite", "0x{:x}".format(item.setter_callsite)),
+                        ),
                     ))
         if not statuses:
             status = CoverageStatus.FAILED if batch.required else CoverageStatus.NOT_APPLICABLE

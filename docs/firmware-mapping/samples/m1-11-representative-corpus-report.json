@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:948b8fcc36daecb6ebe62ddc2335d188904843c91163b109aa07d125e56e8589",
+  "report_id": "corpus-report:a7b78437a6feac90dd72f01956c352d5bbb8b941b7b7c25ef0dabb0f03454cc1",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -192,7 +192,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:1b4684ece8017c825445ecb09e427a1541edb00631fe30fcf2d24135b1521870",
+      "catalog_id": "discovery-catalog:0416439303aa0adf65a8281e1c6881e7376ca26436050d6406a9e8e780d1d257",
       "required_capabilities": [
         "binds_handler",
         "constructs_request",
@@ -203,28 +203,34 @@
       "forbidden_capabilities": [],
       "observed_capabilities": [
         "binds_handler",
+        "calls_parameter_getter",
+        "calls_state_setter",
         "constructs_request",
         "declares_symbol",
         "listens_on",
         "maps_namespace",
+        "maps_parameter_to_state",
         "mentions_endpoint",
+        "reads_request_parameter",
         "registers_route",
         "resolves_endpoint_binding",
         "resolves_table_symbol",
         "selects_operation",
-        "serializes_parameter"
+        "serializes_parameter",
+        "writes_configuration_state"
       ],
       "missing_capabilities": [],
       "unexpected_capabilities": [],
       "candidate_kinds": [
         "native_handler",
         "native_hint",
+        "native_parameter_state_flow",
         "native_route_binding",
         "request_interface",
         "web_configuration"
       ],
-      "candidate_count": 587,
-      "evidence_count": 1438,
+      "candidate_count": 589,
+      "evidence_count": 1448,
       "open_obligation_count": 0
     }
   ],
@@ -240,20 +246,26 @@
       "acquisition_gap_count": 0,
       "observed_capabilities": [
         "binds_handler",
+        "calls_parameter_getter",
+        "calls_state_setter",
         "constructs_request",
         "declares_symbol",
         "listens_on",
         "maps_namespace",
+        "maps_parameter_to_state",
         "mentions_endpoint",
+        "reads_request_parameter",
         "registers_route",
         "resolves_endpoint_binding",
         "resolves_table_symbol",
         "selects_operation",
-        "serializes_parameter"
+        "serializes_parameter",
+        "writes_configuration_state"
       ],
       "candidate_kinds": [
         "native_handler",
         "native_hint",
+        "native_parameter_state_flow",
         "native_route_binding",
         "request_interface",
         "web_configuration"

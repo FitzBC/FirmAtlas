@@ -26,6 +26,7 @@ from firmatlas.mapping import (
     discover_frontend_requests,
     discover_frontend_asset_graph,
     discover_mips_inline_route_bindings,
+    discover_mips_handler_value_flows,
     discover_native_hints,
     discover_script_backend,
     discover_web_configuration,
@@ -184,6 +185,9 @@ def _x5000r_catalog(root: Path):
             and parameter.source_construct == "shared-cgi.topicurl"
         ),
     )
+    value_flow = discover_mips_handler_value_flows(
+        native_source, native_content, 0x004209B8
+    )
     web_content = (root / paths["web"]).read_bytes()
     web = discover_web_configuration(
         _source(paths["web"], web_content), web_content
@@ -204,6 +208,9 @@ def _x5000r_catalog(root: Path):
             DiscoveryProducerBatch.native((native,), paths["native"]),
             DiscoveryProducerBatch.native_deep(
                 (deep,), paths["native"] + ":inline-route-tables"
+            ),
+            DiscoveryProducerBatch.native_value_flow(
+                (value_flow,), paths["native"] + ":setLanCfg"
             ),
         ),
         source_inventory_coverage_status=inventory.coverage_status,

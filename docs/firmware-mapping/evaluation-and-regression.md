@@ -150,6 +150,8 @@ Native Deep fixture 还必须同时包含结构化正例与误绑定负例：rou
 
 MIPS inline-table Profile 额外要求 dynamic symbol 地址/大小证据、固定宽度 route 字段、零 padding 和 executable handler pointer。回归必须覆盖被篡改的 table-symbol proof、部分坏 entry 的 `partial`、重复注册保留、Frontend-only/Native-only 双向差集，以及真实 X5000R 123/199 selector binding；不能只断言 binding 数量而不逐字重放 EvidenceAtom 和机器报告。
 
+MIPS handler value-flow Profile 必须覆盖 local/global GOT callee、GP 的 stack save/restore、`jalr` delay slot、caller/callee-saved 寄存器差异、参数/状态字符串来源和五段 EvidenceAtom 重放。instruction budget 耗尽不得发布半条 flow；首个条件分支必须成为显式 scope boundary。真实 X5000R 回归固定断言 72 条指令、`0x00420ad8` 边界以及 `lanIp→lan_ipaddr`、`lanNetmask→lan_netmask` 两条映射，不能线性穿越 DHCP 分支。
+
 PIC call-site Profile 还需覆盖：单一二参数调用不足以推断 registrar、错误 relocation type、错误参数寄存器、无法建立 GOT 基址、非 executable symbol、跨调用拼接和篡改 Worker/Result proof。真实样本回归必须同时断言 route、handler、callsite、registrar、同组规模和 Scheduler 精确关闭数量，不能只断言“发现大于零”。
 
 代表性 corpus gate 必须把证据层级作为一等字段：旧 Binwalk 派生目录、合成 fixture 与漏洞线索不得计入 real-firmware verified 数量。每个样本显式声明 required/forbidden Evidence Capability；Artifact SHA 不匹配、coverage 非 completed、能力缺失/越界或任一开放义务都必须降为 coverage gap。未提供任何样本的 required category 也必须出现在报告中并标记 acquisition gap，不能从聚合结果消失。

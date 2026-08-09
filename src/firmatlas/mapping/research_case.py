@@ -29,6 +29,7 @@ class CaseEvidenceKind(str, Enum):
     SCRIPT_BACKEND = "script_backend"
     NATIVE_HINT = "native_hint"
     NATIVE_BINDING = "native_binding"
+    NATIVE_VALUE_FLOW = "native_value_flow"
     COVERAGE_LEDGER = "coverage_ledger"
     RUNTIME_OBSERVATION = "runtime_observation"
     VULNERABILITY_RECORD = "vulnerability_record"

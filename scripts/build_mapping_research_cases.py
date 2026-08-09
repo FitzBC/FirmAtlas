@@ -341,6 +341,28 @@ def build_x5000r_shared_cgi_case():
                 "json:$.counts", "bounds_candidate_search",
                 "mips-dispatch-report@v1alpha1",
             ),
+            CaseEvidenceReference(
+                "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
+                CaseEvidenceKind.NATIVE_VALUE_FLOW, "www/cgi-bin/cstecgi.cgi",
+                "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+                "binary:bytes=133772-133780", "maps_parameter_to_state",
+                "native-mips-handler-value-flow@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f",
+                CaseEvidenceKind.NATIVE_VALUE_FLOW, "www/cgi-bin/cstecgi.cgi",
+                "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+                "binary:bytes=133792-133800", "maps_parameter_to_state",
+                "native-mips-handler-value-flow@0.1.0",
+            ),
+            CaseEvidenceReference(
+                "coverage:x5000r-setlancfg-handler-prefix",
+                CaseEvidenceKind.COVERAGE_LEDGER,
+                "docs/firmware-mapping/samples/m1-17-x5000r-mips-value-flow.json",
+                "5dbda7815d736bba9cb2e083748b07cfc0f1f873a46fe77e2606cc0172bbb576",
+                "json:$.coverage", "bounds_value_flow_scope",
+                "mips-handler-value-flow-report@v1alpha1",
+            ),
         ),
         claims=(
             CaseClaim(
@@ -393,6 +415,15 @@ def build_x5000r_shared_cgi_case():
                     "coverage:x5000r-mips-dispatch-set-difference",
                 ),
             ),
+            CaseClaim(
+                "claim:x5000r-setlancfg-prefix-value-flow",
+                "The branch-free prefix of setLanCfg maps request parameters lanIp and lanNetmask through websGetVar into nvram_set keys lan_ipaddr and lan_netmask; analysis stops at the first conditional branch.",
+                (
+                    "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
+                    "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f",
+                    "coverage:x5000r-setlancfg-handler-prefix",
+                ),
+            ),
         ),
         stages=(
             CaseStage(
@@ -422,6 +453,14 @@ def build_x5000r_shared_cgi_case():
                 "stage:x5000r-inline-native-table", 5,
                 "Use exported symbol sizes and the 64-byte inline route plus executable pointer layout to close a verified selector subset without hiding unmatched operations.",
                 ("claim:x5000r-inline-table-bindings",),
+                creates_obligations=("obligation:x5000r-setlancfg-prefix-value-flow",),
+            ),
+            CaseStage(
+                "stage:x5000r-setlancfg-prefix-value-flow", 6,
+                "Resolve GP/GOT calls and register provenance only through the first branch, proving two request-parameter to configuration-state mappings while preserving the branched suffix as unknown.",
+                ("claim:x5000r-setlancfg-prefix-value-flow",),
+                creates_obligations=("obligation:x5000r-branched-value-flow",),
+                resolves_obligations=("obligation:x5000r-setlancfg-prefix-value-flow",),
             ),
         ),
         obligations=(
@@ -436,8 +475,22 @@ def build_x5000r_shared_cgi_case():
             ),
             CaseObligation(
                 "obligation:x5000r-selector-handler",
-                "Bind the remaining 76 frontend selectors or explain their version/dead-code/alternate-backend status, then recover downstream native value flow.",
+                "Bind the remaining 76 frontend selectors or explain their version/dead-code/alternate-backend status.",
                 "binds_handler", CaseObligationStatus.OPEN,
+            ),
+            CaseObligation(
+                "obligation:x5000r-setlancfg-prefix-value-flow",
+                "Recover request-parameter to state writes in the straight-line setLanCfg prefix.",
+                "maps_parameter_to_state", CaseObligationStatus.RESOLVED,
+                (
+                    "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
+                    "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f",
+                ),
+            ),
+            CaseObligation(
+                "obligation:x5000r-branched-value-flow",
+                "Recover branch-dependent DHCP state writes and downstream commit/network/sensitive sinks without merging mutually exclusive paths.",
+                "traces_branched_value_flow", CaseObligationStatus.OPEN,
             ),
         ),
         counterfactuals=(
@@ -446,18 +499,20 @@ def build_x5000r_shared_cgi_case():
             "A native string hit alone would incorrectly imply a proved selector-to-handler binding.",
             "A single-resource frontend pass would miss 199 wrapper operations whose endpoint is defined in another asset.",
             "Treating a selector string hit as a binding would hide the 76 frontend-only and 14 Native-only operation differences.",
+            "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow.",
         ),
         paper_uses=(
             "Motivating example for operation identity below a shared physical endpoint.",
             "Ablation of path-only, frontend-plus-config, and native-dispatch analysis.",
             "Evidence-preserving example of closing a cross-resource JavaScript obligation while retaining a native value-flow obligation.",
             "Frontend/native set-difference experiment for version drift, dead UI code, and alternate backend hypotheses.",
+            "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state.",
         ),
         limitations=(
             "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
-            "The inline table proves handler entry addresses for 123 selectors but does not yet prove downstream parameter getters or sensitive sinks.",
+            "Only the branch-free setLanCfg prefix is proven; DHCP branches, commits, network reconfiguration, and sensitive sinks remain open.",
             "CGI execution configuration does not prove runtime reachability or authentication state.",
-            "Native selector strings do not yet identify handler functions or dangerous data flow.",
+            "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
         ),
     ))
 

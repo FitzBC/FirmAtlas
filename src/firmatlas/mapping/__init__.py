@@ -159,6 +159,15 @@ from .native_deep import (
     discover_native_route_bindings,
     native_deep_scheduler_analyzer,
 )
+from .native_value_flow import (
+    MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION,
+    MipsHandlerValueFlowDiagnostic,
+    MipsHandlerValueFlowPolicy,
+    MipsHandlerValueFlowProfile,
+    MipsHandlerValueFlowResult,
+    MipsParameterStateFlow,
+    discover_mips_handler_value_flows,
+)
 from .corpus_report import (
     CORPUS_REPORT_SCHEMA_VERSION,
     CorpusCategoryResult,
@@ -336,6 +345,13 @@ __all__ = (
     "discover_mips_inline_route_bindings",
     "discover_native_route_bindings",
     "native_deep_scheduler_analyzer",
+    "MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION",
+    "MipsHandlerValueFlowDiagnostic",
+    "MipsHandlerValueFlowPolicy",
+    "MipsHandlerValueFlowProfile",
+    "MipsHandlerValueFlowResult",
+    "MipsParameterStateFlow",
+    "discover_mips_handler_value_flows",
     "RESEARCH_CASE_CORPUS_VALIDATION_SCHEMA_VERSION",
     "RESEARCH_CASE_SCHEMA_VERSION",
     "CaseClaim",

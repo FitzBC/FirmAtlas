@@ -102,7 +102,9 @@ flowchart LR
     NS --> BIN["MIPS cstecgi.cgi"]
     SEL -->|"123/199 selectors"| TAB["get/set/del/other_handle_t"]
     TAB -->|"executable pointer"| BIN
-    SEL -. "76 selectors + value-flow remain open" .-> BIN
+    SEL -. "76 selectors remain open" .-> BIN
+    BIN --> VF["setLanCfg: lanIp/lanNetmask → NVRAM"]
+    VF -. "DHCP branches + sinks remain open" .-> BIN
 ```
 
 这个案例证明路径本身不是完整接口身份：若只按 URL 聚类，所有逻辑操作会被压成
@@ -113,10 +115,13 @@ flowchart LR
 写成 POST。随后 MIPS Inline Table Profile 从四个带大小的动态符号恢复 138 条注册，
 为 123/199 个前端 selector 建立 124 条 handler proof；`getTelnetCfg` 的两条相同注册
 作为重复事实保留。76 个 Frontend-only 与 14 个 Native-only operation 继续作为版本、
-条件构建、死代码或替代处理主体假设；已绑定 handler 的下游 value-flow 仍未确认。
+条件构建、死代码或替代处理主体假设。对 `setLanCfg@0x004209b8`，系统进一步从
+dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
+`lanIp→lan_ipaddr`、`lanNetmask→lan_netmask` 两条请求参数—配置状态链，并在
+`0x00420ad8` 的首个条件分支停止；DHCP 分支和敏感 sink 仍未确认。
 
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
-“跨资源义务关闭、Native 子集绑定、整体 value-flow 仍开放”的阶段性案例；不能据此
+“跨资源义务关闭、Native 子集绑定、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此
 声称动态 selector 全集、76/14 差集原因、运行时可达、认证状态或漏洞数据流已确认。
 
 ## 3. 后续案例准入触发器

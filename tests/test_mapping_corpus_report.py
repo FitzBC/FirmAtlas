@@ -260,10 +260,11 @@ class CorpusReportContractTests(unittest.TestCase):
             if item.sample_id == "totolink-x5000r-shared-cgi"
         )
         self.assertEqual(CorpusSampleStatus.VERIFIED, x5000r.status)
-        self.assertEqual(587, x5000r.candidate_count)
-        self.assertEqual(1438, x5000r.evidence_count)
+        self.assertEqual(589, x5000r.candidate_count)
+        self.assertEqual(1448, x5000r.evidence_count)
         self.assertTrue({
-            "native_handler", "native_route_binding"
+            "native_handler", "native_route_binding",
+            "native_parameter_state_flow",
         } <= set(x5000r.candidate_kinds))
         self.assertEqual((), x5000r.missing_capabilities)
 

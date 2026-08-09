@@ -1,0 +1,335 @@
+{
+  "schema_version": "firmatlas.mapping.x5000r-mips-value-flow/v1alpha1",
+  "source": {
+    "source_path": "www/cgi-bin/cstecgi.cgi",
+    "content_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+    "size": 251300
+  },
+  "handler": {
+    "route_token": "setLanCfg",
+    "address": "0x004209b8",
+    "identity": "www/cgi-bin/cstecgi.cgi@0x004209b8"
+  },
+  "profile": "mips32-gp-straight-line-getter-setter/v1",
+  "coverage": {
+    "status": "completed",
+    "scope": "branch-free handler prefix",
+    "boundary_reason": "first_conditional_branch",
+    "boundary_address": "0x00420ad8",
+    "processed_instructions": 72
+  },
+  "counts": {
+    "validated_parameter_state_flows": 2,
+    "evidence_atoms": 10
+  },
+  "validated_pairs": [
+    [
+      "lanIp",
+      "lan_ipaddr"
+    ],
+    [
+      "lanNetmask",
+      "lan_netmask"
+    ]
+  ],
+  "flows": [
+    {
+      "flow_id": "mips-flow:6ff7aa48826c9b0ee25171d081d6f51e8c1f2aee42ef9fe53176a142e2b9b136",
+      "parameter_name": "lanIp",
+      "state_key": "lan_ipaddr",
+      "getter_symbol": "websGetVar",
+      "setter_symbol": "nvram_set",
+      "getter_callsite": "0x00420a54",
+      "setter_callsite": "0x00420a8c",
+      "evidence_ids": [
+        "evidence:f230d69d626bcbf25e081cc86782b14b9910f3f73113be9cb0634c0d7153818f",
+        "evidence:6c05cd2e7a6c9d644820e324782d280626223cd278350d2f0ff3b149820c7da3",
+        "evidence:886d6a73ef339c971dde64ad127fc10bb9e43cf809437bad14435edce667669d",
+        "evidence:af9134ff26d02758beee78884711b185523da27b302572e013f611a1f9358f05",
+        "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d"
+      ]
+    },
+    {
+      "flow_id": "mips-flow:4830669a396bfe457c59a1b8e9e900b538467bea0e5fd442ac2bae9da4a6f991",
+      "parameter_name": "lanNetmask",
+      "state_key": "lan_netmask",
+      "getter_symbol": "websGetVar",
+      "setter_symbol": "nvram_set",
+      "getter_callsite": "0x00420a74",
+      "setter_callsite": "0x00420aa0",
+      "evidence_ids": [
+        "evidence:e6664e44d9ecd88662342fd5eba041be94a79561a5f08ac63415f5506a802915",
+        "evidence:ec4b7f49adf695af5155d4e74ed85411e5341da0588c9743e2a45d4b9b3ea893",
+        "evidence:c3482b01d478ff30f30c98bf94339e64ff5dee4c71ce2ba605980b48fe454866",
+        "evidence:c57b87be2e6fc434a193f59c39f13ddaafb4f57a22cba81420bd5c3420644f11",
+        "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f"
+      ]
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "evidence_id": "evidence:f230d69d626bcbf25e081cc86782b14b9910f3f73113be9cb0634c0d7153818f",
+      "subject_ref": "mips-flow:6ff7aa48826c9b0ee25171d081d6f51e8c1f2aee42ef9fe53176a142e2b9b136",
+      "predicate": "reads_request_parameter",
+      "object_value": "lanIp",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=215620-215625",
+        "span_kind": "binary",
+        "start_byte": 215620,
+        "end_byte": 215625,
+        "excerpt_sha256": "bdda7d2b40d202cea69337a94c2a6238785d2d561074730c8bf247a4b322a2a6",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "direct_static",
+      "capability": "reads_request_parameter",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:6c05cd2e7a6c9d644820e324782d280626223cd278350d2f0ff3b149820c7da3",
+      "subject_ref": "mips-flow:6ff7aa48826c9b0ee25171d081d6f51e8c1f2aee42ef9fe53176a142e2b9b136",
+      "predicate": "calls_parameter_getter",
+      "object_value": "websGetVar",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=133716-133724",
+        "span_kind": "binary",
+        "start_byte": 133716,
+        "end_byte": 133724,
+        "excerpt_sha256": "d724bd381b439467c7ee63450d4b8aba5ba0ef4243390aa9921273d5126444d8",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "deterministic_derived",
+      "capability": "calls_parameter_getter",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:886d6a73ef339c971dde64ad127fc10bb9e43cf809437bad14435edce667669d",
+      "subject_ref": "mips-flow:6ff7aa48826c9b0ee25171d081d6f51e8c1f2aee42ef9fe53176a142e2b9b136",
+      "predicate": "writes_configuration_state",
+      "object_value": "lan_ipaddr",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=215608-215618",
+        "span_kind": "binary",
+        "start_byte": 215608,
+        "end_byte": 215618,
+        "excerpt_sha256": "2f0ad66c2e05098a0cd6643d13317744329b4d38465e1e21b2db28b029d919e1",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "direct_static",
+      "capability": "writes_configuration_state",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:af9134ff26d02758beee78884711b185523da27b302572e013f611a1f9358f05",
+      "subject_ref": "mips-flow:6ff7aa48826c9b0ee25171d081d6f51e8c1f2aee42ef9fe53176a142e2b9b136",
+      "predicate": "calls_state_setter",
+      "object_value": "nvram_set",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=133772-133780",
+        "span_kind": "binary",
+        "start_byte": 133772,
+        "end_byte": 133780,
+        "excerpt_sha256": "80e71511da6d820cb67dd77bf5872275d386c63836ec109b94cef9e4b6a13e8b",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "deterministic_derived",
+      "capability": "calls_state_setter",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
+      "subject_ref": "mips-flow:6ff7aa48826c9b0ee25171d081d6f51e8c1f2aee42ef9fe53176a142e2b9b136",
+      "predicate": "maps_parameter_to_state",
+      "object_value": "lanIp->lan_ipaddr",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=133772-133780",
+        "span_kind": "binary",
+        "start_byte": 133772,
+        "end_byte": 133780,
+        "excerpt_sha256": "80e71511da6d820cb67dd77bf5872275d386c63836ec109b94cef9e4b6a13e8b",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "deterministic_derived",
+      "capability": "maps_parameter_to_state",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:e6664e44d9ecd88662342fd5eba041be94a79561a5f08ac63415f5506a802915",
+      "subject_ref": "mips-flow:4830669a396bfe457c59a1b8e9e900b538467bea0e5fd442ac2bae9da4a6f991",
+      "predicate": "reads_request_parameter",
+      "object_value": "lanNetmask",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=215596-215606",
+        "span_kind": "binary",
+        "start_byte": 215596,
+        "end_byte": 215606,
+        "excerpt_sha256": "f6538964d6092772253972a90a08e07226b522be76e22a2020ba2ac104164d29",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "direct_static",
+      "capability": "reads_request_parameter",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:ec4b7f49adf695af5155d4e74ed85411e5341da0588c9743e2a45d4b9b3ea893",
+      "subject_ref": "mips-flow:4830669a396bfe457c59a1b8e9e900b538467bea0e5fd442ac2bae9da4a6f991",
+      "predicate": "calls_parameter_getter",
+      "object_value": "websGetVar",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=133748-133756",
+        "span_kind": "binary",
+        "start_byte": 133748,
+        "end_byte": 133756,
+        "excerpt_sha256": "d724bd381b439467c7ee63450d4b8aba5ba0ef4243390aa9921273d5126444d8",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "deterministic_derived",
+      "capability": "calls_parameter_getter",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:c3482b01d478ff30f30c98bf94339e64ff5dee4c71ce2ba605980b48fe454866",
+      "subject_ref": "mips-flow:4830669a396bfe457c59a1b8e9e900b538467bea0e5fd442ac2bae9da4a6f991",
+      "predicate": "writes_configuration_state",
+      "object_value": "lan_netmask",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=215584-215595",
+        "span_kind": "binary",
+        "start_byte": 215584,
+        "end_byte": 215595,
+        "excerpt_sha256": "a83be8839cf125987adc1a89c103241af853007c2a89d9c89f99755380b5d188",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "direct_static",
+      "capability": "writes_configuration_state",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:c57b87be2e6fc434a193f59c39f13ddaafb4f57a22cba81420bd5c3420644f11",
+      "subject_ref": "mips-flow:4830669a396bfe457c59a1b8e9e900b538467bea0e5fd442ac2bae9da4a6f991",
+      "predicate": "calls_state_setter",
+      "object_value": "nvram_set",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=133792-133800",
+        "span_kind": "binary",
+        "start_byte": 133792,
+        "end_byte": 133800,
+        "excerpt_sha256": "c094c28dec40d3fc20232cebd481b912dcbaa6c279a76c8188c5378a4c1bdf52",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "deterministic_derived",
+      "capability": "calls_state_setter",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    },
+    {
+      "evidence_id": "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f",
+      "subject_ref": "mips-flow:4830669a396bfe457c59a1b8e9e900b538467bea0e5fd442ac2bae9da4a6f991",
+      "predicate": "maps_parameter_to_state",
+      "object_value": "lanNetmask->lan_netmask",
+      "source_span": {
+        "artifact_path": "www/cgi-bin/cstecgi.cgi",
+        "artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+        "locator": "binary:bytes=133792-133800",
+        "span_kind": "binary",
+        "start_byte": 133792,
+        "end_byte": 133800,
+        "excerpt_sha256": "c094c28dec40d3fc20232cebd481b912dcbaa6c279a76c8188c5378a4c1bdf52",
+        "start_line": null,
+        "start_column": null,
+        "end_line": null,
+        "end_column": null
+      },
+      "producer": "native-mips-handler-value-flow",
+      "producer_version": "0.1.0",
+      "observation_kind": "deterministic_derived",
+      "capability": "maps_parameter_to_state",
+      "confidence": 1.0,
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1"
+    }
+  ],
+  "open_obligations": [
+    {
+      "capability": "traces_branched_value_flow",
+      "statement": "Analyze branch-dependent DHCP parameters and configuration writes after the first control-flow boundary."
+    },
+    {
+      "capability": "finds_sensitive_sink",
+      "statement": "Continue from validated state writes into commit, network reconfiguration, command, and other sensitive sinks."
+    },
+    {
+      "capability": "attributes_set_difference",
+      "statement": "Explain the 76 frontend-only and 14 native-only dispatcher operations without forcing a synthetic match."
+    }
+  ]
+}
