@@ -9,15 +9,16 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
-    CoverageStatus,
     CorpusEvidenceTier,
     CorpusReportInput,
     CorpusSampleInput,
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
+    InventoryPolicy,
     NativeRouteAnchor,
     SourceArtifactEntry,
     assemble_discovery_catalog,
+    build_inventory,
     build_corpus_report,
     correlate_frontend_native,
     discover_arm_pic_callsite_bindings,
@@ -33,7 +34,6 @@ from firmatlas.mapping import (
 AC9_FIRMWARE_SHA256 = "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296"
 AC9_INVENTORY_SHA256 = "a6b3a57b7262de8692ebf9f9fac2aa249bbbdb69272a45c8c0a651089a6ddcf4"
 DAP3520_FIRMWARE_SHA256 = "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9"
-DAP3520_INVENTORY_SHA256 = "e6b0cfd9e5fed74302986e179ea23de8d9817198c2b361ee946a90e501e91334"
 DAP3520_ROOT = Path(
     "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/"
     "_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/"
@@ -117,11 +117,20 @@ def _dap3520_catalog(root: Path):
     for path, producer in inputs:
         content = (root / path).read_bytes()
         results.append((producer, producer(_source(path, content), content)))
-    web = tuple(result for producer, result in results if producer is discover_web_configuration)
-    scripts = tuple(result for producer, result in results if producer is discover_script_backend)
+    web = tuple(
+        result
+        for producer, result in results
+        if producer is discover_web_configuration
+    )
+    scripts = tuple(
+        result
+        for producer, result in results
+        if producer is discover_script_backend
+    )
+    inventory = build_inventory(root, InventoryPolicy())
     return assemble_discovery_catalog(DiscoveryCatalogInput(
         DAP3520_FIRMWARE_SHA256,
-        DAP3520_INVENTORY_SHA256,
+        inventory.inventory_sha256,
         (
             DiscoveryProducerBatch.web_configuration(
                 web, "etc/templates/httpd/httpd.php"
@@ -130,7 +139,7 @@ def _dap3520_catalog(root: Path):
                 scripts, "www/{home_sys.php,__action.php}"
             ),
         ),
-        source_inventory_coverage_status=CoverageStatus.PARTIAL,
+        source_inventory_coverage_status=inventory.coverage_status,
     ))
 
 

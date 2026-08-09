@@ -32,12 +32,16 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
   --dap3520-root ../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/_DAP-3520_FW_v117-rc047.bin.extracted/squashfs-root
 ```
 
-输出：[M1-11 corpus report](../samples/m1-11-representative-corpus-report.json)，稳定身份为 `corpus-report:df81ad45658444d26f9a144b6320adb8bd8d9668001af92d0011748a893862da`。该身份同时绑定完整 required/forbidden capability policy、DAP-3520 Catalog 和上游 Inventory coverage；修改已满足的门限也会产生新报告身份。
+输出：[M1-11 corpus report](../samples/m1-11-representative-corpus-report.json)。M1-13
+重放后的稳定身份为
+`corpus-report:384bf542890d89f47da86402ddb805551ea229c1dd6a81d22bb763a0354e055e`。
+该身份同时绑定完整 required/forbidden capability policy、DAP-3520 Catalog 和
+上游 Inventory coverage；修改已满足的门限也会产生新报告身份。
 
 | 类别 | 当前状态 | 解释 |
 | --- | --- | --- |
 | `form_handler` | `verified` | AC9 真实制品身份；374 candidates、392 evidence、0 open obligations，包含 `constructs_request` 与 `binds_handler` |
-| `hnap_soap` | `coverage_gap` | DAP-3520 partial Catalog 已发布：273 candidates、288 evidence、所需 5 类 capability 全部满足；Inventory 因绝对固件 symlink 保持 partial，所以真实样本不晋级 verified；fixture 仍只证明 selector 合同 |
+| `hnap_soap` | `verified` | DAP-3520 completed Catalog 已发布：273 candidates、288 evidence、所需 5 类 capability 全部满足；固件 chroot symlink 重放关闭了原先的误报缺口；fixture 仍只证明 selector 合同 |
 | `cgi_gateway` | `contract_only` | shared CGI/topicurl fixture 证明共享端点拆分，不是固件召回证据 |
 | `script_backend` | `coverage_gap` | D-Link DSL 旧 Binwalk 派生源码已有 Producer 结果，但缺原始制品身份绑定后的 Catalog |
 | `native_only` | `acquisition_gap` | 尚缺不依赖前端候选的可校验原始样本 |
@@ -52,10 +56,10 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
 
 ## 5. 下一步
 
-1. 在不跟随宿主逃逸链接的前提下，区分固件 chroot 绝对 symlink 与真正越界，决定能否把安全 Inventory 晋级 completed；
+1. M1-13 已关闭固件 chroot symlink 误报缺口，DAP-3520 HNAP/XGI 已晋级；
 2. 摄取一个原始共享 CGI 固件，并选择一个前端缺失的 Native-only 原始固件；
 3. 重新验证 D-Link DSL 脚本后端的原始 Artifact 谱系，替换 derived-only 缺口；
-4. 三个缺口全部关闭后再运行 M1-GATE，不因当前已有 AC9 或 DAP-3520 路径证据而提前标记 M1 完成。
+4. 剩余三个类别缺口全部关闭后再运行 M1-GATE，不因当前已有 AC9 或 DAP-3520 路径证据而提前标记 M1 完成。
 
 ## 6. 本轮验证
 
@@ -72,3 +76,9 @@ PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
   handler 详情可回到 `etc/templates/httpd/httpd.php`，Console 无错误。
 
 M1-11A 的实现与验证记录由本次 Git 历史共同固定。通信测绘专项按用户明确范围不执行 SSH 部署。
+
+> M1-13 后续验证：DAP-3520 Catalog 的
+> `source_inventory_coverage_status` 已变为 completed，`hnap_soap` 为
+> verified；新 report ID 和最终门禁见
+> [M1-13 记录](./2026-08-09-m1-13-chroot-symlink-inventory.md)。上面的 partial
+> UI/API 观察属于 M1-11A 历史验证，不是当前状态。

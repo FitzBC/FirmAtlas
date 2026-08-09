@@ -32,6 +32,8 @@ classDiagram
 
 - `artifact_id`：由父制品、规范路径和内容摘要派生；
 - `kind`：file、symlink、archive-member、filesystem-node、tool-output；
+- symlink 同时保存原始 `link_target`、固件 chroot 内的 `resolved_path` 与有界
+  `expansion_status`；规范目标不授权读取目标内容；
 - `content_digest`；
 - `canonical_path` 与原始路径；
 - `parent_artifact_id`；

@@ -109,6 +109,9 @@ flowchart TD
 - 不信任扩展名；
 - 规范路径并保留原始路径；
 - 处理 symlink、hardlink、archive member；
+- symlink 的 `/...` 目标在选定固件 root 内按 chroot 语义词法解析，只逐段
+  `lstat`，不经链接读取或散列目标；普通缺失、循环、深度耗尽和越界进入覆盖账本，
+  未物化 `/dev/*` 作为运行时设备 namespace 单独记录；
 - 限制递归深度、展开体积、文件数和单文件大小；
 - 记录所有跳过与失败。
 

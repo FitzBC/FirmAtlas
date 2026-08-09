@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:df81ad45658444d26f9a144b6320adb8bd8d9668001af92d0011748a893862da",
+  "report_id": "corpus-report:384bf542890d89f47da86402ddb805551ea229c1dd6a81d22bb763a0354e055e",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -17,8 +17,8 @@
       "architecture_subtype": "hybrid_hnap_xgi_dispatcher",
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
-      "status": "coverage_gap",
-      "catalog_id": "discovery-catalog:9604de198465109760e1a5ccfc8b8030885ab918c3eb586187a73418ae84521e",
+      "status": "verified",
+      "catalog_id": "discovery-catalog:b0537381a16b6849890027d803727fa1b4e7af24e0edf1e3d57bd54bb751da01",
       "required_capabilities": [
         "binds_handler",
         "maps_namespace",
@@ -237,12 +237,12 @@
     },
     {
       "architecture_category": "hnap_soap",
-      "status": "coverage_gap",
+      "status": "verified",
       "sample_count": 2,
-      "real_firmware_verified_count": 0,
+      "real_firmware_verified_count": 1,
       "derived_firmware_verified_count": 0,
       "contract_verified_count": 1,
-      "coverage_gap_count": 1,
+      "coverage_gap_count": 0,
       "acquisition_gap_count": 0,
       "observed_capabilities": [
         "binds_handler",

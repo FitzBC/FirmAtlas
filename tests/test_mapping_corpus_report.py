@@ -1,4 +1,5 @@
 import hashlib
+import json
 import unittest
 from pathlib import Path
 from dataclasses import replace
@@ -221,12 +222,20 @@ class CorpusReportContractTests(unittest.TestCase):
         from scripts.build_mapping_corpus_report import build_m1_report
 
         report = build_m1_report(root)
+        documented_report = json.loads(
+            Path(
+                "docs/firmware-mapping/samples/"
+                "m1-11-representative-corpus-report.json"
+            ).read_text(encoding="utf-8")
+        )
+        replayable_report = json.loads(json.dumps(report.to_dict()))
+        self.assertEqual(replayable_report, documented_report)
         categories = {
             item.architecture_category: item.status for item in report.categories
         }
         self.assertEqual(CorpusGateStatus.PARTIAL, report.gate_status)
         self.assertEqual(CorpusSampleStatus.VERIFIED, categories["form_handler"])
-        self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, categories["hnap_soap"])
+        self.assertEqual(CorpusSampleStatus.VERIFIED, categories["hnap_soap"])
         self.assertEqual(CorpusSampleStatus.CONTRACT_ONLY, categories["cgi_gateway"])
         self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, categories["script_backend"])
         self.assertEqual(CorpusSampleStatus.ACQUISITION_GAP, categories["native_only"])
@@ -236,7 +245,7 @@ class CorpusReportContractTests(unittest.TestCase):
         dap3520 = next(
             item for item in report.samples if item.sample_id.startswith("dlink-dap3520")
         )
-        self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, dap3520.status)
+        self.assertEqual(CorpusSampleStatus.VERIFIED, dap3520.status)
         dap3520_root = Path(
             "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/"
             "_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/"

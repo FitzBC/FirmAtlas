@@ -12,12 +12,55 @@ from firmatlas.mapping import CoverageStatus, InventoryPolicy, build_inventory
 
 
 class SourceInventoryContractTests(unittest.TestCase):
+    def test_absolute_symlink_is_resolved_inside_firmware_chroot(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "dev").mkdir()
+            (root / "dev" / "null").write_bytes(b"firmware-null")
+            (root / "etc").mkdir()
+            (root / "etc" / "hosts").symlink_to("/dev/null")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            link = next(item for item in inventory.entries if item.kind == "symlink")
+            self.assertEqual("/dev/null", link.link_target)
+            self.assertEqual("dev/null", link.resolved_path)
+            self.assertEqual(
+                "recorded_chroot_absolute_not_followed", link.expansion_status
+            )
+            self.assertIsNone(link.content_sha256)
+            self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
+            self.assertEqual((), inventory.diagnostics)
+
+    def test_relative_symlink_chain_can_cross_a_chroot_absolute_link(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "lib").mkdir()
+            (root / "real").mkdir()
+            (root / "real" / "libc-1.so").write_bytes(b"ELF")
+            (root / "lib" / "libc.so.0").symlink_to("/real/libc-1.so")
+            (root / "lib" / "libc.so").symlink_to("libc.so.0")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            links = {
+                item.canonical_path: item
+                for item in inventory.entries
+                if item.kind == "symlink"
+            }
+            self.assertEqual("real/libc-1.so", links["lib/libc.so"].resolved_path)
+            self.assertEqual(
+                "recorded_not_followed", links["lib/libc.so"].expansion_status
+            )
+            self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
+
     def test_inventory_policy_rejects_nonpositive_resource_limits(self):
         for field_name in (
             "max_files",
             "max_total_bytes",
             "max_file_bytes",
             "max_expanded_bytes",
+            "max_symlink_depth",
         ):
             with self.subTest(field_name=field_name):
                 with self.assertRaisesRegex(ValueError, field_name):
@@ -69,7 +112,8 @@ class SourceInventoryContractTests(unittest.TestCase):
             outside = Path(outside_dir) / "secret.txt"
             outside.write_text("must-not-be-hashed", encoding="utf-8")
             (root / "www").mkdir()
-            (root / "www" / "escape").symlink_to(outside)
+            relative_escape = os.path.relpath(outside, root / "www")
+            (root / "www" / "escape").symlink_to(relative_escape)
 
             inventory = build_inventory(root, InventoryPolicy())
 
@@ -77,13 +121,148 @@ class SourceInventoryContractTests(unittest.TestCase):
             entry = inventory.entries[0]
             self.assertEqual("www/escape", entry.canonical_path)
             self.assertEqual("symlink", entry.kind)
-            self.assertEqual(str(outside), entry.link_target)
+            self.assertEqual(relative_escape, entry.link_target)
             self.assertEqual("rejected_escape", entry.expansion_status)
+            self.assertIsNone(entry.resolved_path)
             self.assertIsNone(entry.content_sha256)
             self.assertEqual(CoverageStatus.PARTIAL, inventory.coverage_status)
             self.assertEqual(
                 ["inventory.symlink_escape"],
                 [diagnostic.code for diagnostic in inventory.diagnostics],
+            )
+
+    def test_intermediate_symlink_escape_is_rejected_before_host_traversal(self):
+        with tempfile.TemporaryDirectory() as root_dir, \
+            tempfile.TemporaryDirectory() as outside_dir:
+            root = Path(root_dir)
+            outside = Path(outside_dir)
+            (outside / "secret").write_text("must-not-be-hashed", encoding="utf-8")
+            (root / "safe").symlink_to(os.path.relpath(outside, root))
+            (root / "entry").symlink_to("safe/secret")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            links = {item.canonical_path: item for item in inventory.entries}
+            self.assertEqual("rejected_escape", links["entry"].expansion_status)
+            self.assertIsNone(links["entry"].resolved_path)
+            self.assertIsNone(links["entry"].content_sha256)
+            self.assertEqual(CoverageStatus.PARTIAL, inventory.coverage_status)
+
+    def test_parent_segment_does_not_erase_a_preceding_symlink_hop(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "secret").write_bytes(b"inside")
+            (root / "jump").symlink_to("../../outside")
+            (root / "entry").symlink_to("jump/../secret")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            links = {item.canonical_path: item for item in inventory.entries}
+            self.assertEqual("rejected_escape", links["entry"].expansion_status)
+            self.assertIsNone(links["entry"].resolved_path)
+            self.assertEqual(CoverageStatus.PARTIAL, inventory.coverage_status)
+
+    def test_missing_symlink_target_is_a_visible_coverage_gap(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "bin").mkdir()
+            (root / "bin" / "tool").symlink_to("/missing/tool")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            link = inventory.entries[0]
+            self.assertEqual("missing_target", link.expansion_status)
+            self.assertEqual("missing/tool", link.resolved_path)
+            self.assertEqual(CoverageStatus.PARTIAL, inventory.coverage_status)
+            self.assertEqual(
+                ["inventory.symlink_target_missing"],
+                [item.code for item in inventory.diagnostics],
+            )
+
+    def test_unmaterialized_runtime_device_target_is_not_a_source_coverage_gap(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "etc").mkdir()
+            (root / "etc" / "hosts").symlink_to("/dev/null")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            link = inventory.entries[0]
+            self.assertEqual(
+                "recorded_runtime_target_not_materialized",
+                link.expansion_status,
+            )
+            self.assertEqual("dev/null", link.resolved_path)
+            self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
+            self.assertEqual((), inventory.diagnostics)
+
+    def test_dap3520_chroot_symlinks_replay_without_false_escape_gap(self):
+        root = Path(
+            "../iot_seedintelligentanalysis/binwalk_result/类型6/BM-2024-00027/"
+            "_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/"
+            "_DAP-3520_FW_v117-rc047.bin.extracted/squashfs-root"
+        )
+        if not root.exists():
+            self.skipTest("local DAP-3520 representative sample is unavailable")
+
+        inventory = build_inventory(root, InventoryPolicy())
+        symlink_statuses = {
+            item.expansion_status
+            for item in inventory.entries
+            if item.kind == "symlink"
+        }
+
+        self.assertEqual(CoverageStatus.COMPLETED, inventory.coverage_status)
+        self.assertEqual(
+            118,
+            sum(item.kind == "symlink" for item in inventory.entries),
+        )
+        self.assertEqual(
+            {
+                "recorded_not_followed",
+                "recorded_runtime_target_not_materialized",
+            },
+            symlink_statuses,
+        )
+        self.assertEqual((), inventory.diagnostics)
+
+    def test_symlink_cycle_is_recorded_without_crashing_inventory(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "a").symlink_to("b")
+            (root / "b").symlink_to("a")
+
+            inventory = build_inventory(root, InventoryPolicy())
+
+            self.assertEqual(
+                ["rejected_cycle", "rejected_cycle"],
+                [item.expansion_status for item in inventory.entries],
+            )
+            self.assertEqual(CoverageStatus.PARTIAL, inventory.coverage_status)
+            self.assertEqual(
+                ["inventory.symlink_cycle", "inventory.symlink_cycle"],
+                [item.code for item in inventory.diagnostics],
+            )
+
+    def test_symlink_depth_budget_limits_only_the_long_chain(self):
+        with tempfile.TemporaryDirectory() as root_dir:
+            root = Path(root_dir)
+            (root / "target").write_bytes(b"target")
+            (root / "c").symlink_to("target")
+            (root / "b").symlink_to("c")
+            (root / "a").symlink_to("b")
+
+            inventory = build_inventory(
+                root, InventoryPolicy(max_symlink_depth=2)
+            )
+            links = {item.canonical_path: item for item in inventory.entries}
+
+            self.assertEqual("depth_limited", links["a"].expansion_status)
+            self.assertEqual("recorded_not_followed", links["b"].expansion_status)
+            self.assertEqual("target", links["b"].resolved_path)
+            self.assertEqual(
+                ["inventory.symlink_depth_exceeded"],
+                [item.code for item in inventory.diagnostics],
             )
 
     def test_zip_members_are_inspected_without_extracting_path_traversal(self):
@@ -383,7 +562,10 @@ class SourceInventoryContractTests(unittest.TestCase):
             inventory = build_inventory(root, policy)
             payload = inventory.to_dict()
 
-            self.assertEqual("firmatlas.mapping.inventory/v1alpha1", payload["schema_version"])
+            self.assertEqual(
+                "firmatlas.mapping.inventory/v1alpha2",
+                payload["schema_version"],
+            )
             self.assertEqual(inventory.inventory_sha256, payload["inventory_sha256"])
             self.assertEqual(17, payload["policy"]["max_files"])
             self.assertEqual(0, payload["policy"]["max_archive_depth"])

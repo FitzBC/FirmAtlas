@@ -101,3 +101,13 @@ AC9 三个关键制品摘要与 M1-01 人工重放一致。带 `.tar` 后缀但�
 ## 8. 下一动作
 
 M1-02A：建立 Binwalk Extraction Worker Interface、deterministic fake 和派生制品谱系；随后进入 M1-03 类型化 EvidenceSpan。
+
+## 9. M1-13 合同演进
+
+2026-08-09，Inventory 合同演进为 `firmatlas.mapping.inventory/v1alpha2`：新增
+`resolved_path` 与 `max_symlink_depth`，将 `/...` 目标解释为固件 chroot 内路径，
+但仍不经 symlink 打开目标。普通缺失、循环、深度耗尽和越界保持 partial；
+未物化 `/dev/*` 作为运行时设备 namespace 单独记录。完整设计、TDD 和
+DAP-3520 重放见
+[M1-13 记录](./2026-08-09-m1-13-chroot-symlink-inventory.md)。本节是后续合同演进，
+不改写上文 v1alpha1 的历史发布证据。

@@ -9,7 +9,8 @@
 - [Tenda AC9：M1 Snapshot 人工证据重放](./tenda-ac9-m1-walkthrough.md)；
 - [Tenda AC9：M1-02 完整 rootfs 清单](./tenda-ac9-m1-inventory-walkthrough.md)。
 - [Binwalk worker 合同中间输出](./binwalk-worker-contract-summary.json)：确定性 fake 证明父制品、命令证据和派生 Inventory 的谱系，不代表真实固件已解包。
-- [M1-02B Binwalk 真实回放](./m1-02b-binwalk-real-replay-summary.json)：固定 Binwalk v3.1.0 本地验证镜像的 DIR-882 零产物负例与 DAP-3520 757-entry HNAP/PHP-XGI 正例；后者因安全 symlink 诊断保持 partial。
+- [M1-02B Binwalk 真实回放](./m1-02b-binwalk-real-replay-summary.json)：固定 Binwalk v3.1.0 本地验证镜像的 DIR-882 零产物负例与 DAP-3520 历史回放；其中 v1alpha1 symlink 结论由 M1-13 后续重放勘误。
+- [M1-13 DAP-3520 chroot symlink 重放](./m1-13-dap3520-chroot-symlink-replay.json)：选定 rootfs 的 753 个节点全部处理；118 条 symlink 保留原始目标与固件内规范目标，15 条 `/dev/null` 链接作为未物化运行时设备目标记录，0 diagnostics。
 - [Tenda AC9：M1-03 精确 EvidenceAtom](./tenda-ac9-m1-evidence-atoms.json)：从完整 `static_route.js` 回放出的字节、行列、摘要和稳定证据身份。
 - [M1-04 Frontend Producer 中间输出](./m1-04-frontend-producer-summary.json)：两份 AC9 真实源文件与 HNAP/共享 CGI 合同 fixture 的请求、参数和 selector 对比。
 - [M1-05 Web Configuration Producer 中间输出](./m1-05-web-configuration-summary.json)：AC9 真实 nginx 配置与启动脚本恢复出的 listener、docroot、FastCGI namespace 和服务链。
@@ -21,7 +22,7 @@
 - [M1-10 Native Deep route-table 中间输出](./m1-10-native-deep-route-table-summary.json)：ARM ELF `{route_ptr, handler_ptr}` 正例的三段证据链、Scheduler 义务关闭、Catalog 投影，以及 AC9 无可信命名表的真实负面对照。
 - [M1-10B AC9 ARM PIC call-site 中间输出](./m1-10b-ac9-arm-pic-callsite-summary.json)：从 `online_list.js` 的 5 个接口关联到 `httpd` 的 5 个 handler、共同 131-pair registrar、五段证据链和 10/10 义务关闭。
 - [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；当前 gate 为 `partial`，不把合同 fixture 或漏洞线索冒充真实固件覆盖。
-- [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；上游 Inventory partial 被传播到 Catalog。
+- [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；M1-13 重放后上游 Inventory 与 Catalog 均为 completed。
 - [M1-12 AC9 research-case corpus](./m1-12-research-case-corpus.json)：将 `/goform` 与 nginx/FastCGI 分支不相交、httpd/dhttpd 候选对照和 ARM PIC 最终 binding 保存为内容寻址的证据时间线，并附反事实、论文用途和局限。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
@@ -93,11 +94,13 @@
 **D-Link DAP-3520 A1 / HNAP + PHP-XGI hybrid**
 
 - 原始 Artifact SHA-256：`0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9`；
-- 当前隔离 Binwalk v3.1.0 回放恢复 757 个 Inventory 条目；
+- 当前选定 `squashfs-root` Inventory v1alpha2 回放恢复 753 个节点；历史
+  Extraction 目录回放是不同层级的制品身份，不与 rootfs Inventory 混用；
 - `httpd.php` 明确绑定 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap`；
 - 普通管理页使用 `ACTION_POST → __action.php → query/set` 的 PHP-XGI 配置链；
 - 专用 Producer 已恢复 5 条 httpd 配置关系、266 条 XGI 状态访问与 5 个 `ACTION_POST` 操作值；Catalog 为 273 candidates / 288 evidence；
-- 当前只因绝对固件 symlink 安全诊断使上游 Inventory 为 partial 而保持 coverage gap，不计入 verified 类别。
+- 118 条 symlink 已按固件 chroot 语义安全解析，目标不会经链接打开；当前
+  HNAP/XGI 真实样本为 `verified`。
 
 ### Tier B：平台已有固件候选
 

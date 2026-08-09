@@ -16,7 +16,7 @@ import zipfile
 from .domain import CoverageStatus
 
 
-INVENTORY_SCHEMA_VERSION = "firmatlas.mapping.inventory/v1alpha1"
+INVENTORY_SCHEMA_VERSION = "firmatlas.mapping.inventory/v1alpha2"
 
 
 @dataclass(frozen=True)
@@ -26,6 +26,7 @@ class InventoryPolicy:
     max_file_bytes: int = 512 * 1024 * 1024
     max_expanded_bytes: int = 8 * 1024 * 1024 * 1024
     max_archive_depth: int = 3
+    max_symlink_depth: int = 40
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -38,6 +39,8 @@ class InventoryPolicy:
                 raise ValueError("{} must be positive".format(field_name))
         if self.max_archive_depth < 0:
             raise ValueError("max_archive_depth must be nonnegative")
+        if self.max_symlink_depth <= 0:
+            raise ValueError("max_symlink_depth must be positive")
 
 
 @dataclass(frozen=True)
@@ -50,6 +53,7 @@ class SourceArtifactEntry:
     link_target: Optional[str] = None
     expansion_status: str = "not_applicable"
     parent_path: Optional[str] = None
+    resolved_path: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -109,6 +113,136 @@ def _canonical_archive_member(raw_name: str) -> Optional[str]:
         return None
     normalized = "/".join(part for part in parts if part not in {"", "."})
     return normalized or None
+
+
+def _firmware_link_components(raw_target: str) -> Optional[Tuple[str, ...]]:
+    """Split a link target while preserving parent traversal order."""
+
+    if not raw_target or "\x00" in raw_target:
+        return None
+    return tuple(part for part in raw_target.split("/") if part not in {"", "."})
+
+
+def _resolve_firmware_symlink(
+    root: Path,
+    source_relative: str,
+    raw_target: str,
+    max_depth: int,
+) -> Tuple[str, Optional[str], Optional[str], Optional[str]]:
+    """Resolve a link as the firmware kernel would, without opening its target."""
+
+    source_parts = tuple(PurePosixPath(source_relative).parts)
+    pending_parts = _firmware_link_components(raw_target)
+    if pending_parts is None:
+        return (
+            "rejected_escape",
+            None,
+            "inventory.symlink_escape",
+            "symlink target escapes the firmware root",
+        )
+    pending = list(pending_parts)
+    resolved: List[str] = (
+        [] if raw_target.startswith("/") else list(source_parts[:-1])
+    )
+    seen_links = {source_relative}
+    followed_links = 1
+    while pending:
+        part = pending.pop(0)
+        if part == "..":
+            if not resolved:
+                return (
+                    "rejected_escape",
+                    None,
+                    "inventory.symlink_escape",
+                    "symlink chain escapes the firmware root",
+                )
+            resolved.pop()
+            continue
+        candidate_parts = tuple(resolved + [part])
+        candidate = root.joinpath(*candidate_parts)
+        try:
+            candidate_mode = candidate.lstat().st_mode
+        except (FileNotFoundError, NotADirectoryError):
+            missing_path = "/".join(candidate_parts + tuple(pending))
+            if (
+                candidate_parts
+                and candidate_parts[0] == "dev"
+                and ".." not in pending
+            ):
+                return (
+                    "recorded_runtime_target_not_materialized",
+                    missing_path,
+                    None,
+                    None,
+                )
+            return (
+                "missing_target",
+                missing_path,
+                "inventory.symlink_target_missing",
+                "symlink target is missing from the firmware root",
+            )
+        except OSError as exc:
+            return (
+                "target_inspection_failed",
+                "/".join(candidate_parts + tuple(pending)),
+                "inventory.symlink_target_inspection_failed",
+                "symlink target metadata could not be inspected: {}".format(
+                    type(exc).__name__
+                ),
+            )
+        if not stat.S_ISLNK(candidate_mode):
+            resolved.append(part)
+            continue
+
+        candidate_relative = "/".join(candidate_parts)
+        if candidate_relative in seen_links:
+            return (
+                "rejected_cycle",
+                candidate_relative,
+                "inventory.symlink_cycle",
+                "symlink chain contains a cycle",
+            )
+        if followed_links >= max_depth:
+            return (
+                "depth_limited",
+                candidate_relative,
+                "inventory.symlink_depth_exceeded",
+                "symlink chain exceeds max_symlink_depth",
+            )
+        seen_links.add(candidate_relative)
+        followed_links += 1
+        try:
+            nested_target = str(candidate.readlink())
+        except OSError as exc:
+            return (
+                "target_inspection_failed",
+                candidate_relative,
+                "inventory.symlink_target_inspection_failed",
+                "symlink target could not be read: {}".format(type(exc).__name__),
+            )
+        nested_parts = _firmware_link_components(nested_target)
+        if nested_parts is None:
+            return (
+                "rejected_escape",
+                None,
+                "inventory.symlink_escape",
+                "symlink chain escapes the firmware root",
+            )
+        pending = list(nested_parts) + pending
+        if nested_target.startswith("/"):
+            resolved = []
+
+    resolved_path = "/".join(resolved) or "."
+    return (
+        (
+            "recorded_chroot_absolute_not_followed"
+            if raw_target.startswith("/")
+            else "recorded_not_followed"
+        ),
+        resolved_path,
+        None,
+        None,
+    )
 
 
 def _inspect_zip(
@@ -302,7 +436,6 @@ def build_inventory(root: Path, policy: InventoryPolicy) -> SourceInventory:
     root = Path(root)
     if not root.is_dir():
         raise ValueError("inventory root must be an existing directory")
-    root_resolved = root.resolve()
     entries_list: List[SourceArtifactEntry] = []
     diagnostics: List[InventoryDiagnostic] = []
     candidates = tuple(
@@ -332,12 +465,14 @@ def build_inventory(root: Path, policy: InventoryPolicy) -> SourceInventory:
             continue
         if path.is_symlink():
             link_target = path.readlink()
-            resolved_target = (path.parent / link_target).resolve()
-            escaped = not (
-                resolved_target == root_resolved
-                or root_resolved in resolved_target.parents
+            status, resolved_path, diagnostic_code, diagnostic_message = (
+                _resolve_firmware_symlink(
+                    root,
+                    relative,
+                    str(link_target),
+                    policy.max_symlink_depth,
+                )
             )
-            status = "rejected_escape" if escaped else "recorded_not_followed"
             entries_list.append(
                 SourceArtifactEntry(
                     canonical_path=relative,
@@ -347,15 +482,16 @@ def build_inventory(root: Path, policy: InventoryPolicy) -> SourceInventory:
                     content_sha256=None,
                     link_target=str(link_target),
                     expansion_status=status,
+                    resolved_path=resolved_path,
                 )
             )
-            if escaped:
+            if diagnostic_code is not None:
                 coverage_incomplete = True
                 diagnostics.append(
                     InventoryDiagnostic(
-                        code="inventory.symlink_escape",
+                        code=diagnostic_code,
                         path=relative,
-                        message="symlink target resolves outside the inventory root",
+                        message=diagnostic_message or "symlink resolution failed",
                     )
                 )
             processed_count += 1
@@ -491,6 +627,7 @@ def build_inventory(root: Path, policy: InventoryPolicy) -> SourceInventory:
             "kind": entry.kind,
             "link_target": entry.link_target,
             "parent_path": entry.parent_path,
+            "resolved_path": entry.resolved_path,
             "size": entry.size,
             "expansion_status": entry.expansion_status,
         }

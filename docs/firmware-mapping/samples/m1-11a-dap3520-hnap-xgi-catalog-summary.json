@@ -7,15 +7,19 @@
     "artifact_sha256": "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9"
   },
   "source_inventory": {
-    "inventory_sha256": "e6b0cfd9e5fed74302986e179ea23de8d9817198c2b361ee946a90e501e91334",
-    "coverage_status": "partial",
-    "observed_entries": 757,
-    "diagnostic": "inventory.symlink_escape"
+    "schema_version": "firmatlas.mapping.inventory/v1alpha2",
+    "inventory_sha256": "c5d877e83f97f294a4c01e417d8fb0914e1ecea9f9df7538f2f727bef2dd14f7",
+    "coverage_status": "completed",
+    "observed_entries": 753,
+    "regular_files": 635,
+    "symlinks": 118,
+    "runtime_targets_not_materialized": 15,
+    "diagnostics": []
   },
   "catalog": {
-    "catalog_id": "discovery-catalog:9604de198465109760e1a5ccfc8b8030885ab918c3eb586187a73418ae84521e",
-    "coverage_status": "partial",
-    "source_inventory_coverage_status": "partial",
+    "catalog_id": "discovery-catalog:b0537381a16b6849890027d803727fa1b4e7af24e0edf1e3d57bd54bb751da01",
+    "coverage_status": "completed",
+    "source_inventory_coverage_status": "completed",
     "candidate_count": 273,
     "parameter_count": 1,
     "evidence_count": 288,
@@ -92,6 +96,7 @@
   "interpretation": {
     "architecture_subtype": "hybrid_hnap_xgi_dispatcher",
     "confidence_boundary": "Deterministic static bindings are supported; shared code origin and runtime reachability are not asserted.",
-    "why_not_verified": "The selected producers completed, but the parent source inventory remains partial because absolute firmware symlinks were recorded without being followed."
+    "verification_status": "verified",
+    "verification_basis": "The selected rootfs Inventory and all selected producers completed; absolute links were resolved lexically inside the firmware chroot without opening their targets."
   }
 }

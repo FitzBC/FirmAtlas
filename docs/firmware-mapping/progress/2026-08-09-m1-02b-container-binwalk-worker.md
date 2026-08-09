@@ -101,15 +101,16 @@ Discovery Catalog；这仍不是从 `/HNAP1` 路径风格直接断言后端同�
 
 ## 6. 为什么仍是进行中
 
+> M1-13 后续勘误：本记录中的 `inventory.symlink_escape` 是 v1alpha1 在当时
+> 对固件绝对链接采取的保守解释。v1alpha2 将 `/...` 解释为选定固件根内路径，
+> 并把未物化 `/dev/*` 记录为运行时设备目标。DAP-3520 选定 rootfs 的新重放为
+> completed；详情见 [M1-13 记录](./2026-08-09-m1-13-chroot-symlink-inventory.md)。
+
 - 仓库固定 Dockerfile 尚未在正确配置全局代理的 Docker daemon 上完成
   独立重建与摘要复核；当前成功的是等价源码提交的本地 ARM64 验证镜像；
-- DAP-3520 的安全 Inventory 因绝对符号链接保持 partial；
-- HNAP/XGI 绑定已进入专用 Producer 与 partial Catalog；M1-11
-  `hnap_soap` 仍不能晋级 `verified` 的原因是父 Inventory coverage，而非缺少
-  选中文件的确定性事实。
+- DAP-3520 的 v1alpha1 symlink 缺口已由 M1-13 关闭；HNAP/XGI 绑定现在进入
+  completed Catalog，`hnap_soap` 已晋级 `verified`；
 
 ## 7. 下一步
 
-1. 明确“固件根绝对 symlink”只记录、不跟随时的 coverage 政策，保持安全
-   前提下区分危险逃逸与预期 chroot 链接；
-2. 重建仓库正式镜像并记录发布摘要，然后再评估 M1-02B 是否可标记已验证。
+1. 重建仓库正式镜像并记录发布摘要，然后再评估 M1-02B 是否可标记已验证。

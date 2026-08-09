@@ -1,0 +1,27 @@
+{
+  "schema_version": "firmatlas.mapping.inventory-replay-summary/v1alpha1",
+  "sample_id": "dlink-dap3520-1.17-rc047-selected-rootfs",
+  "firmware_artifact_sha256": "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9",
+  "inventory_schema_version": "firmatlas.mapping.inventory/v1alpha2",
+  "inventory_sha256": "c5d877e83f97f294a4c01e417d8fb0914e1ecea9f9df7538f2f727bef2dd14f7",
+  "coverage_status": "completed",
+  "observed_count": 753,
+  "processed_count": 753,
+  "processed_bytes": 16354258,
+  "entry_counts": {
+    "file": 635,
+    "symlink": 118
+  },
+  "symlink_status_counts": {
+    "recorded_not_followed": 103,
+    "recorded_runtime_target_not_materialized": 15
+  },
+  "diagnostics": [],
+  "safety_boundary": {
+    "target_interpretation": "absolute targets restart at the selected firmware root",
+    "target_io": "targets are inspected with lstat only and never opened or hashed through the link",
+    "runtime_namespace": "missing /dev targets are recorded as runtime device nodes, not source artifacts",
+    "remaining_gaps": "ordinary missing targets, cycles, depth exhaustion and lexical escapes remain partial"
+  },
+  "lineage_note": "This identity describes the selected squashfs-root used by mapping producers. It does not replace the historical Binwalk extraction-directory Inventory identity."
+}
