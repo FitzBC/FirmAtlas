@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 from pathlib import Path
@@ -29,10 +29,15 @@ from .native_deep import (
     ArmPicCallsiteProfile,
     NativeRouteAnchor,
     discover_arm_pic_callsite_bindings,
+    discover_arm_pic_registrar_bindings,
     native_deep_scheduler_analyzer,
 )
 from .native_ubus_registration import discover_native_ubus_registrations
 from .script_backend import discover_script_backend
+from .set_difference import (
+    SetDifferencePolicy,
+    attribute_frontend_native_set_difference,
+)
 from .scheduler import (
     SchedulerAnalyzer,
     SchedulerDisposition,
@@ -57,7 +62,8 @@ _BASE_ANALYZERS = (
 _AUTO_V1_ANALYZERS = _BASE_ANALYZERS + (
     "arm_pic_callsite", "native_ubus_registration", "ubus_backend",
 )
-_AUTO_ANALYZERS = _AUTO_V1_ANALYZERS + ("frontend_asset_graph",)
+_AUTO_V2_ANALYZERS = _AUTO_V1_ANALYZERS + ("frontend_asset_graph",)
+_AUTO_ANALYZERS = _AUTO_V2_ANALYZERS + ("arm_pic_registrar", "set_difference")
 
 
 @dataclass(frozen=True)
@@ -77,11 +83,15 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v3", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v4", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v3(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v3", _AUTO_V2_ANALYZERS)
 
     @classmethod
     def auto_v2(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v2", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v2", _AUTO_V2_ANALYZERS)
 
     @classmethod
     def auto_v1(cls) -> "MappingAnalysisProfile":
@@ -101,11 +111,17 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v3", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v4", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v3(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v3", _AUTO_V2_ANALYZERS
+        )
 
     @classmethod
     def builtin_v2(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v2", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v2", _AUTO_V2_ANALYZERS)
 
     @classmethod
     def builtin_v1(cls) -> "MappingAnalyzerRegistry":
@@ -138,6 +154,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V3 = MappingAnalyzerRegistry.builtin_v3()
 BUILTIN_ANALYZER_REGISTRY_V2 = MappingAnalyzerRegistry.builtin_v2()
 BUILTIN_ANALYZER_REGISTRY_V1 = MappingAnalyzerRegistry.builtin_v1()
 
@@ -409,6 +426,39 @@ def analyze_extracted_root(
             and _arm_pic_callsite_applicable(selected_by_path[path][1])
         )
     )
+    registrar_inventory = tuple(
+        discover_arm_pic_registrar_bindings(
+            source, content, ArmPicCallsiteProfile()
+        )
+        for source, content, _ in selected
+        if (
+            "arm_pic_registrar" in request.profile.enabled_analyzers
+            and source.canonical_path in native_by_path
+            and native_by_path[source.canonical_path].machine == "ARM"
+            and _arm_pic_callsite_applicable(content)
+        )
+    )
+    anchored_routes = {
+        (result.source_path, binding.route_token)
+        for result in native_deep for binding in result.bindings
+    }
+    registrar_catalog = tuple(
+        replace(
+            result,
+            bindings=tuple(
+                item for item in result.bindings
+                if (result.source_path, item.route_token) not in anchored_routes
+            ),
+            evidence_atoms=tuple(
+                atom for atom in result.evidence_atoms
+                if atom.subject_ref in {
+                    item.binding_id for item in result.bindings
+                    if (result.source_path, item.route_token) not in anchored_routes
+                }
+            ),
+        )
+        for result in registrar_inventory
+    )
     native_ubus = tuple(
         registry.analyze_source("native_ubus_registration", source, content)
         for source, content, kinds in selected
@@ -430,6 +480,22 @@ def analyze_extracted_root(
                     if item.registration_coverage_complete
                 ),
             )
+    set_difference = None
+    set_difference_diagnostics = ()
+    if "set_difference" in request.profile.enabled_analyzers:
+        if frontend_graph is None:
+            set_difference_diagnostics = ("frontend asset graph unavailable",)
+        elif not registrar_inventory:
+            set_difference_diagnostics = (
+                "set difference requires an ARM registrar inventory",
+            )
+        else:
+            set_difference = attribute_frontend_native_set_difference(
+                frontend_graph,
+                registrar_inventory,
+                (),
+                SetDifferencePolicy.route_aware(),
+            )
     initial_obligations = (
         *((correlation.obligations) if correlation is not None else ()),
         *((ubus_backend.open_obligations) if ubus_backend is not None else ()),
@@ -449,6 +515,12 @@ def analyze_extracted_root(
             native_deep,
             "auto:arm-pic-callsite",
         ))
+    if "arm_pic_registrar" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_deep,
+            registrar_catalog,
+            "auto:arm-pic-registrar-unreferenced",
+        ))
     if "ubus_backend" in request.profile.enabled_analyzers:
         batches.append(_batch(
             DiscoveryProducerBatch.ubus_backend,
@@ -462,6 +534,7 @@ def analyze_extracted_root(
         batches=tuple(batches),
         correlation=correlation,
         scheduler=scheduler,
+        set_difference=set_difference,
     ))
     stages = [
         MappingAnalysisStage(
@@ -503,6 +576,21 @@ def analyze_extracted_root(
         stages.append(_stage(
             "arm_pic_callsite", native_deep,
             sum(len(item.bindings) for item in native_deep),
+        ))
+    if "arm_pic_registrar" in request.profile.enabled_analyzers:
+        stages.append(_stage(
+            "arm_pic_registrar", registrar_inventory,
+            sum(len(item.bindings) for item in registrar_inventory),
+        ))
+    if "set_difference" in request.profile.enabled_analyzers:
+        stages.append(MappingAnalysisStage(
+            "set_difference",
+            set_difference.coverage_status if set_difference is not None
+            else CoverageStatus.NOT_APPLICABLE,
+            sum(len(item.bindings) for item in registrar_inventory),
+            len(set_difference.attributions) if set_difference is not None else 0,
+            tuple(item.code for item in set_difference.diagnostics)
+            if set_difference is not None else set_difference_diagnostics,
         ))
     if "ubus_backend" in request.profile.enabled_analyzers:
         stages.append(MappingAnalysisStage(

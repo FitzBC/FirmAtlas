@@ -91,6 +91,7 @@
 | [R2-03 历史 expectation diff](./progress/2026-08-09-r2-03-historical-expectation-diff.md) | 版本范围护栏、漏检归因、AC9 对象 payload 参数闭环 | expectation 合同、归因、历史样本或参数结果变化时 |
 | [R2-04 AC9 框架语义与全集审计](./progress/2026-08-09-r2-04-ac9-framework-history-audit.md) | 跨文件 POST 证明、71 条漏洞全集、30 条样本关联、路由绑定缺口 | framework graph、历史分母、样本关联或 binding 状态变化时 |
 | [R2-05 AC9 双向 PIC literal pool](./progress/2026-08-09-r2-05-ac9-bidirectional-pic.md) | Samba 漏检根因、ARM 负向 literal、59 条绑定与状态迁移 | ARM Profile、literal addressing 或 AC9 binding 集合变化时 |
+| [R2-06 AC9 registrar 全量枚举](./progress/2026-08-09-r2-06-ac9-registrar-inventory.md) | 无 anchor 枚举、双进程 185 条注册、110 条潜在隐藏接口 | registrar、route-aware 差集或 hidden coverage gate 变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 

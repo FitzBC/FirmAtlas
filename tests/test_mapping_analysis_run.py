@@ -14,6 +14,7 @@ from firmatlas.mapping import (
     MappingAnalyzerRegistry,
     SchedulerTermination,
     analyze_extracted_root,
+    build_potential_hidden_interface_index,
 )
 from firmatlas.mapping.__main__ import main as mapping_main
 
@@ -60,7 +61,8 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "inventory", "source_plan", "frontend", "frontend_asset_graph",
                 "web_configuration",
                 "script_backend", "native", "native_ubus_registration",
-                "arm_pic_callsite", "ubus_backend", "scheduler", "catalog",
+                "arm_pic_callsite", "arm_pic_registrar", "set_difference",
+                "ubus_backend", "scheduler", "catalog",
             },
             {stage.stage_name for stage in first.stages},
         )
@@ -170,9 +172,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v3", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v4", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v3",
+            "firmatlas.mapping.analyzer-registry/builtin-v4",
             result.analyzer_registry_id,
         )
 
@@ -222,6 +224,18 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertGreaterEqual(stage.output_count, 5)
+        registrar_stage = next(
+            item for item in result.stages
+            if item.stage_name == "arm_pic_registrar"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, registrar_stage.coverage_status)
+        self.assertEqual(185, registrar_stage.output_count)
+        hidden = build_potential_hidden_interface_index(result.catalog)
+        self.assertEqual(CoverageStatus.COMPLETED, hidden.coverage_status)
+        self.assertEqual(110, len(hidden.items))
+        hidden_tokens = {item.operation_token for item in hidden.items}
+        self.assertIn("GetDeviceDetail", hidden_tokens)
+        self.assertNotIn("SetSambaCfg", hidden_tokens)
 
 
 if __name__ == "__main__":

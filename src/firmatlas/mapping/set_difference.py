@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 import hashlib
 import json
-from typing import Tuple
+from typing import Tuple, Union
 
 from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom, ObservationKind, SpanKind
 from .evidence import EvidenceClaim, SpanSelection, capture_evidence
@@ -19,6 +19,7 @@ SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION = (
     "firmatlas.mapping.set-difference-attribution/v1alpha1"
 )
 _PRODUCER = AnalyzerIdentity("frontend-native-set-difference", "0.1.0")
+_ROUTE_AWARE_PRODUCER = AnalyzerIdentity("frontend-native-set-difference", "0.2.0")
 _CONTENT_KINDS = frozenset({"file", "hardlink", "archive", "archive_member"})
 
 
@@ -62,6 +63,15 @@ class SetDifferencePolicy:
     max_total_bytes: int = 256 * 1024 * 1024
     max_tokens: int = 20_000
     max_hits_per_token: int = 32
+    include_request_action_tokens: bool = False
+    request_action_prefixes: Tuple[str, ...] = ()
+
+    @classmethod
+    def route_aware(cls) -> "SetDifferencePolicy":
+        return cls(
+            include_request_action_tokens=True,
+            request_action_prefixes=("/goform/", "goform/"),
+        )
 
     def __post_init__(self) -> None:
         if (
@@ -69,6 +79,10 @@ class SetDifferencePolicy:
             or self.max_tokens <= 0 or self.max_hits_per_token <= 0
         ):
             raise ValueError("set-difference budgets must be positive")
+        if self.include_request_action_tokens and not self.request_action_prefixes:
+            raise ValueError("route-aware set difference requires path prefixes")
+        if any(not value.strip() for value in self.request_action_prefixes):
+            raise ValueError("request action prefixes must not be blank")
 
 
 @dataclass(frozen=True)
@@ -313,16 +327,20 @@ def _classification(
 
 def attribute_frontend_native_set_difference(
     frontend: FrontendAssetGraphResult,
-    native_inventory: NativeDeepResult,
+    native_inventory: Union[NativeDeepResult, Tuple[NativeDeepResult, ...]],
     artifacts: Tuple[AttributionArtifact, ...],
     policy: SetDifferencePolicy = SetDifferencePolicy(),
 ) -> SetDifferenceAttributionResult:
     """Explain both set differences without promoting a hypothesis to a binding."""
 
+    producer = (
+        _ROUTE_AWARE_PRODUCER
+        if policy.include_request_action_tokens else _PRODUCER
+    )
     diagnostics = []
     if len(artifacts) > policy.max_artifacts:
         return SetDifferenceAttributionResult(
-            CoverageStatus.SKIPPED_BY_POLICY, 0, _PRODUCER, 0, 0, (), (),
+            CoverageStatus.SKIPPED_BY_POLICY, 0, producer, 0, 0, (), (),
             (),
             (SetDifferenceDiagnostic(
                 "artifact_budget_exceeded", "auxiliary artifacts exceed configured budget"
@@ -333,7 +351,7 @@ def attribute_frontend_native_set_difference(
     total_bytes = sum(len(item.content) for item in artifacts)
     if total_bytes > policy.max_total_bytes:
         return SetDifferenceAttributionResult(
-            CoverageStatus.SKIPPED_BY_POLICY, 0, _PRODUCER, 0, 0, (), (),
+            CoverageStatus.SKIPPED_BY_POLICY, 0, producer, 0, 0, (), (),
             (),
             (SetDifferenceDiagnostic(
                 "byte_budget_exceeded", "auxiliary bytes exceed configured budget"
@@ -381,18 +399,56 @@ def attribute_frontend_native_set_difference(
             frontend_constructs.setdefault(parameter.literal_value, set()).add(
                 parameter.source_construct
             )
-    native_evidence = {
-        atom.evidence_id: atom for atom in native_inventory.evidence_atoms
-    }
+        if policy.include_request_action_tokens:
+            for candidate in result.candidates:
+                if candidate.endpoint_shape.value != "exact_literal":
+                    continue
+                path = candidate.endpoint.split("?", 1)[0].rstrip("/")
+                if not any(
+                    path.startswith(prefix)
+                    for prefix in policy.request_action_prefixes
+                ):
+                    continue
+                token = path.rsplit("/", 1)[-1]
+                if not token or token == path and "/" not in path:
+                    continue
+                if any(
+                    evidence_id not in frontend_evidence
+                    for evidence_id in candidate.evidence_ids
+                ):
+                    raise ValueError("frontend request references unknown evidence")
+                frontend_members.setdefault(token, set()).update(
+                    candidate.evidence_ids
+                )
+                frontend_constructs.setdefault(token, set()).add(
+                    candidate.source_construct
+                )
+    native_inventories = (
+        native_inventory if isinstance(native_inventory, tuple)
+        else (native_inventory,)
+    )
+    native_evidence = {}
+    for inventory in native_inventories:
+        for atom in inventory.evidence_atoms:
+            existing = native_evidence.get(atom.evidence_id)
+            if existing is not None and existing != atom:
+                raise ValueError("conflicting native inventory evidence identity")
+            native_evidence[atom.evidence_id] = atom
     native_members = {}
-    for binding in native_inventory.bindings:
-        if any(evidence_id not in native_evidence for evidence_id in binding.evidence_ids):
-            raise ValueError("native registration references unknown evidence")
-        native_members.setdefault(binding.route_token, set()).update(binding.evidence_ids)
+    for inventory in native_inventories:
+        for binding in inventory.bindings:
+            if any(
+                evidence_id not in native_evidence
+                for evidence_id in binding.evidence_ids
+            ):
+                raise ValueError("native registration references unknown evidence")
+            native_members.setdefault(binding.route_token, set()).update(
+                binding.evidence_ids
+            )
     all_tokens = set(frontend_members) | set(native_members)
     if len(all_tokens) > policy.max_tokens:
         return SetDifferenceAttributionResult(
-            CoverageStatus.SKIPPED_BY_POLICY, 0, _PRODUCER,
+            CoverageStatus.SKIPPED_BY_POLICY, 0, producer,
             len(frontend_members), len(native_members), (), (),
             (),
             (SetDifferenceDiagnostic(
@@ -485,7 +541,7 @@ def attribute_frontend_native_set_difference(
                         ObservationKind.DIRECT_STATIC,
                         hit.capability, 1.0,
                     ),
-                    _PRODUCER,
+                    producer,
                 ))
             atoms.extend(proof)
             upstream = (
@@ -501,7 +557,10 @@ def attribute_frontend_native_set_difference(
 
     inherited_partial = (
         frontend.coverage_status is not CoverageStatus.COMPLETED
-        or native_inventory.coverage_status is not CoverageStatus.COMPLETED
+        or any(
+            inventory.coverage_status is not CoverageStatus.COMPLETED
+            for inventory in native_inventories
+        )
     )
     if inherited_partial:
         partial = True
@@ -518,7 +577,7 @@ def attribute_frontend_native_set_difference(
     return SetDifferenceAttributionResult(
         CoverageStatus.PARTIAL if partial else CoverageStatus.COMPLETED,
         sum(len(item.content) for item in valid_artifacts),
-        _PRODUCER, len(frontend_members), len(native_members),
+        producer, len(frontend_members), len(native_members),
         tuple(records), tuple(atoms),
         tuple(upstream_atoms[key] for key in sorted(upstream_ids)),
         tuple(diagnostics),

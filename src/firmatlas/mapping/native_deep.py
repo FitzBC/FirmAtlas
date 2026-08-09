@@ -1267,6 +1267,47 @@ def discover_arm_pic_callsite_bindings(
     )
 
 
+def discover_arm_pic_registrar_bindings(
+    source: SourceArtifactEntry,
+    content: bytes,
+    profile: ArmPicCallsiteProfile = ArmPicCallsiteProfile(),
+    policy: NativeDeepPolicy = NativeDeepPolicy(),
+) -> NativeDeepResult:
+    """Enumerate every pair belonging to a structurally verified ARM registrar."""
+
+    probe = discover_arm_pic_callsite_bindings(source, content, (), profile, policy)
+    if probe.coverage_status is not CoverageStatus.COMPLETED:
+        return probe
+    elf = _parse_elf(content)
+    candidates = _scan_arm_pic_candidates(elf, content, profile)
+    registrar_pairs = {}
+    for candidate in candidates:
+        registrar_pairs.setdefault(candidate.registrar_address, set()).add(
+            (candidate.route_token, candidate.handler_symbol.address)
+        )
+    anchors = tuple(
+        NativeRouteAnchor(
+            "native-registrar:" + hashlib.sha256(json.dumps(
+                [source.canonical_path, candidate.registrar_address,
+                 candidate.route_token], separators=(",", ":"),
+            ).encode()).hexdigest(),
+            candidate.route_token,
+        )
+        for candidate in candidates
+        if len(registrar_pairs[candidate.registrar_address])
+        >= profile.min_registrar_pairs
+    )
+    return discover_arm_pic_callsite_bindings(
+        source,
+        content,
+        tuple(sorted(set(anchors), key=lambda item: (
+            item.route_token, item.target_ref
+        ))),
+        profile,
+        policy,
+    )
+
+
 def native_deep_scheduler_analyzer(result: NativeDeepResult) -> SchedulerAnalyzer:
     """Adapt validated Native Deep proofs to the obligation scheduler seam."""
 

@@ -187,6 +187,13 @@ R2-05 沿这个未决义务继续检查指令编码，发现旧 Adapter 只接�
 AC9 已验证绑定从 45 增至 59，历史路由绑定从 3/13 增至 5/13。这个状态迁移证明上一阶段保留
 “字符串不足以绑定”的判断是必要护栏，而不是失败：只有补齐指令级证明后才能晋级。
 
+R2-06 又推翻了“59 条已绑定路由就是 registrar 全貌”：这 59 条仍由前端关联触发。新增无 anchor
+枚举后，`httpd/dhttpd` 共恢复 185 条指令验证注册；与 completed `/goform/` 前端 action scope
+比较得到 110 条 Native-only。`QuickIndex` 从 R2-03 的单一 symbol clue 先在 R2-05 获得绑定，
+再在 R2-06 因前端 absence 进入潜在隐藏接口索引；`WizardHandle` 则暴露历史期望 handler 与当前
+`fromWizardHandle` 的明确 mismatch。这个时间线不能倒写成初始分析已完整，也不能把 Native-only
+直接解释为后门、活代码或未授权接口。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

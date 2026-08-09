@@ -11,6 +11,7 @@ from firmatlas.mapping import (
     DifferenceSide,
     FrontendAssetInput,
     NativeRouteAnchor,
+    SetDifferencePolicy,
     SourceArtifactEntry,
     assemble_discovery_catalog,
     attribute_frontend_native_set_difference,
@@ -70,6 +71,47 @@ function Dispatcher() {
 
 
 class FrontendNativeSetDifferenceContractTests(unittest.TestCase):
+    def test_multiple_completed_native_registrars_share_one_difference_scope(self):
+        frontend, first = _upstreams(("shared",), ("shared", "firstOnly"))
+        _, second = _upstreams((), ("secondOnly", "secondExtra"))
+
+        result = attribute_frontend_native_set_difference(
+            frontend, (first, second), (), SetDifferencePolicy.route_aware()
+        )
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(4, result.native_token_count)
+        self.assertEqual(
+            {"firstOnly", "secondOnly", "secondExtra"},
+            {
+                item.token for item in result.attributions
+                if item.side is DifferenceSide.NATIVE_ONLY
+            },
+        )
+
+    def test_route_aware_policy_compares_goform_action_with_native_registration(self):
+        frontend = discover_frontend_asset_graph((
+            _asset(
+                "www/samba.js",
+                b'$.post("/goform/SetSambaCfg", {enable: "1"});',
+            ),
+        ))
+        _, native = _upstreams((), ("SetSambaCfg", "NativeOnly"))
+
+        result = attribute_frontend_native_set_difference(
+            frontend, native, (), SetDifferencePolicy.route_aware()
+        )
+
+        self.assertEqual(1, result.frontend_token_count)
+        self.assertEqual(
+            {"NativeOnly"},
+            {item.token for item in result.attributions},
+        )
+        self.assertEqual(
+            DifferenceAttributionKind.NATIVE_REGISTRATION_NO_FRONTEND_REFERENCE,
+            result.attributions[0].kind,
+        )
+
     def test_direct_frontend_operation_is_not_mislabeled_as_wrapper_declaration(self):
         content = b'''var page={importAction:
 "/cgi-bin/cstecgi.cgi?action=upload&setting/setUploadSetting"};

@@ -15,6 +15,7 @@ from firmatlas.mapping import (
     SourceArtifactEntry,
     assemble_discovery_catalog,
     correlate_frontend_native,
+    discover_arm_pic_registrar_bindings,
     discover_arm_pic_callsite_bindings,
     discover_frontend_requests,
     discover_native_hints,
@@ -161,6 +162,26 @@ def _arm32_negative_literal_pic_fixture() -> bytes:
 
 
 class ArmPicCallsiteContractTests(unittest.TestCase):
+    def test_verified_registrar_can_enumerate_all_route_handler_pairs(self):
+        content = _arm32_negative_literal_pic_fixture()
+        source = _source("bin/httpd", content)
+
+        result = discover_arm_pic_registrar_bindings(source, content)
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(
+            {"SetOnlineDevName", "GetDeviceDetail"},
+            {item.route_token for item in result.bindings},
+        )
+        self.assertEqual(
+            {"formSetDeviceName", "formGetDeviceDetail"},
+            {item.handler_symbol for item in result.bindings},
+        )
+        self.assertTrue(all(
+            item.target_ref.startswith("native-registrar:")
+            for item in result.bindings
+        ))
+
     def test_negative_pc_relative_literal_pool_proves_binding(self):
         content = _arm32_negative_literal_pic_fixture()
         source = _source("bin/httpd", content)

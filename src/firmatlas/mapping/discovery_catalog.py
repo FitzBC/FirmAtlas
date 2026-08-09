@@ -60,6 +60,7 @@ class DiscoveryCandidateKind(str, Enum):
     TEMPLATE_READ = "template_read"
     NATIVE_HINT = "native_hint"
     NATIVE_ROUTE_BINDING = "native_route_binding"
+    NATIVE_REGISTRAR = "native_registrar"
     NATIVE_HANDLER = "native_handler"
     NATIVE_PARAMETER_STATE_FLOW = "native_parameter_state_flow"
     NATIVE_NESTED_DISPATCH = "native_nested_dispatch"
@@ -373,6 +374,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
     coverage = []
     associations = []
     native_deep_target_refs = set()
+    native_registrar_target_refs = set()
     native_nested_target_refs = set()
     native_protection_target_refs = set()
     native_service_target_refs = set()
@@ -542,6 +544,28 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             "registrar_pair_count", str(item.registrar_pair_count)
                         ))
                     common_attributes = tuple(common_attributes)
+                    if (
+                        item.target_ref.startswith("native-registrar:")
+                        and item.target_ref not in native_registrar_target_refs
+                    ):
+                        native_registrar_target_refs.add(item.target_ref)
+                        candidates.append(DiscoveryCandidate(
+                            item.target_ref,
+                            DiscoveryCandidateKind.NATIVE_REGISTRAR,
+                            "registrar@0x{:08x}|{}".format(
+                                item.registrar_address or 0, item.route_token
+                            ),
+                            DiscoveryClaimStatus.SUPPORTED,
+                            result.source_path,
+                            item.source_construct,
+                            tuple(
+                                evidence_id for evidence_id in item.evidence_ids
+                                if evidence[evidence_id].capability in {
+                                    "establishes_pic_base", "registers_route",
+                                }
+                            ),
+                            common_attributes,
+                        ))
                     candidates.append(DiscoveryCandidate(
                         item.binding_id,
                         DiscoveryCandidateKind.NATIVE_ROUTE_BINDING,
