@@ -30,6 +30,7 @@ _SUPPORTED_CONSTRUCTS = (
     "jQuery.post",
     "jQuery.ajax",
     "custom.request",
+    "custom.file-upload-property",
     "shared-cgi.topicurl",
     "HTML.form",
 )
@@ -962,7 +963,47 @@ def _shared_cgi_topicurl_calls(
     return tuple(results)
 
 
-def _custom_request_calls(content: bytes) -> tuple:
+def _identifier_object_properties(
+    tokens: Tuple[_Token, ...], identifier: bytes, start_index: int,
+    before_index: int,
+) -> tuple:
+    """Return bounded object-literal assignments reaching a request call."""
+
+    assignments = []
+    for index in range(start_index, before_index):
+        if not (
+            tokens[index].value == identifier
+            and index + 2 < before_index
+            and tokens[index + 1].value == b"="
+            and tokens[index + 2].value == b"{"
+        ):
+            continue
+        properties, _ = _object_properties(tokens, index + 2)
+        assignments.extend(properties)
+    return tuple(assignments)
+
+
+def _enclosing_function_body_start(
+    tokens: Tuple[_Token, ...], before_index: int
+) -> int:
+    stack = []
+    for index in range(before_index):
+        if tokens[index].value == b"{":
+            stack.append(index)
+        elif tokens[index].value == b"}" and stack:
+            stack.pop()
+    for open_index in reversed(stack):
+        cursor = open_index - 1
+        while cursor >= 0 and tokens[cursor].value not in {b";", b"{", b"}"}:
+            if tokens[cursor].value == b"function":
+                return open_index + 1
+            cursor -= 1
+    return 0
+
+
+def _custom_request_calls(
+    content: bytes, external_bindings: Optional[dict] = None
+) -> tuple:
     tokens = _tokenize_javascript(content)
     results = []
     selector_names = {
@@ -977,8 +1018,23 @@ def _custom_request_calls(content: bytes) -> tuple:
             continue
         properties, _ = _object_properties(tokens, index + 4)
         direct = {key.value.lower(): value for key, value in properties}
+        receiver = tokens[index].value
         url = direct.get(b"url")
-        if url is None or url.kind != "string":
+        endpoint_identity = None
+        cross_resource_default = False
+        if url is not None and url.kind == "string":
+            endpoint = url
+        else:
+            endpoint_identity = (b"request_default", receiver)
+            resolved = (external_bindings or {}).get(endpoint_identity)
+            if not isinstance(resolved, bytes):
+                continue
+            endpoint = _Token(
+                "identifier", resolved, tokens[index].start,
+                tokens[index + 2].end,
+            )
+            cross_resource_default = True
+        if endpoint.kind not in {"string", "identifier"}:
             continue
         method_token = direct.get(b"type") or direct.get(b"method")
         method = (
@@ -988,9 +1044,16 @@ def _custom_request_calls(content: bytes) -> tuple:
         )
         data = direct.get(b"data")
         parameters = []
+        data_properties = ()
         if data is not None and data.value == b"{":
             data_index = tokens.index(data)
             data_properties, _ = _object_properties(tokens, data_index)
+        elif data is not None and data.kind == "identifier":
+            data_properties = _identifier_object_properties(
+                tokens, data.value,
+                _enclosing_function_body_start(tokens, index), index,
+            )
+        if data_properties:
             for name, value in data_properties:
                 literal_value = (
                     value.value.decode("utf-8") if value.kind == "string" else None
@@ -1016,8 +1079,98 @@ def _custom_request_calls(content: bytes) -> tuple:
             else FrontendRequestRole.UNSPECIFIED
         )
         results.append((
-            url.value.decode("utf-8"), url.start, url.end, role, method,
-            "json" if parameters else None, tuple(parameters),
+            endpoint.value.decode("utf-8"), endpoint.start, endpoint.end,
+            role, method, "json" if parameters else None, tuple(parameters),
+            endpoint_identity if cross_resource_default else None,
+        ))
+    return tuple(results)
+
+
+def _upload_url_parameters(value: _Token) -> tuple:
+    raw = value.value
+    question = raw.find(b"?")
+    if question < 0:
+        return ()
+    parameters = []
+    cursor = question + 1
+    for segment in raw[question + 1:].split(b"&"):
+        segment_start = cursor
+        cursor += len(segment) + 1
+        if b"=" in segment:
+            name, literal = segment.split(b"=", 1)
+            separator = 1
+        elif b"/" in segment:
+            name, literal = segment.split(b"/", 1)
+            separator = 1
+        else:
+            continue
+        if not name or not literal:
+            continue
+        name_start = value.start + segment_start
+        value_start = name_start + len(name) + separator
+        parameters.append(_ParameterLiteral(
+            name=name.decode("utf-8"),
+            name_start=name_start,
+            name_end=name_start + len(name),
+            namespace=FrontendParameterNamespace.QUERY,
+            literal_value=literal.decode("utf-8"),
+            value_start=value_start,
+            value_end=value_start + len(literal),
+            is_operation_selector=True,
+            source_construct="custom.file-upload-property.url",
+        ))
+    return tuple(parameters)
+
+
+def _file_upload_property_calls(content: bytes) -> tuple:
+    """Recover upload URLs stored in a page property and consumed by a helper."""
+
+    tokens = _tokenize_javascript(content)
+    definitions = {}
+    for index in range(max(0, len(tokens) - 2)):
+        if not (
+            tokens[index].kind in {"identifier", "string"}
+            and tokens[index + 1].value == b":"
+            and tokens[index + 2].kind == "string"
+            and b"/" in tokens[index + 2].value
+        ):
+            continue
+        definitions.setdefault(tokens[index].value, []).append(tokens[index + 2])
+
+    results = []
+    for index in range(max(0, len(tokens) - 5)):
+        if not (
+            tokens[index].kind == "identifier"
+            and tuple(item.value for item in tokens[index + 1:index + 5])
+            == (b".", b"fileUpload", b"(", b"{")
+        ):
+            continue
+        object_end = _matching_close(tokens, index + 4)
+        properties, _ = _object_properties(tokens, index + 4)
+        if not any(key.value.lower() == b"data" for key, _ in properties):
+            continue
+        property_name = None
+        for cursor in range(index + 5, max(index + 5, object_end - 4)):
+            if (
+                tokens[cursor].value.lower() == b"url"
+                and tuple(item.value for item in tokens[cursor + 1:cursor + 4])
+                == (b":", b"this", b".")
+                and tokens[cursor + 4].kind == "identifier"
+            ):
+                property_name = tokens[cursor + 4].value
+                break
+        values = definitions.get(property_name, ())
+        unique = {item.value for item in values}
+        if len(unique) != 1:
+            continue
+        value = values[0]
+        endpoint = value.value.split(b"?", 1)[0]
+        if not endpoint.startswith(b"/"):
+            continue
+        results.append((
+            endpoint.decode("utf-8"), value.start,
+            value.start + len(endpoint), FrontendRequestRole.WRITE, "POST",
+            "multipart_form", _upload_url_parameters(value),
         ))
     return tuple(results)
 
@@ -1124,11 +1277,30 @@ def _request_literals(
         method,
         representation,
         parameters,
-    ) in _custom_request_calls(content):
+        endpoint_identity,
+    ) in _custom_request_calls(content, external_bindings):
         discoveries.append((
             endpoint, start_byte, end_byte,
             FrontendEndpointShape.EXACT_LITERAL, role, method, representation,
-            "custom.request", parameters,
+            (
+                "custom.request.cross-resource-default"
+                if endpoint_identity is not None else "custom.request"
+            ),
+            parameters,
+        ))
+    for (
+        endpoint,
+        start_byte,
+        end_byte,
+        role,
+        method,
+        representation,
+        parameters,
+    ) in _file_upload_property_calls(content):
+        discoveries.append((
+            endpoint, start_byte, end_byte,
+            FrontendEndpointShape.EXACT_LITERAL, role, method, representation,
+            "custom.file-upload-property", parameters,
         ))
     for (
         endpoint,
@@ -1287,7 +1459,11 @@ def _discover_frontend_requests(
                 object_value=endpoint,
                 observation_kind=(
                     ObservationKind.DETERMINISTIC_DERIVED
-                    if source_construct == "shared-cgi.topicurl.cross-resource"
+                    if source_construct in {
+                        "shared-cgi.topicurl.cross-resource",
+                        "custom.request.cross-resource-default",
+                        "custom.file-upload-property",
+                    }
                     else ObservationKind.DIRECT_STATIC
                 ),
                 capability="constructs_request",
@@ -1465,6 +1641,81 @@ def _asset_symbol_definitions(asset: FrontendAssetInput) -> tuple:
     return tuple(definitions)
 
 
+def _request_default_definitions(asset: FrontendAssetInput) -> tuple:
+    """Resolve constructor-backed ``receiver.request`` default URL literals."""
+
+    try:
+        asset.content.decode("utf-8")
+    except UnicodeDecodeError:
+        return ()
+    tokens = _tokenize_javascript(asset.content)
+    constructor_defaults = {}
+    for index in range(max(0, len(tokens) - 8)):
+        if not (
+            tokens[index].kind == "identifier"
+            and tuple(item.value for item in tokens[index + 1:index + 6])
+            == (b".", b"prototype", b".", b"request", b"=")
+            and tokens[index + 6].value == b"function"
+        ):
+            continue
+        body_open = index + 7
+        while body_open < len(tokens) and tokens[body_open].value != b"{":
+            body_open += 1
+        if body_open >= len(tokens):
+            continue
+        body_end = _matching_close(tokens, body_open)
+        for cursor in range(body_open + 1, max(body_open + 1, body_end - 4)):
+            if not (
+                tokens[cursor].kind == "identifier"
+                and tuple(item.value for item in tokens[cursor + 1:cursor + 5])
+                == (b".", b"url", b"|", b"|")
+                and tokens[cursor + 5].kind == "string"
+            ):
+                continue
+            constructor_defaults[tokens[index].value] = tokens[cursor + 5]
+            break
+
+    definitions = []
+    for index in range(max(0, len(tokens) - 4)):
+        if not (
+            tokens[index].kind == "identifier"
+            and (index == 0 or tokens[index - 1].value != b".")
+            and tokens[index + 1].value == b"="
+            and tokens[index + 2].value == b"new"
+            and tokens[index + 3].kind == "identifier"
+        ):
+            continue
+        receiver = tokens[index].value
+        constructor = tokens[index + 3].value
+        default = constructor_defaults.get(constructor)
+        if default is not None:
+            definitions.append((
+                (b"request_default", receiver),
+                "{}.request.default_url".format(receiver.decode("utf-8")),
+                default,
+            ))
+    for index in range(max(0, len(tokens) - 6)):
+        if not (
+            tokens[index].kind == "identifier"
+            and tokens[index + 1].value == b"."
+            and tokens[index + 2].kind == "identifier"
+            and tokens[index + 3].value == b"="
+            and tokens[index + 4].value == b"new"
+            and tokens[index + 5].kind == "identifier"
+        ):
+            continue
+        receiver = tokens[index + 2].value
+        constructor = tokens[index + 5].value
+        default = constructor_defaults.get(constructor)
+        if default is not None:
+            definitions.append((
+                (b"request_default", receiver),
+                "{}.request.default_url".format(receiver.decode("utf-8")),
+                default,
+            ))
+    return tuple(definitions)
+
+
 def _javascript_code_offsets(content: bytes, offsets: tuple) -> set:
     """Return requested offsets that begin in JavaScript code.
 
@@ -1597,7 +1848,10 @@ def discover_frontend_asset_graph(
     for asset, result in zip(assets, baseline):
         if result.coverage_status is not CoverageStatus.COMPLETED:
             continue
-        for identity, symbol, token in _asset_symbol_definitions(asset):
+        for identity, symbol, token in (
+            *_asset_symbol_definitions(asset),
+            *_request_default_definitions(asset),
+        ):
             definitions.setdefault(identity, []).append((asset, symbol, token))
 
     resolved = {}
@@ -1651,10 +1905,30 @@ def discover_frontend_asset_graph(
             ) in _shared_cgi_topicurl_calls(asset.content, external)
             if source_construct == "shared-cgi.topicurl.cross-resource"
         }
+        candidate_identities.update({
+            _candidate_id(
+                asset.source.canonical_path,
+                endpoint,
+                FrontendEndpointShape.EXACT_LITERAL,
+                role,
+                method,
+                representation,
+                "custom.request.cross-resource-default",
+                parameters,
+            ): identity
+            for (
+                endpoint, _start, _end, role, method, representation,
+                parameters, identity,
+            ) in _custom_request_calls(asset.content, external)
+            if identity is not None
+        })
         candidates = list(enriched.candidates)
         evidence_atoms = {atom.evidence_id: atom for atom in enriched.evidence_atoms}
         for candidate_index, candidate in enumerate(candidates):
-            if candidate.source_construct != "shared-cgi.topicurl.cross-resource":
+            if candidate.source_construct not in {
+                "shared-cgi.topicurl.cross-resource",
+                "custom.request.cross-resource-default",
+            }:
                 continue
             identity = candidate_identities.get(candidate.candidate_id)
             resolved_definition = resolved.get(identity)

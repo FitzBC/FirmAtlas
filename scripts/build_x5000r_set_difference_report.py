@@ -60,9 +60,11 @@ def _probe_anchors(content: bytes) -> tuple:
     )
 
 
-def _auxiliary_artifacts(root: Path) -> tuple:
+def _auxiliary_artifacts(
+    root: Path, excluded_paths: tuple = FRONTEND_PATHS
+) -> tuple:
     artifacts = []
-    excluded = set(FRONTEND_PATHS) | {BINARY_PATH}
+    excluded = set(excluded_paths) | {BINARY_PATH}
     for path in sorted(root.rglob("*")):
         if path.is_symlink() or not path.is_file():
             continue

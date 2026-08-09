@@ -4,6 +4,10 @@
 > 范围：集合差异归因、Discovery Catalog、Research Case、Console 查询  
 > 样本：TOTOLINK X5000R `V9.1.0u.6118_B20201102`
 
+> 后续状态：本记录中的 3 个 `frontend_scope_gap` 已在
+> [M1-19](./2026-08-09-m1-19-x5000r-expanded-frontend.md) 通过扩展一等前端分析范围关闭；
+> 本报告继续作为扩展前的可重放基线保留。
+
 ## 1. 问题与边界
 
 M1-16 在四张 MIPS inline table 中证明了 123/199 个前端 selector 的 handler

@@ -27,8 +27,9 @@
 - [M1-16 X5000R MIPS dispatcher](./m1-16-x5000r-mips-dispatch.json)：四张 `char[64]+handler` 导出表、138 registrations、123/199 selector binding、76/14 双向差集、重复注册和开放 value-flow 义务；进度说明见 [M1-16 记录](../progress/2026-08-09-m1-16-x5000r-mips-inline-dispatch.md)。
 - [M1-17 X5000R MIPS handler value-flow](./m1-17-x5000r-mips-value-flow.json)：`setLanCfg` 无分支前缀内两条 `websGetVar(parameter) → nvram_set(state)` 五线证据链、首个条件分支边界与开放的 DHCP/sink 义务；进度说明见 [M1-17 记录](../progress/2026-08-09-m1-17-x5000r-mips-value-flow.md)。
 - [M1-18 X5000R frontend/native 集合差异](./m1-18-x5000r-set-difference.json)：将 76 个 Frontend-only 与 14 个 Native-only operation 分为 38/38/3/1/10 五类证据形状，保留精确 token、suffix 变体负例和开放因果义务；进度说明见 [M1-18 记录](../progress/2026-08-09-m1-18-x5000r-set-difference.md)。
+- [M1-19 X5000R 扩展前端范围](./m1-19-x5000r-expanded-frontend.json)：加入 `kr.js`、`wan_ie.html` 与 `advance/config.html`，恢复默认 URL + payload variable 与 multipart 两级 selector，使 operation 从 199 增至 203、范围缺口从 3 降至 0、差集变为 77/11；进度说明见 [M1-19 记录](../progress/2026-08-09-m1-19-x5000r-expanded-frontend.md)。
 - [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；M1-13 重放后上游 Inventory 与 Catalog 均为 completed。
-- [M1-12 AC9 research-case corpus](./m1-12-research-case-corpus.json)：将 `/goform` 与 nginx/FastCGI 分支不相交、httpd/dhttpd 候选对照和 ARM PIC 最终 binding 保存为内容寻址的证据时间线，并附反事实、论文用途和局限。
+- [M1-12 通信架构 research-case corpus](./m1-12-research-case-corpus.json)：保存 AC9 split web stack 与 X5000R shared-CGI 的内容寻址证据时间线；X5000R 当前已演进到第 8 阶段，包含差集反向驱动范围扩展、三种请求架构和嵌套 upload selector 的开放义务。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

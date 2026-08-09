@@ -392,6 +392,42 @@ def build_x5000r_shared_cgi_case():
                 "json:$.attribution_counts", "attributes_set_difference",
                 "set-difference-report@v1alpha1",
             ),
+            CaseEvidenceReference(
+                "evidence:2973e11ce7d24e78d6333a28b044798e63650180ed207f586605a2b4913774ff",
+                CaseEvidenceKind.FRONTEND_REQUEST, "www/static/js/kr.js",
+                "a2d27291e824ee0fc8fbad0b0eb23e981ed9db7e07fdf89eb6c301205657e52b",
+                "text_utf8:bytes=1519-1539;lines=1:1520-1:1540",
+                "resolves_endpoint_binding", "frontend-request-producer@0.2.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:34dd18b5668ecfa9521d48ad22a8323de463159ab03e84963da5aafb24014cfe",
+                CaseEvidenceKind.FRONTEND_REQUEST, "www/wan_ie.html",
+                "3c6be0fc821f033fc3af38b3b9ee688120b5368a2dc800a560a74c4a9f380820",
+                "text_utf8:bytes=6447-6458;lines=1:6448-1:6459",
+                "selects_operation", "frontend-request-producer@0.2.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:f7628ced45fe71044c8357118eef63f5e677260320ace9d4bdbe962797fd9a95",
+                CaseEvidenceKind.FRONTEND_REQUEST, "www/wan_ie.html",
+                "3c6be0fc821f033fc3af38b3b9ee688120b5368a2dc800a560a74c4a9f380820",
+                "text_utf8:bytes=10173-10184;lines=1:10174-1:10185",
+                "selects_operation", "frontend-request-producer@0.2.0",
+            ),
+            CaseEvidenceReference(
+                "evidence:5692bb66e2b3f7adda5980e80cb964dded2dc5281426843174dafc4345d88fd4",
+                CaseEvidenceKind.FRONTEND_REQUEST, "www/advance/config.html",
+                "e4ed2ad59c3d574bcf5abcad8a0091aac876e4a72bdb205526944721fd7bffe4",
+                "text_utf8:bytes=2377-2393;lines=57:514-57:530",
+                "selects_operation", "frontend-request-producer@0.2.0",
+            ),
+            CaseEvidenceReference(
+                "coverage:x5000r-expanded-frontend-scope",
+                CaseEvidenceKind.COVERAGE_LEDGER,
+                "docs/firmware-mapping/samples/m1-19-x5000r-expanded-frontend.json",
+                "6463653fa52f573e2578a947d04779a8b6afac9c93bba5f7b160ec1f150e788a",
+                "json:$.scope_closure", "closes_frontend_scope_gap",
+                "expanded-frontend-report@v1alpha1",
+            ),
         ),
         claims=(
             CaseClaim(
@@ -463,6 +499,17 @@ def build_x5000r_shared_cgi_case():
                     "coverage:x5000r-set-difference-attribution",
                 ),
             ),
+            CaseClaim(
+                "claim:x5000r-expanded-frontend-scope",
+                "Expanding the first-class frontend graph to kr.js, wan_ie.html, and advance/config.html recovers getWanIeCfg, setWanIeCfg, and setUploadSetting with distinct request architectures; the frontend inventory grows from 199 to 203 operations, all three prior scope gaps leave the Native-only set, and the residual difference becomes 77 frontend-only versus 11 native-only operations.",
+                (
+                    "evidence:2973e11ce7d24e78d6333a28b044798e63650180ed207f586605a2b4913774ff",
+                    "evidence:34dd18b5668ecfa9521d48ad22a8323de463159ab03e84963da5aafb24014cfe",
+                    "evidence:f7628ced45fe71044c8357118eef63f5e677260320ace9d4bdbe962797fd9a95",
+                    "evidence:5692bb66e2b3f7adda5980e80cb964dded2dc5281426843174dafc4345d88fd4",
+                    "coverage:x5000r-expanded-frontend-scope",
+                ),
+            ),
         ),
         stages=(
             CaseStage(
@@ -511,6 +558,13 @@ def build_x5000r_shared_cgi_case():
                 creates_obligations=("obligation:x5000r-frontend-scope-expansion",),
                 resolves_obligations=("obligation:x5000r-set-difference-shape",),
             ),
+            CaseStage(
+                "stage:x5000r-expanded-frontend-scope", 8,
+                "Promote the two referenced pages and kr.request implementation into the analyzed graph, preserving explicit URL, inherited default URL, payload-variable, and multipart upload-selector evidence as different request architectures.",
+                ("claim:x5000r-expanded-frontend-scope",),
+                creates_obligations=("obligation:x5000r-upload-mode-owner",),
+                resolves_obligations=("obligation:x5000r-frontend-scope-expansion",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -524,7 +578,7 @@ def build_x5000r_shared_cgi_case():
             ),
             CaseObligation(
                 "obligation:x5000r-selector-handler",
-                "Bind the remaining 76 frontend selectors or explain their version/dead-code/alternate-backend status.",
+                "Bind or explain the residual 77 frontend-only operations after scope expansion; upload is a newly recovered outer selector and must not be forced into the inline topicurl tables.",
                 "binds_handler", CaseObligationStatus.OPEN,
             ),
             CaseObligation(
@@ -555,7 +609,19 @@ def build_x5000r_shared_cgi_case():
             CaseObligation(
                 "obligation:x5000r-frontend-scope-expansion",
                 "Expand the first-class frontend asset graph to cover wan_ie.html and advance/config.html, then determine whether their three exact selectors change the dispatcher comparison.",
-                "expands_frontend_scope", CaseObligationStatus.OPEN,
+                "expands_frontend_scope", CaseObligationStatus.RESOLVED,
+                (
+                    "evidence:2973e11ce7d24e78d6333a28b044798e63650180ed207f586605a2b4913774ff",
+                    "evidence:34dd18b5668ecfa9521d48ad22a8323de463159ab03e84963da5aafb24014cfe",
+                    "evidence:f7628ced45fe71044c8357118eef63f5e677260320ace9d4bdbe962797fd9a95",
+                    "evidence:5692bb66e2b3f7adda5980e80cb964dded2dc5281426843174dafc4345d88fd4",
+                    "coverage:x5000r-expanded-frontend-scope",
+                ),
+            ),
+            CaseObligation(
+                "obligation:x5000r-upload-mode-owner",
+                "Determine which upload-mode dispatcher consumes action=upload before setUploadSetting reaches the inline native registration, without treating their URL adjacency as a direct call edge.",
+                "binds_upload_mode", CaseObligationStatus.OPEN,
             ),
         ),
         counterfactuals=(
@@ -566,6 +632,7 @@ def build_x5000r_shared_cgi_case():
             "Treating a selector string hit as a binding would hide the 76 frontend-only and 14 Native-only operation differences.",
             "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow.",
             "Substring matching would misclassify loginAuth as an exact cross-native occurrence because usr/sbin/lighttpd contains userloginAuth; the suffix-token variant remains only a candidate clue.",
+            "Analyzing only shared wrapper files would leave three implemented operations labeled Native-only; conversely, flattening the multipart URL would hide the distinct outer upload mode and inner setUploadSetting selector.",
         ),
         paper_uses=(
             "Motivating example for operation identity below a shared physical endpoint.",
@@ -574,6 +641,7 @@ def build_x5000r_shared_cgi_case():
             "Frontend/native set-difference experiment for version drift, dead UI code, and alternate backend hypotheses.",
             "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state.",
             "Evidence-backed case study showing how frontend/native set differences expose incomplete asset scope, wrapper-only declarations, and native registrations without inventing backend equivalence.",
+            "Scope-expansion example showing three request architectures behind one CGI: direct literal request, inherited kr.request default with payload-variable selector, and multipart upload URL with nested selectors.",
         ),
         limitations=(
             "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
@@ -581,6 +649,7 @@ def build_x5000r_shared_cgi_case():
             "CGI execution configuration does not prove runtime reachability or authentication state.",
             "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
             "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof.",
+            "The upload URL proves two serialized selector layers but not the native control-flow edge between action=upload and setUploadSetting.",
         ),
     ))
 

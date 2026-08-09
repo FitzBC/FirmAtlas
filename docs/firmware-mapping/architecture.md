@@ -152,6 +152,8 @@ M1-17 增加 `discover_mips_handler_value_flows(source, content, handler_address
 
 M1-18 增加 `attribute_frontend_native_set_difference(frontend, native_inventory, artifacts, policy)`。该 Module 对已发布的 Frontend Asset Graph 与 Native binding inventory 做双向集合差异，再在有界 Web/ELF 辅助制品中收集 exact identifier evidence。Frontend-only 区分“辅助页面实际消费”和“仅 wrapper 声明”；Native-only 区分“原前端范围缺口”“跨 Native token 变体”和“无前端引用注册”。suffix/prefix 变体不能晋级 exact，所有归因只发布 `set_difference_attribution` 和开放义务，不会生成 `binds_handler`。
 
+M1-19 深化既有 `discover_frontend_asset_graph(assets, policy)` Interface，不增加样本专属入口。Implementation 能把 constructor-backed `.request` 默认 URL 绑定到全局 receiver，并只解析同一函数作用域内到达调用点的 object-literal payload；还可恢复被 `.fileUpload({data, url:this.property})` 唯一消费的 multipart URL，将 `action=upload&setting/setUploadSetting` 保留为两级 selector。默认 URL、消费调用、参数名和 selector 均保存独立 EvidenceAtom。跨函数同名变量、无 payload upload、歧义属性和未证明的 helper 语义必须 fail closed。
+
 未来 Ghidra Adapter 采用 `Candidate Worker → Core Validator`，而不是让反编译器成为事实来源。Worker 的 versioned manifest 固定 Ghidra/script/input SHA、language ID、image base、预算、xref/call-site/P-code candidates 与 coverage；stdout、自由文本反编译和启发式置信度都不能直接关闭义务。详细合同及从相邻项目吸收/拒绝的实现经验见 [Native Ghidra Adapter 设计](./native-ghidra-adapter.md)。
 
 M1-11 Corpus Report Module 的公开 Interface 是 `build_corpus_report(CorpusReportInput) -> CorpusReport`。它只读取不可变 Discovery Catalog 与显式研究样本定义，不重新分析源码，也不从路径风格推断架构类别。Module 分开记录 `real_firmware`、`derived_firmware`、`contract_fixture` 与 `external_lead`；只有 real firmware 的预期制品摘要与 Catalog 一致、coverage completed、所需 Evidence Capability 全部满足、禁止能力未出现且没有开放义务时，类别才能成为 `verified`。样本编排脚本是 benchmark Adapter，不属于 Mapper 核心 Interface。

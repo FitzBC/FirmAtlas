@@ -331,6 +331,9 @@ class ResearchCaseTests(unittest.TestCase):
     def test_real_x5000r_case_evidence_replays_from_current_producers(self) -> None:
         from scripts.build_mapping_corpus_report import X5000R_ROOT
         from scripts.build_x5000r_set_difference_report import build_analysis
+        from scripts.build_x5000r_expanded_frontend_report import (
+            build_analysis as build_expanded_analysis,
+        )
 
         if not X5000R_ROOT.exists():
             self.skipTest("local X5000R representative sample is unavailable")
@@ -379,6 +382,9 @@ class ResearchCaseTests(unittest.TestCase):
             binary_source, binary_content, 0x004209B8
         )
         _, _, set_difference = build_analysis(X5000R_ROOT)
+        (
+            _, expanded_frontend, _, _, _, expanded_difference
+        ) = build_expanded_analysis(X5000R_ROOT)
         results = (
             *frontend_graph.results,
             analyze("lighttp/lighttpd.conf", discover_web_configuration),
@@ -386,6 +392,8 @@ class ResearchCaseTests(unittest.TestCase):
             deep,
             value_flow,
             set_difference,
+            *expanded_frontend.results,
+            expanded_difference,
         )
         replayed = {
             atom.evidence_id: atom
@@ -441,8 +449,11 @@ class ResearchCaseTests(unittest.TestCase):
             obligations["obligation:x5000r-set-difference-shape"]["status"],
         )
         self.assertEqual(
-            "open",
+            "resolved",
             obligations["obligation:x5000r-frontend-scope-expansion"]["status"],
+        )
+        self.assertEqual(
+            "open", obligations["obligation:x5000r-upload-mode-owner"]["status"]
         )
         self.assertEqual(124, len(deep.bindings))
         self.assertEqual(123, len({item.route_token for item in deep.bindings}))
@@ -456,6 +467,17 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual(
             coverage["source_artifact_sha256"],
             hashlib.sha256(report_path.read_bytes()).hexdigest(),
+        )
+        expanded_coverage = next(
+            item for item in case["evidence"]
+            if item["evidence_ref"]
+            == "coverage:x5000r-expanded-frontend-scope"
+        )
+        expanded_report_path = Path(expanded_coverage["source_path"])
+        self.assertTrue(expanded_report_path.is_file())
+        self.assertEqual(
+            expanded_coverage["source_artifact_sha256"],
+            hashlib.sha256(expanded_report_path.read_bytes()).hexdigest(),
         )
 
 

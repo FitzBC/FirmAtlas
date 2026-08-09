@@ -34,6 +34,7 @@ class DifferenceSide(str, Enum):
 
 class DifferenceAttributionKind(str, Enum):
     FRONTEND_DECLARATION_NATIVE_ABSENT = "frontend_declaration_native_absent"
+    FRONTEND_OPERATION_NATIVE_ABSENT = "frontend_operation_native_absent"
     FRONTEND_CONSUMER_NATIVE_ABSENT = "frontend_consumer_native_absent"
     ALTERNATE_NATIVE_LITERAL = "alternate_native_literal"
     FRONTEND_SCOPE_GAP = "frontend_scope_gap"
@@ -251,8 +252,13 @@ def _identity(token: str, side: DifferenceSide, kind: DifferenceAttributionKind,
     return "set-difference:" + hashlib.sha256(encoded).hexdigest()
 
 
-def _classification(side: DifferenceSide, web_hits: tuple, native_hits: tuple,
-                    native_variant_hits: tuple):
+def _classification(
+    side: DifferenceSide,
+    web_hits: tuple,
+    native_hits: tuple,
+    native_variant_hits: tuple,
+    frontend_constructs: tuple = (),
+):
     if side is DifferenceSide.FRONTEND_ONLY:
         if native_hits:
             return (
@@ -265,6 +271,15 @@ def _classification(side: DifferenceSide, web_hits: tuple, native_hits: tuple,
                 DifferenceAttributionKind.FRONTEND_CONSUMER_NATIVE_ABSENT,
                 "A web consumer uses the frontend operation, but the profiled native dispatcher has no registration.",
                 "Test firmware-version skew, conditional builds, or an alternate backend before assigning ownership.",
+            )
+        if any(
+            construct != "shared-cgi.topicurl"
+            for construct in frontend_constructs
+        ):
+            return (
+                DifferenceAttributionKind.FRONTEND_OPERATION_NATIVE_ABSENT,
+                "A direct frontend request selects the operation, but the profiled native dispatcher has no registration.",
+                "Resolve the request through alternate dispatch tables, upload modes, scripts, or another runtime principal.",
             )
         return (
             DifferenceAttributionKind.FRONTEND_DECLARATION_NATIVE_ABSENT,
@@ -348,6 +363,7 @@ def attribute_frontend_native_set_difference(
         valid_artifacts.append(artifact)
 
     frontend_members = {}
+    frontend_constructs = {}
     frontend_evidence = {
         atom.evidence_id: atom
         for result in frontend.results
@@ -361,6 +377,9 @@ def attribute_frontend_native_set_difference(
                 raise ValueError("frontend selector references unknown evidence")
             frontend_members.setdefault(parameter.literal_value, set()).update(
                 parameter.evidence_ids
+            )
+            frontend_constructs.setdefault(parameter.literal_value, set()).add(
+                parameter.source_construct
             )
     native_evidence = {
         atom.evidence_id: atom for atom in native_inventory.evidence_atoms
@@ -440,7 +459,8 @@ def attribute_frontend_native_set_difference(
                 and hit.capability == "mentions_operation_variant"
             )
             kind, interpretation, obligation = _classification(
-                side, web_hits, native_hits, native_variant_hits
+                side, web_hits, native_hits, native_variant_hits,
+                tuple(sorted(frontend_constructs.get(token, ()))),
             )
             paths = tuple(sorted({
                 hit.artifact.source.canonical_path for hit in hits

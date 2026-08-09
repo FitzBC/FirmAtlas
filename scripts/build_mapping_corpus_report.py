@@ -14,18 +14,15 @@ from firmatlas.mapping import (
     CorpusSampleInput,
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
-    FrontendAssetInput,
     InventoryPolicy,
     NativeRouteAnchor,
     SourceArtifactEntry,
-    attribute_frontend_native_set_difference,
     assemble_discovery_catalog,
     build_inventory,
     build_corpus_report,
     correlate_frontend_native,
     discover_arm_pic_callsite_bindings,
     discover_frontend_requests,
-    discover_frontend_asset_graph,
     discover_mips_inline_route_bindings,
     discover_mips_handler_value_flows,
     discover_native_hints,
@@ -36,14 +33,14 @@ from firmatlas.mapping import (
 )
 
 if __package__:
-    from scripts.build_x5000r_set_difference_report import (
-        _auxiliary_artifacts as _x5000r_auxiliary_artifacts,
-        _probe_anchors as _x5000r_probe_anchors,
+    from scripts.build_x5000r_expanded_frontend_report import (
+        EXPANDED_FRONTEND_PATHS,
+        build_analysis as _x5000r_expanded_analysis,
     )
 else:
-    from build_x5000r_set_difference_report import (
-        _auxiliary_artifacts as _x5000r_auxiliary_artifacts,
-        _probe_anchors as _x5000r_probe_anchors,
+    from build_x5000r_expanded_frontend_report import (
+        EXPANDED_FRONTEND_PATHS,
+        build_analysis as _x5000r_expanded_analysis,
     )
 
 
@@ -166,44 +163,44 @@ def _dap3520_catalog(root: Path):
 
 def _x5000r_catalog(root: Path):
     paths = {
-        "config": "www/static/js/config.js",
-        "frontend": "www/static/js/config_ie.js",
-        "wrapper": "www/static/js/topicurl.js",
         "web": "lighttp/lighttpd.conf",
         "native": "www/cgi-bin/cstecgi.cgi",
     }
-    if not all((root / path).is_file() for path in paths.values()):
+    if not all(
+        (root / path).is_file()
+        for path in (*paths.values(), *EXPANDED_FRONTEND_PATHS)
+    ):
         return None
-    frontend_assets = []
-    for key in ("config", "frontend", "wrapper"):
-        path = paths[key]
-        content = (root / path).read_bytes()
-        frontend_assets.append(
-            FrontendAssetInput(_source(path, content), content)
-        )
-    frontend_graph = discover_frontend_asset_graph(tuple(frontend_assets))
+    (
+        _frontend_assets,
+        frontend_graph,
+        native_source,
+        table_inventory,
+        _artifacts,
+        set_difference,
+    ) = _x5000r_expanded_analysis(root)
     native_content = (root / paths["native"]).read_bytes()
-    native_source = _source(paths["native"], native_content)
+    candidates = {
+        item.candidate_id: item
+        for result in frontend_graph.results
+        for item in result.candidates
+    }
+    anchor_pairs = {
+        (parameter.request_candidate_id, parameter.literal_value)
+        for result in frontend_graph.results
+        for parameter in result.parameters
+        if parameter.is_operation_selector
+        and parameter.literal_value is not None
+        and candidates[parameter.request_candidate_id].endpoint
+        == "/cgi-bin/cstecgi.cgi"
+    }
     deep = discover_mips_inline_route_bindings(
         native_source,
         native_content,
         tuple(
-            NativeRouteAnchor(
-                parameter.request_candidate_id, parameter.literal_value
-            )
-            for result in frontend_graph.results
-            for parameter in result.parameters
-            if parameter.is_operation_selector
-            and parameter.source_construct == "shared-cgi.topicurl"
+            NativeRouteAnchor(candidate_id, operation)
+            for candidate_id, operation in sorted(anchor_pairs)
         ),
-    )
-    table_inventory = discover_mips_inline_route_bindings(
-        native_source, native_content, _x5000r_probe_anchors(native_content)
-    )
-    set_difference = attribute_frontend_native_set_difference(
-        frontend_graph,
-        table_inventory,
-        _x5000r_auxiliary_artifacts(root),
     )
     value_flow = discover_mips_handler_value_flows(
         native_source, native_content, 0x004209B8
@@ -220,7 +217,7 @@ def _x5000r_catalog(root: Path):
         (
             DiscoveryProducerBatch.frontend(
                 frontend_graph.results,
-                "www/static/js/{config,config_ie,topicurl}.js",
+                "X5000R:expanded-frontend-scope/v1",
             ),
             DiscoveryProducerBatch.web_configuration(
                 (web,), paths["web"]

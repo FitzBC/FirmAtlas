@@ -1,6 +1,6 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha1",
-  "report_id": "corpus-report:d55f004a788af10de4392de33de900940aa6f357887abbea9834df15871fc0b6",
+  "report_id": "corpus-report:763271e7084fdd85da77f3c31805d38cfe7b7d01c92e10ded71caea19450e52d",
   "corpus_version": "firmatlas.mapping.corpus/m1.2",
   "gate_status": "partial",
   "required_categories": [
@@ -192,7 +192,7 @@
       "role": "cross-architecture-validation",
       "evidence_tier": "real_firmware",
       "status": "verified",
-      "catalog_id": "discovery-catalog:f710150342045b38e7c1a0b9a57daec377ffb158b5fef19b4fb00f193dcaa61d",
+      "catalog_id": "discovery-catalog:5cd309241c052af440c18bac88a8e627b4241b821064e4f3a08bced1b7d85c0c",
       "required_capabilities": [
         "binds_handler",
         "constructs_request",
@@ -232,8 +232,8 @@
         "set_difference_attribution",
         "web_configuration"
       ],
-      "candidate_count": 679,
-      "evidence_count": 1580,
+      "candidate_count": 694,
+      "evidence_count": 1662,
       "open_obligation_count": 0
     }
   ],

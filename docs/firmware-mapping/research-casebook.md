@@ -118,13 +118,19 @@ flowchart LR
 做了有界归因：38 个由辅助功能页消费但 dispatcher 无注册、38 个只有 wrapper 声明、
 3 个是原三文件前端图的范围缺口、1 个是 `loginAuth` / `userloginAuth` 后缀变体、10 个
 只有 native registration 且无前端引用。这些是静态证据形状，不是版本、死代码或
-替代处理主体的因果证明。对 `setLanCfg@0x004209b8`，系统进一步从
+替代处理主体的因果证明。随后系统将 `kr.js`、`wan_ie.html` 与
+`advance/config.html` 纳入一等前端范围，分别恢复显式 `kr.request`、继承缺省 URL
+且 payload 通过局部变量传递的 `kr.request`，以及 multipart upload property URL。
+三个 scope gap 因此全部关闭，前端 operation 从 199 增至 203，差集变为 77/11。
+新增的 `action=upload` 是外层 selector，`setting/setUploadSetting` 是内层 selector；
+只有后者进入当前 MIPS inline table，二者之间的 dispatcher 控制流仍开放。对
+`setLanCfg@0x004209b8`，系统进一步从
 dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 `lanIp→lan_ipaddr`、`lanNetmask→lan_netmask` 两条请求参数—配置状态链，并在
 `0x00420ad8` 的首个条件分支停止；DHCP 分支和敏感 sink 仍未确认。
 
 论文中可将它用于 shared-endpoint operation identity、path-only/单资源消融，以及
-“跨资源义务关闭、Native 子集绑定、差集形状归因、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、76/14 差集的运行时原因、运行时可达、认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
+“跨资源义务关闭、Native 子集绑定、差集反向驱动 Producer 深化、局部 value-flow 关闭但分支后缀仍开放”的阶段性案例；不能据此声称动态 selector 全集、77/11 剩余差集的运行时原因、upload-mode 控制流、运行时可达、认证状态或漏洞数据流已确认。`loginAuth` 负例还可用于说明 substring 搜索为何不能替代接口身份边界。
 
 ## 3. 后续案例准入触发器
 

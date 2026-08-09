@@ -74,6 +74,10 @@ _Avoid_: 最新结果、报告文件
 对两个已声明范围的候选集合做双向差异，并用可定位辅助证据描述“范围缺口、仅声明、被其他制品消费、变体或无引用”等观察形状；它不自动证明版本原因、运行时可达、执行主体或 handler 归属。
 _Avoid_: 漏检原因、后端绑定、同源证明
 
+**嵌套操作选择器（Nested Operation Selector）**：
+同一物理请求中按先后层级选择 transport mode、dispatcher 分支或业务 operation 的多个字段或 URL 片段，例如 `action=upload` 与 `setting/setUploadSetting`；各层必须保留独立身份和证据，不能因共享 URL 而压成一个操作。
+_Avoid_: 单一接口名、重复参数、路径别名
+
 ## 固件测绘
 
 **组件（Software Component）**：

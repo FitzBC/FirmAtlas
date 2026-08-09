@@ -70,6 +70,26 @@ function Dispatcher() {
 
 
 class FrontendNativeSetDifferenceContractTests(unittest.TestCase):
+    def test_direct_frontend_operation_is_not_mislabeled_as_wrapper_declaration(self):
+        content = b'''var page={importAction:
+"/cgi-bin/cstecgi.cgi?action=upload&setting/setUploadSetting"};
+upload.fileUpload({data:file,url:this.importAction});'''
+        frontend = discover_frontend_asset_graph((
+            _asset("www/advance/config.html", content),
+        ))
+        _, native = _upstreams((), ("setUploadSetting",))
+
+        result = attribute_frontend_native_set_difference(
+            frontend, native, ()
+        )
+
+        upload = next(item for item in result.attributions if item.token == "upload")
+        self.assertEqual(
+            DifferenceAttributionKind.FRONTEND_OPERATION_NATIVE_ABSENT,
+            upload.kind,
+        )
+        self.assertIn("direct frontend request", upload.interpretation)
+
     def test_auxiliary_evidence_distinguishes_scope_gap_from_unreferenced_routes(self):
         frontend, native = _upstreams(
             ("wrapperOnly", "usedOnly"),
@@ -247,6 +267,41 @@ class FrontendNativeSetDifferenceContractTests(unittest.TestCase):
             "cross_native_token_variant": 1,
             "native_registration_no_frontend_reference": 10,
         }, replayed["attribution_counts"])
+
+    def test_documented_x5000r_expanded_scope_closes_all_scope_gaps(self):
+        from scripts.build_x5000r_expanded_frontend_report import (
+            X5000R_ROOT,
+            build_summary,
+        )
+        from pathlib import Path
+        import json
+
+        if not X5000R_ROOT.exists():
+            self.skipTest("local X5000R representative sample is unavailable")
+        documented = json.loads(Path(
+            "docs/firmware-mapping/samples/"
+            "m1-19-x5000r-expanded-frontend.json"
+        ).read_text())
+
+        replayed = build_summary(X5000R_ROOT)
+
+        self.assertEqual(documented, replayed)
+        self.assertEqual(203, replayed["frontend_scope"]["operation_count"])
+        self.assertEqual(
+            {"getWanIeCfg", "setWanIeCfg", "setUploadSetting", "upload"},
+            {
+                item["operation"]
+                for item in replayed["scope_closure"]["recovered_operations"]
+            },
+        )
+        self.assertNotIn(
+            "frontend_scope_gap",
+            replayed["difference"]["attribution_counts"],
+        )
+        self.assertEqual(
+            {"frontend_only": 77, "native_only": 11},
+            replayed["difference"]["side_counts"],
+        )
 
 
 if __name__ == "__main__":

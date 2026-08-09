@@ -89,6 +89,141 @@ return this.topicurl="setLanCfg",this.post(data);};'''
             {atom.capability for atom in atoms},
         )
 
+    def test_asset_graph_resolves_custom_request_default_and_payload_variable(self):
+        transport = b'''function Transport(){}
+Transport.prototype.request=function(options){
+  var endpoint=options.url||"/cgi-bin/cstecgi.cgi";
+  var payload=options.data||{};
+};
+window.kr=new Transport();'''
+        consumer = b'''function save(mode){
+  var payload={topicurl:"setWanIeCfg",wanMode:mode};
+  kr.request({type:"POST",data:payload});
+}'''
+        assets = tuple(
+            FrontendAssetInput(
+                SourceArtifactEntry(
+                    path, path, "file", len(content),
+                    hashlib.sha256(content).hexdigest(),
+                ),
+                content,
+            )
+            for path, content in (
+                ("www/static/js/kr.js", transport),
+                ("www/wan_ie.html", consumer),
+            )
+        )
+
+        graph = discover_frontend_asset_graph(assets)
+
+        candidates = [
+            item for result in graph.results for item in result.candidates
+        ]
+        self.assertEqual(1, len(candidates))
+        self.assertEqual("/cgi-bin/cstecgi.cgi", candidates[0].endpoint)
+        self.assertEqual("POST", candidates[0].method)
+        self.assertEqual(
+            "custom.request.cross-resource-default",
+            candidates[0].source_construct,
+        )
+        parameters = [
+            item for result in graph.results for item in result.parameters
+        ]
+        self.assertEqual({"topicurl", "wanMode"}, {item.name for item in parameters})
+        selector = next(item for item in parameters if item.name == "topicurl")
+        self.assertEqual("setWanIeCfg", selector.literal_value)
+        self.assertTrue(selector.is_operation_selector)
+        self.assertEqual(1, len(graph.bindings))
+        self.assertEqual("kr.request.default_url", graph.bindings[0].symbol)
+        atoms = [
+            atom for result in graph.results for atom in result.evidence_atoms
+        ]
+        self.assertEqual(
+            {"www/static/js/kr.js", "www/wan_ie.html"},
+            {atom.source_span.artifact_path for atom in atoms},
+        )
+
+    def test_payload_variable_does_not_cross_function_scope(self):
+        transport = b'''function Transport(){}
+Transport.prototype.request=function(options){
+  var endpoint=options.url||"/cgi-bin/cstecgi.cgi";
+};window.kr=new Transport();'''
+        consumer = b'''function unrelated(){
+  var payload={topicurl:"wrongOperation"};
+}
+function save(){
+  var payload={topicurl:"rightOperation"};
+  kr.request({type:"POST",data:payload});
+}'''
+        assets = tuple(
+            FrontendAssetInput(
+                SourceArtifactEntry(
+                    path, path, "file", len(content),
+                    hashlib.sha256(content).hexdigest(),
+                ), content,
+            )
+            for path, content in (
+                ("www/static/js/kr.js", transport),
+                ("www/page.html", consumer),
+            )
+        )
+
+        graph = discover_frontend_asset_graph(assets)
+
+        selectors = {
+            item.literal_value
+            for result in graph.results
+            for item in result.parameters
+            if item.is_operation_selector
+        }
+        self.assertEqual({"rightOperation"}, selectors)
+
+    def test_file_upload_property_preserves_outer_and_inner_operation_selectors(self):
+        content = b'''var page={data:function(){return{
+  importAction:"/cgi-bin/cstecgi.cgi?action=upload&setting/setUploadSetting"
+}},methods:{restore:function(file){
+  upload.fileUpload({data:file,url:this.importAction});
+}}};'''
+        source = SourceArtifactEntry(
+            "www/advance/config.html", "www/advance/config.html", "file",
+            len(content), hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(1, len(result.candidates))
+        candidate = result.candidates[0]
+        self.assertEqual("/cgi-bin/cstecgi.cgi", candidate.endpoint)
+        self.assertEqual("POST", candidate.method)
+        self.assertEqual("multipart_form", candidate.representation)
+        self.assertEqual("custom.file-upload-property", candidate.source_construct)
+        selectors = {
+            (item.name, item.literal_value)
+            for item in result.parameters if item.is_operation_selector
+        }
+        self.assertEqual(
+            {("action", "upload"), ("setting", "setUploadSetting")},
+            selectors,
+        )
+        self.assertEqual(
+            {"constructs_request", "serializes_parameter", "selects_operation"},
+            {atom.capability for atom in result.evidence_atoms},
+        )
+
+    def test_file_upload_without_payload_does_not_publish_a_request(self):
+        content = b'''var page={importAction:
+"/cgi-bin/cstecgi.cgi?action=upload&setting/setUploadSetting"};
+upload.fileUpload({url:this.importAction});'''
+        source = SourceArtifactEntry(
+            "www/advance/config.html", "www/advance/config.html", "file",
+            len(content), hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual((), result.candidates)
+        self.assertEqual((), result.parameters)
+
     def test_asset_graph_keeps_conflicting_endpoint_definitions_unresolved(self):
         sources = (
             ("www/a.js", b'globalConfig={cgiUrl:"/cgi-bin/a.cgi"};'),
@@ -206,6 +341,7 @@ D.prototype.run=function(x){return this.topicurl="run",this.post(x)};'''
                 "jQuery.post",
                 "jQuery.ajax",
                 "custom.request",
+                "custom.file-upload-property",
                 "shared-cgi.topicurl",
                 "HTML.form",
             },
