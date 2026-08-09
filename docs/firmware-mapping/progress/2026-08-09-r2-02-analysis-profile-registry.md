@@ -35,7 +35,7 @@ ELF 具有可界定 section table，只有满足前置条件的 `bin/httpd` 进�
 | ARM PIC route→handler bindings | 45 |
 | Native handler candidates | 45 |
 | Scheduler 输入 / 已关闭 / 保留 | 179 / 90 / 89 |
-| Catalog candidates / parameters / evidence | 3461 / 79 / 3966 |
+| Catalog candidates / parameters / evidence | 3461 / 130 / 4025 |
 
 代表性确定链包括：
 
@@ -82,7 +82,7 @@ Analyzer，而不是为单一路径增加特例。
 ## 6. 回归验证记录
 
 - 三份 AC9 报告由构建脚本重新生成并逐字段比较，均与版本库文档一致；
-- 原厂 Tenda AC9 Auto 报告 SHA-256：`8aa169ef326038fc2914cea947979aabcda8220a2fbf0da22cba4b1e2b646cf3`；
+- 原厂 Tenda AC9 Auto 报告在 R2-03 参数语法扩展后重放更新，SHA-256：`465462a274c0c47eae7d0ea46a98731b8d4ad9415d4276ba2ce14bb2c885c3b7`；
 - OpenWrt Tenda AC9 Auto 对照报告 SHA-256：`16704d301ec64c58b3ff663f4fbc5ea2d872071999193bf6f48fb4676d85fcfc`；
 - R2-01 Base 回放报告 SHA-256：`5f128a404a94a137579eddb842cdc71b0d124856f887d05ec97bdab6be578750`；
 - 后端：`make test`，373 项通过；

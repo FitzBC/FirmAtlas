@@ -2,8 +2,8 @@
   "schema_version": "firmatlas.mapping.vendor-tenda-ac9-auto-profile/v1alpha1",
   "sample_role": "primary-vendor-tenda-ac9-goform-arm-pic",
   "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
-  "analysis_run_id": "mapping-analysis-run:83dd2780bc401d690efe7c9c906a771853349191d6988bfb4fd9ba32d208b73e",
-  "catalog_id": "discovery-catalog:b7a0f7db00de577fe26b81e584764d004599ba10b2143a4a639fb7746174c880",
+  "analysis_run_id": "mapping-analysis-run:21f77063fb38a0110df0d27af3b61c479a0bcd928ebdf188db291c7b3fe3e057",
+  "catalog_id": "discovery-catalog:42f437c967a8a8d253b92d49e669b0c0b28ce28849bd47675558a2bf18de4463",
   "profile_id": "firmatlas.mapping.profile/auto-v1",
   "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v1",
   "coverage_status": "completed",
@@ -24,8 +24,8 @@
   ],
   "catalog_summary": {
     "candidate_count": 3461,
-    "parameter_count": 79,
-    "evidence_count": 3966,
+    "parameter_count": 130,
+    "evidence_count": 4025,
     "association_count": 65,
     "open_obligation_count": 89,
     "resolved_obligation_count": 90,
@@ -44,6 +44,11 @@
       "code": "empty_page_model_url",
       "affected_sources": ["webroot_ro/js/parental_control.js", "webroot_ro/js/status_usb.js", "webroot_ro/js/system_log.js"],
       "resolution": "empty getUrl/setUrl values are disabled operations and no longer become zero-length interface evidence"
+    },
+    {
+      "code": "page_model_object_payload_parameters",
+      "affected_sources": ["webroot_ro/js/iptv.js", "webroot_ro/js/lan.js", "webroot_ro/js/remote_web.js", "webroot_ro/js/wireless_ssid.js"],
+      "resolution": "bounded R.pageModel.beforeSubmit and R.moduleModel.getSubmitData object keys now become request parameters with exact source evidence"
     }
   ],
   "interpretation": {

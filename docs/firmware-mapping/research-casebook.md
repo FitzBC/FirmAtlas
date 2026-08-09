@@ -158,7 +158,28 @@ dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 
 论文可用它展示 path-only diff、ACL-as-owner 与 string-co-occurrence 三种消融失败，以及 Coverage Ledger 如何阻止“分析器漏报 → 固件功能删除”的错误因果。固定制品、解包谱系、候选与参数差异见 [M1-24 机器报告](./samples/m1-24-openwrt-ac9-version-diff.json)，执行主体与访问链见 [M1-25 机器报告](./samples/m1-25-openwrt-ac9-ubus-backend.json)。
 
-## 4. 后续案例准入触发器
+## 4. AC9：历史参数“漏检”如何反向修正 Producer
+
+原厂 AC9 `15.03.05.19` 的 13 条版本化历史 expectation 首次与整根 Catalog 对照时，
+`SetIPTVCfg/list`、`AdvSetLanip/lanMask`、`WifiBasicSet/security` 和
+`SetRemoteWebCfg/remoteIp` 都呈现“接口已发现、参数未发现”。回到精确源码后发现，参数分别
+位于 `R.pageModel.beforeSubmit` 或 `R.moduleModel.getSubmitData` 的对象载荷中；旧 Producer
+只支持 module-model 内的查询串，因此这是 analyzer 语法覆盖缺口，不是固件缺少参数。
+
+加入有界对象键提取后，当前 Catalog 从 79 增至 130 个参数，前三条 obligation 关闭；
+RemoteWeb 的 `remoteIp` 也恢复，但历史记录明确声明 POST，而局部页面只声明 `setUrl`，method
+仍等待 `public.js` 中 page-model framework 调用的跨资源证据。时间线、Catalog Evidence ID、
+13 条 expectation 与 exact/out-of-scope 版本依据见
+[R2-03 完整记录](./progress/2026-08-09-r2-03-historical-expectation-diff.md)及
+[机器差异报告](./samples/r2-03-vendor-tenda-ac9-historical-diff.json)。
+
+反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
+oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
+`/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、
+history-guided analyzer development 和 obligation 状态迁移。限制是未验证运行时、漏洞存在、
+可利用性或跨版本代码谱系；历史记录本身也可能省略参数或 method。
+
+## 5. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：
 
@@ -174,7 +195,7 @@ dynamic MIPS GOT、`jalr` delay slot 和寄存器 provenance 证明
 准入不是要求案例必须成功解决。一个证据充分、局限明确且仍然 open 的案例同样
 有研究价值；但不得把 open 写成 supported。
 
-## 5. 案例模板
+## 6. 案例模板
 
 每个案例至少包含：
 

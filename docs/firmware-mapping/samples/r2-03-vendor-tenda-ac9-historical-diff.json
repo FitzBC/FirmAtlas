@@ -1,0 +1,475 @@
+{
+  "analysis_run_id": "mapping-analysis-run:21f77063fb38a0110df0d27af3b61c479a0bcd928ebdf188db291c7b3fe3e057",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v1",
+  "catalog_coverage_status": "completed",
+  "catalog_id": "discovery-catalog:42f437c967a8a8d253b92d49e669b0c0b28ce28849bd47675558a2bf18de4463",
+  "entries": [
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+      "candidate_ids": [
+        "frontend-request:2ce4d7b0a4f60a43ee5aa159a9906db726e3efd60884559f19bdb2a703be25a2"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:0fa1cd2b78abe474cd05ddb29076a104aba8d9b19cc9f3d1b3b678790fc2b371",
+        "evidence:11220ccd775a464fac41ca2b668364431e333599cdd597f6196fda2b4522c8b5",
+        "evidence:2c062c8ff11be4d0936da92903909a027c9ec0bea4473d10faaa98ad231c1799",
+        "evidence:7c679546f58678adab6f85042ead5adbbb1558db8022d0e9dc69c1f8b5af709b",
+        "evidence:82e999b9bf9568b1d67a0d2d2a7787a0087b8f91bab5e3b2503b5efffb7ab78d",
+        "evidence:917379058d72abab64eecc198a02becf65a32fdd0b010a0c1fa042c8a9a02a03"
+      ],
+      "claimed_versions": [
+        "15.03.02.13"
+      ],
+      "expectation_id": "historical-expectation:27507b29a4a11d602df0166818dc613878e45160893937c1ed39c9ad1b95487f",
+      "expected_parameters": [
+        "list"
+      ],
+      "gap_reason": "none",
+      "handler_value": "formSetIptv",
+      "interface_value": "/goform/SetIPTVCfg",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [],
+      "observed_parameters": [
+        "igmpEn",
+        "iptvType",
+        "list",
+        "stbEn",
+        "vlanId"
+      ],
+      "source_ref": "semantic-analysis:CVE-2025-5836",
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5836"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+      "candidate_ids": [
+        "frontend-request:a85fdfc4adfc1bbeed4fe189682961878b1194556f2d41eb13c8678984d4747e"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:078716d649de22e9bcbb98b5b4844402734268c21084621365f12c45e484e1cb",
+        "evidence:113d257c998c74acc418360c127f034d60af2f6d773dcb63b86cafd05c9df2a5",
+        "evidence:1580edf27a5ff76554de23ad8f1e50be6e1f47b47b8d07e4f84791a1023200ad",
+        "evidence:221eeeec15cb77d38b6496df4549e423ba7c6a0d1ce5e6e13106e504f1d322e2",
+        "evidence:392eec50e8117c3eba29be595ac08b9f96b0728acd53aee9231580f1c056f88a",
+        "evidence:64e0615e6bc103d60122698f82ed0f8109a21783c1aa58cca35573c2ba8830b6",
+        "evidence:6531d9495975833497f5dd75a705534f8d3034c94f7e19f34686772657d5f136",
+        "evidence:caec43b1382b27096631360a1b92f4d98e88f3d6355462d09171e755480ff2ee",
+        "evidence:e579ba6875d89102045f6ad1ff4c0aec6c0f72bf46a318c6dc6d0eae59c6ab86",
+        "evidence:e72e8fca8062348f2405b9c8293e8c47bb4764dcda4804300ff34467df4886f6",
+        "evidence:e7de814dea12e0a0c5a4122f9aa5241a73b014604155a58514916cb6b8e13e9c"
+      ],
+      "claimed_versions": [
+        "15.03.05.14_multi"
+      ],
+      "expectation_id": "historical-expectation:2923eb6bb309ffe4e847cb002272e556f30ecbd4ab9d0c83f409e0aa40908a7e",
+      "expected_parameters": [
+        "security"
+      ],
+      "gap_reason": "none",
+      "handler_value": "formWifiBasicSet",
+      "interface_value": "/goform/WifiBasicSet",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [],
+      "observed_parameters": [
+        "hideSsid",
+        "hideSsid_5g",
+        "security",
+        "security_5g",
+        "ssid",
+        "ssid_5g",
+        "wrlEn",
+        "wrlEn_5g",
+        "wrlPwd",
+        "wrlPwd_5g"
+      ],
+      "source_ref": "nvd:CVE-2025-45427",
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45427"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+      "candidate_ids": [],
+      "catalog_evidence_ids": [],
+      "claimed_versions": [
+        "15.03.02.13"
+      ],
+      "expectation_id": "historical-expectation:3eee213d610220f8d486d51172253d4ce999d44429c09e62e28883ff93aaffcc",
+      "expected_parameters": [
+        "WANS"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "handler_value": "decodePwd",
+      "interface_value": "/goform/WizardHandle",
+      "method": null,
+      "missing_parameters": [
+        "WANS"
+      ],
+      "observed_methods": [],
+      "observed_parameters": [],
+      "source_ref": "semantic-analysis:CVE-2026-6016",
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6016"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+      "candidate_ids": [
+        "native-hint:7164c51edc27945663af79dc0ad17337089d2a3562c6e4a890e17a75d6065a97"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:1b65782a2576a3defbf15dcbb85d3807b4a4bb416e452808e7057325ccfa483d"
+      ],
+      "claimed_versions": [
+        "15.03.02.13"
+      ],
+      "expectation_id": "historical-expectation:47a8b6f2d711c01c814f28c22c3b9ec0396922ed9497c86eea6ee9da8b70e7fc",
+      "expected_parameters": [
+        "PPPOEPassword"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "handler_value": "formQuickIndex",
+      "interface_value": "/goform/QuickIndex",
+      "method": null,
+      "missing_parameters": [
+        "PPPOEPassword"
+      ],
+      "observed_methods": [],
+      "observed_parameters": [],
+      "source_ref": "semantic-analysis:CVE-2026-6015",
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6015"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+      "candidate_ids": [
+        "frontend-request:3c4b778d50c475c1d67597d646d5ec678a20504e36e6a8e2ba08e361540ea2e4"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:c2a367df336e51c4dc31eaafa2ec91d86fd7fd1d9e87785f4d1a96837bf8d404"
+      ],
+      "claimed_versions": [
+        "15.03.05.14_multi"
+      ],
+      "expectation_id": "historical-expectation:4a51df8b66a2d5d93c7fa1e7823877776e78be698ccc762b202587c62f39b54a",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "handler_value": null,
+      "interface_value": "/goform/WifiWpsStart",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [
+        "POST"
+      ],
+      "observed_parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-45429",
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45429"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+      "candidate_ids": [
+        "frontend-request:8ed8594ff22a37d22fe14591405061fd3d002d2e6ba0486277099f7cdbc384b2"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:036d7ed6274a91b4b42816d90181e70adc73903d6409a06d53ea3e21a15f3fb6",
+        "evidence:30e1b00acc6ff1858ae8c15b7677afe69e045fc3f5199183971933648102b65b",
+        "evidence:656bc10a5e4672edb45823768367a986d4b91db28a86b64a3bfd2ec9e7fefe6a",
+        "evidence:66c2086c05845129669ee45d91ac10629afcd89464cde26db7c25a6f04aa38e2"
+      ],
+      "claimed_versions": [
+        "15.03.05.14_multi"
+      ],
+      "expectation_id": "historical-expectation:5f90d35dfc0c71aa7d4fd84ebcd56b677b0fa9a0fe3392508856fa6cc27a889e",
+      "expected_parameters": [
+        "rebootTime"
+      ],
+      "gap_reason": "none",
+      "handler_value": null,
+      "interface_value": "/goform/SetSysAutoRebbotCfg",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [],
+      "observed_parameters": [
+        "autoRebootEn",
+        "delayRebootEn",
+        "rebootTime"
+      ],
+      "source_ref": "nvd:CVE-2025-45428",
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45428"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+      "candidate_ids": [
+        "frontend-request:a45db5a1fd4d4ea96b8148bd69b9c9374e4b4e979471568305d0dc060677a169"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:3865c21809d47a30af4a23f6393b7bc3ca8f2af253d148849ceb79475fd4c136",
+        "evidence:494fd1c1ec38d557465ff84c52f7f168cea24e9fa266fcbef83b091bb96825eb",
+        "evidence:78c94f0a81f5d0aec736afcec8ee6bd1f35bf790c47413eab7070bef68b0b9c9",
+        "evidence:b6c1c6d75c312f609ded19e8193bb2ae3342e53ba67dc8ec2e442b63d05fc8c6",
+        "evidence:b7a8d796090f56e0ee67ed57e01be616151c68e3dcdac2ad76126c2791ecae6b",
+        "evidence:dba01dc798e1e0d89903691093ee0b669898e0bb7973f8b8deee50c4abac2c69",
+        "evidence:df490b9fccb42f3cfeb68fac63d532a482afbb49d1cd9fc7c0ea455a758c1b07"
+      ],
+      "claimed_versions": [
+        "15.03.02.13"
+      ],
+      "expectation_id": "historical-expectation:61f009ae1ce245360dccd6e118111f7445840aecfefd2442ff43d76b915686ea",
+      "expected_parameters": [
+        "remoteIp"
+      ],
+      "gap_reason": "method_not_observed",
+      "handler_value": "formSetSafeWanWebMan",
+      "interface_value": "/goform/SetRemoteWebCfg",
+      "method": "POST",
+      "missing_parameters": [],
+      "observed_methods": [],
+      "observed_parameters": [
+        "remoteIp",
+        "remotePort",
+        "remoteWebEn"
+      ],
+      "source_ref": "semantic-analysis:CVE-2025-5847",
+      "status": "partial",
+      "vulnerability_identifier": "CVE-2025-5847"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact",
+      "candidate_ids": [],
+      "catalog_evidence_ids": [],
+      "claimed_versions": [
+        "15.03.05.14_multi"
+      ],
+      "expectation_id": "historical-expectation:6a89310326d92fc4f827cdc04270257b0b8694c6ab06708d6c6d7d5d09f8c0cc",
+      "expected_parameters": [],
+      "gap_reason": "artifact_out_of_scope",
+      "handler_value": null,
+      "interface_value": "/cgi-bin/DownloadCfg.jpg",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [],
+      "observed_parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-14286",
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-14286"
+    },
+    {
+      "applicability": "exact_artifact",
+      "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19",
+      "candidate_ids": [
+        "frontend-request:8d1e4faa2223c0693652175b641dc1ed1a9a303da990fc7b46db990d691ef24b"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:46e43abf788d92f8445a0c1fc3653d8573f98048bb8094d0abba165ce2cb612d",
+        "evidence:53fd28dd3cbdfa3177d0af80a8d09f2995a5d64b4dd9c594f83a72d9b90efd8d",
+        "evidence:767c2bca9a39508d2ca27be85dc21c24443bc6b3e7100001cdc1705942e9db5a",
+        "evidence:7fb7a94f7de97781620bee5b91bc8deb92257db6455ef93910a22dc28ce13003",
+        "evidence:8185ef405079e18aae1319cf1c10530ad1ca877d40f4fc814d6971bb2c348da4",
+        "evidence:a16a94a6bc71616cfe2d779be842260d3f38d117c012bbd3aecf2fe9994d3b91",
+        "evidence:b9c9bbbaba0db9b1cb4188c0f028381bd476e6fcfb85c6e2784c49220225fe39",
+        "evidence:e900a8cabcfd03dfe00596ccbb0aa3d9eb5361fd17f9721d2e2ce40e406f55b5"
+      ],
+      "claimed_versions": [
+        "15.03.05.19"
+      ],
+      "expectation_id": "historical-expectation:71d0f9c5b81c78c9ea46ab9e787cb79b66e8257e3e425cc552603088ab173d6b",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "handler_value": null,
+      "interface_value": "/goform/SetSambaCfg",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [],
+      "observed_parameters": [
+        "fileCode",
+        "guestaccess",
+        "guestpwd",
+        "guestuser",
+        "internetPort",
+        "password",
+        "premitEn"
+      ],
+      "source_ref": "semantic-analysis:CVE-2025-22949",
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22949"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+      "candidate_ids": [
+        "frontend-request:1366dc96cfa27af49b6c0393a537e3c8804121aa5484fcb7d9ae5905b15edde1"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:1c2964c321d3f0c9cf1180b8db43a5fd82f3948339c8a1458870a8092208f0ca",
+        "evidence:3b02888c98215e2cb6059856c7009727e8d7261fa7652353da26ca434c9173cf",
+        "evidence:444e8888249c6ed69b125cca11e7c471e641759f8c21c0647cf2cd03d23ae222",
+        "evidence:641c25040b2ef45cb180d10b330ee95ec70d59734e152c561b7a7d3bbd5c8da4",
+        "evidence:753279c99060103f917c68ee2fbf577c4d74d6da2e490e55ea0932e880cf2ff1",
+        "evidence:8ddf87daaf3cd0e4c0e498c228afc7ca247e0786c1047bfdfc2d7d737d0b986b",
+        "evidence:9c2a0ceb6b54298abc955cb2ae70eaed7701fa0a1a2a6906d1505607488ccd0d",
+        "evidence:a011cb584609f21e7d18baf786c5300c3856a13ef8dcdb07e459e9e11840353d",
+        "evidence:cfc0fa8b293de20d3d7e227a280d29b3d976d6f679c1b5c789dcad6825d7b0ae",
+        "evidence:e12f9ee2ec4d0730484391a66eb6c1f8bae15a41e81c8326efc67338e87a5c6a"
+      ],
+      "claimed_versions": [
+        "15.03.02.13"
+      ],
+      "expectation_id": "historical-expectation:a34517e78cde71017a9e991ac1a1a4ca08cd17040cfc4b68a8dcf2a41d2e52b2",
+      "expected_parameters": [
+        "lanMask"
+      ],
+      "gap_reason": "none",
+      "handler_value": "fromAdvSetLanip",
+      "interface_value": "/goform/AdvSetLanip",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [],
+      "observed_parameters": [
+        "dhcpEn",
+        "endIp",
+        "lanDns1",
+        "lanDns2",
+        "lanDnsAuto",
+        "lanIp",
+        "lanMask",
+        "leaseTime",
+        "startIp"
+      ],
+      "source_ref": "semantic-analysis:CVE-2025-5839",
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5839"
+    },
+    {
+      "applicability": "exact_artifact",
+      "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19",
+      "candidate_ids": [
+        "frontend-request:30a992559e38517b9ef11e7a9880599fd6a6a7d53c714ba945dc9655f717b0f1",
+        "frontend-request:513a146d995ad9f930a316ed9361de24b36c04c5fcfa6208d3af6b490b9959e1",
+        "frontend-request:867f27ff10d0b9e0a5eeb6e48cc186ad68243298cfb1dc4ca2238b4025728159",
+        "frontend-request:8f8a50020c71bc62bd5b5f665959524aa949af50aa49975d6f209af78bb31d29"
+      ],
+      "catalog_evidence_ids": [
+        "evidence:0d9f944d4b49d0a020d330a242a83dd18cfe2469dfca0747811b597440f1e00a",
+        "evidence:21b00efacd8603336bf79a222508fb50cfcf290ff3f2a70613b07d2150f2724c",
+        "evidence:24317743b44162d49496c2ae54bbad0ecb1883e83bd0370cf82cefc950acaf89",
+        "evidence:2eecdb27e453c93d359cfd4be2a28aa214d236c98ae3efa449bac2e7867571a1",
+        "evidence:47d4aad76a52544c2dae608fd742831361be3e6f57b15375de5af8c90b10c31a",
+        "evidence:5b21e6fa0b299cd3883df69399a9f7cdc9d8f9738651e5cd2a49da204a878396",
+        "evidence:70c22c87a15d30bdb9bb3d5463df5e6cef2d7568dc8280deca1b5581c5bb4678",
+        "evidence:75c6f1a0b5e22b009e88cc3104335fefb8f404cbda2d95b3ad80c8b82d3f5b6f",
+        "evidence:7c6471bacf59d9117208724df20d96be2edbb3c2cf967e51334d98dcfa676bfd",
+        "evidence:8adc67a5d46a9d3582908da3634361b8ca62fccd5a4152f20cf98bdd2675dfc5",
+        "evidence:a29b032a873a3eb4bbaeb716f401fdf29e185cee3b2f40baa2d34169765ee9eb",
+        "evidence:bc09a0001bde158ae3a37d6e133b04be1473eba36e26d9c4b98d29453336b018",
+        "evidence:cca023c92c8d3ca17aca7f643ff5df1e6845a22e4f67600bd1b53218ac9d7e30",
+        "evidence:d3d5de1845e467631231ace50287eb99002f81b199b5f57f64d3391c4c331a9a",
+        "evidence:fe1b8e3cbd1ee9bba401c224a77a83d1df3257d1b7d16b77b85233e2140081a3"
+      ],
+      "claimed_versions": [
+        "15.03.05.19"
+      ],
+      "expectation_id": "historical-expectation:afb7be89f141baacd95bfec69956e37543f84bf4608e8182fad3dfe52405a3cb",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "handler_value": null,
+      "interface_value": "/goform/SetOnlineDevName",
+      "method": null,
+      "missing_parameters": [],
+      "observed_methods": [
+        "POST"
+      ],
+      "observed_parameters": [
+        "devName",
+        "mac"
+      ],
+      "source_ref": "semantic-analysis:CVE-2025-22946",
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22946"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.05.14/15.03.05.18, not the selected artifact",
+      "candidate_ids": [],
+      "catalog_evidence_ids": [],
+      "claimed_versions": [
+        "15.03.05.14",
+        "15.03.05.18"
+      ],
+      "expectation_id": "historical-expectation:e15842fd299ec7cf1948ae9c8f73b209849422fc0d63e283d6dd6928827053ed",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "handler_value": "formexeCommand",
+      "interface_value": "/goform/exeCommand",
+      "method": null,
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "observed_methods": [],
+      "observed_parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-10443",
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10443"
+    },
+    {
+      "applicability": "out_of_scope",
+      "applicability_basis": "historical claim identifies 15.03.05.14, not the selected 15.03.05.19 artifact",
+      "candidate_ids": [],
+      "catalog_evidence_ids": [],
+      "claimed_versions": [
+        "15.03.05.14"
+      ],
+      "expectation_id": "historical-expectation:eab3df130c9abf85bc8933241dd22afbdb59355d49d499962198372d6ce40583",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "handler_value": "formexeCommand",
+      "interface_value": "/goform/exeCommand",
+      "method": null,
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "observed_methods": [],
+      "observed_parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-10442",
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10442"
+    }
+  ],
+  "expectation_manifest": "docs/firmware-mapping/samples/r2-03-vendor-tenda-ac9-historical-expectations.json",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "firmware_release_version": "15.03.05.19",
+  "interpretation": {
+    "cross_version_use": "the remaining claims test architecture and clue coverage only; absence does not count as a miss for this artifact",
+    "not_claimed": "vulnerability presence, exploitability, runtime reachability, or recall for claims targeting other AC9 firmware versions",
+    "supported": "both historical interface expectations explicitly scoped to the selected V15.03.05.19 artifact are observed in the cold-start catalog"
+  },
+  "inventory_coverage_status": "completed",
+  "profile_id": "firmatlas.mapping.profile/auto-v1",
+  "report_id": "historical-expectation-diff:549080762bac2f9c7133412b3741bc3b5fb6f8fe8b8ff4239ee85c923cacb43a",
+  "sample_role": "primary-vendor-tenda-ac9-v15.03.05.19",
+  "schema_version": "firmatlas.mapping.historical-expectation-diff/v1alpha1",
+  "scope_summary": {
+    "cross_version_reference_count": 11,
+    "exact_artifact_expectation_count": 2,
+    "exact_artifact_gap_count": 0,
+    "exact_artifact_observed_count": 2
+  },
+  "summary": {
+    "not_assessable": 5,
+    "observed": 7,
+    "partial": 1
+  }
+}

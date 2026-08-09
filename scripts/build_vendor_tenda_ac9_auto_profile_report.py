@@ -92,7 +92,21 @@ def build_report() -> dict:
                     "empty getUrl/setUrl values are disabled operations and no longer "
                     "become zero-length interface evidence"
                 ),
-            }
+            },
+            {
+                "code": "page_model_object_payload_parameters",
+                "affected_sources": [
+                    "webroot_ro/js/iptv.js",
+                    "webroot_ro/js/lan.js",
+                    "webroot_ro/js/remote_web.js",
+                    "webroot_ro/js/wireless_ssid.js",
+                ],
+                "resolution": (
+                    "bounded R.pageModel.beforeSubmit and "
+                    "R.moduleModel.getSubmitData object keys now become request "
+                    "parameters with exact source evidence"
+                ),
+            },
         ],
         "interpretation": {
             "supported": (

@@ -936,6 +936,71 @@ var moduleModel = R.moduleModel({
             result.parameters[0].source_construct,
         )
 
+    def test_page_model_write_uses_bounded_module_model_object_parameters(self):
+        content = b'''var pageModel = R.pageModel({setUrl: "goform/SetRemoteWebCfg"});
+var moduleModel = R.moduleModel({
+    getSubmitData: function () {
+        subObj = {
+            "remoteWebEn": $("#remoteWebEn").val(),
+            "remoteIp": $("#remoteIp").val(),
+            "remotePort": parseInt($("#remotePort").val(), 10)
+        };
+        return objTostring(subObj);
+    }
+});'''
+        source = SourceArtifactEntry(
+            canonical_path="webroot_ro/js/remote_web.js",
+            original_path="webroot_ro/js/remote_web.js",
+            kind="file",
+            size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(
+            ["remoteIp", "remotePort", "remoteWebEn"],
+            sorted(item.name for item in result.parameters),
+        )
+        self.assertEqual(
+            {"R.moduleModel.getSubmitData.object"},
+            {item.source_construct for item in result.parameters},
+        )
+        self.assertEqual(
+            {result.candidates[0].candidate_id},
+            {item.request_candidate_id for item in result.parameters},
+        )
+
+    def test_page_model_write_uses_bounded_before_submit_object_parameters(self):
+        content = b'''var pageModel = R.pageModel({
+    setUrl: "goform/SetIPTVCfg",
+    beforeSubmit: function () {
+        subObj = {
+            "stbEn": $("#stbEn").val(),
+            "vlanId": vlanId,
+            "list": list
+        };
+    }
+});'''
+        source = SourceArtifactEntry(
+            canonical_path="webroot_ro/js/iptv.js",
+            original_path="webroot_ro/js/iptv.js",
+            kind="file",
+            size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(
+            ["list", "stbEn", "vlanId"],
+            sorted(item.name for item in result.parameters),
+        )
+        self.assertEqual(
+            {"R.pageModel.beforeSubmit.object"},
+            {item.source_construct for item in result.parameters},
+        )
+
     def test_documented_frontend_sample_summary_keeps_real_and_fixture_roles(self):
         fixture = (
             Path(__file__).parents[1]

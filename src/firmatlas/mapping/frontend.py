@@ -511,6 +511,71 @@ def _module_model_parameters(content: bytes) -> tuple:
     return tuple(unique.values())
 
 
+def _page_model_object_parameters(content: bytes) -> tuple:
+    """Recover bounded object payload keys consumed by a page-model write."""
+
+    tokens = _tokenize_javascript(content)
+    configurations = (
+        ((b"R", b".", b"moduleModel", b"(", b"{"), b"getSubmitData",
+         "R.moduleModel.getSubmitData.object"),
+        ((b"R", b".", b"pageModel", b"(", b"{"), b"beforeSubmit",
+         "R.pageModel.beforeSubmit.object"),
+    )
+    parameters = []
+    for prefix, function_name, construct in configurations:
+        for index in range(0, max(0, len(tokens) - len(prefix) + 1)):
+            if tuple(item.value for item in tokens[index:index + 5]) != prefix:
+                continue
+            object_end = _matching_close(tokens, index + 4)
+            cursor = index + 5
+            while cursor < object_end:
+                if (
+                    tokens[cursor].value != function_name
+                    or cursor + 1 >= object_end
+                    or tokens[cursor + 1].value != b":"
+                ):
+                    cursor += 1
+                    continue
+                block_open = cursor + 2
+                while block_open < object_end and tokens[block_open].value != b"{":
+                    block_open += 1
+                if block_open >= object_end:
+                    break
+                block_end = _matching_close(tokens, block_open)
+                inner = block_open + 1
+                while inner < block_end:
+                    if (
+                        tokens[inner].value == b"{"
+                        and inner > block_open
+                        and tokens[inner - 1].value in {b"=", b"return"}
+                    ):
+                        properties, object_cursor = _object_properties(tokens, inner)
+                        for key, _value in properties:
+                            if not re.fullmatch(
+                                rb"[A-Za-z_][A-Za-z0-9_.-]*", key.value
+                            ):
+                                continue
+                            parameters.append(_ParameterLiteral(
+                                name=key.value.decode("ascii"),
+                                name_start=key.start,
+                                name_end=key.end,
+                                namespace=FrontendParameterNamespace.FORM,
+                                literal_value=None,
+                                value_start=None,
+                                value_end=None,
+                                is_operation_selector=False,
+                                source_construct=construct,
+                            ))
+                        inner = object_cursor
+                    else:
+                        inner += 1
+                cursor = block_end
+    unique = {}
+    for parameter in parameters:
+        unique[(parameter.name, parameter.name_start)] = parameter
+    return tuple(unique.values())
+
+
 def _assigned_parameters(tokens: Tuple[_Token, ...]) -> dict:
     assignments = {}
     for index in range(0, max(0, len(tokens) - 2)):
@@ -1401,7 +1466,9 @@ def _request_literals(
                 (),
             )
         )
-    module_parameters = _module_model_parameters(content)
+    module_parameters = (
+        _module_model_parameters(content) + _page_model_object_parameters(content)
+    )
     write_indexes = [
         index
         for index, item in enumerate(page_model_discoveries)

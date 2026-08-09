@@ -1,0 +1,142 @@
+{
+  "schema_version": "firmatlas.mapping.historical-expectations/v1alpha1",
+  "sample": {
+    "vendor": "Tenda",
+    "device_model": "AC9",
+    "artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+    "release_version": "15.03.05.19"
+  },
+  "rules": {
+    "historical_claim_is_not_firmware_fact": true,
+    "absent_out_of_scope_claim_is_not_a_mapper_miss": true,
+    "exact_artifact_basis_is_required_for_recall_measurement": true
+  },
+  "expectations": [
+    {
+      "vulnerability_identifier": "CVE-2025-22946",
+      "interface_value": "/goform/SetOnlineDevName",
+      "parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-22946",
+      "applicability": "exact_artifact",
+      "claimed_versions": ["15.03.05.19"],
+      "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-22949",
+      "interface_value": "/goform/SetSambaCfg",
+      "parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-22949",
+      "applicability": "exact_artifact",
+      "claimed_versions": ["15.03.05.19"],
+      "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-10442",
+      "interface_value": "/goform/exeCommand",
+      "handler_value": "formexeCommand",
+      "parameters": ["cmdinput"],
+      "source_ref": "semantic-analysis:CVE-2025-10442",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.05.14"],
+      "applicability_basis": "historical claim identifies 15.03.05.14, not the selected 15.03.05.19 artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-10443",
+      "interface_value": "/goform/exeCommand",
+      "handler_value": "formexeCommand",
+      "parameters": ["cmdinput"],
+      "source_ref": "semantic-analysis:CVE-2025-10443",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.05.14", "15.03.05.18"],
+      "applicability_basis": "historical claim identifies 15.03.05.14/15.03.05.18, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-14286",
+      "interface_value": "/cgi-bin/DownloadCfg.jpg",
+      "parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-14286",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.05.14_multi"],
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-45427",
+      "interface_value": "/goform/WifiBasicSet",
+      "handler_value": "formWifiBasicSet",
+      "parameters": ["security"],
+      "source_ref": "nvd:CVE-2025-45427",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.05.14_multi"],
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-45428",
+      "interface_value": "/goform/SetSysAutoRebbotCfg",
+      "parameters": ["rebootTime"],
+      "source_ref": "nvd:CVE-2025-45428",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.05.14_multi"],
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-45429",
+      "interface_value": "/goform/WifiWpsStart",
+      "parameters": [],
+      "source_ref": "semantic-analysis:CVE-2025-45429",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.05.14_multi"],
+      "applicability_basis": "historical claim identifies 15.03.05.14_multi, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-5836",
+      "interface_value": "/goform/SetIPTVCfg",
+      "handler_value": "formSetIptv",
+      "parameters": ["list"],
+      "source_ref": "semantic-analysis:CVE-2025-5836",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.02.13"],
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-5839",
+      "interface_value": "/goform/AdvSetLanip",
+      "handler_value": "fromAdvSetLanip",
+      "parameters": ["lanMask"],
+      "source_ref": "semantic-analysis:CVE-2025-5839",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.02.13"],
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2025-5847",
+      "interface_value": "/goform/SetRemoteWebCfg",
+      "handler_value": "formSetSafeWanWebMan",
+      "method": "POST",
+      "parameters": ["remoteIp"],
+      "source_ref": "semantic-analysis:CVE-2025-5847",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.02.13"],
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2026-6015",
+      "interface_value": "/goform/QuickIndex",
+      "handler_value": "formQuickIndex",
+      "parameters": ["PPPOEPassword"],
+      "source_ref": "semantic-analysis:CVE-2026-6015",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.02.13"],
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact"
+    },
+    {
+      "vulnerability_identifier": "CVE-2026-6016",
+      "interface_value": "/goform/WizardHandle",
+      "handler_value": "decodePwd",
+      "parameters": ["WANS"],
+      "source_ref": "semantic-analysis:CVE-2026-6016",
+      "applicability": "out_of_scope",
+      "claimed_versions": ["15.03.02.13"],
+      "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact"
+    }
+  ]
+}
