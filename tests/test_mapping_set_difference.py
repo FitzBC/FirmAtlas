@@ -71,6 +71,38 @@ function Dispatcher() {
 
 
 class FrontendNativeSetDifferenceContractTests(unittest.TestCase):
+    def test_dispatcher_self_literal_is_a_clue_only_for_frontend_missing_route(self):
+        frontend = discover_frontend_asset_graph((
+            _asset("www/page.js", b'$.post("goform/MissingRoute", {});'),
+        ))
+        _, native = _upstreams((), ("KnownRoute", "NativeOnly"))
+        content = b"MissingRoute\x00NativeOnly\x00"
+        source = _source("www/cgi-bin/cstecgi.cgi", content)
+        helper_content = b"NativeOnly\x00"
+        helper_source = _source("usr/sbin/helper", helper_content)
+
+        result = attribute_frontend_native_set_difference(
+            frontend,
+            native,
+            (AttributionArtifact(
+                source, content, AttributionArtifactRole.NATIVE_AUXILIARY
+            ), AttributionArtifact(
+                helper_source, helper_content,
+                AttributionArtifactRole.NATIVE_AUXILIARY,
+            )),
+            SetDifferencePolicy.route_aware(frontend_auxiliary_only=True),
+        )
+
+        by_token = {item.token: item for item in result.attributions}
+        self.assertEqual(
+            DifferenceAttributionKind.ALTERNATE_NATIVE_LITERAL,
+            by_token["MissingRoute"].kind,
+        )
+        self.assertEqual(
+            DifferenceAttributionKind.NATIVE_REGISTRATION_NO_FRONTEND_REFERENCE,
+            by_token["NativeOnly"].kind,
+        )
+
     def test_multiple_completed_native_registrars_share_one_difference_scope(self):
         frontend, first = _upstreams(("shared",), ("shared", "firstOnly"))
         _, second = _upstreams((), ("secondOnly", "secondExtra"))

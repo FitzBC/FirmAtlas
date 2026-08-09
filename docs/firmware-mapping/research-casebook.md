@@ -194,6 +194,14 @@ R2-06 又推翻了“59 条已绑定路由就是 registrar 全貌”：这 59 �
 `fromWizardHandle` 的明确 mismatch。这个时间线不能倒写成初始分析已完整，也不能把 Native-only
 直接解释为后门、活代码或未授权接口。
 
+R2-07 从五条 Frontend-only 继续反向检查：`GetUpnpCfg/GetSySLogCfg` 的 route string 本来就在
+`httpd`，但调用顺序是先经 GOT 解析 handler，再把 route delta 放入 r2、形成 r0，和旧模板的
+route-first/r3 不同。支持第二种寄存器布局后，两条接口分别绑定 `formGetUpnpLists/formGetSysLog`；
+剩余三条 DLNA action 在 287 个 Native 辅助制品中无精确 token。一次把辅助制品同时用于
+Native-only 的尝试因 `write/exit` 等高频词超过 hit budget，使 coverage partial、110 条候选全部
+撤回；策略收窄为辅助检索只解释 Frontend-only 后恢复 completed。这说明 coverage gate 不仅保护
+结论，也能暴露“检索范围扩大但信噪比下降”的工程反例。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

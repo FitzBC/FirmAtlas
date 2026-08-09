@@ -35,6 +35,8 @@ from .native_deep import (
 from .native_ubus_registration import discover_native_ubus_registrations
 from .script_backend import discover_script_backend
 from .set_difference import (
+    AttributionArtifact,
+    AttributionArtifactRole,
     SetDifferencePolicy,
     attribute_frontend_native_set_difference,
 )
@@ -83,6 +85,10 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v5", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v4(cls) -> "MappingAnalysisProfile":
         return cls("firmatlas.mapping.profile/auto-v4", _AUTO_ANALYZERS)
 
     @classmethod
@@ -111,6 +117,10 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v5", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v4(cls) -> "MappingAnalyzerRegistry":
         return cls("firmatlas.mapping.analyzer-registry/builtin-v4", _AUTO_ANALYZERS)
 
     @classmethod
@@ -154,6 +164,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V4 = MappingAnalyzerRegistry.builtin_v4()
 BUILTIN_ANALYZER_REGISTRY_V3 = MappingAnalyzerRegistry.builtin_v3()
 BUILTIN_ANALYZER_REGISTRY_V2 = MappingAnalyzerRegistry.builtin_v2()
 BUILTIN_ANALYZER_REGISTRY_V1 = MappingAnalyzerRegistry.builtin_v1()
@@ -413,12 +424,19 @@ def analyze_extracted_root(
     native_deep = tuple(
         discover_arm_pic_callsite_bindings(
             selected_by_path[path][0], selected_by_path[path][1], tuple(anchors),
-            ArmPicCallsiteProfile.v1()
-            if request.profile.profile_id in {
-                "firmatlas.mapping.profile/auto-v1",
-                "firmatlas.mapping.profile/auto-v2",
-            }
-            else ArmPicCallsiteProfile(),
+            (
+                ArmPicCallsiteProfile.v1()
+                if request.profile.profile_id in {
+                    "firmatlas.mapping.profile/auto-v1",
+                    "firmatlas.mapping.profile/auto-v2",
+                }
+                else ArmPicCallsiteProfile.v2()
+                if request.profile.profile_id in {
+                    "firmatlas.mapping.profile/auto-v3",
+                    "firmatlas.mapping.profile/auto-v4",
+                }
+                else ArmPicCallsiteProfile()
+            ),
         )
         for path, anchors in sorted(anchors_by_path.items())
         if (
@@ -428,7 +446,11 @@ def analyze_extracted_root(
     )
     registrar_inventory = tuple(
         discover_arm_pic_registrar_bindings(
-            source, content, ArmPicCallsiteProfile()
+            source,
+            content,
+            ArmPicCallsiteProfile.v2()
+            if request.profile.profile_id == "firmatlas.mapping.profile/auto-v4"
+            else ArmPicCallsiteProfile(),
         )
         for source, content, _ in selected
         if (
@@ -482,6 +504,7 @@ def analyze_extracted_root(
             )
     set_difference = None
     set_difference_diagnostics = ()
+    attribution_artifacts = ()
     if "set_difference" in request.profile.enabled_analyzers:
         if frontend_graph is None:
             set_difference_diagnostics = ("frontend asset graph unavailable",)
@@ -490,11 +513,25 @@ def analyze_extracted_root(
                 "set difference requires an ARM registrar inventory",
             )
         else:
+            attribution_artifacts = (
+                tuple(
+                    AttributionArtifact(
+                        source, content, AttributionArtifactRole.NATIVE_AUXILIARY
+                    )
+                    for source, content, kinds in selected if "native" in kinds
+                )
+                if request.profile.profile_id
+                == "firmatlas.mapping.profile/auto-v5"
+                else ()
+            )
             set_difference = attribute_frontend_native_set_difference(
                 frontend_graph,
                 registrar_inventory,
-                (),
-                SetDifferencePolicy.route_aware(),
+                attribution_artifacts,
+                SetDifferencePolicy.route_aware(
+                    frontend_auxiliary_only=request.profile.profile_id
+                    == "firmatlas.mapping.profile/auto-v5"
+                ),
             )
     initial_obligations = (
         *((correlation.obligations) if correlation is not None else ()),
@@ -587,7 +624,9 @@ def analyze_extracted_root(
             "set_difference",
             set_difference.coverage_status if set_difference is not None
             else CoverageStatus.NOT_APPLICABLE,
-            sum(len(item.bindings) for item in registrar_inventory),
+            len(attribution_artifacts) or sum(
+                len(item.bindings) for item in registrar_inventory
+            ),
             len(set_difference.attributions) if set_difference is not None else 0,
             tuple(item.code for item in set_difference.diagnostics)
             if set_difference is not None else set_difference_diagnostics,

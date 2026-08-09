@@ -161,7 +161,48 @@ def _arm32_negative_literal_pic_fixture() -> bytes:
     return bytes(payload)
 
 
+def _arm32_handler_first_pic_fixture() -> bytes:
+    payload = bytearray(_arm32_pic_fixture())
+    section_table_offset = struct.unpack_from("<I", payload, 32)[0]
+    text_offset = struct.unpack_from("<I", payload, section_table_offset + 2 * 40 + 16)[0]
+
+    def put(address: int, value: int) -> None:
+        struct.pack_into("<I", payload, text_offset + address - 0x1000, value & 0xFFFFFFFF)
+
+    put(0x100C, 0xE59F3074)  # handler GOT offset -> 0x1088
+    put(0x1010, 0xE7943003)
+    put(0x1014, 0xE59F2068)  # route delta -> 0x1084
+    put(0x1018, 0xE0842002)
+    put(0x101C, 0xE1A00002)
+    put(0x1020, 0xE1A01003)
+    put(0x1024, _arm_bl(0x1024, 0x1200))
+    put(0x1028, 0xE59F3060)
+    put(0x102C, 0xE7943003)
+    put(0x1030, 0xE59F2054)
+    put(0x1034, 0xE0842002)
+    put(0x1038, 0xE1A00002)
+    put(0x103C, 0xE1A01003)
+    put(0x1040, _arm_bl(0x1040, 0x1200))
+    return bytes(payload)
+
+
 class ArmPicCallsiteContractTests(unittest.TestCase):
+    def test_handler_first_r2_route_layout_is_enumerated(self):
+        content = _arm32_handler_first_pic_fixture()
+        source = _source("bin/httpd", content)
+
+        result = discover_arm_pic_registrar_bindings(source, content)
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(
+            {"SetOnlineDevName", "GetDeviceDetail"},
+            {item.route_token for item in result.bindings},
+        )
+        self.assertEqual(
+            {"formSetDeviceName", "formGetDeviceDetail"},
+            {item.handler_symbol for item in result.bindings},
+        )
+
     def test_verified_registrar_can_enumerate_all_route_handler_pairs(self):
         content = _arm32_negative_literal_pic_fixture()
         source = _source("bin/httpd", content)
@@ -506,7 +547,7 @@ class ArmPicCallsiteContractTests(unittest.TestCase):
                 for item in deep.bindings
             },
         )
-        self.assertEqual({164}, {item.registrar_pair_count for item in deep.bindings})
+        self.assertEqual({166}, {item.registrar_pair_count for item in deep.bindings})
 
 
 if __name__ == "__main__":

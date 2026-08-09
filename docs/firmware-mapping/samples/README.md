@@ -94,6 +94,7 @@
 - R2-04 用 `public.js` 的 `$.post(pageModel.setUrl, ...)` 为 31 个页面接口提供跨文件 method 证据，13 条结构化 expectation 达到 8 observed / 5 version-out-of-scope。另以 [71 条产品级全集](./r2-04-vendor-tenda-ac9-vulnerability-scope.json)守住分母：13 条可比较接口、3 条仅参数、9 条无结构化通信、46 条尚未语义分析；平台对当前 FirmEmuHub 样本另有 30 条高置信 `reproduced_on` 关联，两者不可混算。13 条历史路由中目前仅 3 条有验证过的 route→handler binding。
 - R2-05 发现 Samba 所在注册块使用 ARM `LDR [PC, -offset]` 回指 literal pool；`auto-v3` 增加双向 PC-relative 解析后，绑定从 45 增至 59、开放义务从 89 降至 61，并证明 `SetSambaCfg → formSetSambaConf`。历史路由 binding 覆盖从 3/13 提升至 5/13；机器输出见 [R2-05](./r2-05-vendor-tenda-ac9-bidirectional-pic.json)。
 - R2-06 移除前端/history anchor 对 Native 枚举范围的限制：`httpd` 183 条、`dhttpd` 2 条，共恢复 185 条 registrar binding。限定 `/goform/` 前端 action 后得到 110 条 Native-only、5 条 Frontend-only；只有 Inventory、Frontend、Native 与 Set Difference coverage 全部 completed，才发布 110 条[潜在隐藏接口](./r2-06-vendor-tenda-ac9-registrar-inventory.json)。它们包含 `QuickIndex/WizardHandle/MfgTest/telnet/ate` 等研究目标，但不代表后门、运行时可达或漏洞。
+- R2-07 识别 handler-first/r2-route ARM 调用布局，恢复 `GetUpnpCfg → formGetUpnpLists` 与 `GetSySLogCfg → formGetSysLog`；registrar 185→187、开放义务 61→57、Frontend-only 5→3。剩余 `GetDlnaCfg/SetDlnaCfg/refreshDLNA` 在 287 个 Native 辅助制品中均无精确 token，继续保持版本残留或缺失组件义务；见 [R2-07](./r2-07-vendor-tenda-ac9-handler-first.json)。
 
 它是开发样本，不进入最终无泄漏测试结果。
 

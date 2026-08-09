@@ -65,12 +65,16 @@ class SetDifferencePolicy:
     max_hits_per_token: int = 32
     include_request_action_tokens: bool = False
     request_action_prefixes: Tuple[str, ...] = ()
+    scan_native_only_auxiliary: bool = True
 
     @classmethod
-    def route_aware(cls) -> "SetDifferencePolicy":
+    def route_aware(
+        cls, frontend_auxiliary_only: bool = False,
+    ) -> "SetDifferencePolicy":
         return cls(
             include_request_action_tokens=True,
             request_action_prefixes=("/goform/", "goform/"),
+            scan_native_only_auxiliary=not frontend_auxiliary_only,
         )
 
     def __post_init__(self) -> None:
@@ -427,6 +431,9 @@ def attribute_frontend_native_set_difference(
         native_inventory if isinstance(native_inventory, tuple)
         else (native_inventory,)
     )
+    registration_paths = {
+        inventory.source_path for inventory in native_inventories
+    }
     native_evidence = {}
     for inventory in native_inventories:
         for atom in inventory.evidence_atoms:
@@ -467,6 +474,11 @@ def attribute_frontend_native_set_difference(
             hits = []
             hit_budget_exhausted = False
             for artifact in valid_artifacts:
+                if (
+                    side is DifferenceSide.NATIVE_ONLY
+                    and not policy.scan_native_only_auxiliary
+                ):
+                    continue
                 remaining = policy.max_hits_per_token - len(hits)
                 if remaining <= 0:
                     hit_budget_exhausted = True
@@ -508,11 +520,19 @@ def attribute_frontend_native_set_difference(
                 hit for hit in hits
                 if hit.artifact.role is AttributionArtifactRole.NATIVE_AUXILIARY
                 and hit.capability == "mentions_operation_token"
+                and (
+                    side is DifferenceSide.FRONTEND_ONLY
+                    or hit.artifact.source.canonical_path not in registration_paths
+                )
             )
             native_variant_hits = tuple(
                 hit for hit in hits
                 if hit.artifact.role is AttributionArtifactRole.NATIVE_AUXILIARY
                 and hit.capability == "mentions_operation_variant"
+                and (
+                    side is DifferenceSide.FRONTEND_ONLY
+                    or hit.artifact.source.canonical_path not in registration_paths
+                )
             )
             kind, interpretation, obligation = _classification(
                 side, web_hits, native_hits, native_variant_hits,

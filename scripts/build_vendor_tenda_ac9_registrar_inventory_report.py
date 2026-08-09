@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V4,
     DiscoveryCandidateKind,
     HistoricalVulnerabilityRecord,
     MappingAnalysisProfile,
@@ -31,7 +32,11 @@ VULNERABILITY_SCOPE = Path(
 )
 
 
-def build_report() -> dict:
+def build_report(
+    profile: MappingAnalysisProfile = MappingAnalysisProfile.auto_v4(),
+    registry=BUILTIN_ANALYZER_REGISTRY_V4,
+    selected_routes: tuple = (),
+) -> dict:
     expectations = load_historical_expectations(json.loads(
         EXPECTATIONS.read_text(encoding="utf-8")
     ))
@@ -42,8 +47,8 @@ def build_report() -> dict:
     run = analyze_extracted_root(MappingAnalysisRequest(
         root=ROOT,
         firmware_artifact_sha256=ARTIFACT_SHA256,
-        profile=MappingAnalysisProfile.auto(),
-    ))
+        profile=profile,
+    ), registry=registry)
     diff = compare_historical_expectations(run.catalog, expectations)
     audit = build_historical_vulnerability_audit(diff, records)
     route_report = compare_historical_route_bindings(run.catalog, expectations)
@@ -62,7 +67,7 @@ def build_report() -> dict:
             and dict(item.attributes).get("difference_side") == "frontend_only"
         )
     )
-    return {
+    report = {
         "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-06/v1alpha1",
         "sample_role": "primary-vendor-tenda-ac9-full-registrar-iteration",
         "firmware_artifact_sha256": ARTIFACT_SHA256,
@@ -111,6 +116,25 @@ def build_report() -> dict:
             ),
         },
     }
+    if selected_routes:
+        report["selected_route_bindings"] = [
+            {
+                "route_token": item.canonical_identity,
+                "handler_symbol": dict(item.attributes).get("handler_symbol"),
+                "handler_identity": dict(item.attributes).get("handler_identity"),
+                "registration_address": dict(item.attributes).get(
+                    "registration_address"
+                ),
+                "source_path": item.source_path,
+                "evidence_ids": list(item.evidence_ids),
+            }
+            for item in run.catalog.candidates
+            if (
+                item.candidate_kind is DiscoveryCandidateKind.NATIVE_ROUTE_BINDING
+                and item.canonical_identity in set(selected_routes)
+            )
+        ]
+    return report
 
 
 if __name__ == "__main__":

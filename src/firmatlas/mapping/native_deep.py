@@ -80,18 +80,27 @@ class NativeDeepPolicy:
 
 @dataclass(frozen=True)
 class ArmPicCallsiteProfile:
-    name: str = "arm32-pic-r0-r1-bl/v2"
+    name: str = "arm32-pic-r0-r1-bl/v3"
     min_registrar_pairs: int = 2
     max_pic_base_distance: int = 16 * 1024
     max_route_bytes: int = 256
     relocation_types: Tuple[int, ...] = (_R_ARM_GLOB_DAT,)
     allow_negative_pc_relative_literals: bool = True
+    allow_handler_first_layout: bool = True
 
     @classmethod
     def v1(cls) -> "ArmPicCallsiteProfile":
         return cls(
             name="arm32-pic-r0-r1-bl/v1",
             allow_negative_pc_relative_literals=False,
+            allow_handler_first_layout=False,
+        )
+
+    @classmethod
+    def v2(cls) -> "ArmPicCallsiteProfile":
+        return cls(
+            name="arm32-pic-r0-r1-bl/v2",
+            allow_handler_first_layout=False,
         )
 
     def __post_init__(self) -> None:
@@ -1019,29 +1028,48 @@ def _scan_arm_pic_candidates(
         if section.flags & (_ALLOC | _EXEC) == (_ALLOC | _EXEC)
     )
     candidates = []
+
+    def literal_load(word: int, register: int) -> bool:
+        return (
+            word & 0xFF7FF000 == (0xE51F0000 | (register << 12))
+            and (
+                profile.allow_negative_pc_relative_literals
+                or word & 0x00800000
+            )
+        )
+
+    def literal_address(instruction_address: int, word: int) -> int:
+        displacement = word & 0xFFF
+        return instruction_address + 8 + (
+            displacement if word & 0x00800000 else -displacement
+        )
+
     for section in executable_sections:
         if section.section_type != 1:
             continue
         for relative in range(0, section.size - 28 + 1, 4):
             offset = section.offset + relative
             words = struct.unpack_from(elf.endian_prefix + "7I", content, offset)
-            if not (
-                words[0] & 0xFF7FF000 == 0xE51F3000
-                and (
-                    profile.allow_negative_pc_relative_literals
-                    or words[0] & 0x00800000
-                )
+            route_first = (
+                literal_load(words[0], 3)
                 and words[1] == 0xE0843003
                 and words[2] == 0xE1A00003
-                and words[3] & 0xFF7FF000 == 0xE51F3000
-                and (
-                    profile.allow_negative_pc_relative_literals
-                    or words[3] & 0x00800000
-                )
+                and literal_load(words[3], 3)
                 and words[4] == 0xE7943003
                 and words[5] == 0xE1A01003
                 and words[6] & 0xFF000000 == 0xEB000000
-            ):
+            )
+            handler_first = (
+                profile.allow_handler_first_layout
+                and literal_load(words[0], 3)
+                and words[1] == 0xE7943003
+                and literal_load(words[2], 2)
+                and words[3] == 0xE0842002
+                and words[4] == 0xE1A00002
+                and words[5] == 0xE1A01003
+                and words[6] & 0xFF000000 == 0xEB000000
+            )
+            if not (route_first or handler_first):
                 continue
             address = section.address + relative
             pic_base = _find_pic_base(
@@ -1049,20 +1077,14 @@ def _scan_arm_pic_candidates(
             )
             if pic_base is None:
                 continue
-            route_delta = _word_at_address(
-                elf, content,
-                address + 8 + (
-                    (words[0] & 0xFFF) if words[0] & 0x00800000
-                    else -(words[0] & 0xFFF)
-                ),
-            )
-            handler_offset = _word_at_address(
-                elf, content,
-                address + 20 + (
-                    (words[3] & 0xFFF) if words[3] & 0x00800000
-                    else -(words[3] & 0xFFF)
-                ),
-            )
+            route_word_index = 0 if route_first else 2
+            handler_word_index = 3 if route_first else 0
+            route_delta = _word_at_address(elf, content, literal_address(
+                address + route_word_index * 4, words[route_word_index]
+            ))
+            handler_offset = _word_at_address(elf, content, literal_address(
+                address + handler_word_index * 4, words[handler_word_index]
+            ))
             if route_delta is None or handler_offset is None:
                 continue
             route_address = (got.address + route_delta) & 0xFFFFFFFF

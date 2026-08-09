@@ -172,9 +172,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v4", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v5", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v4",
+            "firmatlas.mapping.analyzer-registry/builtin-v5",
             result.analyzer_registry_id,
         )
 
@@ -229,13 +229,23 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             if item.stage_name == "arm_pic_registrar"
         )
         self.assertEqual(CoverageStatus.COMPLETED, registrar_stage.coverage_status)
-        self.assertEqual(185, registrar_stage.output_count)
+        self.assertEqual(187, registrar_stage.output_count)
         hidden = build_potential_hidden_interface_index(result.catalog)
         self.assertEqual(CoverageStatus.COMPLETED, hidden.coverage_status)
         self.assertEqual(110, len(hidden.items))
         hidden_tokens = {item.operation_token for item in hidden.items}
         self.assertIn("GetDeviceDetail", hidden_tokens)
         self.assertNotIn("SetSambaCfg", hidden_tokens)
+        recovered = {
+            item.canonical_identity: dict(item.attributes).get("handler_symbol")
+            for item in result.catalog.candidates
+            if item.candidate_kind is DiscoveryCandidateKind.NATIVE_ROUTE_BINDING
+            and item.canonical_identity in {"GetUpnpCfg", "GetSySLogCfg"}
+        }
+        self.assertEqual({
+            "GetUpnpCfg": "formGetUpnpLists",
+            "GetSySLogCfg": "formGetSysLog",
+        }, recovered)
 
 
 if __name__ == "__main__":
