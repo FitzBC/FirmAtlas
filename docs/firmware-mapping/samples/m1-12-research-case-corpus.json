@@ -1178,7 +1178,7 @@
       ]
     },
     {
-      "case_id": "research-case:f964e17f7c40e239dd79fb395a9889a316c450f49f7e03a76d12a506f0955d45",
+      "case_id": "research-case:2ac72c304c51f46f2673f134d27e03d5a2eda91f8354adcffd330cbad48c7673",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1885,6 +1885,15 @@
           "locator": "json:$.queries",
           "capability": "replays_persisted_graph_queries_with_evidence",
           "producer": "communication-graph-query@v1alpha1"
+        },
+        {
+          "evidence_ref": "coverage:ac9-dlna-http-console-graph",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-19-vendor-tenda-ac9-http-console-graph.json",
+          "source_artifact_sha256": "923673e035b176735549fe33b7f02076e4eb8b28b5bc95f340aa64f03d414ce4",
+          "locator": "json:$.http_acceptance",
+          "capability": "replays_product_graph_query_with_evidence",
+          "producer": "communication-graph-http-console@v1alpha1"
         }
       ],
       "claims": [
@@ -2046,6 +2055,14 @@
           "status": "supported"
         },
         {
+          "claim_id": "claim:dlna-product-graph-query",
+          "statement": "The product HTTP adapter and Console recover the same four AC9 DLNA interfaces, parameter evidence, and four open owner obligations through the shared persisted-query interface; the presentation layer does not infer a handler.",
+          "evidence_refs": [
+            "coverage:ac9-dlna-http-console-graph"
+          ],
+          "status": "supported"
+        },
+        {
           "claim_id": "claim:dlna-handler-owner",
           "statement": "In the AC9 artifact, no exact Native registration or handler binding connects GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform execution path; the adjacent GetUSBStatus binding does not establish an alias for those operations.",
           "evidence_refs": [
@@ -2124,7 +2141,8 @@
             "coverage:ac18-dlna-frontend-reachability-control",
             "coverage:ac9-dlna-communication-graph",
             "coverage:ac18-dlna-communication-graph-control",
-            "coverage:ac9-dlna-persisted-graph-query"
+            "coverage:ac9-dlna-persisted-graph-query",
+            "coverage:ac9-dlna-http-console-graph"
           ],
           "status": "unresolved"
         }
@@ -2265,6 +2283,18 @@
           "creates_obligations": [],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-product-graph-query",
+          "order": 12,
+          "interpretation": "Replay the persisted graph through the real HTTP adapter and Console interface focus, presets, and EvidenceAtom panel without adding presentation-layer inference.",
+          "claim_ids": [
+            "claim:dlna-product-graph-query",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -2307,7 +2337,8 @@
         "Transferring AC18 handler addresses or vulnerability state to AC9 would confuse a family-level positive control with artifact-local proof.",
         "Treating declared-but-unreached as dead code or runtime inaccessibility would overstate a bounded static call-graph result.",
         "Hiding a stale open obligation after deeper binding evidence arrives would make the graph contradict its own evidence timeline.",
-        "Reimplementing graph traversal in each UI would allow view filters to become an unreviewed second inference engine."
+        "Reimplementing graph traversal in each UI would allow view filters to become an unreviewed second inference engine.",
+        "Rendering a full unbounded graph in the browser would hide query budgets, mix unrelated interfaces, and make visual proximity look evidentiary."
       ],
       "paper_uses": [
         "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -2320,7 +2351,8 @@
         "Family holdout showing that enabled variants can prioritize symbols and structures without resolving a disabled target build by analogy.",
         "Frontend reachability ablation separating request declaration, bounded active paths, and commented or unreached functions.",
         "Graph-projection case showing artifact-local owner separation and a late-evidence obligation state transition.",
-        "Persistence/query case showing that reproducible analyst views can preserve the same evidence and open obligations across process restarts."
+        "Persistence/query case showing that reproducible analyst views can preserve the same evidence and open obligations across process restarts.",
+        "Product-adapter case showing that HTTP and interactive graph views can share one evidence-preserving query semantics."
       ],
       "limitations": [
         "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",

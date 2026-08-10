@@ -404,6 +404,132 @@ export interface MappingSnapshotDiff {
   diagnostics: Array<{ code: string; message: string }>
 }
 
+export interface CommunicationGraphSummary {
+  graph_id: string
+  schema_version: string
+  source_catalog_id: string
+  firmware_artifact_sha256: string
+  source_catalog_coverage_status: string
+  projection_status: string
+  node_count: number
+  edge_count: number
+  published_at: string
+}
+
+export interface CommunicationGraphQueryOptions {
+  query?: string
+  preset?: string
+  nodeKinds?: string[]
+  edgeKinds?: string[]
+  statuses?: string[]
+  evidenceId?: string
+  focusNodeIds?: string[]
+  focusIdentities?: string[]
+  maxHops?: number
+  maxNodes?: number
+  maxEdges?: number
+}
+
+export interface CommunicationGraphNode {
+  node_id: string
+  node_kind: string
+  label: string
+  status: string
+  source_path: string
+  evidence_ids: string[]
+  attributes: Array<[string, string]>
+}
+
+export interface CommunicationGraphEdge {
+  edge_id: string
+  edge_kind: string
+  source_ref: string
+  target_ref: string
+  status: string
+  origin_ref: string
+  evidence_ids: string[]
+  attributes: Array<[string, string]>
+}
+
+export interface CommunicationGraphEvidenceAtom {
+  evidence_id: string
+  subject_ref: string
+  predicate: string
+  object_value: string
+  capability: string
+  confidence: number
+  observation_kind: string
+  producer: string
+  producer_version: string
+  source_span: {
+    artifact_path: string
+    artifact_sha256: string
+    locator: string
+    span_kind: string
+    start_byte: number
+    end_byte: number
+    start_line?: number | null
+    end_line?: number | null
+  }
+}
+
+export interface CommunicationGraphQueryResult {
+  schema_version: string
+  query_id: string
+  graph: {
+    graph_id: string
+    schema_version: string
+    source_catalog_id: string
+    firmware_artifact_sha256: string
+    source_catalog_coverage_status: string
+    projection_status: string
+  }
+  query: {
+    text: string
+    preset_id: string
+    node_kinds: string[]
+    edge_kinds: string[]
+    statuses: string[]
+    evidence_id: string
+    focus_node_ids: string[]
+    focus_canonical_identities: string[]
+    max_hops: number
+    max_nodes: number
+    max_edges: number
+  }
+  query_status: 'completed' | 'partial'
+  nodes: CommunicationGraphNode[]
+  edges: CommunicationGraphEdge[]
+  total_node_count: number
+  total_edge_count: number
+  selected_node_count: number
+  selected_edge_count: number
+  evidence_atoms: CommunicationGraphEvidenceAtom[]
+  facets: {
+    node_kinds: Record<string, number>
+    edge_kinds: Record<string, number>
+    statuses: Record<string, number>
+  }
+  coverage: Array<{
+    scope: string
+    producer_kind: string
+    producer: string
+    producer_version: string
+    status: string
+    required: boolean
+    processed_result_count: number
+    diagnostic: string
+  }>
+  view_presets: Array<{
+    preset_id: string
+    title: string
+    node_kinds: string[]
+    edge_kinds: string[]
+    description: string
+  }>
+  diagnostics: string[]
+}
+
 export interface SemanticInterfaceObservation {
   value: string
   kind: string

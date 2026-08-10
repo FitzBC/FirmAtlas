@@ -335,3 +335,15 @@ src/firmatlas/
 - 任何异常都转换成结构化 diagnostic 和 coverage status；
 - 动态网络默认关闭，仅由授权策略和隔离环境开放；
 - 研究 PoC 产物不得进入普通产品查询和公开导出。
+
+## 11. 产品查询与可视化 Adapter
+
+产品 HTTP Adapter 只接受 graph identity、文本、preset、kind/status、EvidenceAtom、精确焦点和
+预算参数，并构造 `CommunicationGraphQuery`；遍历、证据回填、partial 诊断和无悬空边约束仍
+只存在于 repository Module。Console 先用 `node_kind=interface` 获取有界接口索引，再用精确
+`focus_node` 获取子图，不在浏览器中重新拼接 owner、参数或漏洞关系。
+
+图谱按接口入口、参数/契约、分发/绑定、执行主体、未决义务分层布局。四个 preset 是同一事实
+图的选择视图：`interface_structure`、`parameter_state`、`communication_topology`、
+`completeness`。Coverage、query partial 和 obligation 必须可见；EvidenceAtom 侧栏显示原始
+artifact path/locator。HTTP、CLI 和 Console 因而共享一个查询 Interface，而不是三套推理实现。

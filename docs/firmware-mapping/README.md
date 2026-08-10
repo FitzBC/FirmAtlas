@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1 corpus gate 仍为 `partial`；R2-18 AC9 通信图持久化与统一查询已验证
+> 当前状态：M1 corpus gate 仍为 `partial`；R2-19 AC9 HTTP/Console 通信图谱已验证
 > 最近更新：2026-08-11
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -98,6 +98,7 @@
 | [R2-16 AC9/AC18 前端调用可达性](./progress/2026-08-10-r2-16-ac9-dlna-frontend-reachability.md) | 请求声明、静态活动路径、未达函数与注释绑定的证据分层 | 前端调用根、调用边、覆盖边界或 DLNA 可达性状态变化时 |
 | [R2-17 AC9/AC18 通信架构图](./progress/2026-08-10-r2-17-ac9-dlna-communication-graph.md) | Catalog-only 图投影、焦点预算、证据/覆盖/义务叠加与 owner 对照 | 图 schema、边引用、焦点规则、义务关闭或 UI 查询合同变化时 |
 | [R2-18 AC9 持久化图查询](./progress/2026-08-11-r2-18-ac9-persisted-graph-query.md) | SQLite 不可变发布、统一 preset/focus/evidence 查询、重开与 CLI | 图存储 schema、查询语义、证据闭包、预算或产品 Adapter 变化时 |
+| [R2-19 AC9 HTTP/Console 图谱](./progress/2026-08-11-r2-19-ac9-http-console-graph.md) | 共享查询 HTTP Adapter、接口焦点、四视图、证据/义务侧栏与真实浏览器回放 | HTTP 参数、图谱交互、响应式布局或 evidence overlay 变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -184,8 +185,9 @@ M1 工作项：
 | M1-26 | Native rpcd/ubus 注册表与 handler 绑定 | 已验证 | M1-25 | 4 个真实 ARM32 plugin + 31 verified binding + 30 registration obligations closed + handler UI |
 | R2-17 | Catalog 通信架构图投影与 AC9 主样本 | 已验证 | R2-01/15/16 | pure read model + 4 view presets + bounded focus + AC9 69-node graph + AC18 owner control |
 | R2-18 | 通信图持久化与统一查询 | 已验证 | R2-17 | immutable SQLite graph + source Catalog evidence closure + reopen + 5 AC9 query views + CLI |
+| R2-19 | AC9 产品 HTTP 与 Console 通信图谱 | 已验证 | R2-18 | shared query HTTP Adapter + interface index/focus + 4 presets + evidence/obligation panel + real browser replay |
 
-**下一项建议**：为已验证 repository query 增加产品 HTTP Adapter 与 Console 图谱/证据抽屉，再以 AC9 唯一剩余的历史 transport-method gap 建立跨资源 framework-semantics 证据；随后在 DAP-3520/X5000R/OpenWrt ubus 复用相同持久化查询合同。
+**下一项建议**：以 AC9 唯一剩余的历史 transport-method gap 建立跨资源 framework-semantics 证据，并把历史漏洞 expectation 作为不改变事实图的 overlay；随后在 DAP-3520/X5000R/OpenWrt ubus 复用相同 HTTP/Console 查询合同。
 
 ## 7. 跨会话无缝工作协议
 

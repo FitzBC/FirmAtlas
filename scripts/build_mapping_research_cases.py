@@ -58,6 +58,10 @@ AC9_R2_18_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-18-vendor-tenda-ac9-graph-query.json"
 )
+AC9_R2_19_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-19-vendor-tenda-ac9-http-console-graph.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1230,6 +1234,17 @@ def build_ac9_dlna_fixture_split_case():
         "replays_persisted_graph_queries_with_evidence",
         "communication-graph-query@v1alpha1",
     )
+    product_graph_report_sha = hashlib.sha256(
+        AC9_R2_19_REPORT.read_bytes()
+    ).hexdigest()
+    ac9_product_graph_ref = CaseEvidenceReference(
+        "coverage:ac9-dlna-http-console-graph",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_19_REPORT.as_posix(), product_graph_report_sha,
+        "json:$.http_acceptance",
+        "replays_product_graph_query_with_evidence",
+        "communication-graph-http-console@v1alpha1",
+    )
     evidence = (
         *atom_evidence,
         target_resolution_ref,
@@ -1241,6 +1256,7 @@ def build_ac9_dlna_fixture_split_case():
         ac9_graph_ref,
         ac18_graph_ref,
         ac9_graph_query_ref,
+        ac9_product_graph_ref,
     )
     by_capability = {}
     for item in evidence:
@@ -1424,6 +1440,14 @@ def build_ac9_dlna_fixture_split_case():
                 (ac9_graph_query_ref.evidence_ref,),
             ),
             CaseClaim(
+                "claim:dlna-product-graph-query",
+                "The product HTTP adapter and Console recover the same four "
+                "AC9 DLNA interfaces, parameter evidence, and four open owner "
+                "obligations through the shared persisted-query interface; "
+                "the presentation layer does not infer a handler.",
+                (ac9_product_graph_ref.evidence_ref,),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
                 "In the AC9 artifact, no exact Native registration or handler binding connects "
                 "GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform "
@@ -1444,6 +1468,7 @@ def build_ac9_dlna_fixture_split_case():
                     ac9_graph_ref.evidence_ref,
                     ac18_graph_ref.evidence_ref,
                     ac9_graph_query_ref.evidence_ref,
+                    ac9_product_graph_ref.evidence_ref,
                 ),
                 CaseClaimStatus.UNRESOLVED,
             ),
@@ -1542,6 +1567,16 @@ def build_ac9_dlna_fixture_split_case():
                     "claim:dlna-handler-owner",
                 ),
             ),
+            CaseStage(
+                "stage:dlna-product-graph-query", 12,
+                "Replay the persisted graph through the real HTTP adapter and "
+                "Console interface focus, presets, and EvidenceAtom panel "
+                "without adding presentation-layer inference.",
+                (
+                    "claim:dlna-product-graph-query",
+                    "claim:dlna-handler-owner",
+                ),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1570,6 +1605,7 @@ def build_ac9_dlna_fixture_split_case():
             "Treating declared-but-unreached as dead code or runtime inaccessibility would overstate a bounded static call-graph result.",
             "Hiding a stale open obligation after deeper binding evidence arrives would make the graph contradict its own evidence timeline.",
             "Reimplementing graph traversal in each UI would allow view filters to become an unreviewed second inference engine.",
+            "Rendering a full unbounded graph in the browser would hide query budgets, mix unrelated interfaces, and make visual proximity look evidentiary.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -1583,6 +1619,7 @@ def build_ac9_dlna_fixture_split_case():
             "Frontend reachability ablation separating request declaration, bounded active paths, and commented or unreached functions.",
             "Graph-projection case showing artifact-local owner separation and a late-evidence obligation state transition.",
             "Persistence/query case showing that reproducible analyst views can preserve the same evidence and open obligations across process restarts.",
+            "Product-adapter case showing that HTTP and interactive graph views can share one evidence-preserving query semantics.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",

@@ -1,0 +1,90 @@
+{
+  "analysis": {
+    "analysis_run_id": "mapping-analysis-run:45eda12627543cee4d50664fb746d5cd05ba99061da1c6a87e6a70a23f3e455b",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v13",
+    "catalog_coverage_status": "completed",
+    "catalog_id": "discovery-catalog:e1b1f16da33f8d9ac0725bb3ae917efb80becc4d7b3d6db9305309126862a14a",
+    "edge_count": 7212,
+    "graph_id": "communication-graph:451023b0a6422c343920f7756360aaa564e995498afdc56a53d07265c71ca7d1",
+    "graph_projection_status": "completed",
+    "node_count": 5674,
+    "profile_id": "firmatlas.mapping.profile/auto-v13"
+  },
+  "console_acceptance": {
+    "interaction_contract": [
+      "graph_selection",
+      "interface_search_and_exact_focus",
+      "interface_structure_preset",
+      "parameter_state_preset",
+      "communication_topology_preset",
+      "completeness_and_obligation_preset",
+      "evidence_atom_drilldown",
+      "partial_and_coverage_diagnostics",
+      "responsive_three-pane_layout"
+    ],
+    "production_document_served": true,
+    "source_sha256": {
+      "apps/console/src/api/client.ts": "342e15cd920d44f36ec1622694f1421f9507563f96ff031ca79880059beb9a5a",
+      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "8deea063cb9c84677982179445e0f9d3032e9bef8f9b63487269dc14df80c871",
+      "apps/console/src/components/MappingCatalogWorkspace.tsx": "ad2def1e6707d107a5794646b772993197dc15c4711af42eb75fe3face9ed559",
+      "apps/console/src/types.ts": "90e6ab8908ac649d4291ac44fe960c0518a22a222d2f3618f38aacc75a21e859"
+    }
+  },
+  "evidence_boundary": "The HTTP adapter translates request parameters into the shared CommunicationGraphQuery. The Console selects and renders returned facts; neither layer creates interface, owner, runtime, or vulnerability conclusions.",
+  "http_acceptance": {
+    "dlna_interface_index": {
+      "labels": [
+        "/goform/refreshDLNA",
+        "goform/GetDlnaCfg",
+        "goform/SetDlnaCfg",
+        "goform/expandDlnaFile?"
+      ],
+      "query_id": "communication-graph-query:44574430afa9b5f5b603fd4484aaa4ce4760da0395158b286afd3757927c6232"
+    },
+    "focused_interface_structure": {
+      "dlnaEn_evidence": [
+        {
+          "capability": "serializes_parameter",
+          "evidence_id": "evidence:d77b98274f66deb99b7bf503be7a564c82559848cfa8a3fb15031caeb3a4e615",
+          "locator": "text_utf8:bytes=1404-1410;lines=45:17-45:23",
+          "source_path": "webroot_ro/js/dlna.js"
+        }
+      ],
+      "edge_count": 22,
+      "node_count": 23,
+      "node_kind_counts": {
+        "feature_gate": 1,
+        "interface": 4,
+        "invocation": 4,
+        "obligation": 4,
+        "parameter": 7,
+        "response_contract": 3
+      },
+      "open_obligation_count": 4,
+      "open_obligation_labels": [
+        "registers_route",
+        "registers_route",
+        "registers_route",
+        "registers_route"
+      ],
+      "query_id": "communication-graph-query:5ddb0754f35905688ef04e9dfb0276fa440f8efff2ab38b865bfe26e6270a0f1",
+      "query_status": "completed"
+    },
+    "health": {
+      "status": "ok"
+    },
+    "listed_graph_count": 1,
+    "parameter_state": {
+      "edge_count": 6,
+      "node_count": 7,
+      "parameter_labels": [
+        "deviceName",
+        "dlnaEn",
+        "scanList"
+      ],
+      "query_id": "communication-graph-query:3ca7b5baf214833541528d42ff65656c5a02cbeadb3f554d7ea264a67aef3064"
+    }
+  },
+  "sample_role": "tenda-ac9-primary",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-19/http-console-graph-v1alpha1"
+}

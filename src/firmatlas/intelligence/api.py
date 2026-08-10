@@ -11,7 +11,10 @@ from pathlib import Path
 from typing import Any, Dict, Tuple
 from urllib.parse import parse_qs, unquote, urlparse
 
-from firmatlas.mapping.repository import DiscoveryCatalogRepository
+from firmatlas.mapping.repository import (
+    CommunicationGraphQuery,
+    DiscoveryCatalogRepository,
+)
 
 from .repository import IntelligenceRepository
 from .service import IntelligenceService, SyncAlreadyRunning
@@ -137,6 +140,39 @@ def create_handler(
                     raise ApiError(
                         HTTPStatus.NOT_FOUND,
                         "base or target mapping catalog not found",
+                    )
+                return HTTPStatus.OK, result
+            if method == "GET" and path == "/api/mappings/graphs":
+                page_size = max(1, min(_integer(query, "page_size", 30), 100))
+                page = max(1, _integer(query, "page", 1))
+                return HTTPStatus.OK, mappings.list_communication_graphs(
+                    limit=page_size, offset=(page - 1) * page_size,
+                )
+            graph_prefix = "/api/mappings/graphs/"
+            if method == "GET" and path.startswith(graph_prefix):
+                graph_id = unquote(path[len(graph_prefix):])
+                result = mappings.query_communication_graph(
+                    graph_id,
+                    CommunicationGraphQuery(
+                        text=_one(query, "q"),
+                        preset_id=_one(query, "preset"),
+                        node_kinds=_many(query, "node_kind"),
+                        edge_kinds=_many(query, "edge_kind"),
+                        statuses=_many(query, "status"),
+                        evidence_id=_one(query, "evidence_id"),
+                        focus_node_ids=_many(query, "focus_node"),
+                        focus_canonical_identities=_many(
+                            query, "focus_identity"
+                        ),
+                        max_hops=_integer(query, "max_hops", 2),
+                        max_nodes=_integer(query, "max_nodes", 500),
+                        max_edges=_integer(query, "max_edges", 1_000),
+                    ),
+                )
+                if result is None:
+                    raise ApiError(
+                        HTTPStatus.NOT_FOUND,
+                        "communication graph not found",
                     )
                 return HTTPStatus.OK, result
             mapping_prefix = "/api/mappings/catalogs/"
@@ -389,3 +425,7 @@ def _integer(query: Dict[str, Any], name: str, default: int) -> int:
         return int(_one(query, name, str(default)))
     except ValueError:
         raise ValueError("{} must be an integer".format(name))
+
+
+def _many(query: Dict[str, Any], name: str) -> tuple:
+    return tuple(str(value) for value in query.get(name, ()))

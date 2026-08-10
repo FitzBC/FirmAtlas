@@ -290,3 +290,8 @@ Remote checks:
 ```
 
 失败结果保留在原记录中；修复后追加新记录并相互链接，不回写历史为“从未失败”。
+
+通信图产品 Adapter 另设一致性门：同一 graph/query 必须在 repository、CLI 和 HTTP 返回相同
+稳定 query identity、节点/边集合、EvidenceAtom 与 diagnostics；Console 只能选择和展示返回
+内容。真实浏览器检查至少覆盖图列表、接口搜索、精确焦点、preset 切换、参数证据下钻、开放
+义务和 partial/coverage 可见性，并在窄屏保持可滚动而不丢失证据面板。

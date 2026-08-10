@@ -21,6 +21,7 @@ from firmatlas.mapping import (
     SourceArtifactEntry,
     assemble_discovery_catalog,
     discover_frontend_requests,
+    project_communication_architecture_graph,
 )
 from firmatlas.mapping.repository import DiscoveryCatalogRepository
 from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
@@ -159,6 +160,37 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual(200, status)
         self.assertEqual(1, result["summary"]["resolved_hidden_interface_count"])
         self.assertFalse(result["same_firmware_family_verified"])
+
+    def test_mapping_graph_routes_reuse_persisted_query_semantics(self) -> None:
+        catalog = _hidden_catalog()
+        graph = project_communication_architecture_graph(catalog)
+        self.mapping_repository.publish(catalog)
+        self.mapping_repository.publish_communication_graph(graph)
+
+        list_status, listing = self.get("/api/mappings/graphs")
+        query_status, result = self.get(
+            "/api/mappings/graphs/{}?{}".format(
+                graph.graph_id,
+                urlencode({
+                    "preset": "interface_structure",
+                    "focus_identity": "/cgi-bin/cstecgi.cgi",
+                    "max_hops": 1,
+                    "max_nodes": 50,
+                    "max_edges": 100,
+                }),
+            )
+        )
+
+        self.assertEqual(200, list_status)
+        self.assertEqual(1, listing["total"])
+        self.assertEqual(graph.graph_id, listing["items"][0]["graph_id"])
+        self.assertEqual(200, query_status)
+        self.assertEqual(graph.graph_id, result["graph"]["graph_id"])
+        self.assertEqual("completed", result["query_status"])
+        self.assertIn(
+            "interface", {item["node_kind"] for item in result["nodes"]}
+        )
+        self.assertTrue(result["evidence_atoms"])
 
     def test_updates_relevance_policy_through_api(self) -> None:
         status, result = self.put(

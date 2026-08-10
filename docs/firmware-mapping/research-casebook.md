@@ -296,6 +296,14 @@ constructs_request、resolves_transport_method、serializes_parameter 三条原�
 AC9 的四条 Web owner 义务，也没有把相邻 daemon 关系改写成 route owner。案例新增第十一阶段，
 用于说明可视化查询必须是事实选择层，而不是第二套推理器。
 
+R2-19 把同一查询 Interface 接入真实产品 HTTP 和 Console，而没有把图 traversal 复制到浏览器。
+AC9 从 rootfs 独立重建后，HTTP 的 DLNA 接口索引稳定返回四条请求；精确聚焦 `SetDlnaCfg`
+得到 23 节点/22 边，`dlnaEn` 仍引用 `webroot_ro/js/dlna.js:45` 的
+`serializes_parameter` EvidenceAtom，四条 `registers_route` obligation 仍为 open。Console 只按
+接口焦点和四类 preset 重新查询，节点侧栏展示属性、相邻边和原始 locator。截图传输在浏览器
+验收中超时，但 DOM、点击路径、生产文档和真实 HTTP 均成功；该失败保留在时间线中。案例新增
+第十二阶段，用于说明产品可视化必须保持预算、coverage 和义务语义，视觉邻近不是新证据。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：

@@ -4,6 +4,7 @@ import { intelligenceApi } from '../api/client'
 import type {
   MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
   MappingSnapshotDiff, PotentialHiddenInterfacePage,
+  CommunicationGraphQueryResult, CommunicationGraphSummary,
 } from '../types'
 import { MappingCatalogWorkspace } from './MappingCatalogWorkspace'
 
@@ -122,6 +123,73 @@ const snapshotDiff: MappingSnapshotDiff = {
   }],
 }
 
+const graphSummary: CommunicationGraphSummary = {
+  graph_id: 'communication-graph:ac9',
+  schema_version: 'firmatlas.mapping.communication-architecture-graph/v1alpha1',
+  source_catalog_id: catalog.catalog_id,
+  firmware_artifact_sha256: catalog.firmware_artifact_sha256,
+  source_catalog_coverage_status: 'completed', projection_status: 'completed',
+  node_count: 5674, edge_count: 7212, published_at: '2026-08-11T00:00:00Z',
+}
+
+const graphResult = (nodes: CommunicationGraphQueryResult['nodes'], edges: CommunicationGraphQueryResult['edges'] = []): CommunicationGraphQueryResult => ({
+  schema_version: 'firmatlas.mapping.communication-graph-query-result/v1alpha1',
+  query_id: 'communication-graph-query:ac9',
+  graph: {
+    graph_id: graphSummary.graph_id, schema_version: graphSummary.schema_version,
+    source_catalog_id: graphSummary.source_catalog_id,
+    firmware_artifact_sha256: graphSummary.firmware_artifact_sha256,
+    source_catalog_coverage_status: 'completed', projection_status: 'completed',
+  },
+  query: {
+    text: '', preset_id: 'interface_structure', node_kinds: [], edge_kinds: [],
+    statuses: [], evidence_id: '', focus_node_ids: [], focus_canonical_identities: [],
+    max_hops: 3, max_nodes: 160, max_edges: 320,
+  },
+  query_status: 'completed', nodes, edges,
+  total_node_count: nodes.length, total_edge_count: edges.length,
+  selected_node_count: nodes.length, selected_edge_count: edges.length,
+  evidence_atoms: [{
+    evidence_id: 'evidence:dlna', subject_ref: 'interface:set-dlna',
+    predicate: 'constructs_request', object_value: 'goform/SetDlnaCfg',
+    capability: 'constructs_request', confidence: 0.9,
+    observation_kind: 'direct_static', producer: 'frontend-request-producer',
+    producer_version: '0.4.0', source_span: {
+      artifact_path: 'webroot_ro/js/dlna.js', artifact_sha256: 'a'.repeat(64),
+      locator: 'text_utf8:lines=22:1-22:20', span_kind: 'text_utf8',
+      start_byte: 10, end_byte: 30, start_line: 22, end_line: 22,
+    },
+  }],
+  facets: { node_kinds: { interface: 1 }, edge_kinds: {}, statuses: { supported: 1 } },
+  coverage: [{
+    scope: 'auto:frontend', producer_kind: 'frontend', producer: 'frontend-request-producer',
+    producer_version: '0.4.0', status: 'completed', required: true,
+    processed_result_count: 1, diagnostic: '',
+  }],
+  view_presets: [
+    { preset_id: 'interface_structure', title: 'Interface structure', node_kinds: ['interface', 'parameter', 'obligation'], edge_kinds: ['accepts_parameter', 'requires_evidence'], description: 'Interface ownership and evidence.' },
+    { preset_id: 'parameter_state', title: 'Parameter state', node_kinds: ['interface', 'parameter'], edge_kinds: ['accepts_parameter'], description: 'Parameters and state clues.' },
+    { preset_id: 'communication_topology', title: 'Communication topology', node_kinds: ['interface', 'runtime_principal'], edge_kinds: ['executed_by'], description: 'Runtime communication shape.' },
+    { preset_id: 'completeness', title: 'Completeness', node_kinds: ['interface', 'obligation'], edge_kinds: ['requires_evidence'], description: 'Coverage and unresolved obligations.' },
+  ], diagnostics: [],
+})
+
+const interfaceNode = {
+  node_id: 'interface:set-dlna', node_kind: 'interface', label: 'goform/SetDlnaCfg',
+  status: 'supported', source_path: 'webroot_ro/js/dlna.js',
+  evidence_ids: ['evidence:dlna'], attributes: [['canonical_identity', 'goform/SetDlnaCfg']] as Array<[string, string]>,
+}
+const parameterNode = {
+  node_id: 'parameter:dlna-en', node_kind: 'parameter', label: 'dlnaEn',
+  status: 'observed', source_path: 'webroot_ro/js/dlna.js',
+  evidence_ids: ['evidence:dlna'], attributes: [['namespace', 'form']] as Array<[string, string]>,
+}
+const obligationNode = {
+  node_id: 'obligation:dlna-owner', node_kind: 'obligation', label: 'Resolve DLNA handler owner',
+  status: 'open', source_path: 'bin/httpd', evidence_ids: [],
+  attributes: [['required_capability', 'binds_handler']] as Array<[string, string]>,
+}
+
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
@@ -210,4 +278,42 @@ it('compares two mapping snapshots without hiding coverage confounding', async (
   expect(compare).toHaveBeenCalledWith(
     catalog.catalog_id, targetCatalog.catalog_id, expect.any(AbortSignal),
   )
+})
+
+it('explores a persisted communication graph from interface to parameter and evidence', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
+    items: [catalog], total: 1, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
+    items: [candidate], total: 1, limit: 100, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingGraphs').mockResolvedValue({
+    items: [graphSummary], total: 1, limit: 100, offset: 0,
+  })
+  const queryGraph = vi.spyOn(intelligenceApi, 'mappingGraph').mockImplementation(
+    (_graphId, options) => Promise.resolve(options?.nodeKinds?.includes('interface')
+      ? graphResult([interfaceNode])
+      : graphResult([interfaceNode, parameterNode, obligationNode], [
+        { edge_id: 'edge:parameter', edge_kind: 'accepts_parameter', source_ref: interfaceNode.node_id, target_ref: parameterNode.node_id, status: 'supported', origin_ref: parameterNode.node_id, evidence_ids: ['evidence:dlna'], attributes: [] },
+        { edge_id: 'edge:obligation', edge_kind: 'requires_evidence', source_ref: interfaceNode.node_id, target_ref: obligationNode.node_id, status: 'open', origin_ref: obligationNode.node_id, evidence_ids: [], attributes: [] },
+      ])),
+  )
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '架构图谱' }))
+
+  expect(await screen.findByText('goform/SetDlnaCfg')).toBeInTheDocument()
+  expect(screen.getByText('5,674')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: /聚焦接口 goform\/SetDlnaCfg/ }))
+  expect(await screen.findByText('dlnaEn')).toBeInTheDocument()
+  expect(screen.getByText('Resolve DLNA handler owner')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: /查看图节点 dlnaEn/ }))
+  expect(screen.getByText('constructs_request')).toBeInTheDocument()
+  expect(screen.getAllByText(/dlna\.js/).length).toBeGreaterThan(0)
+  fireEvent.click(screen.getByRole('button', { name: '参数与状态' }))
+  await waitFor(() => expect(queryGraph).toHaveBeenLastCalledWith(
+    graphSummary.graph_id,
+    expect.objectContaining({ preset: 'parameter_state', focusNodeIds: [interfaceNode.node_id] }),
+    expect.any(AbortSignal),
+  ))
 })

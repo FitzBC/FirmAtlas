@@ -26,6 +26,9 @@ import type {
   MappingCandidatePage,
   MappingCandidateDetail,
   PotentialHiddenInterfacePage,
+  CommunicationGraphQueryOptions,
+  CommunicationGraphQueryResult,
+  CommunicationGraphSummary,
 } from '../types'
 
 interface Envelope<T> {
@@ -204,4 +207,27 @@ export const intelligenceApi = {
       `/api/mappings/catalogs/${encodeURIComponent(catalogId)}/candidates/${encodeURIComponent(candidateId)}`,
       { signal },
     ),
+  mappingGraphs: (signal?: AbortSignal) =>
+    request<{ items: CommunicationGraphSummary[]; total: number; limit: number; offset: number }>(
+      '/api/mappings/graphs?page_size=100', { signal },
+    ),
+  mappingGraph: (
+    graphId: string, options: CommunicationGraphQueryOptions = {}, signal?: AbortSignal,
+  ) => {
+    const params = new URLSearchParams()
+    if (options.query) params.set('q', options.query)
+    if (options.preset) params.set('preset', options.preset)
+    options.nodeKinds?.forEach((value) => params.append('node_kind', value))
+    options.edgeKinds?.forEach((value) => params.append('edge_kind', value))
+    options.statuses?.forEach((value) => params.append('status', value))
+    if (options.evidenceId) params.set('evidence_id', options.evidenceId)
+    options.focusNodeIds?.forEach((value) => params.append('focus_node', value))
+    options.focusIdentities?.forEach((value) => params.append('focus_identity', value))
+    if (options.maxHops !== undefined) params.set('max_hops', String(options.maxHops))
+    if (options.maxNodes !== undefined) params.set('max_nodes', String(options.maxNodes))
+    if (options.maxEdges !== undefined) params.set('max_edges', String(options.maxEdges))
+    return request<CommunicationGraphQueryResult>(
+      `/api/mappings/graphs/${encodeURIComponent(graphId)}?${params}`, { signal },
+    )
+  },
 }

@@ -162,6 +162,11 @@ PYTHONPATH=src python3 -m firmatlas.cli mapping query-graph \
 发布会验证 graph 与源 Catalog 的 firmware、coverage 和 EvidenceAtom 闭包；查询返回无悬空边的
 节点/边、facet、Coverage Ledger 与完整 EvidenceAtom。AC9 实证见 [R2-18 持久化图查询](./docs/firmware-mapping/progress/2026-08-11-r2-18-ac9-persisted-graph-query.md)。
 
+本地产品服务直接复用同一查询 Interface：Console 的“通信测绘 → 架构图谱”先检索接口，再按
+精确节点焦点切换接口结构、参数与状态、通信拓扑、完整性与义务四种视图；节点侧栏展示属性、
+相邻语义关系与源 Catalog EvidenceAtom。AC9 真实 HTTP/浏览器回放见
+[R2-19 HTTP 与 Console 图谱](./docs/firmware-mapping/progress/2026-08-11-r2-19-ac9-http-console-graph.md)。
+
 历史漏洞接口只能在声明版本与当前制品范围明确后用于测绘差异，不能直接当作固件真值：
 
 ```bash
@@ -331,6 +336,8 @@ make firmware-refresh
 | `GET /api/mappings/catalogs/{catalog_id}` | 读取完整版本化 Discovery Catalog 文档 |
 | `GET /api/mappings/catalogs/{catalog_id}/candidates` | 按 `q`、`kind` 和分页参数查询候选投影 |
 | `GET /api/mappings/catalogs/{catalog_id}/candidates/{candidate_id}` | 聚合参数、EvidenceAtom、关联、覆盖与开放义务 |
+| `GET /api/mappings/graphs` | 查询已发布通信架构图及 firmware、coverage、节点/边规模 |
+| `GET /api/mappings/graphs/{graph_id}` | 按 `q`、preset、kind、status、evidence、focus 与预算查询证据闭合子图 |
 
 `q` 会规范化路径分隔符和 CamelCase token，因此 `online dev` 能命中 `/goform/SetOnlineDevName`。目录发布是内容寻址且幂等的；同一 `catalog_id` 对应不同内容会被拒绝。
 
@@ -340,7 +347,7 @@ make firmware-refresh
 
 | 状态 | 模块 |
 | --- | --- |
-| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性 Inventory v1alpha2（含固件 chroot symlink 与空运行时树）、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend shared-CGI/custom-request、跨资源默认 URL、局部 payload variable、multipart 嵌套 selector 与 Asset Graph、lighttpd/nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow、ARM32 PIC、MIPS32 inline-table、MIPS CGI nested-dispatch、MIPS handler-prefix parameter→state、frontend/native 集合差异归因、静态服务装配、全固件潜在隐藏接口投影/API/可视化、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/查询、三级通信测绘 UI、证据分层的代表性 corpus report |
+| **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性 Inventory v1alpha2（含固件 chroot symlink 与空运行时树）、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend shared-CGI/custom-request、跨资源默认 URL、局部 payload variable、multipart 嵌套 selector 与 Asset Graph、lighttpd/nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow、ARM32 PIC、MIPS32 inline-table、MIPS CGI nested-dispatch、MIPS handler-prefix parameter→state、frontend/native 集合差异归因、静态服务装配、全固件潜在隐藏接口投影/API/可视化、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/统一 HTTP 查询、接口/组件/参数/义务/EvidenceAtom 通信图谱、三级通信测绘 UI、证据分层的代表性 corpus report |
 | **Next** | 独立运行时可达验证、通用 HTML script dependency scope Planner、同型号版本差异、剩余 77/11 差集因果验证、MIPS CFG-aware DHCP/sink value-flow、动态 method 恢复、脚本后端/Native-only 真实固件覆盖、固定 Binwalk 发布镜像重建、固件上传与 SHA-256 制品去重、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 

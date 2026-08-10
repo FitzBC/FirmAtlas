@@ -11,6 +11,7 @@ import type {
   MappingSnapshotChange, MappingSnapshotDiff, PotentialHiddenInterface,
   PotentialHiddenInterfacePage,
 } from '../types'
+import { CommunicationGraphWorkspace } from './CommunicationGraphWorkspace'
 
 const kinds = [
   ['', '全部能力'], ['request_interface', '请求接口'], ['web_configuration', 'Web 配置'],
@@ -33,7 +34,7 @@ export function MappingCatalogWorkspace() {
   const [kind, setKind] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<'catalog' | 'hidden' | 'compare'>('catalog')
+  const [view, setView] = useState<'catalog' | 'graph' | 'hidden' | 'compare'>('catalog')
   const [hiddenQuery, setHiddenQuery] = useState('')
   const [hiddenPage, setHiddenPage] = useState<PotentialHiddenInterfacePage | null>(null)
   const [selectedHidden, setSelectedHidden] = useState<PotentialHiddenInterface | null>(null)
@@ -147,6 +148,7 @@ export function MappingCatalogWorkspace() {
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-xl border border-white/[0.07] bg-black/20 p-1">
             <button type="button" onClick={() => setView('catalog')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'catalog' ? 'bg-white/[0.08] text-white' : 'text-slate-600 hover:text-slate-300'}`}>目录浏览</button>
+            <button type="button" onClick={() => setView('graph')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'graph' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>架构图谱</button>
             <button type="button" onClick={() => setView('hidden')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'hidden' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>潜在隐藏接口</button>
             <button type="button" onClick={() => setView('compare')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'compare' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>版本对比</button>
           </div>
@@ -156,7 +158,7 @@ export function MappingCatalogWorkspace() {
 
       {error && <div role="alert" className="mb-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
 
-      {view === 'hidden' ? <HiddenInterfaceWorkspace
+      {view === 'graph' ? <CommunicationGraphWorkspace /> : view === 'hidden' ? <HiddenInterfaceWorkspace
         page={hiddenPage} query={hiddenQuery} onQuery={setHiddenQuery}
         selected={selectedHidden} onSelect={setSelectedHidden} loading={loading}
       /> : view === 'compare' ? <SnapshotComparisonWorkspace
