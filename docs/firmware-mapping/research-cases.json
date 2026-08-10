@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:54d49d58e915b70c96fec901ffc75fd4e76f31b532eb2c8b9aff3d394f36447b",
+      "case_id": "research-case:e65e0cf5a518efbc55d97281794f80ecdf62f3db76af203442af40256d322a3b",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -79,6 +79,15 @@
           "producer": "native-deep-arm-pic-callsite@0.1.0"
         },
         {
+          "evidence_ref": "coverage:ac9-historical-graph-overlay",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-20-vendor-tenda-ac9-historical-graph-overlay.json",
+          "source_artifact_sha256": "6b86bb559df2388e6acdac32ca9bf5974a54ad8b738f8839ecc9017f83a9e15e",
+          "locator": "json:$.historical_comparison",
+          "capability": "compares_historical_expectations_without_fact_promotion",
+          "producer": "historical-graph-overlay@v1alpha1"
+        },
+        {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
           "kind": "native_binding",
           "source_path": "bin/httpd",
@@ -104,6 +113,14 @@
             "evidence:a0da24eeb4bf15b945e4e22ec43809393277d3e894d8fc5477dd9152523b8f5e",
             "evidence:5e3cbb6617a5d9733512054d473bfe1eefd9ea35c5169f9b6428f416c5290a29",
             "evidence:24b22b2b30f09ac9486cf461f223e93f1455bee974ba2d22055985cd4e291cd2"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:historical-interface-scope-boundary",
+          "statement": "The exact AC9 artifact observes both exact-artifact historical interface expectations, while cross-version structural matches remain independently labeled out_of_scope and do not assert vulnerability presence.",
+          "evidence_refs": [
+            "coverage:ac9-historical-graph-overlay"
           ],
           "status": "supported"
         },
@@ -184,6 +201,17 @@
             "obligation:goform-owner"
           ],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:historical-interface-overlay",
+          "order": 5,
+          "interpretation": "Project historical interfaces and parameters onto exact graph references while preserving applicability as an independent dimension and leaving firmware facts unchanged.",
+          "claim_ids": [
+            "claim:historical-interface-scope-boundary"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -201,15 +229,18 @@
       "counterfactuals": [
         "A firmware-level or path-style merge would incorrectly assign /goform to the observed nginx/FastCGI namespace.",
         "Choosing dhttpd by filename alone would spend deep-analysis effort on the weaker candidate.",
-        "Treating a route string and a similar symbol name as a binding would skip the registrar call-site proof."
+        "Treating a route string and a similar symbol name as a binding would skip the registrar call-site proof.",
+        "Treating a cross-version historical interface match as a current vulnerability would collapse structural observation, version applicability, and exploitability into one unsupported claim."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
         "Ablation case comparing frontend-only, configuration-only, shallow-native, and full evidence fusion.",
-        "Worked example for obligation-preserving analysis and false-merge prevention."
+        "Worked example for obligation-preserving analysis and false-merge prevention.",
+        "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",
+        "Historical expectation coverage is limited to 13 structured interfaces from a 71-record product-level denominator and is not a vulnerability or exploitability audit of the artifact.",
         "The dhttpd negative control is bounded by the declared shallow producer and is not proof of total runtime non-participation.",
         "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality."
       ]
@@ -1178,7 +1209,7 @@
       ]
     },
     {
-      "case_id": "research-case:2ac72c304c51f46f2673f134d27e03d5a2eda91f8354adcffd330cbad48c7673",
+      "case_id": "research-case:aae03b93e87ed0e3cda8e0238a65df6c4a3461cdfbfb20907265cdee8f32ab21",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1890,7 +1921,7 @@
           "evidence_ref": "coverage:ac9-dlna-http-console-graph",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-19-vendor-tenda-ac9-http-console-graph.json",
-          "source_artifact_sha256": "923673e035b176735549fe33b7f02076e4eb8b28b5bc95f340aa64f03d414ce4",
+          "source_artifact_sha256": "faaabafc83a6ac2a5d55949a15a1936ac731b3cc57fb66265aea8f5648490609",
           "locator": "json:$.http_acceptance",
           "capability": "replays_product_graph_query_with_evidence",
           "producer": "communication-graph-http-console@v1alpha1"

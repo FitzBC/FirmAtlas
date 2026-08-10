@@ -11,6 +11,13 @@ from firmatlas.mapping import (
     CoverageStatus,
     CommunicationGraphConflictError,
     DiscoveryCatalogRepository,
+    HistoricalApplicability,
+    HistoricalGraphOverlayQuery,
+    HistoricalInterfaceExpectation,
+    HistoricalMatchStatus,
+    compare_historical_expectations,
+    compare_historical_route_bindings,
+    project_historical_graph_overlay,
     project_communication_architecture_graph,
 )
 from tests.test_mapping_catalog_repository import _catalog
@@ -25,6 +32,23 @@ class CommunicationGraphRepositoryContractTests(unittest.TestCase):
 
     def tearDown(self):
         self.repository.close()
+
+    def _historical_overlay(self):
+        expectation = HistoricalInterfaceExpectation(
+            vulnerability_identifier="CVE-2025-22946",
+            interface_value="/goform/SetOnlineDevName",
+            method="POST",
+            parameters=("mac", "devName"),
+            source_ref="historical-semantic-analysis:CVE-2025-22946",
+            applicability=HistoricalApplicability.EXACT_ARTIFACT,
+            claimed_versions=("V15.03.2.21",),
+            applicability_basis="Exact vendor artifact hash.",
+        )
+        diff = compare_historical_expectations(self.catalog, (expectation,))
+        routes = compare_historical_route_bindings(
+            self.catalog, (expectation,)
+        )
+        return project_historical_graph_overlay(self.graph, diff, routes)
 
     def test_publish_requires_source_catalog_and_is_immutable_and_idempotent(self):
         with self.assertRaisesRegex(ValueError, "source catalog"):
@@ -45,6 +69,64 @@ class CommunicationGraphRepositoryContractTests(unittest.TestCase):
         )
         with self.assertRaises(CommunicationGraphConflictError):
             self.repository.publish_communication_graph(conflicting)
+
+    def test_historical_overlay_requires_graph_and_queries_two_dimensions(self):
+        overlay = self._historical_overlay()
+        with self.assertRaisesRegex(ValueError, "graph is not published"):
+            self.repository.publish_historical_graph_overlay(overlay)
+
+        self.repository.publish(self.catalog)
+        self.repository.publish_communication_graph(self.graph)
+        first = self.repository.publish_historical_graph_overlay(overlay)
+        second = self.repository.publish_historical_graph_overlay(overlay)
+        result = self.repository.query_historical_graph_overlay(
+            self.graph.graph_id,
+            HistoricalGraphOverlayQuery(
+                statuses=(HistoricalMatchStatus.OBSERVED.value,),
+                applicabilities=(HistoricalApplicability.EXACT_ARTIFACT.value,),
+            ),
+        )
+
+        self.assertTrue(first["created"])
+        self.assertFalse(second["created"])
+        self.assertEqual(overlay.overlay_id, result["overlay"]["overlay_id"])
+        self.assertEqual(1, result["total_entry_count"])
+        self.assertEqual(1, result["selected_entry_count"])
+        self.assertEqual(
+            {"observed": 1}, result["facets"]["status"]
+        )
+        self.assertEqual(
+            "exact_artifact", result["entries"][0]["applicability"]
+        )
+        self.assertTrue(result["entries"][0]["graph_node_ids"])
+
+        empty = self.repository.query_historical_graph_overlay(
+            self.graph.graph_id,
+            HistoricalGraphOverlayQuery(statuses=("missing",)),
+        )
+        self.assertEqual(0, empty["selected_entry_count"])
+
+    def test_historical_overlay_rejects_unknown_graph_references(self):
+        overlay = self._historical_overlay()
+        self.repository.publish(self.catalog)
+        self.repository.publish_communication_graph(self.graph)
+        bad_entry = replace(
+            overlay.entries[0],
+            graph_node_ids=("candidate:not-in-graph",),
+        )
+
+        with self.assertRaisesRegex(ValueError, "unknown graph node"):
+            self.repository.publish_historical_graph_overlay(replace(
+                overlay, entries=(bad_entry,)
+            ))
+        bad_catalog_entry = replace(
+            overlay.entries[0],
+            catalog_candidate_ids=("candidate:not-in-catalog",),
+        )
+        with self.assertRaisesRegex(ValueError, "unknown catalog candidate"):
+            self.repository.publish_historical_graph_overlay(replace(
+                overlay, entries=(bad_catalog_entry,)
+            ))
 
     def test_publish_rejects_graph_evidence_absent_from_source_catalog(self):
         self.repository.publish(self.catalog)
@@ -235,6 +317,49 @@ class CommunicationGraphRepositoryContractTests(unittest.TestCase):
             {"interface", "parameter"},
             {item["node_kind"] for item in result["nodes"]},
         )
+
+    def test_cli_publishes_and_queries_historical_overlay(self):
+        overlay = self._historical_overlay()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            database = root / "mapping.db"
+            run_document = root / "analysis-run.json"
+            graph_document = root / "graph.json"
+            overlay_document = root / "overlay.json"
+            run_document.write_text(
+                json.dumps({"catalog": self.catalog.to_dict()}),
+                encoding="utf-8",
+            )
+            graph_document.write_text(
+                json.dumps(self.graph.to_dict()), encoding="utf-8"
+            )
+            overlay_document.write_text(
+                json.dumps(overlay.to_dict()), encoding="utf-8"
+            )
+            with redirect_stdout(io.StringIO()):
+                firmatlas_main((
+                    "mapping", "publish-graph", "--database", str(database),
+                    "--catalog-document", str(run_document),
+                    str(graph_document),
+                ))
+                publish_code = firmatlas_main((
+                    "mapping", "publish-history-overlay",
+                    "--database", str(database), str(overlay_document),
+                ))
+            queried = io.StringIO()
+            with redirect_stdout(queried):
+                query_code = firmatlas_main((
+                    "mapping", "query-history-overlay",
+                    "--database", str(database), self.graph.graph_id,
+                    "--status", "observed",
+                    "--applicability", "exact_artifact",
+                ))
+
+        self.assertEqual(0, publish_code)
+        self.assertEqual(0, query_code)
+        result = json.loads(queried.getvalue())
+        self.assertEqual(1, result["selected_entry_count"])
+        self.assertEqual(overlay.overlay_id, result["overlay"]["overlay_id"])
 
     def test_persisted_graph_is_queryable_after_repository_reopen(self):
         with tempfile.TemporaryDirectory() as directory:

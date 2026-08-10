@@ -240,10 +240,13 @@ from .extraction import (
 from .container_worker import ContainerBinwalkConfig, ContainerBinwalkWorker
 from .repository import (
     COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION,
+    HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION,
     CatalogConflictError,
     CommunicationGraphConflictError,
     CommunicationGraphQuery,
     DiscoveryCatalogRepository,
+    HistoricalGraphOverlayConflictError,
+    HistoricalGraphOverlayQuery,
 )
 from .native_deep import (
     NATIVE_DEEP_RESULT_SCHEMA_VERSION,
@@ -323,6 +326,14 @@ from .historical_expectation import (
     compare_historical_route_bindings,
     compare_historical_expectations,
     load_historical_expectations,
+)
+from .historical_graph_overlay import (
+    HISTORICAL_GRAPH_OVERLAY_CLAIM_BOUNDARY,
+    HISTORICAL_GRAPH_OVERLAY_SCHEMA_VERSION,
+    HistoricalGraphOverlay,
+    HistoricalGraphOverlayAudit,
+    HistoricalGraphOverlayEntry,
+    project_historical_graph_overlay,
 )
 from .native_nested_dispatch import (
     MIPS_NESTED_DISPATCH_RESULT_SCHEMA_VERSION,
@@ -629,9 +640,12 @@ __all__ = (
     "ContainerBinwalkWorker",
     "CatalogConflictError",
     "COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION",
+    "HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION",
     "CommunicationGraphConflictError",
     "CommunicationGraphQuery",
     "DiscoveryCatalogRepository",
+    "HistoricalGraphOverlayConflictError",
+    "HistoricalGraphOverlayQuery",
     "NATIVE_DEEP_RESULT_SCHEMA_VERSION",
     "ArmPicCallsiteProfile",
     "MipsInlineRouteTableProfile",
@@ -694,6 +708,12 @@ __all__ = (
     "compare_historical_route_bindings",
     "compare_historical_expectations",
     "load_historical_expectations",
+    "HISTORICAL_GRAPH_OVERLAY_CLAIM_BOUNDARY",
+    "HISTORICAL_GRAPH_OVERLAY_SCHEMA_VERSION",
+    "HistoricalGraphOverlay",
+    "HistoricalGraphOverlayAudit",
+    "HistoricalGraphOverlayEntry",
+    "project_historical_graph_overlay",
     "MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION",
     "MipsHandlerValueFlowDiagnostic",
     "MipsHandlerValueFlowPolicy",

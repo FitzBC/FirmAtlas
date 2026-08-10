@@ -21,6 +21,11 @@ from firmatlas.mapping import (
     SourceArtifactEntry,
     assemble_discovery_catalog,
     discover_frontend_requests,
+    HistoricalApplicability,
+    HistoricalInterfaceExpectation,
+    compare_historical_expectations,
+    compare_historical_route_bindings,
+    project_historical_graph_overlay,
     project_communication_architecture_graph,
 )
 from firmatlas.mapping.repository import DiscoveryCatalogRepository
@@ -191,6 +196,48 @@ class IntelligenceApiTests(unittest.TestCase):
             "interface", {item["node_kind"] for item in result["nodes"]}
         )
         self.assertTrue(result["evidence_atoms"])
+
+    def test_mapping_graph_historical_overlay_route_keeps_scope_separate(self) -> None:
+        catalog = _hidden_catalog()
+        graph = project_communication_architecture_graph(catalog)
+        expectation = HistoricalInterfaceExpectation(
+            vulnerability_identifier="CVE-context",
+            interface_value="/cgi-bin/cstecgi.cgi",
+            parameters=(),
+            source_ref="historical-semantic-analysis:CVE-context",
+            applicability=HistoricalApplicability.OUT_OF_SCOPE,
+            claimed_versions=("other-version",),
+            applicability_basis="Cross-version structural comparison.",
+        )
+        diff = compare_historical_expectations(catalog, (expectation,))
+        overlay = project_historical_graph_overlay(
+            graph,
+            diff,
+            compare_historical_route_bindings(catalog, (expectation,)),
+        )
+        self.mapping_repository.publish(catalog)
+        self.mapping_repository.publish_communication_graph(graph)
+        self.mapping_repository.publish_historical_graph_overlay(overlay)
+
+        status, result = self.get(
+            "/api/mappings/graphs/{}/historical-overlay?{}".format(
+                graph.graph_id,
+                urlencode({
+                    "status": "observed",
+                    "applicability": "out_of_scope",
+                }),
+            )
+        )
+
+        self.assertEqual(200, status)
+        self.assertEqual(1, result["selected_entry_count"])
+        self.assertEqual("observed", result["entries"][0]["status"])
+        self.assertEqual(
+            "out_of_scope", result["entries"][0]["applicability"]
+        )
+        self.assertIn("contextual expectations", result["overlay"][
+            "claim_boundary"
+        ])
 
     def test_updates_relevance_policy_through_api(self) -> None:
         status, result = self.put(

@@ -248,9 +248,17 @@ class ResearchCaseTests(unittest.TestCase):
 
         self.assertTrue(corpus["validation"]["paper_ready"])
         self.assertEqual(14, corpus["validation"]["evidence_line_count"])
+        claims = {item["claim_id"]: item for item in case["claims"]}
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
-            [case["claims"][index]["status"] for index in (2, 3, 4)],
+            [
+                claims[claim_id]["status"]
+                for claim_id in (
+                    "claim:namespace-divergence",
+                    "claim:shallow-priority",
+                    "claim:httpd-handler-binding",
+                )
+            ],
         )
         self.assertEqual(
             ["obligation:goform-owner"],
@@ -260,7 +268,14 @@ class ResearchCaseTests(unittest.TestCase):
             ["obligation:goform-owner"],
             list(case["stages"][3]["resolves_obligations"]),
         )
-        self.assertIn("formSetDeviceName", case["claims"][4]["statement"])
+        self.assertIn(
+            "formSetDeviceName",
+            claims["claim:httpd-handler-binding"]["statement"],
+        )
+        self.assertEqual(
+            "supported",
+            claims["claim:historical-interface-scope-boundary"]["status"],
+        )
 
     def test_ac9_dlna_case_preserves_fixture_daemon_split_as_open(self) -> None:
         corpus = build_research_case_corpus()

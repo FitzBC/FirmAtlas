@@ -18,12 +18,22 @@ from .communication_graph import (
     CommunicationGraphEdgeKind,
     CommunicationGraphNodeKind,
 )
+from .historical_expectation import (
+    HistoricalApplicability,
+    HistoricalGapReason,
+    HistoricalMatchStatus,
+    HistoricalRouteBindingStatus,
+)
+from .historical_graph_overlay import HistoricalGraphOverlay
 from .hidden_interface import project_potential_hidden_interface_document
 from .snapshot_diff import MappingReleaseContext, compare_mapping_catalog_documents
 
 
 COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION = (
     "firmatlas.mapping.communication-graph-query-result/v1alpha1"
+)
+HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION = (
+    "firmatlas.mapping.historical-graph-overlay-query-result/v1alpha1"
 )
 
 
@@ -33,6 +43,10 @@ class CatalogConflictError(RuntimeError):
 
 class CommunicationGraphConflictError(RuntimeError):
     """A graph identity was reused for content with a different digest."""
+
+
+class HistoricalGraphOverlayConflictError(RuntimeError):
+    """An overlay identity was reused for content with a different digest."""
 
 
 @dataclass(frozen=True)
@@ -66,6 +80,34 @@ class CommunicationGraphQuery:
             item.value for item in CommunicationGraphEdgeKind
         ):
             raise ValueError("communication graph query has unknown edge kind")
+
+
+@dataclass(frozen=True)
+class HistoricalGraphOverlayQuery:
+    text: str = ""
+    statuses: tuple = ()
+    applicabilities: tuple = ()
+    gap_reasons: tuple = ()
+    route_binding_statuses: tuple = ()
+
+    def __post_init__(self) -> None:
+        selections = (
+            (self.statuses, {item.value for item in HistoricalMatchStatus}),
+            (
+                self.applicabilities,
+                {item.value for item in HistoricalApplicability},
+            ),
+            (self.gap_reasons, {item.value for item in HistoricalGapReason}),
+            (
+                self.route_binding_statuses,
+                {item.value for item in HistoricalRouteBindingStatus},
+            ),
+        )
+        for values, allowed in selections:
+            if len(values) != len(set(values)):
+                raise ValueError("historical overlay query filters must be unique")
+            if not set(values).issubset(allowed):
+                raise ValueError("historical overlay query has unknown filter")
 
 
 def _utc_now() -> str:
@@ -225,6 +267,24 @@ class DiscoveryCatalogRepository:
                 CREATE INDEX IF NOT EXISTS idx_mapping_graph_edge_kind
                     ON mapping_communication_graph_edges(
                         graph_id, edge_kind, source_ref, target_ref
+                    );
+                CREATE TABLE IF NOT EXISTS mapping_historical_graph_overlays (
+                    overlay_id TEXT PRIMARY KEY,
+                    schema_version TEXT NOT NULL,
+                    graph_id TEXT NOT NULL,
+                    catalog_id TEXT NOT NULL,
+                    expectation_diff_id TEXT NOT NULL,
+                    entry_count INTEGER NOT NULL,
+                    content_sha256 TEXT NOT NULL,
+                    document_json TEXT NOT NULL,
+                    published_at TEXT NOT NULL,
+                    FOREIGN KEY(graph_id)
+                        REFERENCES mapping_communication_graphs(graph_id)
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_mapping_history_overlay_graph
+                    ON mapping_historical_graph_overlays(
+                        graph_id, published_at DESC, overlay_id
                     );
                 """
             )
@@ -417,6 +477,204 @@ class DiscoveryCatalogRepository:
             "total": total,
             "limit": limit,
             "offset": offset,
+        }
+
+    def publish_historical_graph_overlay(
+        self, overlay: HistoricalGraphOverlay
+    ) -> dict:
+        """Publish a validated contextual overlay without changing its graph."""
+
+        document = overlay.to_dict()
+        payload = _encoded(document)
+        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        with self._lock, self._connection:
+            graph_row = self._connection.execute(
+                """SELECT source_catalog_id, document_json
+                   FROM mapping_communication_graphs WHERE graph_id = ?""",
+                (overlay.graph_id,),
+            ).fetchone()
+            if graph_row is None:
+                raise ValueError("historical overlay graph is not published")
+            if graph_row["source_catalog_id"] != overlay.catalog_id:
+                raise ValueError(
+                    "historical overlay catalog does not match graph"
+                )
+            graph_document = json.loads(graph_row["document_json"])
+            graph_node_ids = {
+                item["node_id"] for item in graph_document["nodes"]
+            }
+            graph_edge_ids = {
+                item["edge_id"] for item in graph_document["edges"]
+            }
+            catalog_row = self._connection.execute(
+                """SELECT document_json FROM mapping_discovery_catalogs
+                   WHERE catalog_id = ?""",
+                (overlay.catalog_id,),
+            ).fetchone()
+            catalog_document = json.loads(catalog_row["document_json"])
+            catalog_candidate_ids = {
+                item["candidate_id"]
+                for item in catalog_document.get("candidates", ())
+            }
+            catalog_evidence_ids = {
+                item["evidence_id"]
+                for item in catalog_document.get("evidence_atoms", ())
+            }
+            for entry in overlay.entries:
+                unknown_nodes = set(entry.graph_node_ids) - graph_node_ids
+                if unknown_nodes:
+                    raise ValueError(
+                        "historical overlay references unknown graph node"
+                    )
+                unknown_edges = set(entry.graph_edge_ids) - graph_edge_ids
+                if unknown_edges:
+                    raise ValueError(
+                        "historical overlay references unknown graph edge"
+                    )
+                if (
+                    set(entry.catalog_candidate_ids)
+                    | set(entry.unmapped_catalog_reference_ids)
+                ) - catalog_candidate_ids:
+                    raise ValueError(
+                        "historical overlay references unknown catalog candidate"
+                    )
+                if (
+                    set(entry.catalog_evidence_ids)
+                    | set(entry.unmapped_catalog_evidence_ids)
+                ) - catalog_evidence_ids:
+                    raise ValueError(
+                        "historical overlay references unknown catalog evidence"
+                    )
+            existing = self._connection.execute(
+                """SELECT content_sha256
+                   FROM mapping_historical_graph_overlays
+                   WHERE overlay_id = ?""",
+                (overlay.overlay_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing["content_sha256"] != digest:
+                    raise HistoricalGraphOverlayConflictError(
+                        "historical graph overlay identity already contains "
+                        "different content"
+                    )
+                return {
+                    "overlay_id": overlay.overlay_id,
+                    "created": False,
+                    "content_sha256": digest,
+                }
+            self._connection.execute(
+                """INSERT INTO mapping_historical_graph_overlays (
+                    overlay_id, schema_version, graph_id, catalog_id,
+                    expectation_diff_id, entry_count, content_sha256,
+                    document_json, published_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    overlay.overlay_id, overlay.schema_version,
+                    overlay.graph_id, overlay.catalog_id,
+                    overlay.expectation_diff_id, len(overlay.entries),
+                    digest, payload, _utc_now(),
+                ),
+            )
+        return {
+            "overlay_id": overlay.overlay_id,
+            "created": True,
+            "content_sha256": digest,
+        }
+
+    def query_historical_graph_overlay(
+        self,
+        graph_id: str,
+        query: HistoricalGraphOverlayQuery = HistoricalGraphOverlayQuery(),
+    ) -> Optional[dict]:
+        """Query the latest immutable historical context layer for a graph."""
+
+        with self._lock:
+            row = self._connection.execute(
+                """SELECT document_json
+                   FROM mapping_historical_graph_overlays
+                   WHERE graph_id = ?
+                   ORDER BY published_at DESC, overlay_id DESC
+                   LIMIT 1""",
+                (graph_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        overlay = HistoricalGraphOverlay.from_dict(
+            json.loads(row["document_json"])
+        )
+        entries = list(overlay.to_dict()["entries"])
+        text_tokens = _search_text(query.text).split()
+        selected = [
+            item for item in entries
+            if (
+                not query.statuses or item["status"] in query.statuses
+            )
+            and (
+                not query.applicabilities
+                or item["applicability"] in query.applicabilities
+            )
+            and (
+                not query.gap_reasons
+                or item["gap_reason"] in query.gap_reasons
+            )
+            and (
+                not query.route_binding_statuses
+                or item["route_binding_status"]
+                in query.route_binding_statuses
+            )
+            and all(
+                token in _search_text(" ".join((
+                    item["vulnerability_identifier"],
+                    item["interface_value"], item["handler_value"],
+                    " ".join(item["expected_parameters"]),
+                    item["gap_reason"], item["applicability"],
+                )))
+                for token in text_tokens
+            )
+        ]
+
+        def facets(key: str) -> dict:
+            values = sorted({item[key] for item in entries if item[key]})
+            return {
+                value: sum(item[key] == value for item in entries)
+                for value in values
+            }
+
+        query_document = asdict(query)
+        identity = {
+            "schema_version": (
+                HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION
+            ),
+            "overlay_id": overlay.overlay_id,
+            "query": query_document,
+            "expectation_ids": [
+                item["expectation_id"] for item in selected
+            ],
+        }
+        query_id = "historical-graph-overlay-query:" + hashlib.sha256(
+            _encoded(identity).encode("utf-8")
+        ).hexdigest()
+        overlay_document = overlay.to_dict()
+        return {
+            "schema_version": (
+                HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION
+            ),
+            "query_id": query_id,
+            "overlay": {
+                key: value for key, value in overlay_document.items()
+                if key not in {"entries", "diagnostics"}
+            },
+            "query": query_document,
+            "entries": selected,
+            "total_entry_count": len(entries),
+            "selected_entry_count": len(selected),
+            "facets": {
+                "status": facets("status"),
+                "applicability": facets("applicability"),
+                "gap_reason": facets("gap_reason"),
+                "route_binding_status": facets("route_binding_status"),
+            },
+            "diagnostics": list(overlay.diagnostics),
         }
 
     def query_communication_graph(

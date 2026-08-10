@@ -1,5 +1,5 @@
 from dataclasses import replace
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
 from pathlib import Path
@@ -277,6 +277,8 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
                 }],
             }), encoding="utf-8")
             output = Path(directory) / "historical-diff.json"
+            graph_output = Path(directory) / "communication-graph.json"
+            overlay_output = Path(directory) / "historical-overlay.json"
             stdout = io.StringIO()
             with redirect_stdout(stdout):
                 exit_code = mapping_main((
@@ -284,15 +286,51 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
                     "--artifact-sha256", "a" * 64,
                     "--expectations", str(expectations),
                     "--output", str(output),
+                    "--graph-output", str(graph_output),
+                    "--overlay-output", str(overlay_output),
                     "--profile", "base",
                 ))
             summary = json.loads(stdout.getvalue())
             document = json.loads(output.read_text(encoding="utf-8"))
+            graph_document = json.loads(
+                graph_output.read_text(encoding="utf-8")
+            )
+            overlay_document = json.loads(
+                overlay_output.read_text(encoding="utf-8")
+            )
 
         self.assertEqual(0, exit_code)
         self.assertEqual({"observed": 1}, document["summary"])
         self.assertEqual(document["report_id"], summary["report_id"])
         self.assertEqual("discovery-catalog", document["catalog_id"].split(":")[0])
+        self.assertEqual(graph_document["graph_id"], overlay_document["graph_id"])
+        self.assertEqual(document["report_id"], overlay_document[
+            "expectation_diff_id"
+        ])
+        self.assertEqual(summary["overlay_id"], overlay_document["overlay_id"])
+        self.assertEqual("observed", overlay_document["entries"][0]["status"])
+        self.assertTrue(overlay_document["entries"][0]["graph_node_ids"])
+
+    def test_cli_rejects_vulnerability_scope_without_overlay_before_writing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "must-not-exist.json"
+            stderr = io.StringIO()
+            with redirect_stderr(stderr):
+                exit_code = mapping_main((
+                    "compare-history", str(Path(directory) / "missing-root"),
+                    "--artifact-sha256", "a" * 64,
+                    "--expectations", str(Path(directory) / "missing.json"),
+                    "--output", str(output),
+                    "--vulnerability-scope", str(
+                        Path(directory) / "scope.json"
+                    ),
+                ))
+
+        self.assertEqual(1, exit_code)
+        self.assertFalse(output.exists())
+        self.assertIn(
+            "vulnerability-scope requires overlay-output", stderr.getvalue()
+        )
 
     def test_expectation_json_preserves_version_scope_basis(self) -> None:
         expectation = HistoricalInterfaceExpectation.from_dict({

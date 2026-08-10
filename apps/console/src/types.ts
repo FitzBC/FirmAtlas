@@ -530,6 +530,73 @@ export interface CommunicationGraphQueryResult {
   diagnostics: string[]
 }
 
+export interface HistoricalGraphOverlayEntry {
+  expectation_id: string
+  vulnerability_identifier: string
+  interface_value: string
+  method: string
+  handler_value: string
+  expected_parameters: string[]
+  source_ref: string
+  applicability: 'exact_artifact' | 'product_family' | 'unknown' | 'out_of_scope'
+  claimed_versions: string[]
+  applicability_basis: string
+  status: 'observed' | 'partial' | 'missing' | 'not_assessable'
+  gap_reason: string
+  gap_explanation: string
+  observed_methods: string[]
+  observed_parameters: string[]
+  missing_parameters: string[]
+  catalog_candidate_ids: string[]
+  catalog_evidence_ids: string[]
+  route_binding_status: string | null
+  observed_handlers: string[]
+  graph_node_ids: string[]
+  graph_edge_ids: string[]
+  graph_link_bases: string[]
+  unmapped_catalog_reference_ids: string[]
+  unmapped_catalog_evidence_ids: string[]
+}
+
+export interface HistoricalGraphOverlayQueryResult {
+  schema_version: string
+  query_id: string
+  overlay: {
+    schema_version: string
+    overlay_id: string
+    graph_id: string
+    catalog_id: string
+    expectation_diff_id: string
+    route_binding_report_id: string | null
+    claim_boundary: string
+    summary: Record<string, Record<string, number>>
+    vulnerability_audit: {
+      audit_id: string
+      total_vulnerability_count: number
+      category_counts: Record<string, number>
+      exact_artifact_expectation_count: number
+      exact_artifact_observed_count: number
+    } | null
+  }
+  query: {
+    text: string
+    statuses: string[]
+    applicabilities: string[]
+    gap_reasons: string[]
+    route_binding_statuses: string[]
+  }
+  entries: HistoricalGraphOverlayEntry[]
+  total_entry_count: number
+  selected_entry_count: number
+  facets: {
+    status: Record<string, number>
+    applicability: Record<string, number>
+    gap_reason: Record<string, number>
+    route_binding_status: Record<string, number>
+  }
+  diagnostics: string[]
+}
+
 export interface SemanticInterfaceObservation {
   value: string
   kind: string

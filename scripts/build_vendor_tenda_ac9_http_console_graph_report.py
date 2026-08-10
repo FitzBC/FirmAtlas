@@ -222,7 +222,7 @@ def build() -> dict:
                 "interface_search_and_exact_focus",
                 "interface_structure_preset",
                 "parameter_state_preset",
-                "communication_topology_preset",
+                "communication_components_preset",
                 "completeness_and_obligation_preset",
                 "evidence_atom_drilldown",
                 "partial_and_coverage_diagnostics",

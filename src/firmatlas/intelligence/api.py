@@ -14,6 +14,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 from firmatlas.mapping.repository import (
     CommunicationGraphQuery,
     DiscoveryCatalogRepository,
+    HistoricalGraphOverlayQuery,
 )
 
 from .repository import IntelligenceRepository
@@ -150,7 +151,32 @@ def create_handler(
                 )
             graph_prefix = "/api/mappings/graphs/"
             if method == "GET" and path.startswith(graph_prefix):
-                graph_id = unquote(path[len(graph_prefix):])
+                graph_remainder = path[len(graph_prefix):]
+                graph_segment, overlay_separator, overlay_nested = (
+                    graph_remainder.partition("/historical-overlay")
+                )
+                graph_id = unquote(graph_segment)
+                if overlay_separator:
+                    if overlay_nested:
+                        raise ApiError(HTTPStatus.NOT_FOUND, "route not found")
+                    result = mappings.query_historical_graph_overlay(
+                        graph_id,
+                        HistoricalGraphOverlayQuery(
+                            text=_one(query, "q"),
+                            statuses=_many(query, "status"),
+                            applicabilities=_many(query, "applicability"),
+                            gap_reasons=_many(query, "gap_reason"),
+                            route_binding_statuses=_many(
+                                query, "route_binding_status"
+                            ),
+                        ),
+                    )
+                    if result is None:
+                        raise ApiError(
+                            HTTPStatus.NOT_FOUND,
+                            "historical graph overlay not found",
+                        )
+                    return HTTPStatus.OK, result
                 result = mappings.query_communication_graph(
                     graph_id,
                     CommunicationGraphQuery(

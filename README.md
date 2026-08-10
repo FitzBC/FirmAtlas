@@ -55,6 +55,7 @@ FirmAtlas 是一个证据驱动的一体化固件分析平台。它聚合固件�
 | 架构聚类 | 表单处理器、CGI 网关、管理路由、动态页面、资源型 API、HNAP/SOAP | 相似接口、命中理由、厂商与固件型号分布 |
 | 潜在隐藏接口 | 全固件 Native 注册减去 completed 客户端范围，默认选择每个固件最新目录 | 注册二进制、handler、覆盖 scope、证据 identity、运行时原因义务 |
 | 固件版本结构差异 | 覆盖感知地对齐同型号不可变测绘目录，比较接口、参数与潜在隐藏接口 | 发行身份依据、coverage/profile 边界、增删改置信度、BASE/TARGET 证据 |
+| 历史漏洞图谱对照 | 将版本化历史接口/参数期望作为只读覆盖层投影到通信图，分别呈现“是否发现”和“是否适用于当前制品” | 精确图节点/边、参数与 handler、漏检原因、版本边界、漏洞全集分母 |
 | 调查体验 | 固件 ↔ 漏洞 ↔ 接口多级下钻，不丢失列表与筛选上下文 | 分层面板、逐级回退、父级可见、移动端全屏层级 |
 | 大规模检索 | SQLite FTS5、字段索引、服务端分页与输入防抖 | 17 万级候选无需全量加载到浏览器 |
 
@@ -163,7 +164,7 @@ PYTHONPATH=src python3 -m firmatlas.cli mapping query-graph \
 节点/边、facet、Coverage Ledger 与完整 EvidenceAtom。AC9 实证见 [R2-18 持久化图查询](./docs/firmware-mapping/progress/2026-08-11-r2-18-ac9-persisted-graph-query.md)。
 
 本地产品服务直接复用同一查询 Interface：Console 的“通信测绘 → 架构图谱”先检索接口，再按
-精确节点焦点切换接口结构、参数与状态、通信拓扑、完整性与义务四种视图；节点侧栏展示属性、
+精确节点焦点切换接口结构、参数与状态、通信组件、完整性与义务四种视图；节点侧栏展示属性、
 相邻语义关系与源 Catalog EvidenceAtom。AC9 真实 HTTP/浏览器回放见
 [R2-19 HTTP 与 Console 图谱](./docs/firmware-mapping/progress/2026-08-11-r2-19-ac9-http-console-graph.md)。
 
@@ -174,10 +175,22 @@ PYTHONPATH=src python3 -m firmatlas.mapping compare-history /path/to/rootfs \
   --artifact-sha256 <original-firmware-sha256> \
   --expectations historical-expectations.json \
   --profile auto \
-  --output historical-expectation-diff.json
+  --output historical-expectation-diff.json \
+  --graph-output communication-graph.json \
+  --overlay-output historical-graph-overlay.json \
+  --vulnerability-scope historical-vulnerability-scope.json
 ```
 
-输出区分接口/参数/method/dispatcher/coverage/artifact-scope 缺口，并保留 Catalog candidate 与 EvidenceAtom 引用。原厂 AC9 的 [R2-04 报告](./docs/firmware-mapping/samples/r2-04-vendor-tenda-ac9-framework-history.json)同时固化 13 条结构化 expectation、71 条产品级漏洞全集、30 条当前样本级复现关联和 route→handler 覆盖；产品同名记录不会被自动当作当前版本事实。
+输出区分接口/参数/method/dispatcher/coverage/artifact-scope 缺口，并保留 Catalog candidate 与 EvidenceAtom 引用。可选的 graph/overlay 输出把这些比较链接到精确图节点和语义边，但历史声明始终是只读上下文，不会创建或修改固件事实。覆盖层可用 `firmatlas mapping publish-history-overlay` 发布到 SQLite，并用 `query-history-overlay` 或 Console“历史漏洞对照”按发现状态、版本适用性和漏检原因检索。原厂 AC9 的 [R2-20 报告](./docs/firmware-mapping/samples/r2-20-vendor-tenda-ac9-historical-graph-overlay.json)固化 13 条结构化 expectation 与 71 条产品级漏洞全集：2 条 exact-artifact 期望均发现，11 条跨版本期望仍独立标为 out-of-scope；接口结构出现不等同于当前版本存在漏洞。
+
+```bash
+PYTHONPATH=src python3 -m firmatlas.cli mapping publish-history-overlay \
+  --database var/firmatlas.db historical-graph-overlay.json
+
+PYTHONPATH=src python3 -m firmatlas.cli mapping query-history-overlay \
+  --database var/firmatlas.db <graph-id> \
+  --status observed --applicability exact_artifact
+```
 
 输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。Inventory v1alpha2 会在固件 chroot 内解析绝对与链式 symlink，但不会经链接打开或散列目标；普通缺失、循环、深度耗尽和越界仍进入 coverage ledger。内置 Inventory 只读取已解包目录并以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装由独立 Container Extraction Worker 处理，不能把原始固件直接交给此命令。
 

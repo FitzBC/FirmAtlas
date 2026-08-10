@@ -5,6 +5,7 @@ import type {
   MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
   MappingSnapshotDiff, PotentialHiddenInterfacePage,
   CommunicationGraphQueryResult, CommunicationGraphSummary,
+  HistoricalGraphOverlayQueryResult,
 } from '../types'
 import { MappingCatalogWorkspace } from './MappingCatalogWorkspace'
 
@@ -169,7 +170,7 @@ const graphResult = (nodes: CommunicationGraphQueryResult['nodes'], edges: Commu
   view_presets: [
     { preset_id: 'interface_structure', title: 'Interface structure', node_kinds: ['interface', 'parameter', 'obligation'], edge_kinds: ['accepts_parameter', 'requires_evidence'], description: 'Interface ownership and evidence.' },
     { preset_id: 'parameter_state', title: 'Parameter state', node_kinds: ['interface', 'parameter'], edge_kinds: ['accepts_parameter'], description: 'Parameters and state clues.' },
-    { preset_id: 'communication_topology', title: 'Communication topology', node_kinds: ['interface', 'runtime_principal'], edge_kinds: ['executed_by'], description: 'Runtime communication shape.' },
+    { preset_id: 'communication_components', title: 'Communication components', node_kinds: ['interface', 'runtime_principal'], edge_kinds: ['executed_by'], description: 'Runtime communication shape.' },
     { preset_id: 'completeness', title: 'Completeness', node_kinds: ['interface', 'obligation'], edge_kinds: ['requires_evidence'], description: 'Coverage and unresolved obligations.' },
   ], diagnostics: [],
 })
@@ -188,6 +189,42 @@ const obligationNode = {
   node_id: 'obligation:dlna-owner', node_kind: 'obligation', label: 'Resolve DLNA handler owner',
   status: 'open', source_path: 'bin/httpd', evidence_ids: [],
   attributes: [['required_capability', 'binds_handler']] as Array<[string, string]>,
+}
+
+const historicalOverlay: HistoricalGraphOverlayQueryResult = {
+  schema_version: 'firmatlas.mapping.historical-graph-overlay-query-result/v1alpha1',
+  query_id: 'historical-graph-overlay-query:ac9',
+  overlay: {
+    schema_version: 'firmatlas.mapping.historical-graph-overlay/v1alpha1',
+    overlay_id: 'historical-graph-overlay:ac9', graph_id: graphSummary.graph_id,
+    catalog_id: catalog.catalog_id, expectation_diff_id: 'historical-expectation-diff:ac9',
+    route_binding_report_id: 'historical-route-binding:ac9',
+    claim_boundary: 'Historical vulnerability claims are contextual expectations only; graph links do not assert vulnerability presence.',
+    summary: { status: { observed: 1 }, applicability: { out_of_scope: 1 } },
+    vulnerability_audit: {
+      audit_id: 'historical-vulnerability-audit:ac9', total_vulnerability_count: 71,
+      category_counts: { compared_interface: 13, not_analyzed: 46 },
+      exact_artifact_expectation_count: 2, exact_artifact_observed_count: 2,
+    },
+  },
+  query: { text: '', statuses: [], applicabilities: [], gap_reasons: [], route_binding_statuses: [] },
+  entries: [{
+    expectation_id: 'historical-expectation:iptv', vulnerability_identifier: 'CVE-2025-5836',
+    interface_value: '/goform/SetDlnaCfg', method: 'POST', handler_value: 'formSetIptv',
+    expected_parameters: ['list'], source_ref: 'semantic-analysis:CVE-2025-5836',
+    applicability: 'out_of_scope', claimed_versions: ['V15.03.06.42_multi'],
+    applicability_basis: 'Different AC9 firmware lineage.', status: 'observed', gap_reason: 'none',
+    gap_explanation: 'The expected interface, method, and parameters were observed in the evidence-backed catalog.',
+    observed_methods: ['POST'], observed_parameters: ['list'], missing_parameters: [],
+    catalog_candidate_ids: [interfaceNode.node_id], catalog_evidence_ids: ['evidence:dlna'],
+    route_binding_status: 'verified_expected_handler', observed_handlers: ['formSetIptv'],
+    graph_node_ids: [interfaceNode.node_id, parameterNode.node_id], graph_edge_ids: ['edge:parameter'],
+    graph_link_bases: ['catalog_candidate_id', 'parameter_owner_edge'],
+    unmapped_catalog_reference_ids: [], unmapped_catalog_evidence_ids: [],
+  }],
+  total_entry_count: 1, selected_entry_count: 1,
+  facets: { status: { observed: 1 }, applicability: { out_of_scope: 1 }, gap_reason: { none: 1 }, route_binding_status: { verified_expected_handler: 1 } },
+  diagnostics: [],
 }
 
 afterEach(() => {
@@ -290,6 +327,7 @@ it('explores a persisted communication graph from interface to parameter and evi
   vi.spyOn(intelligenceApi, 'mappingGraphs').mockResolvedValue({
     items: [graphSummary], total: 1, limit: 100, offset: 0,
   })
+  vi.spyOn(intelligenceApi, 'mappingHistoricalOverlay').mockResolvedValue(historicalOverlay)
   const queryGraph = vi.spyOn(intelligenceApi, 'mappingGraph').mockImplementation(
     (_graphId, options) => Promise.resolve(options?.nodeKinds?.includes('interface')
       ? graphResult([interfaceNode])
@@ -314,6 +352,51 @@ it('explores a persisted communication graph from interface to parameter and evi
   await waitFor(() => expect(queryGraph).toHaveBeenLastCalledWith(
     graphSummary.graph_id,
     expect.objectContaining({ preset: 'parameter_state', focusNodeIds: [interfaceNode.node_id] }),
+    expect.any(AbortSignal),
+  ))
+  fireEvent.click(screen.getByRole('button', { name: '通信组件' }))
+  await waitFor(() => expect(queryGraph).toHaveBeenLastCalledWith(
+    graphSummary.graph_id,
+    expect.objectContaining({ preset: 'communication_components', focusNodeIds: [interfaceNode.node_id] }),
+    expect.any(AbortSignal),
+  ))
+})
+
+it('overlays AC9 historical expectations without turning cross-version presence into a vulnerability fact', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
+    items: [catalog], total: 1, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
+    items: [candidate], total: 1, limit: 100, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingGraphs').mockResolvedValue({
+    items: [graphSummary], total: 1, limit: 100, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingHistoricalOverlay').mockResolvedValue(historicalOverlay)
+  const queryGraph = vi.spyOn(intelligenceApi, 'mappingGraph').mockImplementation(
+    (_graphId, options) => Promise.resolve(options?.nodeKinds?.includes('interface')
+      ? graphResult([interfaceNode])
+      : graphResult([interfaceNode, parameterNode], [{
+        edge_id: 'edge:parameter', edge_kind: 'accepts_parameter',
+        source_ref: interfaceNode.node_id, target_ref: parameterNode.node_id,
+        status: 'supported', origin_ref: parameterNode.node_id,
+        evidence_ids: ['evidence:dlna'], attributes: [],
+      }])),
+  )
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '架构图谱' }))
+  fireEvent.click(await screen.findByRole('button', { name: '历史漏洞对照' }))
+
+  expect(await screen.findByText('CVE-2025-5836')).toBeInTheDocument()
+  expect(screen.getByText('71')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: /查看历史漏洞 CVE-2025-5836/ }))
+  expect(await screen.findByText('Different AC9 firmware lineage.')).toBeInTheDocument()
+  expect(screen.getByText('跨版本结构存在，不代表当前固件存在该漏洞')).toBeInTheDocument()
+  expect(screen.getByText('formSetIptv')).toBeInTheDocument()
+  await waitFor(() => expect(queryGraph).toHaveBeenLastCalledWith(
+    graphSummary.graph_id,
+    expect.objectContaining({ focusNodeIds: [interfaceNode.node_id, parameterNode.node_id] }),
     expect.any(AbortSignal),
   ))
 })

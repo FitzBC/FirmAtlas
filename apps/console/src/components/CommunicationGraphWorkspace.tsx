@@ -1,6 +1,7 @@
 import {
   Activity, AlertTriangle, Boxes, Braces, ChevronRight, CircleDot,
-  Database, FileSearch, GitBranch, Layers3, Network, Search, ShieldQuestion,
+  Database, FileSearch, GitBranch, History, Layers3, Network, Search,
+  ShieldQuestion,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { intelligenceApi } from '../api/client'
@@ -8,13 +9,14 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type {
   CommunicationGraphEdge, CommunicationGraphEvidenceAtom,
   CommunicationGraphNode, CommunicationGraphQueryResult,
-  CommunicationGraphSummary,
+  CommunicationGraphSummary, HistoricalGraphOverlayEntry,
+  HistoricalGraphOverlayQueryResult,
 } from '../types'
 
 const presetLabels: Record<string, string> = {
   interface_structure: '接口结构',
   parameter_state: '参数与状态',
-  communication_topology: '通信拓扑',
+  communication_components: '通信组件',
   completeness: '完整性与义务',
 }
 
@@ -50,6 +52,10 @@ export function CommunicationGraphWorkspace() {
   const [interfaceQuery, setInterfaceQuery] = useState('')
   const [interfaceIndex, setInterfaceIndex] = useState<CommunicationGraphQueryResult | null>(null)
   const [selectedInterface, setSelectedInterface] = useState<CommunicationGraphNode | null>(null)
+  const [indexMode, setIndexMode] = useState<'interfaces' | 'history'>('interfaces')
+  const [historicalOverlay, setHistoricalOverlay] = useState<HistoricalGraphOverlayQueryResult | null>(null)
+  const [selectedHistory, setSelectedHistory] = useState<HistoricalGraphOverlayEntry | null>(null)
+  const [overlayError, setOverlayError] = useState<string | null>(null)
   const [preset, setPreset] = useState('interface_structure')
   const [result, setResult] = useState<CommunicationGraphQueryResult | null>(null)
   const [selectedNodeId, setSelectedNodeId] = useState('')
@@ -97,12 +103,34 @@ export function CommunicationGraphWorkspace() {
   }, [graphId, debouncedQuery])
 
   useEffect(() => {
-    if (!graphId || !selectedInterface) { setResult(null); return }
+    if (!graphId) { setHistoricalOverlay(null); return }
+    const controller = new AbortController()
+    void intelligenceApi.mappingHistoricalOverlay(graphId, controller.signal).then((next) => {
+      setHistoricalOverlay(next)
+      setSelectedHistory((current) => next.entries.some(
+        (entry) => entry.expectation_id === current?.expectation_id,
+      ) ? current : null)
+      setOverlayError(null)
+    }).catch((caught) => {
+      if (!controller.signal.aborted) {
+        setHistoricalOverlay(null)
+        setSelectedHistory(null)
+        setOverlayError(caught instanceof Error ? caught.message : '历史漏洞覆盖层加载失败')
+      }
+    })
+    return () => controller.abort()
+  }, [graphId])
+
+  useEffect(() => {
+    const focusNodeIds = selectedHistory?.graph_node_ids ?? (
+      selectedInterface ? [selectedInterface.node_id] : []
+    )
+    if (!graphId || focusNodeIds.length === 0) { setResult(null); return }
     const controller = new AbortController()
     setLoading(true)
     void intelligenceApi.mappingGraph(graphId, {
       preset,
-      focusNodeIds: [selectedInterface.node_id],
+      focusNodeIds,
       maxHops: preset === 'completeness' ? 4 : 3,
       maxNodes: 160,
       maxEdges: 320,
@@ -110,7 +138,11 @@ export function CommunicationGraphWorkspace() {
       setResult(next)
       setSelectedNodeId((current) => next.nodes.some(
         (node) => node.node_id === current,
-      ) ? current : selectedInterface.node_id)
+      ) ? current : (
+        focusNodeIds.find((nodeId) => next.nodes.some(
+          (node) => node.node_id === nodeId,
+        )) ?? next.nodes[0]?.node_id ?? ''
+      ))
       setError(null)
     }).catch((caught) => {
       if (!controller.signal.aborted) {
@@ -118,7 +150,7 @@ export function CommunicationGraphWorkspace() {
       }
     }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
     return () => controller.abort()
-  }, [graphId, selectedInterface, preset])
+  }, [graphId, selectedInterface, selectedHistory, preset])
 
   const summary = graphs.find((graph) => graph.graph_id === graphId)
   const selectedNode = result?.nodes.find((node) => node.node_id === selectedNodeId) ?? null
@@ -132,6 +164,14 @@ export function CommunicationGraphWorkspace() {
   const evidence = result?.evidence_atoms.filter((atom) => (
     selectedEvidenceIds.has(atom.evidence_id)
   )) ?? []
+  const historyEntries = useMemo(() => {
+    const query = debouncedQuery.trim().toLowerCase()
+    if (!query) return historicalOverlay?.entries ?? []
+    return (historicalOverlay?.entries ?? []).filter((entry) => [
+      entry.vulnerability_identifier, entry.interface_value,
+      entry.handler_value, ...entry.expected_parameters,
+    ].join(' ').toLowerCase().includes(query))
+  }, [historicalOverlay, debouncedQuery])
 
   if (!loading && graphs.length === 0) {
     return <div className="grid min-h-[520px] place-items-center rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 p-8 text-center"><div><Network size={42} className="mx-auto text-cyan/30" /><h2 className="mt-4 text-sm text-slate-300">尚未发布通信架构图</h2><p className="mt-2 max-w-md text-xs leading-5 text-slate-600">先发布 Discovery Catalog 与确定性图投影；页面只查询既有事实，不会在浏览器中推断接口或 owner。</p></div></div>
@@ -144,20 +184,18 @@ export function CommunicationGraphWorkspace() {
         <div><div className="eyebrow"><Network size={12} /> Communication architecture graph</div><div className="mt-2 flex flex-wrap items-baseline gap-3"><h2 className="text-lg font-semibold text-white">证据约束通信图</h2>{summary && <span className="font-mono text-[9px] text-slate-600">{summary.firmware_artifact_sha256.slice(0, 16)}…</span>}</div></div>
         <div className="flex flex-wrap gap-2">
           {summary && <><GraphMetric label="节点" value={summary.node_count} /><GraphMetric label="关系" value={summary.edge_count} /><GraphMetric label="覆盖" value={summary.source_catalog_coverage_status} /></>}
-          {graphs.length > 1 && <label className="select-field"><Database size={13} /><select aria-label="选择通信架构图" value={graphId} onChange={(event) => { setGraphId(event.target.value); setSelectedInterface(null); setResult(null) }}>{graphs.map((graph) => <option key={graph.graph_id} value={graph.graph_id}>{graph.firmware_artifact_sha256.slice(0, 12)} · {graph.node_count} nodes</option>)}</select></label>}
+          {graphs.length > 1 && <label className="select-field"><Database size={13} /><select aria-label="选择通信架构图" value={graphId} onChange={(event) => { setGraphId(event.target.value); setSelectedInterface(null); setSelectedHistory(null); setResult(null) }}>{graphs.map((graph) => <option key={graph.graph_id} value={graph.graph_id}>{graph.firmware_artifact_sha256.slice(0, 12)} · {graph.node_count} nodes</option>)}</select></label>}
         </div>
       </div>
     </div>
     {error && <div role="alert" className="m-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
     <div className="grid min-h-[650px] xl:grid-cols-[270px_minmax(520px,1fr)_320px]">
       <aside className="border-b border-white/[0.07] p-4 xl:border-b-0 xl:border-r">
-        <div className="eyebrow"><Braces size={12} /> Exposed interfaces</div>
-        <label className="search-field mt-4"><Search size={14} /><input aria-label="搜索通信接口" value={interfaceQuery} onChange={(event) => setInterfaceQuery(event.target.value)} placeholder="路径、操作或命名空间…" /></label>
-        <div className="mt-3 flex items-center justify-between text-[9px] text-slate-700"><span>精确接口焦点</span><span>{interfaceIndex?.selected_node_count ?? 0} / {interfaceIndex?.total_node_count ?? 0}{interfaceIndex?.query_status === 'partial' ? ' · partial' : ''}</span></div>
+        <div className="grid grid-cols-2 rounded-xl border border-white/[0.07] bg-black/20 p-1"><button type="button" onClick={() => setIndexMode('interfaces')} className={`rounded-lg px-2 py-2 text-[9px] transition ${indexMode === 'interfaces' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600'}`}><Braces size={11} className="mr-1 inline" />接口索引</button><button type="button" onClick={() => setIndexMode('history')} className={`rounded-lg px-2 py-2 text-[9px] transition ${indexMode === 'history' ? 'bg-amber-300/[0.1] text-amber-200' : 'text-slate-600'}`}><History size={11} className="mr-1 inline" />历史漏洞对照</button></div>
+        <label className="search-field mt-4"><Search size={14} /><input aria-label={indexMode === 'interfaces' ? '搜索通信接口' : '搜索历史漏洞'} value={interfaceQuery} onChange={(event) => setInterfaceQuery(event.target.value)} placeholder={indexMode === 'interfaces' ? '路径、操作或命名空间…' : 'CVE、接口、参数或 handler…'} /></label>
+        {indexMode === 'interfaces' ? <div className="mt-3 flex items-center justify-between text-[9px] text-slate-700"><span>精确接口焦点</span><span>{interfaceIndex?.selected_node_count ?? 0} / {interfaceIndex?.total_node_count ?? 0}{interfaceIndex?.query_status === 'partial' ? ' · partial' : ''}</span></div> : <div className="mt-3 rounded-xl border border-amber-300/10 bg-amber-300/[0.035] p-3"><div className="flex items-center justify-between text-[9px]"><span className="text-amber-200">历史期望 {historicalOverlay?.total_entry_count ?? 0}</span>{historicalOverlay?.overlay.vulnerability_audit && <span className="font-mono text-slate-400">{historicalOverlay.overlay.vulnerability_audit.total_vulnerability_count}</span>}</div><p className="mt-2 text-[8px] leading-4 text-slate-600">右侧总数是漏洞库分母；图中只链接已有 Catalog 证据。</p></div>}
         <div className="mt-2 max-h-[535px] overflow-y-auto pr-1">
-          {loading && !interfaceIndex && <div className="py-10 text-center text-[10px] text-slate-700">正在装载接口索引…</div>}
-          {interfaceIndex?.nodes.map((node) => <button key={node.node_id} type="button" aria-label={`聚焦接口 ${node.label}`} onClick={() => { setSelectedInterface(node); setSelectedNodeId(node.node_id) }} className={`group mb-1.5 w-full rounded-xl border p-3 text-left transition ${selectedInterface?.node_id === node.node_id ? 'border-cyan/30 bg-cyan/[0.075]' : 'border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]'}`}><div className="flex items-start gap-2.5"><CircleDot size={14} className="mt-0.5 shrink-0 text-cyan" /><div className="min-w-0 flex-1"><div className="break-all font-mono text-[11px] leading-4 text-slate-200">{node.label}</div><div className="mt-1 truncate text-[9px] text-slate-700">{node.source_path}</div></div><ChevronRight size={13} className="mt-1 shrink-0 text-slate-700 transition group-hover:translate-x-0.5" /></div></button>)}
-          {!loading && interfaceIndex?.nodes.length === 0 && <div className="py-10 text-center text-[10px] text-slate-700">没有符合条件的接口</div>}
+          {indexMode === 'interfaces' ? <>{loading && !interfaceIndex && <div className="py-10 text-center text-[10px] text-slate-700">正在装载接口索引…</div>}{interfaceIndex?.nodes.map((node) => <button key={node.node_id} type="button" aria-label={`聚焦接口 ${node.label}`} onClick={() => { setSelectedHistory(null); setSelectedInterface(node); setSelectedNodeId(node.node_id) }} className={`group mb-1.5 w-full rounded-xl border p-3 text-left transition ${selectedInterface?.node_id === node.node_id && !selectedHistory ? 'border-cyan/30 bg-cyan/[0.075]' : 'border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]'}`}><div className="flex items-start gap-2.5"><CircleDot size={14} className="mt-0.5 shrink-0 text-cyan" /><div className="min-w-0 flex-1"><div className="break-all font-mono text-[11px] leading-4 text-slate-200">{node.label}</div><div className="mt-1 truncate text-[9px] text-slate-700">{node.source_path}</div></div><ChevronRight size={13} className="mt-1 shrink-0 text-slate-700 transition group-hover:translate-x-0.5" /></div></button>)}{!loading && interfaceIndex?.nodes.length === 0 && <div className="py-10 text-center text-[10px] text-slate-700">没有符合条件的接口</div>}</> : <>{overlayError && <div className="rounded-xl border border-dashed border-white/[0.08] p-4 text-center text-[9px] leading-5 text-slate-600">该图尚未发布历史漏洞覆盖层<br />{overlayError}</div>}{historyEntries.map((entry) => <button key={entry.expectation_id} type="button" aria-label={`查看历史漏洞 ${entry.vulnerability_identifier}`} onClick={() => { setSelectedInterface(null); setSelectedHistory(entry); setPreset('completeness'); setSelectedNodeId(entry.graph_node_ids[0] ?? '') }} className={`group mb-1.5 w-full rounded-xl border p-3 text-left transition ${selectedHistory?.expectation_id === entry.expectation_id ? 'border-amber-300/25 bg-amber-300/[0.065]' : 'border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]'}`}><div className="flex items-center justify-between gap-2"><span className="font-mono text-[10px] text-amber-200">{entry.vulnerability_identifier}</span><HistoryStatus status={entry.status} /></div><div className="mt-2 break-all font-mono text-[9px] leading-4 text-slate-400">{entry.interface_value}</div><div className="mt-2 flex justify-between text-[8px] text-slate-700"><span>{entry.applicability}</span><span>{entry.graph_node_ids.length} graph refs</span></div></button>)}{historicalOverlay && historyEntries.length === 0 && <div className="py-10 text-center text-[10px] text-slate-700">没有符合条件的历史期望</div>}</>}
         </div>
       </aside>
       <main className="min-w-0 border-b border-white/[0.07] xl:border-b-0 xl:border-r">
@@ -166,11 +204,12 @@ export function CommunicationGraphWorkspace() {
           {result && <div className="mt-3 flex flex-wrap items-center gap-3 text-[9px] text-slate-600"><span className={result.query_status === 'completed' ? 'text-signal' : 'text-amber-300'}>{result.query_status}</span><span>{result.selected_node_count} nodes</span><span>{result.selected_edge_count} edges</span><span>{Object.keys(result.facets.node_kinds).length} dimensions</span>{result.diagnostics.map((diagnostic) => <span key={diagnostic} className="text-amber-300">{diagnostic}</span>)}</div>}
         </div>
         <div className="relative min-h-[560px] overflow-auto bg-[radial-gradient(circle_at_50%_15%,rgba(117,214,255,0.055),transparent_32%),linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:auto,32px_32px,32px_32px]">
-          {!selectedInterface ? <GraphPrompt /> : result ? <GraphCanvas result={result} selectedNodeId={selectedNodeId} onSelect={setSelectedNodeId} /> : <div className="grid min-h-[560px] place-items-center text-xs text-slate-700">正在恢复证据关系…</div>}
+          {!selectedInterface && !selectedHistory ? <GraphPrompt /> : result ? <GraphCanvas result={result} selectedNodeId={selectedNodeId} onSelect={setSelectedNodeId} /> : <div className="grid min-h-[560px] place-items-center text-xs text-slate-700">正在恢复证据关系…</div>}
         </div>
       </main>
       <aside className="min-w-0 bg-gradient-to-b from-white/[0.02] to-transparent">
-        {selectedNode ? <NodeEvidence node={selectedNode} evidence={evidence} edges={touchingEdges} /> : <div className="grid min-h-[420px] place-items-center p-8 text-center"><div><FileSearch size={34} className="mx-auto text-signal/25" /><h3 className="mt-4 text-sm text-slate-400">选择图中的节点</h3><p className="mt-2 text-[10px] leading-5 text-slate-700">查看身份、状态、属性、相邻关系与原始 EvidenceAtom。</p></div></div>}
+        {selectedHistory && historicalOverlay && <HistoricalEvidence entry={selectedHistory} claimBoundary={historicalOverlay.overlay.claim_boundary} />}
+        {selectedNode ? <NodeEvidence node={selectedNode} evidence={evidence} edges={touchingEdges} /> : !selectedHistory && <div className="grid min-h-[420px] place-items-center p-8 text-center"><div><FileSearch size={34} className="mx-auto text-signal/25" /><h3 className="mt-4 text-sm text-slate-400">选择图中的节点</h3><p className="mt-2 text-[10px] leading-5 text-slate-700">查看身份、状态、属性、相邻关系与原始 EvidenceAtom。</p></div></div>}
       </aside>
     </div>
   </div>
@@ -217,6 +256,26 @@ function layoutNodes(nodes: CommunicationGraphNode[]) {
     })
   })
   return { nodes: positioned, width: Math.max(720, 34 + (maxRank + 1) * 200), height: Math.max(560, 34 + maxRows * 86) }
+}
+
+function HistoryStatus({ status }: { status: HistoricalGraphOverlayEntry['status'] }) {
+  const labels = {
+    observed: '已发现', partial: '部分发现', missing: '未发现', not_assessable: '不可判定',
+  }
+  const tone = status === 'observed' ? 'bg-signal/[0.08] text-signal' : status === 'missing' ? 'bg-ember/[0.09] text-ember' : 'bg-amber-300/[0.08] text-amber-200'
+  return <span className={`rounded-md px-1.5 py-0.5 text-[8px] ${tone}`}>{labels[status]}</span>
+}
+
+function HistoricalEvidence({ entry, claimBoundary }: { entry: HistoricalGraphOverlayEntry; claimBoundary: string }) {
+  const crossVersion = entry.applicability !== 'exact_artifact'
+  return <article className="detail-enter border-b border-amber-300/10 bg-amber-300/[0.025] p-5">
+    <div className="eyebrow text-amber-200"><History size={12} /> Historical expectation</div>
+    <div className="mt-3 flex items-start justify-between gap-3"><div><h3 className="font-mono text-sm font-semibold text-white">{entry.vulnerability_identifier}</h3><div className="mt-1 break-all font-mono text-[10px] text-slate-400">{entry.interface_value}</div></div><HistoryStatus status={entry.status} /></div>
+    <div className="mt-3 grid grid-cols-2 gap-2 text-[8px]"><div className="rounded-lg border border-white/[0.06] p-2"><div className="text-slate-700">适用性</div><div className="mt-1 text-amber-200">{entry.applicability}</div></div><div className="rounded-lg border border-white/[0.06] p-2"><div className="text-slate-700">路由绑定</div><div className="mt-1 break-all text-slate-300">{entry.route_binding_status ?? '未提供'}</div></div></div>
+    {crossVersion && <div className="mt-3 rounded-lg border border-amber-300/15 bg-amber-300/[0.045] p-2.5 text-[9px] leading-5 text-amber-100">跨版本结构存在，不代表当前固件存在该漏洞</div>}
+    <div className="mt-4 space-y-3 text-[9px] leading-5"><div><div className="text-[8px] uppercase tracking-wider text-slate-700">期望 / 已观察参数</div><div className="mt-1 break-all font-mono text-slate-400">{entry.expected_parameters.join(', ') || '无'} / {entry.observed_parameters.join(', ') || '无'}</div>{entry.missing_parameters.length > 0 && <div className="mt-1 font-mono text-ember">缺失: {entry.missing_parameters.join(', ')}</div>}</div><div><div className="text-[8px] uppercase tracking-wider text-slate-700">Handler evidence</div><div className="mt-1 break-all font-mono text-slate-400">{entry.observed_handlers.join(', ') || '未观察到'}</div></div><div><div className="text-[8px] uppercase tracking-wider text-slate-700">差异解释</div><p className="mt-1 text-slate-500">{entry.gap_explanation}</p></div><div><div className="text-[8px] uppercase tracking-wider text-slate-700">版本边界依据</div><p className="mt-1 text-slate-500">{entry.applicability_basis || '未提供版本适用性依据'}</p></div></div>
+    <div className="mt-4 rounded-lg border border-white/[0.06] p-2.5 text-[8px] leading-4 text-slate-700">{claimBoundary}</div>
+  </article>
 }
 
 function NodeEvidence({ node, evidence, edges }: { node: CommunicationGraphNode; evidence: CommunicationGraphEvidenceAtom[]; edges: CommunicationGraphEdge[] }) {

@@ -1,0 +1,434 @@
+{
+  "analysis": {
+    "analysis_run_id": "mapping-analysis-run:45eda12627543cee4d50664fb746d5cd05ba99061da1c6a87e6a70a23f3e455b",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v13",
+    "catalog_coverage_status": "completed",
+    "catalog_id": "discovery-catalog:e1b1f16da33f8d9ac0725bb3ae917efb80becc4d7b3d6db9305309126862a14a",
+    "expectation_diff_id": "historical-expectation-diff:bd29c387726065bb15d0d60115b928ad6640322e8a1f685fe86a41eb7e6bc91f",
+    "graph_edge_count": 7212,
+    "graph_id": "communication-graph:451023b0a6422c343920f7756360aaa564e995498afdc56a53d07265c71ca7d1",
+    "graph_node_count": 5674,
+    "graph_projection_status": "completed",
+    "overlay_id": "historical-graph-overlay:b549a5351a7a3ea7d9642299e99599652fca040af627c1fba541616b0cb1c944",
+    "profile_id": "firmatlas.mapping.profile/auto-v13",
+    "route_binding_report_id": "historical-route-binding:763463e385a2dfa412afbd15881dd80ff8d4bf6025a54e28ffdcb796e7d88ec3",
+    "vulnerability_audit_id": "historical-vulnerability-audit:174bdd4fcaee593b0d3daa0b8a7057a0fa3274dab87aff817427911f42cd2e33"
+  },
+  "console_acceptance": {
+    "interaction_contract": [
+      "interface_and_history_index_switch",
+      "historical_status_and_applicability_are_separate",
+      "exact_graph_reference_focus",
+      "expected_observed_and_missing_parameters",
+      "route_handler_evidence",
+      "gap_reason_explanation",
+      "version_scope_boundary",
+      "vulnerability_denominator_visible"
+    ],
+    "production_document_served": true,
+    "source_sha256": {
+      "apps/console/src/api/client.ts": "913679853899cbc2d91fa219a4ea2ea03d07a3ff3626d3fa5587da685b02c40a",
+      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "dedfa4360a29da4c023ab5c43e792334e60b38ad31fa65d6f910ffd629d32544",
+      "apps/console/src/types.ts": "b485f97405b6ab9e681b804c877053728a321c2f071419e7f0d1c42b555252cf"
+    }
+  },
+  "diagnostics": [],
+  "evidence_boundary": "Historical vulnerability claims are contextual expectations only; graph links visualize exact catalog references and do not assert vulnerability presence or firmware-version applicability.",
+  "historical_comparison": {
+    "applicability_summary": {
+      "exact_artifact": 2,
+      "out_of_scope": 11
+    },
+    "expectation_count": 13,
+    "gap_reason_summary": {
+      "artifact_out_of_scope": 5,
+      "none": 8
+    },
+    "route_binding_summary": {
+      "binding_not_observed": 3,
+      "handler_mismatch": 1,
+      "verified_expected_handler": 5,
+      "verified_route_binding": 4
+    },
+    "selected_cases": {
+      "CVE-2025-22946": {
+        "applicability": "exact_artifact",
+        "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19",
+        "expected_parameters": [],
+        "gap_reason": "none",
+        "graph_edge_ids": [
+          "communication-edge:1ebfcde8fd958a9af142eb2a5f4218ba05172f0e44ab226cdb87f3541235a133",
+          "communication-edge:23a4d9407849b616662a384730fb79b45f80b58bd8ae4654cd66ef6cc643a3ff",
+          "communication-edge:438e2cf5624ef2f54f82db7a28939062b2e8cba93240932ba18cff4a580fa2e6",
+          "communication-edge:74deeeb07c0c581c01f5349fd09957f718e6f7e194c56ffd9625ac947db96406",
+          "communication-edge:7883c3ba7b157a575e2cb17c822526412945677472c5b5597aa50b346626e43b",
+          "communication-edge:7ec65fcdd5da20d3eaaeb421657723ba4e124882878332858c1b27475b9cf4ee",
+          "communication-edge:98cdd7d740927dd4984d18fe2a789aa34f86f707149c81af3b4c6c982480aae7",
+          "communication-edge:a2b2bff456831ca9fde158eb24b65beb9aedf6be1022cec7b386f8486e1560e0",
+          "communication-edge:dd4236855ddb7fbc548ac0fb88024a4c439f15977945d66ef8b28c1b41061896",
+          "communication-edge:ee633d876d11e0cc641083857a48bc61f47766b5f7b4cb3b34abbf20b857091e",
+          "communication-edge:f1a0eaab718762335ffd3b3c7632b0d6c3fa2fafd7f3bcbe6a1d6d4dd6815954",
+          "communication-edge:f799d2629eaf5315bfbb06a35b900dc323b6cfaeba17bde9ed713759dfacfc88"
+        ],
+        "graph_link_bases": [
+          "catalog_candidate_id",
+          "native_clue_id",
+          "parameter_owner_edge",
+          "route_binding_id",
+          "route_handler_edge"
+        ],
+        "graph_node_ids": [
+          "frontend-parameter:1f0e46812ae44d3ce7bb05bb8a09ca2584f1a6c7eeb2181ad9dbcb358fe9a5c6",
+          "frontend-parameter:2f7cfdc21fc6b53d10a5f0e9369de91361b23912204b6804ad1891d41a2964f9",
+          "frontend-parameter:6fa02206c5738200aa63c6c0395510d8f82a0adde42707ebddc434a32de60b37",
+          "frontend-parameter:a6c3df2a36fb035276660e44c3c981a290538bf0524a852d17b0e28028dbd8b0",
+          "frontend-parameter:ae866ad3585c90325274b8c423fa9455e1f65c153f53d89bd4345f76a8d85fe7",
+          "frontend-parameter:c5563990d1755c8ff62e6404e28d6be9110ff6450f7704be262533483752598d",
+          "frontend-parameter:ca66f30a58ca4629a90a7fd5af7bcf31f831949a5d99242f601090b87f204a8a",
+          "frontend-parameter:f0795722ca0623b6f71fdda990857beb7105bea37b66bbcde3d42b59f98a69aa",
+          "frontend-request:30a992559e38517b9ef11e7a9880599fd6a6a7d53c714ba945dc9655f717b0f1",
+          "frontend-request:513a146d995ad9f930a316ed9361de24b36c04c5fcfa6208d3af6b490b9959e1",
+          "frontend-request:867f27ff10d0b9e0a5eeb6e48cc186ad68243298cfb1dc4ca2238b4025728159",
+          "frontend-request:8f8a50020c71bc62bd5b5f665959524aa949af50aa49975d6f209af78bb31d29",
+          "native-handler:7f3a4eba7607f56635569f4d440da0f3a1702770563db36a0b309c5e50775799",
+          "native-handler:9d511e0bedfc705c4b97c55231ef7c65ae0ee81330bbb0d8c577a37140ef5b02",
+          "native-handler:b16d865f213da82fa0d640de22301ba32f3234c7cfe9212566ff8d1b4b4687ac",
+          "native-handler:fc7e9d3b7f0e1b4164e54828203478ee4622f3d94099b2ecaa4f7e6fc3707b61",
+          "native-hint:c07c39b3abab645216ee165af4fb9199eac3185a0bfde69d313b8d79dbd97393",
+          "native-route-binding:b1be0e0143d4977a3dc86f632c9ff11ce814d950e60e010a6e478a5f09d79667",
+          "native-route-binding:b8b57127fdf550d0ad06df0566571cf158b9e9fc5a41368fb2eec33687d7d370",
+          "native-route-binding:d44fe201f307a3199c7dbec4e0f7af74b8969be10dd7954ac88d778a76a92992",
+          "native-route-binding:fbbb30bfde9e60905dd9c0c19ff21c8c15a5480e22ac5569710ae77fcdab10d6"
+        ],
+        "interface_value": "/goform/SetOnlineDevName",
+        "missing_parameters": [],
+        "observed_handlers": [
+          "formSetDeviceName"
+        ],
+        "observed_parameters": [
+          "devName",
+          "mac"
+        ],
+        "route_binding_status": "verified_route_binding",
+        "status": "observed"
+      },
+      "CVE-2025-22949": {
+        "applicability": "exact_artifact",
+        "applicability_basis": "the vulnerability record and selected artifact both identify Tenda AC9 V15.03.05.19",
+        "expected_parameters": [],
+        "gap_reason": "none",
+        "graph_edge_ids": [
+          "communication-edge:0099aa595f00c8f0348b2761edffcead1bc6e02aa6bfe1cdb016afba971adb73",
+          "communication-edge:09b0be637a4a6cac800260d47b99cda91df89d40413bc181b8c2512548d36f9c",
+          "communication-edge:2e550f7bd66ff86d884d5381fd1edffbbcc610a48931a382973d347ae9a49042",
+          "communication-edge:43d8957cc3d6d9d0a32c0970b475512961542b9fb4a1d78bca1ff85774a6025b",
+          "communication-edge:694e6fde092d58d705d4bd04f7d61bacedde9dbaedad30e370c795840662e027",
+          "communication-edge:778bac87f9e32ae84dd904b8e4997918a09f1173836bca871b3aac999c1fb534",
+          "communication-edge:b4a993fb345af564a59b4a10bee031648df562243a56fe2a050a3bb05c72190a",
+          "communication-edge:f7ab886ebab2dcaf07d6f48ba92eded2e7d88dbe25206d47ba277e273e6dc23d"
+        ],
+        "graph_link_bases": [
+          "catalog_candidate_id",
+          "native_clue_id",
+          "parameter_owner_edge",
+          "route_binding_id",
+          "route_handler_edge"
+        ],
+        "graph_node_ids": [
+          "frontend-parameter:157ba06c8208dd668d01896e3c9a382e050bf996d106f943a7fe1f61a2d8f12e",
+          "frontend-parameter:231344c2d11c6b3f58b7355c358d3c102769a9d1423a16229aa0c5b6ea5d77aa",
+          "frontend-parameter:462d2a906f6b322b1ae1ebf6cf6438ec9919d8546e2ebdb4116fe5818073acd9",
+          "frontend-parameter:4ec7323a983d65d4054c546bb05331ec3c1b353e6f415b76ca8537d933ca5451",
+          "frontend-parameter:c81226dfee02d70b1827f863ddbe1f253c92cc80bbd74cf0dce33bf188b8cd78",
+          "frontend-parameter:dc1bda476f9e6d5860b392570ec2983f5c04b566fac982ffb0e2f5e646984f6f",
+          "frontend-parameter:e16d502e80010223e5d8b2e102e48e271ec495099d7e71183902935480e02155",
+          "frontend-request:f9ad52d1518c2b6d9c0788373ccd0b7123d520204f35c12ec6fd6cb3f8cfad8f",
+          "native-handler:5a5aeb8cf8da6125660a69cf2fdd89ff475dd20b821e397fabff3d14231d5af4",
+          "native-hint:4a94df978bad1adbdd6dee4c7e7efe357f16e0b37b34f8ae53e190d524f1784e",
+          "native-route-binding:4b43146113ae12d0f56b19706c58dd1aacd9216fe93226c08e83af37fca00959"
+        ],
+        "interface_value": "/goform/SetSambaCfg",
+        "missing_parameters": [],
+        "observed_handlers": [
+          "formSetSambaConf"
+        ],
+        "observed_parameters": [
+          "fileCode",
+          "guestaccess",
+          "guestpwd",
+          "guestuser",
+          "internetPort",
+          "password",
+          "premitEn"
+        ],
+        "route_binding_status": "verified_route_binding",
+        "status": "observed"
+      },
+      "CVE-2025-5836": {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "expected_parameters": [
+          "list"
+        ],
+        "gap_reason": "none",
+        "graph_edge_ids": [
+          "communication-edge:29bc6eb12bee1fac267ec177250291f13cccc23f4349247b9189c007595d7bae",
+          "communication-edge:5816f2f4af6d3600c4e5686dc9f564c60bab0c52024ba8eb7f681ad3901a97d9",
+          "communication-edge:5c7b7e6c2cbf9e2e618609953ca3395f7dc463e858d81656e12337f3e0a1a61a",
+          "communication-edge:65c0e379403124e45b8826e945a6210b874bd79e34830b506dce3fa26ee7cbd3",
+          "communication-edge:6d4993c1cdb5005d00f99e6535635fe07acdee151dcf5ed8429f350288a7dd76",
+          "communication-edge:c5b0bceb3da995c156efb567033462dfbc972866b6374db818d309b028289253"
+        ],
+        "graph_link_bases": [
+          "catalog_candidate_id",
+          "native_clue_id",
+          "parameter_owner_edge",
+          "route_binding_id",
+          "route_handler_edge"
+        ],
+        "graph_node_ids": [
+          "frontend-parameter:03dc21015ca0eaa1cf1d1e3a5ff115100057c4413c23fcdfb89bfcdc9d5a2a86",
+          "frontend-parameter:0ec7b607da6a666d1c15b507dfef19e2db8e9247d324456c0bc4e004660ba157",
+          "frontend-parameter:2f3d6a0a618dd039e1f0c6aea781bc0ceb26020bfd45f34e6d3d6c58c37c85a2",
+          "frontend-parameter:5afd0e13fd9946aadd91df5ede886cf8fcaab3e7427f0cce8d542fe6d246ec95",
+          "frontend-parameter:9ef659efd1b375683bc1cf8207e42787cceb5a3a91527b65a2a2624b60fee3fe",
+          "frontend-request:e4c940ef585000e9154d57d3e86a15dbdb80c8a733b5a657cf712eec5f1cfa97",
+          "native-handler:c7b134104ace259e74134bc05732ab04c4ef07fbdf0a406eeac09e68241f8f17",
+          "native-hint:58898cbbddd93cd7d68d481c4457c0b7505daa744a2c73ed2440d638b93b88e2",
+          "native-hint:627d6b4f9c8cb485970fb4e1476073bd9d9feef38b61f0d747818979ad20c98d",
+          "native-route-binding:be9852e11c3372f8e90d553e9acfd5ab2b33c3884139e853d9faabef4e57703c"
+        ],
+        "interface_value": "/goform/SetIPTVCfg",
+        "missing_parameters": [],
+        "observed_handlers": [
+          "formSetIptv"
+        ],
+        "observed_parameters": [
+          "igmpEn",
+          "iptvType",
+          "list",
+          "stbEn",
+          "vlanId"
+        ],
+        "route_binding_status": "verified_expected_handler",
+        "status": "observed"
+      },
+      "CVE-2025-5847": {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "expected_parameters": [
+          "remoteIp"
+        ],
+        "gap_reason": "none",
+        "graph_edge_ids": [
+          "communication-edge:224f69c1a6f076b050a05bd938a130592028164b652844ec340b639bc91b5daf",
+          "communication-edge:3a3130e9b01ce2c5cd5fe5cb7e3ba4b98ea4449cc57c09e9b49c1e67966124aa",
+          "communication-edge:3d37a40cab29a7005d1c36409c5c939e6b3c61ab1e00d0f536b7fc0ec0612e17",
+          "communication-edge:c3654aeab06dfb3f52b691b6d1c62511692881ce39ad5eecb273dc2935054ec8"
+        ],
+        "graph_link_bases": [
+          "catalog_candidate_id",
+          "native_clue_id",
+          "parameter_owner_edge",
+          "route_binding_id",
+          "route_handler_edge"
+        ],
+        "graph_node_ids": [
+          "frontend-parameter:155e25790865dd065da1913f06d5485307f311e9efc51f4663a093fb24722cb4",
+          "frontend-parameter:35ba6d5ae411e4199ba544b5ec57c286169e82de750a47d367f3006aeb52bbe8",
+          "frontend-parameter:41bcce5d239cc490259011f3aa288aa1a861272ec704236054c5d2b0b3413d4e",
+          "frontend-request:d3d4f84dd763e749235427f382d3bf0b232a4ddacc366f7fdf7849b1d103dc9e",
+          "native-handler:796eb6e66e0e277656eb565b497ae8b9b54658ffe4d6294cbc390698ff14a25d",
+          "native-hint:8109e03728a3911db6b49882a9e5993e8d046b1d767f23dd300eeac933ebaeaa",
+          "native-hint:b6c898752828fdc83dbf54b046a7270825120d155f61b4a97b7bba3dedf5e649",
+          "native-route-binding:66f22f3e7b1177bc92c634fffcb8aa9870fb907325cc61ce7d57b7da6a499697"
+        ],
+        "interface_value": "/goform/SetRemoteWebCfg",
+        "missing_parameters": [],
+        "observed_handlers": [
+          "formSetSafeWanWebMan"
+        ],
+        "observed_parameters": [
+          "remoteIp",
+          "remotePort",
+          "remoteWebEn"
+        ],
+        "route_binding_status": "verified_expected_handler",
+        "status": "observed"
+      },
+      "CVE-2026-6015": {
+        "applicability": "out_of_scope",
+        "applicability_basis": "historical claim identifies 15.03.02.13, not the selected artifact",
+        "expected_parameters": [
+          "PPPOEPassword"
+        ],
+        "gap_reason": "artifact_out_of_scope",
+        "graph_edge_ids": [
+          "communication-edge:b4a6aeda973b1eb9d34c0aaf40364704502127b4959a0266931047038b39b2de"
+        ],
+        "graph_link_bases": [
+          "catalog_candidate_id",
+          "native_clue_id",
+          "route_binding_id",
+          "route_handler_edge"
+        ],
+        "graph_node_ids": [
+          "native-handler:4ef3ed8d7efa505f93a59e70af3e3a50e65fa8a2c4c392745c66c52cb104937d",
+          "native-hint:7164c51edc27945663af79dc0ad17337089d2a3562c6e4a890e17a75d6065a97",
+          "native-route-binding:69d9e12838e14c8c929dd7cbdc78c9a9dca3fb1ac4a3dc7bc4634b09155481ab"
+        ],
+        "interface_value": "/goform/QuickIndex",
+        "missing_parameters": [
+          "PPPOEPassword"
+        ],
+        "observed_handlers": [
+          "formQuickIndex"
+        ],
+        "observed_parameters": [],
+        "route_binding_status": "verified_expected_handler",
+        "status": "not_assessable"
+      }
+    },
+    "status_summary": {
+      "not_assessable": 5,
+      "observed": 8
+    },
+    "vulnerability_denominator": {
+      "audit_id": "historical-vulnerability-audit:174bdd4fcaee593b0d3daa0b8a7057a0fa3274dab87aff817427911f42cd2e33",
+      "category_counts": {
+        "compared_interface": 13,
+        "no_structured_communication": 9,
+        "not_analyzed": 46,
+        "parameter_only": 3
+      },
+      "compared_interface_identifiers": [
+        "CVE-2025-10442",
+        "CVE-2025-10443",
+        "CVE-2025-14286",
+        "CVE-2025-22946",
+        "CVE-2025-22949",
+        "CVE-2025-45427",
+        "CVE-2025-45428",
+        "CVE-2025-45429",
+        "CVE-2025-5836",
+        "CVE-2025-5839",
+        "CVE-2025-5847",
+        "CVE-2026-6015",
+        "CVE-2026-6016"
+      ],
+      "exact_artifact_expectation_count": 2,
+      "exact_artifact_observed_count": 2,
+      "expectation_diff_id": "historical-expectation-diff:bd29c387726065bb15d0d60115b928ad6640322e8a1f685fe86a41eb7e6bc91f",
+      "no_structured_communication_identifiers": [
+        "CVE-2022-28560",
+        "CVE-2024-24543",
+        "CVE-2024-25746",
+        "CVE-2024-25748",
+        "CVE-2024-25751",
+        "CVE-2024-25753",
+        "CVE-2024-25756",
+        "CVE-2025-5900",
+        "CVE-2025-9731"
+      ],
+      "not_analyzed_identifiers": [
+        "CVE-2017-16923",
+        "CVE-2017-16936",
+        "CVE-2018-18728",
+        "CVE-2020-26728",
+        "CVE-2022-25414",
+        "CVE-2022-25417",
+        "CVE-2022-25418",
+        "CVE-2022-25427",
+        "CVE-2022-25428",
+        "CVE-2022-25429",
+        "CVE-2022-25431",
+        "CVE-2022-25433",
+        "CVE-2022-25434",
+        "CVE-2022-25435",
+        "CVE-2022-25437",
+        "CVE-2022-25438",
+        "CVE-2022-25439",
+        "CVE-2022-25440",
+        "CVE-2022-25441",
+        "CVE-2022-26278",
+        "CVE-2022-27016",
+        "CVE-2022-27022",
+        "CVE-2022-36273",
+        "CVE-2022-36568",
+        "CVE-2022-36569",
+        "CVE-2022-36570",
+        "CVE-2022-36571",
+        "CVE-2023-41552",
+        "CVE-2023-41553",
+        "CVE-2023-41554",
+        "CVE-2023-41556",
+        "CVE-2023-41559",
+        "CVE-2023-41560",
+        "CVE-2023-41561",
+        "CVE-2023-41562",
+        "CVE-2023-41563",
+        "CVE-2024-42634",
+        "CVE-2025-29384",
+        "CVE-2025-29385",
+        "CVE-2025-29386",
+        "CVE-2025-29387",
+        "CVE-2025-44872",
+        "CVE-2025-44877",
+        "CVE-2025-45042",
+        "CVE-2025-57638",
+        "CVE-2025-57639"
+      ],
+      "parameter_only_identifiers": [
+        "CVE-2021-42659",
+        "CVE-2026-2191",
+        "CVE-2026-2192"
+      ],
+      "schema_version": "firmatlas.mapping.historical-vulnerability-audit/v1alpha1",
+      "total_vulnerability_count": 71
+    }
+  },
+  "http_acceptance": {
+    "all_entry_count": 13,
+    "cross_version_count": 11,
+    "exact_artifact_observed_count": 2,
+    "facets": {
+      "applicability": {
+        "exact_artifact": 2,
+        "out_of_scope": 11
+      },
+      "gap_reason": {
+        "artifact_out_of_scope": 5,
+        "none": 8
+      },
+      "route_binding_status": {
+        "binding_not_observed": 3,
+        "handler_mismatch": 1,
+        "verified_expected_handler": 5,
+        "verified_route_binding": 4
+      },
+      "status": {
+        "not_assessable": 5,
+        "observed": 8
+      }
+    },
+    "not_assessable_count": 5,
+    "publication": {
+      "content_sha256": "57c7d217ebc5018d27b7505fa270b592d4183333187a461c26049e21c8f55aa0",
+      "created": true,
+      "overlay_id": "historical-graph-overlay:b549a5351a7a3ea7d9642299e99599652fca040af627c1fba541616b0cb1c944"
+    },
+    "query_ids": {
+      "all": "historical-graph-overlay-query:be9b7459f174c47d690404b70ce2fc596e71be7384e58444a139be2e1ee87b82",
+      "cross_version": "historical-graph-overlay-query:32341d8a217dda5183151f87695ed25b260f37e6f46d19108858a8f3d563fb6f",
+      "exact_observed": "historical-graph-overlay-query:bcb2dfd9ba8d101fb31747f6b31efc74834e495474877ef86060ac047ff0bafb",
+      "not_assessable": "historical-graph-overlay-query:154c304fa1c903a7383213ad36fa5ab6ec1281822bbc71f49cac2d871929556e"
+    },
+    "repeated_publication": {
+      "content_sha256": "57c7d217ebc5018d27b7505fa270b592d4183333187a461c26049e21c8f55aa0",
+      "created": false,
+      "overlay_id": "historical-graph-overlay:b549a5351a7a3ea7d9642299e99599652fca040af627c1fba541616b0cb1c944"
+    }
+  },
+  "sample_role": "tenda-ac9-primary",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-20/historical-graph-overlay-v1alpha1"
+}

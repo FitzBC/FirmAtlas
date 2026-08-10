@@ -172,6 +172,31 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     query_graph_parser.add_argument("--max-hops", type=int, default=2)
     query_graph_parser.add_argument("--max-nodes", type=int, default=500)
     query_graph_parser.add_argument("--max-edges", type=int, default=1000)
+    publish_overlay_parser = mapping_subparsers.add_parser(
+        "publish-history-overlay",
+        help="publish an immutable historical expectation graph overlay",
+    )
+    _database_argument(publish_overlay_parser)
+    publish_overlay_parser.add_argument(
+        "document", help="path to a historical graph overlay JSON document"
+    )
+    query_overlay_parser = mapping_subparsers.add_parser(
+        "query-history-overlay",
+        help="query the latest historical expectation overlay for a graph",
+    )
+    _database_argument(query_overlay_parser)
+    query_overlay_parser.add_argument("graph_id")
+    query_overlay_parser.add_argument("--query", default="")
+    query_overlay_parser.add_argument("--status", action="append", default=[])
+    query_overlay_parser.add_argument(
+        "--applicability", action="append", default=[]
+    )
+    query_overlay_parser.add_argument(
+        "--gap-reason", action="append", default=[]
+    )
+    query_overlay_parser.add_argument(
+        "--route-binding-status", action="append", default=[]
+    )
     args = parser.parse_args(argv)
 
     if args.command == "demo-report":
@@ -246,9 +271,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         from .mapping.communication_graph import (
             CommunicationArchitectureGraph,
         )
+        from .mapping.historical_graph_overlay import HistoricalGraphOverlay
         from .mapping.repository import (
             CommunicationGraphQuery,
             DiscoveryCatalogRepository,
+            HistoricalGraphOverlayQuery,
         )
 
         repository = DiscoveryCatalogRepository(args.database)
@@ -272,7 +299,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 }
             elif args.mapping_command == "list-graphs":
                 result = repository.list_communication_graphs()
-            else:
+            elif args.mapping_command == "query-graph":
                 result = repository.query_communication_graph(
                     args.graph_id,
                     CommunicationGraphQuery(
@@ -293,6 +320,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
                 if result is None:
                     raise ValueError("communication graph does not exist")
+            elif args.mapping_command == "publish-history-overlay":
+                overlay = HistoricalGraphOverlay.from_dict(json.loads(
+                    Path(args.document).read_text(encoding="utf-8")
+                ))
+                result = repository.publish_historical_graph_overlay(overlay)
+            else:
+                result = repository.query_historical_graph_overlay(
+                    args.graph_id,
+                    HistoricalGraphOverlayQuery(
+                        text=args.query,
+                        statuses=tuple(args.status),
+                        applicabilities=tuple(args.applicability),
+                        gap_reasons=tuple(args.gap_reason),
+                        route_binding_statuses=tuple(
+                            args.route_binding_status
+                        ),
+                    ),
+                )
+                if result is None:
+                    raise ValueError(
+                        "historical graph overlay does not exist"
+                    )
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         finally:

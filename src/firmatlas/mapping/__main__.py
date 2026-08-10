@@ -16,9 +16,13 @@ from .analysis_run import (
     analyze_extracted_root,
 )
 from .historical_expectation import (
+    HistoricalVulnerabilityRecord,
+    build_historical_vulnerability_audit,
     compare_historical_expectations,
+    compare_historical_route_bindings,
     load_historical_expectations,
 )
+from .historical_graph_overlay import project_historical_graph_overlay
 from .communication_graph import (
     CommunicationGraphPolicy,
     project_communication_architecture_graph,
@@ -154,6 +158,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     compare_history.add_argument("--expectations", required=True)
     compare_history.add_argument("--output", required=True)
     compare_history.add_argument(
+        "--graph-output",
+        help="write the communication graph used by the historical overlay",
+    )
+    compare_history.add_argument(
+        "--overlay-output",
+        help="write an immutable historical expectation graph overlay",
+    )
+    compare_history.add_argument(
+        "--vulnerability-scope",
+        help="optional vulnerability denominator records JSON for audit context",
+    )
+    compare_history.add_argument(
         "--profile", choices=("auto", "base"), default="auto",
         help="versioned analyzer profile (default: auto)",
     )
@@ -173,6 +189,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        if args.command == "compare-history":
+            if args.overlay_output and not args.graph_output:
+                raise ValueError("overlay-output requires graph-output")
+            if args.vulnerability_scope and not args.overlay_output:
+                raise ValueError(
+                    "vulnerability-scope requires overlay-output"
+                )
+            history_paths = [Path(args.output).resolve()]
+            if args.graph_output:
+                history_paths.append(Path(args.graph_output).resolve())
+            if args.overlay_output:
+                history_paths.append(Path(args.overlay_output).resolve())
+            if len(history_paths) != len(set(history_paths)):
+                raise ValueError(
+                    "history, graph, and overlay outputs must differ"
+                )
         if args.command == "inventory":
             if args.sample_limit < 0:
                 raise ValueError("sample-limit must be nonnegative")
@@ -215,6 +247,50 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     + "\n",
                     encoding="utf-8",
                 )
+                graph = None
+                overlay = None
+                if args.graph_output:
+                    graph_output = Path(args.graph_output)
+                    overlay_output = (
+                        Path(args.overlay_output) if args.overlay_output else None
+                    )
+                    graph = project_communication_architecture_graph(run.catalog)
+                    graph_output.write_text(
+                        json.dumps(
+                            graph.to_dict(), ensure_ascii=False,
+                            indent=2, sort_keys=True,
+                        ) + "\n",
+                        encoding="utf-8",
+                    )
+                    if overlay_output:
+                        expectations = load_historical_expectations(
+                            expectation_document
+                        )
+                        routes = compare_historical_route_bindings(
+                            run.catalog, expectations
+                        )
+                        audit = None
+                        if args.vulnerability_scope:
+                            scope = json.loads(Path(
+                                args.vulnerability_scope
+                            ).read_text(encoding="utf-8"))
+                            audit = build_historical_vulnerability_audit(
+                                diff,
+                                tuple(
+                                    HistoricalVulnerabilityRecord(**item)
+                                    for item in scope["records"]
+                                ),
+                            )
+                        overlay = project_historical_graph_overlay(
+                            graph, diff, routes, audit
+                        )
+                        overlay_output.write_text(
+                            json.dumps(
+                                overlay.to_dict(), ensure_ascii=False,
+                                indent=2, sort_keys=True,
+                            ) + "\n",
+                            encoding="utf-8",
+                        )
                 result = {
                     "schema_version": diff.schema_version,
                     "report_id": diff.report_id,
@@ -223,6 +299,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "summary": diff.summary,
                     "output": str(output),
                 }
+                if graph is not None:
+                    result.update({
+                        "graph_id": graph.graph_id,
+                        "graph_output": str(args.graph_output),
+                    })
+                if overlay is not None:
+                    result.update({
+                        "overlay_id": overlay.overlay_id,
+                        "overlay_output": str(args.overlay_output),
+                    })
                 print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
                 return 0
             if args.graph_focus and not args.graph_output:

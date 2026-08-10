@@ -16,7 +16,7 @@
       "interface_search_and_exact_focus",
       "interface_structure_preset",
       "parameter_state_preset",
-      "communication_topology_preset",
+      "communication_components_preset",
       "completeness_and_obligation_preset",
       "evidence_atom_drilldown",
       "partial_and_coverage_diagnostics",
@@ -24,10 +24,10 @@
     ],
     "production_document_served": true,
     "source_sha256": {
-      "apps/console/src/api/client.ts": "342e15cd920d44f36ec1622694f1421f9507563f96ff031ca79880059beb9a5a",
-      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "8deea063cb9c84677982179445e0f9d3032e9bef8f9b63487269dc14df80c871",
+      "apps/console/src/api/client.ts": "913679853899cbc2d91fa219a4ea2ea03d07a3ff3626d3fa5587da685b02c40a",
+      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "dedfa4360a29da4c023ab5c43e792334e60b38ad31fa65d6f910ffd629d32544",
       "apps/console/src/components/MappingCatalogWorkspace.tsx": "ad2def1e6707d107a5794646b772993197dc15c4711af42eb75fe3face9ed559",
-      "apps/console/src/types.ts": "90e6ab8908ac649d4291ac44fe960c0518a22a222d2f3618f38aacc75a21e859"
+      "apps/console/src/types.ts": "b485f97405b6ab9e681b804c877053728a321c2f071419e7f0d1c42b555252cf"
     }
   },
   "evidence_boundary": "The HTTP adapter translates request parameters into the shared CommunicationGraphQuery. The Console selects and renders returned facts; neither layer creates interface, owner, runtime, or vulnerability conclusions.",

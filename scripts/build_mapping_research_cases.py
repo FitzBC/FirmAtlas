@@ -62,10 +62,25 @@ AC9_R2_19_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-19-vendor-tenda-ac9-http-console-graph.json"
 )
+AC9_R2_20_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-20-vendor-tenda-ac9-historical-graph-overlay.json"
+)
 
 
 def build_ac9_split_web_stack_case():
     """Preserve the evidence progression from namespace gap to native binding."""
+
+    history_report_sha = hashlib.sha256(AC9_R2_20_REPORT.read_bytes()).hexdigest()
+    history_overlay_ref = CaseEvidenceReference(
+        "coverage:ac9-historical-graph-overlay",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_20_REPORT.as_posix(),
+        history_report_sha,
+        "json:$.historical_comparison",
+        "compares_historical_expectations_without_fact_promotion",
+        "historical-graph-overlay@v1alpha1",
+    )
 
     return build_research_case(ResearchCaseInput(
         case_key="tenda-ac9-split-web-stack-goform-ownership",
@@ -145,6 +160,7 @@ def build_ac9_split_web_stack_case():
                 "registers_route",
                 "native-deep-arm-pic-callsite@0.1.0",
             ),
+            history_overlay_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -170,6 +186,14 @@ def build_ac9_split_web_stack_case():
                     "evidence:5e3cbb6617a5d9733512054d473bfe1eefd9ea35c5169f9b6428f416c5290a29",
                     "evidence:24b22b2b30f09ac9486cf461f223e93f1455bee974ba2d22055985cd4e291cd2",
                 ),
+            ),
+            CaseClaim(
+                "claim:historical-interface-scope-boundary",
+                "The exact AC9 artifact observes both exact-artifact historical "
+                "interface expectations, while cross-version structural matches "
+                "remain independently labeled out_of_scope and do not assert "
+                "vulnerability presence.",
+                (history_overlay_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -227,6 +251,13 @@ def build_ac9_split_web_stack_case():
                 ("claim:httpd-handler-binding",),
                 resolves_obligations=("obligation:goform-owner",),
             ),
+            CaseStage(
+                "stage:historical-interface-overlay", 5,
+                "Project historical interfaces and parameters onto exact graph "
+                "references while preserving applicability as an independent "
+                "dimension and leaving firmware facts unchanged.",
+                ("claim:historical-interface-scope-boundary",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -247,6 +278,9 @@ def build_ac9_split_web_stack_case():
             "the weaker candidate.",
             "Treating a route string and a similar symbol name as a binding would "
             "skip the registrar call-site proof.",
+            "Treating a cross-version historical interface match as a current "
+            "vulnerability would collapse structural observation, version "
+            "applicability, and exploitability into one unsupported claim.",
         ),
         paper_uses=(
             "Motivating case for why communication mapping must precede "
@@ -254,10 +288,15 @@ def build_ac9_split_web_stack_case():
             "Ablation case comparing frontend-only, configuration-only, "
             "shallow-native, and full evidence fusion.",
             "Worked example for obligation-preserving analysis and false-merge prevention.",
+            "Historical-ground-truth overlay example separating mapper recall "
+            "from firmware-version vulnerability conclusions.",
         ),
         limitations=(
             "The native result proves selected static registrations, not runtime "
             "reachability or authentication state.",
+            "Historical expectation coverage is limited to 13 structured "
+            "interfaces from a 71-record product-level denominator and is not a "
+            "vulnerability or exploitability audit of the artifact.",
             "The dhttpd negative control is bounded by the declared shallow producer "
             "and is not proof of total runtime non-participation.",
             "One firmware case motivates and illustrates the method but cannot "
