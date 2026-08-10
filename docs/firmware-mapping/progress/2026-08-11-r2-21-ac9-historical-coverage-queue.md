@@ -176,4 +176,6 @@ R2-20 把 13 条已结构化历史 expectation 叠加到通信图，但 71 条 A
 - 主样本继续固定为 Tenda AC9；其他样本只作为通信类别或阳性/阴性对照。
 - 本轮只修改 `firmatlas.mapping`、mapping 测试、脚本和 `docs/firmware-mapping`，适用 mapping research exception。
 - 按用户明确要求，不执行 SSH 远程部署；本地验证后提交并通过已配置 SSH 密钥推送 GitHub。
+- 功能提交：`aaaeed83c28477b1e941a0fdd452831801c3e296`（`feat(mapping): prioritize AC9 historical coverage gaps`）。
+- SSH 部署：N/A（用户明确排除本研究轨道，且仓库 `Firmware mapping research exception` 明确适用）。
 - 后续会话从 queue 的两个 priority 95 配置 sink 开始，不要把 native route 命中误写为已恢复配置上传入口。
