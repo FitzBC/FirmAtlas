@@ -1178,7 +1178,7 @@
       ]
     },
     {
-      "case_id": "research-case:c545a2095789a598d783c57905490031b34c581991be309bb26a0aaa57a279d2",
+      "case_id": "research-case:e0732db6db165717aee29c7c31f99aa1f038d92c876779d71054476c0285f95d",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1191,7 +1191,9 @@
         "embedded_process_ipc_relationships",
         "missing_target_component",
         "symbol_profiled_command_table",
-        "arm_pic_literal_xref"
+        "arm_pic_literal_xref",
+        "tail_merged_route_registration",
+        "frontend_tokenizer_coverage_repair"
       ],
       "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers?",
       "evidence": [
@@ -1520,6 +1522,213 @@
           "producer": "native-arm-literal-xref@0.1.0"
         },
         {
+          "evidence_ref": "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=237920-237928",
+          "capability": "establishes_pic_base",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=241992-242016",
+          "capability": "binds_handler",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951924-951931",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=98470-98490;lines=2513:20-2513:40",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951980-951984",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=24396-24404",
+          "capability": "resolves_handler_symbol",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648540-648548",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951956-951969",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=875536-875548",
+          "capability": "mentions_endpoint",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=241992-242016",
+          "capability": "registers_route",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648492-648500",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648312-648320",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=243496-243504",
+          "capability": "branches_to_registrar_tail",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951980-951984",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648036-648044",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
           "evidence_ref": "coverage:ac9-native-relationship-target-resolution",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-11-vendor-tenda-ac9-native-relationships.json",
@@ -1603,8 +1812,38 @@
           "status": "supported"
         },
         {
+          "claim_id": "claim:dlna-usb-status-route-handler",
+          "statement": "main.js constructs GetUSBStatus; a tail-merged ARM registration binds that route to formGetUSBStatus@0xa62d0, whose exact function references dlna.en, /var/etc/upan, and dlna literals.",
+          "evidence_refs": [
+            "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0",
+            "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+            "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+            "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+            "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+            "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+            "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+            "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+            "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+            "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+            "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+            "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc",
+            "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+            "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+            "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c",
+            "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+            "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+            "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e",
+            "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615",
+            "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+            "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+            "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554"
+          ],
+          "status": "supported"
+        },
+        {
           "claim_id": "claim:dlna-handler-owner",
-          "statement": "No exact Native registration or handler binding currently connects the frontend/fixture contract to a goform execution path.",
+          "statement": "No exact Native registration or handler binding currently connects GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform execution path; the adjacent GetUSBStatus binding does not establish an alias for those operations.",
           "evidence_refs": [
             "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
             "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
@@ -1642,7 +1881,30 @@
             "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
             "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
             "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
-            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b"
+            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b",
+            "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0",
+            "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+            "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+            "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+            "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+            "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+            "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+            "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+            "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+            "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+            "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+            "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc",
+            "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+            "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+            "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c",
+            "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+            "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+            "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e",
+            "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615",
+            "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+            "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+            "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554"
           ],
           "status": "unresolved"
         }
@@ -1711,6 +1973,18 @@
             "obligation:dlna-supervisor-ipc-binding"
           ],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-usb-status-route-handler",
+          "order": 6,
+          "interpretation": "Repair regex-aware frontend tokenization, replay the nonlocal tail-merged ARM registration, and deepen only that verified handler to function-scoped literal xrefs without treating it as an alias for the still-unbound DLNA operations.",
+          "claim_ids": [
+            "claim:dlna-usb-status-route-handler",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -1747,21 +2021,24 @@
         "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
         "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
         "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
-        "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain."
+        "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
+        "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding."
       ],
       "paper_uses": [
         "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
         "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
         "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
         "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
-        "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open."
+        "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
+        "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner."
       ],
       "limitations": [
         "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
         "The fixture may be development data and does not establish runtime response values.",
         "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
         "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
-        "The proven static callback chain does not show that the callback or its embedded command executed at runtime."
+        "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
+        "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations."
       ]
     }
   ],

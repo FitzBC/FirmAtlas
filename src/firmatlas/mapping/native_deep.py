@@ -80,13 +80,15 @@ class NativeDeepPolicy:
 
 @dataclass(frozen=True)
 class ArmPicCallsiteProfile:
-    name: str = "arm32-pic-r0-r1-bl/v3"
+    name: str = "arm32-pic-r0-r1-bl/v4"
     min_registrar_pairs: int = 2
     max_pic_base_distance: int = 16 * 1024
+    max_tail_branch_distance: int = 16 * 1024
     max_route_bytes: int = 256
     relocation_types: Tuple[int, ...] = (_R_ARM_GLOB_DAT,)
     allow_negative_pc_relative_literals: bool = True
     allow_handler_first_layout: bool = True
+    allow_tail_merged_layout: bool = True
 
     @classmethod
     def v1(cls) -> "ArmPicCallsiteProfile":
@@ -94,6 +96,7 @@ class ArmPicCallsiteProfile:
             name="arm32-pic-r0-r1-bl/v1",
             allow_negative_pc_relative_literals=False,
             allow_handler_first_layout=False,
+            allow_tail_merged_layout=False,
         )
 
     @classmethod
@@ -101,6 +104,14 @@ class ArmPicCallsiteProfile:
         return cls(
             name="arm32-pic-r0-r1-bl/v2",
             allow_handler_first_layout=False,
+            allow_tail_merged_layout=False,
+        )
+
+    @classmethod
+    def v3(cls) -> "ArmPicCallsiteProfile":
+        return cls(
+            name="arm32-pic-r0-r1-bl/v3",
+            allow_tail_merged_layout=False,
         )
 
     def __post_init__(self) -> None:
@@ -108,7 +119,11 @@ class ArmPicCallsiteProfile:
             raise ValueError("ARM PIC callsite profile requires identity")
         if self.min_registrar_pairs < 2:
             raise ValueError("ARM PIC registrar inference requires at least two pairs")
-        if self.max_pic_base_distance <= 0 or self.max_route_bytes <= 0:
+        if (
+            self.max_pic_base_distance <= 0
+            or self.max_tail_branch_distance <= 0
+            or self.max_route_bytes <= 0
+        ):
             raise ValueError("ARM PIC callsite budgets must be positive")
         if not self.relocation_types or any(value <= 0 for value in self.relocation_types):
             raise ValueError("ARM PIC callsite profile requires relocation types")
@@ -249,7 +264,7 @@ def _validate_result_contract(result: NativeDeepResult) -> None:
         }
         supporting_capabilities = {
             "establishes_pic_base", "resolves_handler_symbol",
-            "resolves_table_symbol",
+            "resolves_table_symbol", "branches_to_registrar_tail",
         }
         if not required_capabilities.issubset(by_capability) or not set(by_capability).issubset(
             required_capabilities | supporting_capabilities
@@ -602,7 +617,9 @@ class _ArmPicCandidate:
     pic_base_offset: int
     callsite_address: int
     callsite_offset: int
+    callsite_size: int
     registrar_address: int
+    tail_callsite_offset: Optional[int] = None
 
 
 def _section_by_index(elf: _Elf, index: int) -> Optional[_Section]:
@@ -1069,7 +1086,16 @@ def _scan_arm_pic_candidates(
                 and words[5] == 0xE1A01003
                 and words[6] & 0xFF000000 == 0xEB000000
             )
-            if not (route_first or handler_first):
+            tail_merged = (
+                profile.allow_tail_merged_layout
+                and literal_load(words[0], 3)
+                and words[1] == 0xE0843003
+                and words[2] == 0xE1A00003
+                and literal_load(words[3], 3)
+                and words[4] == 0xE7943003
+                and words[5] & 0xFF000000 == 0xEA000000
+            )
+            if not (route_first or handler_first or tail_merged):
                 continue
             address = section.address + relative
             pic_base = _find_pic_base(
@@ -1078,7 +1104,9 @@ def _scan_arm_pic_candidates(
             if pic_base is None:
                 continue
             route_word_index = 0 if route_first else 2
-            handler_word_index = 3 if route_first else 0
+            handler_word_index = 3 if route_first or tail_merged else 0
+            if tail_merged:
+                route_word_index = 0
             route_delta = _word_at_address(elf, content, literal_address(
                 address + route_word_index * 4, words[route_word_index]
             ))
@@ -1102,12 +1130,51 @@ def _scan_arm_pic_candidates(
                 < symbol_section.address + symbol_section.size
             ):
                 continue
-            registrar = _arm_branch_target(address + 24, words[6])
+            tail_callsite_offset = None
+            callsite_address = address + 24
+            callsite_size = 28
+            registrar_instruction_address = address + 24
+            registrar_instruction = words[6]
+            if tail_merged:
+                callsite_address = address + 20
+                callsite_size = 24
+                tail_address = _arm_branch_target(callsite_address, words[5])
+                if (
+                    abs(tail_address - callsite_address)
+                    > profile.max_tail_branch_distance
+                    or not _contains_address(
+                        executable_sections,
+                        tail_address,
+                        _ALLOC | _EXEC,
+                    )
+                    or not _contains_address(
+                        executable_sections,
+                        tail_address + 4,
+                        _ALLOC | _EXEC,
+                    )
+                ):
+                    continue
+                tail_move = _word_at_address(elf, content, tail_address)
+                tail_call = _word_at_address(elf, content, tail_address + 4)
+                tail_callsite_offset = _file_offset_for_address(elf, tail_address)
+                if (
+                    tail_move != 0xE1A01003
+                    or tail_call is None
+                    or tail_call & 0xFF000000 != 0xEB000000
+                    or tail_callsite_offset is None
+                ):
+                    continue
+                registrar_instruction_address = tail_address + 4
+                registrar_instruction = tail_call
+            registrar = _arm_branch_target(
+                registrar_instruction_address, registrar_instruction
+            )
             if not _contains_address(executable_sections, registrar, _ALLOC | _EXEC):
                 continue
             candidates.append(_ArmPicCandidate(
                 route[0], route[1], relocation.symbol, relocation.source_offset,
-                pic_base[0], pic_base[1], address + 24, offset, registrar,
+                pic_base[0], pic_base[1], callsite_address, offset,
+                callsite_size, registrar, tail_callsite_offset,
             ))
     return tuple(candidates)
 
@@ -1237,7 +1304,9 @@ def discover_arm_pic_callsite_bindings(
                 ), _CALLSITE_PRODUCER,
             )
             call_selection = SpanSelection(
-                SpanKind.BINARY, candidate.callsite_offset, candidate.callsite_offset + 28
+                SpanKind.BINARY,
+                candidate.callsite_offset,
+                candidate.callsite_offset + candidate.callsite_size,
             )
             registration_atom = capture_evidence(
                 source, content, call_selection,
@@ -1253,22 +1322,49 @@ def discover_arm_pic_callsite_bindings(
                     ObservationKind.DETERMINISTIC_DERIVED, "binds_handler", 1.0,
                 ), _CALLSITE_PRODUCER,
             )
-            evidence_ids = tuple(
-                atom.evidence_id for atom in (
-                    route_atom, pic_atom, relocation_atom,
-                    registration_atom, handler_atom,
+            tail_atoms = (
+                (
+                    capture_evidence(
+                        source,
+                        content,
+                        SpanSelection(
+                            SpanKind.BINARY,
+                            candidate.tail_callsite_offset,
+                            candidate.tail_callsite_offset + 8,
+                        ),
+                        EvidenceClaim(
+                            binding_id,
+                            "branches_to_registrar_tail",
+                            "registrar@0x{:08x}".format(
+                                candidate.registrar_address
+                            ),
+                            ObservationKind.DETERMINISTIC_DERIVED,
+                            "branches_to_registrar_tail",
+                            1.0,
+                        ),
+                        _CALLSITE_PRODUCER,
+                    ),
                 )
+                if candidate.tail_callsite_offset is not None
+                else ()
             )
+            binding_atoms = (
+                route_atom, pic_atom, relocation_atom,
+                registration_atom, handler_atom, *tail_atoms,
+            )
+            evidence_ids = tuple(atom.evidence_id for atom in binding_atoms)
             atoms.extend((
                 route_atom, pic_atom, relocation_atom,
-                registration_atom, handler_atom,
+                registration_atom, handler_atom, *tail_atoms,
             ))
             bindings.append(NativeRouteBinding(
                 binding_id, anchor.target_ref, candidate.route_token,
                 handler_identity, candidate.callsite_address,
                 candidate.handler_symbol.address,
-                "elf.{}:registrar@0x{:08x}".format(
-                    profile.name, candidate.registrar_address
+                "elf.{}:{}registrar@0x{:08x}".format(
+                    profile.name,
+                    "tail-merged:" if candidate.tail_callsite_offset is not None else "",
+                    candidate.registrar_address,
                 ),
                 evidence_ids,
                 handler_symbol=candidate.handler_symbol.name,

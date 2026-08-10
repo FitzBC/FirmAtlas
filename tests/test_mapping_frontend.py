@@ -492,7 +492,7 @@ D.prototype.run=function(x){return this.topicurl="run",this.post(x)};'''
         )
 
     def test_asset_graph_ignores_assignment_shaped_comments_and_strings(self):
-        config = b'''// globalConfig={cgiUrl:"/comment.cgi"};
+        config = br'''// globalConfig={cgiUrl:"/comment.cgi"};
 var note='globalConfig={cgiUrl:"/string.cgi"}';
 var pattern=/globalConfig={cgiUrl:"\/regex.cgi"}/;
 var commentProperty={/* cgiUrl:"/property-comment.cgi" */};'''
@@ -676,6 +676,51 @@ var pageModel = R.pageModel({});
         self.assertEqual("GET", candidate.method)
         self.assertEqual("json", candidate.representation)
         self.assertEqual("jQuery.getJSON", candidate.source_construct)
+
+    def test_get_json_after_regex_with_quotes_remains_discoverable(self):
+        content = br'''function validate(value) {
+    return /[^\x00-\x80]|[~;'&"%\s]/.test(value);
+}
+$.getJSON("goform/GetUSBStatus?" + Math.random(), usbInfo.setValue);
+'''
+        source = SourceArtifactEntry(
+            canonical_path="webroot_ro/js/main.js",
+            original_path="webroot_ro/js/main.js",
+            kind="file",
+            size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(1, len(result.candidates))
+        candidate = result.candidates[0]
+        self.assertEqual("goform/GetUSBStatus?", candidate.endpoint)
+        self.assertEqual(
+            FrontendEndpointShape.LITERAL_PREFIX,
+            candidate.endpoint_shape,
+        )
+        self.assertEqual("GET", candidate.method)
+
+    def test_html_closing_tag_is_not_misclassified_as_a_regex(self):
+        content = (
+            b'</script><script>$.getJSON("goform/GetUSBStatus?" + '
+            b'Math.random(), usbInfo.setValue);</script>'
+        )
+        source = SourceArtifactEntry(
+            canonical_path="webroot_ro/js/main.html",
+            original_path="webroot_ro/js/main.html",
+            kind="file",
+            size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+        result = discover_frontend_requests(source, content)
+
+        self.assertEqual(
+            ["goform/GetUSBStatus?"],
+            [item.endpoint for item in result.candidates],
+        )
 
     def test_hnap_ajax_preserves_soap_action_as_an_operation_selector(self):
         content = b"""$.ajax({

@@ -215,9 +215,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v9", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v10", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v9",
+            "firmatlas.mapping.analyzer-registry/builtin-v10",
             result.analyzer_registry_id,
         )
 
@@ -253,6 +253,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertTrue({
             "SetOnlineDevName", "setBlackRule", "delBlackRule",
             "getOnlineList", "getBlackRuleList", "SetSambaCfg",
+            "GetUSBStatus",
         } <= routes)
         samba_handler = next(
             item for item in result.catalog.candidates
@@ -261,6 +262,31 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(
             "formSetSambaConf", dict(samba_handler.attributes)["handler_symbol"]
+        )
+        usb_status_handler = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind is DiscoveryCandidateKind.NATIVE_HANDLER
+            and item.canonical_identity == "bin/httpd@0x000a62d0"
+        )
+        self.assertEqual(
+            "formGetUSBStatus",
+            dict(usb_status_handler.attributes)["handler_symbol"],
+        )
+        usb_status_binding = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.NATIVE_ROUTE_BINDING
+            and item.canonical_identity == "GetUSBStatus"
+        )
+        usb_status_literals = {
+            dict(item.attributes)["literal_value"]
+            for item in result.catalog.candidates
+            if item.candidate_kind is DiscoveryCandidateKind.ARM_LITERAL_XREF
+            and dict(item.attributes)["target_ref"]
+            == usb_status_binding.candidate_id
+        }
+        self.assertTrue(
+            {"dlna.en", "/var/etc/upan", "dlna"} <= usb_status_literals
         )
         stage = next(
             item for item in result.stages if item.stage_name == "arm_pic_callsite"
@@ -272,10 +298,14 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             if item.stage_name == "arm_pic_registrar"
         )
         self.assertEqual(CoverageStatus.COMPLETED, registrar_stage.coverage_status)
-        self.assertEqual(187, registrar_stage.output_count)
+        self.assertEqual(188, registrar_stage.output_count)
         hidden = build_potential_hidden_interface_index(result.catalog)
         self.assertEqual(CoverageStatus.COMPLETED, hidden.coverage_status)
-        self.assertEqual(107, len(hidden.items))
+        self.assertEqual(84, len(hidden.items))
+        self.assertNotIn(
+            "GetUSBStatus",
+            {item.operation_token for item in hidden.items},
+        )
         hidden_tokens = {item.operation_token for item in hidden.items}
         self.assertIn("GetDeviceDetail", hidden_tokens)
         self.assertNotIn("SetSambaCfg", hidden_tokens)
@@ -316,7 +346,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             if item.stage_name == "arm_literal_xref"
         )
         self.assertEqual(CoverageStatus.COMPLETED, xref_stage.coverage_status)
-        self.assertEqual(2, xref_stage.output_count)
+        self.assertEqual(14, xref_stage.output_count)
         self.assertEqual(
             {"/var/etc/upan", "time_check_daemon_minidlna"},
             {

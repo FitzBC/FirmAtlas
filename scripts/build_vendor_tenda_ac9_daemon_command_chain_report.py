@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V9,
     DiscoveryCandidateKind,
     HistoricalVulnerabilityRecord,
     MappingAnalysisProfile,
@@ -27,9 +28,12 @@ from build_vendor_tenda_ac9_registrar_inventory_report import (
 
 
 def build() -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(
-        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto()
-    ))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v9()
+        ),
+        registry=BUILTIN_ANALYZER_REGISTRY_V9,
+    )
     command_bindings = [
         item for item in run.catalog.candidates
         if item.candidate_kind is DiscoveryCandidateKind.NATIVE_COMMAND_BINDING

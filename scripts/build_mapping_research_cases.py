@@ -34,6 +34,10 @@ AC9_R2_11_REPORT = Path(
 AC9_R2_12_REPORT = Path(
     "docs/firmware-mapping/samples/r2-12-vendor-tenda-ac9-daemon-command-chain.json"
 )
+AC9_R2_13_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-13-vendor-tenda-ac9-tail-merged-usb-status.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1014,34 +1018,67 @@ def build_ac9_dlna_fixture_split_case():
     command_chain_report = json.loads(
         AC9_R2_12_REPORT.read_text(encoding="utf-8")
     )
+    usb_status_report = json.loads(
+        AC9_R2_13_REPORT.read_text(encoding="utf-8")
+    )
+    usb_status_dlna_xref_ids = {
+        item["xref_id"]
+        for item in usb_status_report["usb_status_route_handler_chain"][
+            "dlna_literal_xrefs"
+        ]
+    }
     atoms = (
         *report["dlna_response_fixture_evidence"],
         *report["dlna_architecture_evidence"],
         *relationship_report["dlna_relationship_evidence"],
         *command_chain_report["daemon_command_chain_evidence"],
+        *usb_status_report["usb_status_route_handler_evidence"],
     )
     selected = []
     for atom in atoms:
         source_path = atom["source_span"]["artifact_path"]
         capability = atom["capability"]
-        if (
-            (
-                source_path == "webroot_ro/js/dlna.js"
-                and capability == "constructs_request"
-                and "expandDlnaFile" in atom["object_value"]
-            )
-            or source_path == "webroot_ro/goform/expandDlnaFile.txt"
+        producer = atom["producer"]
+        is_dlna_frontend_request = (
+            source_path == "webroot_ro/js/dlna.js"
+            and capability == "constructs_request"
+            and "expandDlnaFile" in atom["object_value"]
+        )
+        is_fixture_or_architecture = (
+            source_path == "webroot_ro/goform/expandDlnaFile.txt"
             or capability in {
-                    "prepares_media_mount",
-                    "aliases_media_download",
-                    "reads_dlna_state",
-                    "monitors_media_daemon",
+                "prepares_media_mount",
+                "aliases_media_download",
+                "reads_dlna_state",
+                "monitors_media_daemon",
             }
-            or atom["producer"] == "native-embedded-command-relationship"
-            or atom["producer"] in {
+        )
+        is_selected_command_or_xref = (
+            producer in {
                 "native-symbol-command-table",
                 "native-arm-literal-xref",
             }
+            and (
+                source_path != "bin/httpd"
+                or atom["subject_ref"] in usb_status_dlna_xref_ids
+            )
+        )
+        is_usb_status_binding = (
+            producer == "native-deep-arm-pic-callsite"
+            and atom["subject_ref"]
+            == usb_status_report["usb_status_route_handler_chain"]["binding_id"]
+        )
+        is_usb_status_frontend = (
+            producer == "frontend-request-producer"
+            and atom["object_value"] == "goform/GetUSBStatus?"
+        )
+        if (
+            is_dlna_frontend_request
+            or is_fixture_or_architecture
+            or producer == "native-embedded-command-relationship"
+            or is_selected_command_or_xref
+            or is_usb_status_binding
+            or is_usb_status_frontend
         ):
             selected.append(atom)
     atom_evidence = tuple(
@@ -1058,6 +1095,8 @@ def build_ac9_dlna_fixture_split_case():
                 if atom["producer"] == "native-symbol-command-table"
                 else CaseEvidenceKind.NATIVE_LITERAL_XREF
                 if atom["producer"] == "native-arm-literal-xref"
+                else CaseEvidenceKind.NATIVE_BINDING
+                if atom["producer"] == "native-deep-arm-pic-callsite"
                 else CaseEvidenceKind.WEB_CONFIGURATION
                 if atom["source_span"]["artifact_path"].startswith("etc_ro/")
                 else CaseEvidenceKind.NATIVE_HINT
@@ -1083,7 +1122,13 @@ def build_ac9_dlna_fixture_split_case():
     by_capability = {}
     for item in evidence:
         by_capability.setdefault(item.capability, []).append(item.evidence_ref)
-    frontend_refs = tuple(by_capability["constructs_request"])
+    frontend_refs = tuple(
+        item.evidence_ref for item in evidence
+        if (
+            item.kind is CaseEvidenceKind.FRONTEND_REQUEST
+            and item.source_path == "webroot_ro/js/dlna.js"
+        )
+    )
     fixture_refs = tuple(
         item.evidence_ref for item in evidence
         if item.kind is CaseEvidenceKind.RESPONSE_FIXTURE
@@ -1108,7 +1153,28 @@ def build_ac9_dlna_fixture_split_case():
     )
     literal_xref_refs = tuple(
         item.evidence_ref for item in evidence
-        if item.kind is CaseEvidenceKind.NATIVE_LITERAL_XREF
+        if (
+            item.kind is CaseEvidenceKind.NATIVE_LITERAL_XREF
+            and item.source_path == "bin/time_check"
+        )
+    )
+    usb_status_frontend_refs = tuple(
+        item.evidence_ref for item in evidence
+        if (
+            item.kind is CaseEvidenceKind.FRONTEND_REQUEST
+            and item.source_path == "webroot_ro/js/main.js"
+        )
+    )
+    usb_status_binding_refs = tuple(
+        item.evidence_ref for item in evidence
+        if item.kind is CaseEvidenceKind.NATIVE_BINDING
+    )
+    usb_status_literal_xref_refs = tuple(
+        item.evidence_ref for item in evidence
+        if (
+            item.kind is CaseEvidenceKind.NATIVE_LITERAL_XREF
+            and item.source_path == "bin/httpd"
+        )
     )
     return build_research_case(ResearchCaseInput(
         case_key="tenda-ac9-dlna-fixture-daemon-split",
@@ -1123,6 +1189,8 @@ def build_ac9_dlna_fixture_split_case():
             "missing_target_component",
             "symbol_profiled_command_table",
             "arm_pic_literal_xref",
+            "tail_merged_route_registration",
+            "frontend_tokenizer_coverage_repair",
         ),
         research_question=(
             "Do bundled DLNA request code and JSON response fixtures prove that "
@@ -1161,13 +1229,28 @@ def build_ac9_dlna_fixture_split_case():
                 (*command_binding_refs, *literal_xref_refs),
             ),
             CaseClaim(
+                "claim:dlna-usb-status-route-handler",
+                "main.js constructs GetUSBStatus; a tail-merged ARM registration "
+                "binds that route to formGetUSBStatus@0xa62d0, whose exact function "
+                "references dlna.en, /var/etc/upan, and dlna literals.",
+                (
+                    *usb_status_frontend_refs,
+                    *usb_status_binding_refs,
+                    *usb_status_literal_xref_refs,
+                ),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
                 "No exact Native registration or handler binding currently connects "
-                "the frontend/fixture contract to a goform execution path.",
+                "GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform "
+                "execution path; the adjacent GetUSBStatus binding does not establish "
+                "an alias for those operations.",
                 (
                     *frontend_refs, *fixture_refs, *architecture_refs,
                     *relationship_refs, *target_resolution_refs,
                     *command_binding_refs, *literal_xref_refs,
+                    *usb_status_frontend_refs, *usb_status_binding_refs,
+                    *usb_status_literal_xref_refs,
                 ),
                 CaseClaimStatus.UNRESOLVED,
             ),
@@ -1206,6 +1289,17 @@ def build_ac9_dlna_fixture_split_case():
                 ),
                 resolves_obligations=("obligation:dlna-supervisor-ipc-binding",),
             ),
+            CaseStage(
+                "stage:dlna-usb-status-route-handler", 6,
+                "Repair regex-aware frontend tokenization, replay the nonlocal "
+                "tail-merged ARM registration, and deepen only that verified "
+                "handler to function-scoped literal xrefs without treating it as "
+                "an alias for the still-unbound DLNA operations.",
+                (
+                    "claim:dlna-usb-status-route-handler",
+                    "claim:dlna-handler-owner",
+                ),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1228,6 +1322,7 @@ def build_ac9_dlna_fixture_split_case():
             "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
             "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
             "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
+            "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -1235,6 +1330,7 @@ def build_ac9_dlna_fixture_split_case():
             "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
             "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
             "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
+            "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
@@ -1242,6 +1338,7 @@ def build_ac9_dlna_fixture_split_case():
             "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
             "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
             "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
+            "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations.",
         ),
     ))
 

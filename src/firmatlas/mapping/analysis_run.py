@@ -93,9 +93,10 @@ _AUTO_V5_ANALYZERS = _AUTO_V2_ANALYZERS + ("arm_pic_registrar", "set_difference"
 _AUTO_V6_ANALYZERS = _AUTO_V5_ANALYZERS + ("parameter_clue",)
 _AUTO_V7_ANALYZERS = _AUTO_V6_ANALYZERS + ("response_fixture",)
 _AUTO_V8_ANALYZERS = _AUTO_V7_ANALYZERS + ("native_relationship",)
-_AUTO_ANALYZERS = _AUTO_V8_ANALYZERS + (
+_AUTO_V9_ANALYZERS = _AUTO_V8_ANALYZERS + (
     "native_command_binding", "arm_literal_xref",
 )
+_AUTO_ANALYZERS = _AUTO_V9_ANALYZERS
 
 
 @dataclass(frozen=True)
@@ -115,7 +116,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v9", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v10", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v9(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v9", _AUTO_V9_ANALYZERS)
 
     @classmethod
     def auto_v8(cls) -> "MappingAnalysisProfile":
@@ -163,7 +168,13 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v9", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v10", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v9(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v9", _AUTO_V9_ANALYZERS
+        )
 
     @classmethod
     def builtin_v8(cls) -> "MappingAnalyzerRegistry":
@@ -229,6 +240,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V9 = MappingAnalyzerRegistry.builtin_v9()
 BUILTIN_ANALYZER_REGISTRY_V8 = MappingAnalyzerRegistry.builtin_v8()
 BUILTIN_ANALYZER_REGISTRY_V7 = MappingAnalyzerRegistry.builtin_v7()
 BUILTIN_ANALYZER_REGISTRY_V6 = MappingAnalyzerRegistry.builtin_v6()
@@ -475,6 +487,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v7",
                 "firmatlas.mapping.profile/auto-v8",
                 "firmatlas.mapping.profile/auto-v9",
+                "firmatlas.mapping.profile/auto-v10",
             }
         ),
         enable_tenda_get_set_data=(
@@ -483,7 +496,12 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v7",
                 "firmatlas.mapping.profile/auto-v8",
                 "firmatlas.mapping.profile/auto-v9",
+                "firmatlas.mapping.profile/auto-v10",
             }
+        ),
+        enable_regex_literals=(
+            request.profile.profile_id
+            == "firmatlas.mapping.profile/auto-v10"
         ),
     )
     frontend_graph = None
@@ -574,7 +592,7 @@ def analyze_extracted_root(
         source.canonical_path: (source, content)
         for source, content, _ in selected
     }
-    arm_literal_xrefs = (
+    command_handler_literal_xrefs = (
         tuple(
             discover_arm_function_literal_xrefs(
                 selected_by_path[result.source_path][0],
@@ -616,6 +634,14 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v3",
                     "firmatlas.mapping.profile/auto-v4",
                 }
+                else ArmPicCallsiteProfile.v3()
+                if request.profile.profile_id in {
+                    "firmatlas.mapping.profile/auto-v5",
+                    "firmatlas.mapping.profile/auto-v6",
+                    "firmatlas.mapping.profile/auto-v7",
+                    "firmatlas.mapping.profile/auto-v8",
+                    "firmatlas.mapping.profile/auto-v9",
+                }
                 else ArmPicCallsiteProfile()
             ),
         )
@@ -625,12 +651,46 @@ def analyze_extracted_root(
             and _arm_pic_callsite_applicable(selected_by_path[path][1])
         )
     )
+    tail_handler_targets_by_path = {}
+    if "arm_literal_xref" in request.profile.enabled_analyzers:
+        for result in native_deep:
+            for binding in result.bindings:
+                if ":tail-merged:" not in binding.source_construct:
+                    continue
+                tail_handler_targets_by_path.setdefault(
+                    result.source_path, []
+                ).append(ArmFunctionTarget(
+                    binding.binding_id, binding.handler_address
+                ))
+    route_handler_literal_xrefs = tuple(
+        discover_arm_function_literal_xrefs(
+            selected_by_path[path][0],
+            selected_by_path[path][1],
+            tuple(sorted(set(targets), key=lambda item: (
+                item.function_address, item.target_ref,
+            ))),
+            policy=request.arm_literal_xref_policy,
+        )
+        for path, targets in sorted(tail_handler_targets_by_path.items())
+    )
+    arm_literal_xrefs = (
+        *command_handler_literal_xrefs,
+        *route_handler_literal_xrefs,
+    )
     registrar_inventory = tuple(
         discover_arm_pic_registrar_bindings(
             source,
             content,
             ArmPicCallsiteProfile.v2()
             if request.profile.profile_id == "firmatlas.mapping.profile/auto-v4"
+            else ArmPicCallsiteProfile.v3()
+            if request.profile.profile_id in {
+                "firmatlas.mapping.profile/auto-v5",
+                "firmatlas.mapping.profile/auto-v6",
+                "firmatlas.mapping.profile/auto-v7",
+                "firmatlas.mapping.profile/auto-v8",
+                "firmatlas.mapping.profile/auto-v9",
+            }
             else ArmPicCallsiteProfile(),
         )
         for source, content, _ in selected
@@ -708,6 +768,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v7",
                     "firmatlas.mapping.profile/auto-v8",
                     "firmatlas.mapping.profile/auto-v9",
+                    "firmatlas.mapping.profile/auto-v10",
                 }
                 else ()
             )
@@ -723,7 +784,12 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v7",
                         "firmatlas.mapping.profile/auto-v8",
                         "firmatlas.mapping.profile/auto-v9",
-                    }
+                        "firmatlas.mapping.profile/auto-v10",
+                    },
+                    include_fixed_action_dynamic_query=(
+                        request.profile.profile_id
+                        == "firmatlas.mapping.profile/auto-v10"
+                    ),
                 ),
             )
     initial_obligations = (

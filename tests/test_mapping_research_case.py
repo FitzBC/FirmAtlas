@@ -271,7 +271,7 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual(
             [
                 "supported", "supported", "supported", "supported",
-                "supported", "unresolved",
+                "supported", "supported", "unresolved",
             ],
             [claim["status"] for claim in case["claims"]],
         )
@@ -287,8 +287,11 @@ class ResearchCaseTests(unittest.TestCase):
             item for item in case["evidence"]
             if item["kind"] == "frontend_request"
         ]
-        self.assertEqual(1, len(frontend))
-        self.assertEqual("constructs_request", frontend[0]["capability"])
+        self.assertEqual(2, len(frontend))
+        self.assertEqual(
+            {"constructs_request"},
+            {item["capability"] for item in frontend},
+        )
         relationships = [
             item for item in case["evidence"]
             if item["kind"] == "native_relationship"
@@ -302,11 +305,22 @@ class ResearchCaseTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            8,
+            6,
+            sum(
+                item["kind"] == "native_binding"
+                for item in case["evidence"]
+            ),
+        )
+        self.assertEqual(
+            24,
             sum(
                 item["kind"] == "native_literal_xref"
                 for item in case["evidence"]
             ),
+        )
+        self.assertEqual(
+            "stage:dlna-usb-status-route-handler",
+            case["stages"][-1]["stage_id"],
         )
         resolution = next(
             item for item in case["evidence"]

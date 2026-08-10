@@ -163,6 +163,25 @@ class FrontendNativeSetDifferenceContractTests(unittest.TestCase):
             result.attributions[0].kind,
         )
 
+    def test_route_aware_policy_accepts_fixed_action_with_dynamic_query_suffix(self):
+        frontend = discover_frontend_asset_graph((
+            _asset(
+                "www/status.js",
+                b'$.getJSON("goform/GetUSBStatus?" + Math.random(), callback);',
+            ),
+        ))
+        _, native = _upstreams((), ("GetUSBStatus", "NativeOnly"))
+
+        result = attribute_frontend_native_set_difference(
+            frontend, native, (), SetDifferencePolicy.route_aware()
+        )
+
+        self.assertEqual(1, result.frontend_token_count)
+        self.assertEqual(
+            {"NativeOnly"},
+            {item.token for item in result.attributions},
+        )
+
     def test_direct_frontend_operation_is_not_mislabeled_as_wrapper_declaration(self):
         content = b'''var page={importAction:
 "/cgi-bin/cstecgi.cgi?action=upload&setting/setUploadSetting"};

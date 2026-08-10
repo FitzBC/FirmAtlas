@@ -242,6 +242,17 @@ R2-12 沿 R2-11 明确留下的 callsite 缺口继续推进。`bin/time_check` �
 原有 `obligation:dlna-handler-owner` 仍然 open，因为尚无证据把这条监督 IPC 链与三个
 DLNA `/goform` 操作绑定，也没有证明命令运行时执行。
 
+R2-13 又发现一个必须保留边界的相邻执行路径。`main.js` 中七个 `$.getJSON` 本来因前置
+JavaScript regex 中的引号触发 tokenizer 失步而未进入 Catalog；修复 regex literal 后，
+`goform/GetUSBStatus?` 与 Native route token 精确相交。对应 ARM 注册并非连续
+`route → handler → BL`：`0x43148` 开始装载 route 和 handler，`0x4315c` 无条件跳至
+共享尾块 `0x43728`，后者才执行 `mov r1,r3; bl 0x17134`。v4 重放将
+`GetUSBStatus → formGetUSBStatus@0xa62d0` 绑定，并在该函数内证明 `dlna.en`、
+`/var/etc/upan` 和两处 `dlna` 引用。这个结果支持“主仪表盘 USB 状态 handler 同时读取
+DLNA 状态”，但不能把 `GetUSBStatus` 当成 `GetDlnaCfg / SetDlnaCfg / refreshDLNA /
+expandDlnaFile` 的别名。因此案例新增 supported 相邻路径 claim，而核心 handler-owner
+obligation 继续 open；这比用共享状态字符串强行关闭义务更符合证据边界。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：

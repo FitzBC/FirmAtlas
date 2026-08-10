@@ -1,0 +1,2011 @@
+{
+  "analysis_run_id": "mapping-analysis-run:bcecac32dc2c2dd2b0170dc067419182c422177b51f85f874765111fac45f249",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v10",
+  "catalog_id": "discovery-catalog:4429837c200fc6dcfdd81430b403f512b3b2c80d28259ea42acfcf13316006d5",
+  "coverage_status": "completed",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "historical_expectation_entries": [
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "list"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetIPTVCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5836"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "security"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/WifiBasicSet",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45427"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "WANS"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/WizardHandle",
+      "missing_parameters": [
+        "WANS"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6016"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "PPPOEPassword"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/QuickIndex",
+      "missing_parameters": [
+        "PPPOEPassword"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6015"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/WifiWpsStart",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45429"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "rebootTime"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetSysAutoRebbotCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45428"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "remoteIp"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetRemoteWebCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5847"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/cgi-bin/DownloadCfg.jpg",
+      "missing_parameters": [],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-14286"
+    },
+    {
+      "applicability": "exact_artifact",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetSambaCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22949"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "lanMask"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/AdvSetLanip",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5839"
+    },
+    {
+      "applicability": "exact_artifact",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetOnlineDevName",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22946"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/exeCommand",
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10443"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/exeCommand",
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10442"
+    }
+  ],
+  "historical_expectation_summary": {
+    "not_assessable": 5,
+    "observed": 8
+  },
+  "interpretation": {
+    "not_claimed": "GetUSBStatus aliases the separate DLNA operations, the route is runtime reachable, the returned fields have fixture values, or a vulnerability exists",
+    "still_unresolved": "GetDlnaCfg, SetDlnaCfg, refreshDLNA, and expandDlnaFile still lack an exact Native route-handler binding",
+    "supported": "main.js constructs GET goform/GetUSBStatus?; an ARM tail-merged registration binds GetUSBStatus to formGetUSBStatus@0xa62d0; that exact handler references DLNA state and media-mount literals"
+  },
+  "main_js_getjson_requests": [
+    {
+      "endpoint": "goform/GetAdvanceStatus?",
+      "evidence_ids": [
+        "evidence:0602ab03f543d50a4e7c178e05d4a7937450f3af6b599ff333c163f281ab0cb2"
+      ],
+      "request_id": "frontend-request:57a5415c40a1a51534535a7b538009e8cd8915131556352eff51f81147de5b45",
+      "source_path": "webroot_ro/js/main.js"
+    },
+    {
+      "endpoint": "goform/GetParentCtrlList?",
+      "evidence_ids": [
+        "evidence:92bdc72516f643aabd718b9b62cd03ce4dff29a7b7369be97828532587c4ecef"
+      ],
+      "request_id": "frontend-request:3ba82700c1ae9d432ae5498d994c3831c128deceb2ebf97a9dc0a8df478bcd65",
+      "source_path": "webroot_ro/js/main.js"
+    },
+    {
+      "endpoint": "goform/GetSysStatus?",
+      "evidence_ids": [
+        "evidence:d7b60ecabd86d9f4e9f252dea4272f521957f67692e9d3f58f825a87af12b095"
+      ],
+      "request_id": "frontend-request:15e53675cfb3054eb21c4b76b9148288cd5fa4f0a4a0a68c7877f44b438a7315",
+      "source_path": "webroot_ro/js/main.js"
+    },
+    {
+      "endpoint": "goform/GetUSBStatus?",
+      "evidence_ids": [
+        "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0"
+      ],
+      "request_id": "frontend-request:dbf1621e88d6d32152744b2588e0c310a054d7bccc4b831d05d991f8ce9e2e6d",
+      "source_path": "webroot_ro/js/main.js"
+    },
+    {
+      "endpoint": "goform/GetVpnStatus?",
+      "evidence_ids": [
+        "evidence:18cf48f5f25e83a9cab54e5caddcc0320314152dba7ee8ff7072deebefdaf0f5"
+      ],
+      "request_id": "frontend-request:879f57d30a9e50791c13eaaf43759fa2c7de20f9897812aa1108519d20b46485",
+      "source_path": "webroot_ro/js/main.js"
+    },
+    {
+      "endpoint": "goform/GetWrlStatus?",
+      "evidence_ids": [
+        "evidence:7be60cb583ed3146512730744800a8c224ec83500f7c9a42059dc666906d656e"
+      ],
+      "request_id": "frontend-request:29a2ced1f788b15fa6cb2e827a594e9465708e29052bf98395f667cbf163803f",
+      "source_path": "webroot_ro/js/main.js"
+    },
+    {
+      "endpoint": "goform/WifiGuestGet?",
+      "evidence_ids": [
+        "evidence:6bdf5df0047f9f0db4a1d2f358fb62f5e34bf2143c5668ee34a8b4955f413c60"
+      ],
+      "request_id": "frontend-request:e77eb5c61452bfba84f5554ff3044d46072c05b1b3a95a88f44c697642b279b9",
+      "source_path": "webroot_ro/js/main.js"
+    }
+  ],
+  "mapping_summary": {
+    "candidate_count": 4369,
+    "evidence_count": 12080,
+    "main_js_getjson_request_count": 7,
+    "open_obligation_count": 64,
+    "parameter_count": 696,
+    "potential_hidden_interface_count": 84,
+    "tail_merged_route_binding_count": 1,
+    "usb_status_handler_literal_xref_count": 12
+  },
+  "profile_id": "firmatlas.mapping.profile/auto-v10",
+  "sample_role": "primary-vendor-tenda-ac9-tail-merged-route-iteration",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-13/v1alpha1",
+  "stages": [
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "inventory",
+      "output_count": 1038
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "source_plan",
+      "output_count": 529
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend",
+      "output_count": 134
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend_asset_graph",
+      "output_count": 32
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 451,
+      "name": "parameter_clue",
+      "output_count": 143
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 111,
+      "name": "response_fixture",
+      "output_count": 553
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native_relationship",
+      "output_count": 101
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "native_command_binding",
+      "output_count": 1
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 2,
+      "name": "arm_literal_xref",
+      "output_count": 14
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "web_configuration",
+      "output_count": 5
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "script_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native",
+      "output_count": 3187
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no selected sources"
+      ],
+      "input_count": 0,
+      "name": "native_ubus_registration",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "arm_pic_callsite",
+      "output_count": 74
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "arm_pic_registrar",
+      "output_count": 188
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "set_difference",
+      "output_count": 92
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no ubus operations"
+      ],
+      "input_count": 0,
+      "name": "ubus_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "no_eligible_analyzer"
+      ],
+      "input_count": 212,
+      "name": "scheduler",
+      "output_count": 64
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "open obligations remain but no unattempted eligible analyzer is available"
+      ],
+      "input_count": 529,
+      "name": "catalog",
+      "output_count": 4369
+    }
+  ],
+  "usb_status_route_handler_chain": {
+    "binding_evidence_ids": [
+      "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+      "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+      "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+      "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+      "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+      "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818"
+    ],
+    "binding_id": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c",
+    "dlna_literal_xrefs": [
+      {
+        "evidence_ids": [
+          "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+          "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+          "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554",
+          "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a6364",
+        "literal_address": "0x000f0674",
+        "literal_value": "dlna.en",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:753c4c907a7b24141152a675a89886d27c36d80713c8f1c69fa439a74cf13f43"
+      },
+      {
+        "evidence_ids": [
+          "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+          "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+          "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+          "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a6478",
+        "literal_address": "0x000f0694",
+        "literal_value": "/var/etc/upan",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:523cd0ae7b931f1b570f3a8f6fce20cb53dec241c5dab3d83110107db36f5228"
+      },
+      {
+        "evidence_ids": [
+          "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+          "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+          "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+          "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a652c",
+        "literal_address": "0x000f06ac",
+        "literal_value": "dlna",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:f0d471b134e4682371fc5adc2d653a30b5927713a694da9ec956305a54fdbe25"
+      },
+      {
+        "evidence_ids": [
+          "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+          "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+          "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+          "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a655c",
+        "literal_address": "0x000f06ac",
+        "literal_value": "dlna",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:d034e96891b3de85f23d05f837fda7dea274200482afcde07f552b22f83f53c5"
+      }
+    ],
+    "frontend_endpoint": "goform/GetUSBStatus?",
+    "frontend_request_id": "frontend-request:dbf1621e88d6d32152744b2588e0c310a054d7bccc4b831d05d991f8ce9e2e6d",
+    "handler_identity": "bin/httpd@0x000a62d0",
+    "handler_literal_xrefs": [
+      {
+        "evidence_ids": [
+          "evidence:bccb5f03688713cb3b92143e3354ea0bad292280acd85937d8ef80bbefbe9379",
+          "evidence:66cd8d500760ca3d9faec4f860be1af3cbdea36dc5db6d035d63b41b7b287970",
+          "evidence:075c05c473aa501cc660ff60106fb3bc5d71b6837a4771c62e707718c366c677",
+          "evidence:3bb91d5c53fc2afe7517c397f1f20e983acba0fc21e3902441cfd489548086f7"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a6334",
+        "literal_address": "0x000f0330",
+        "literal_value": "usb.ippd.enable",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:776eed084172f84f35a8b8428726d5ec9a0e63fd29fced03cfe4d4ea582eeec4"
+      },
+      {
+        "evidence_ids": [
+          "evidence:78e556f427d7fe50f009cf5925488466c1cead00f96d6b3857a7e07e371c87d3",
+          "evidence:7bf8514b7222298b56de6a2b6f64eaa32bce22fdc14bb91e88756dc7cc9c611b",
+          "evidence:536cf78a8f4869ebf38225dde9188a9e62f4f7f0b886b97c836218a9e8aee56b",
+          "evidence:8d4e14bef412e4d6d2a66d1deb831959fc134b678732fb47599fd536a5711f6d"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a634c",
+        "literal_address": "0x000f051c",
+        "literal_value": "usb.ftp.remote.acess",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:c69c15655ffa60a1d4885744ae59a0ced6e148aa46ed35f042bf2d5a66767844"
+      },
+      {
+        "evidence_ids": [
+          "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+          "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+          "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554",
+          "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a6364",
+        "literal_address": "0x000f0674",
+        "literal_value": "dlna.en",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:753c4c907a7b24141152a675a89886d27c36d80713c8f1c69fa439a74cf13f43"
+      },
+      {
+        "evidence_ids": [
+          "evidence:4732e2123d1e74d2052b268290cc79b2737df6a10997cb1f0d6d20b09d91b772",
+          "evidence:bff2243427e2510c2e417b7dcdb3a2ffac6106f573d2a2b5d8d564b0e438fc03",
+          "evidence:0fa05277e1d8f985f2bd677e31efc47c47f7074090127ca7bc00c6b0d7f14ddf",
+          "evidence:8ff61513e3e354da84da5d1e1812adf6051569e5bf24b8e1cd95d3ae911afd2b"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a63b4",
+        "literal_address": "0x000f0680",
+        "literal_value": "printer",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:e702340b3a07860002fcb2dbe01fc3a83563a1b45ac37b667fd4d5995660bb38"
+      },
+      {
+        "evidence_ids": [
+          "evidence:3569e29b8d2195ccfae4b2ef89222468844c15a94697a7c42d2fdfe56083482a",
+          "evidence:326b7910bc849cf73260461f476cc132781cb7a93eb36d55e096abec5feb16e4",
+          "evidence:f40eff581489e2994deee20fe8b987f2e295c298b81badb3302809855b76cab1",
+          "evidence:ff95ceceef738e76581c834b5e64ee7d2906b03cb45ebd5748a754888b64c19d"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a63e4",
+        "literal_address": "0x000f0680",
+        "literal_value": "printer",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:99cf25f0b50dafa325840f600260b9f80745e871ede78cd44490214fdab2b47c"
+      },
+      {
+        "evidence_ids": [
+          "evidence:28ba68b95653c31e905c813e412bba1fb503f2d86ee6e254dcf14297553a3aa6",
+          "evidence:8c8c3dd1658217ad864b23f4b0e01c5b897d8de6ffc68fc8f092c765a111e400",
+          "evidence:3f1e3353ad4562574e77e86d3c7542efde4d1ae63dd2abb02261c924f9aeac22",
+          "evidence:d2cd5337c045b0ef23b8cc032ff84e1af6ff7ff622d69812dcba5c0b3399d082"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a6434",
+        "literal_address": "0x000f0688",
+        "literal_value": "fileshare",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:cec5026416829d292d4bf772281012421ccfb9c501a56a1c52ac5c5ea8736137"
+      },
+      {
+        "evidence_ids": [
+          "evidence:62cbd3fbb7e7fb2a1007944bf9e6589e0885b8599a19b4b27ec286a77e4bd994",
+          "evidence:5d08c7364070f4377d09efbc075322926efb586ff825f6ee86afd15697d59e24",
+          "evidence:b378bce5ebb5c59298d049bcb6b0ddd9d3b8dbbed5214e21fb0497052a12b190",
+          "evidence:06e69c871fe2b4f5de16245acf957da75b04233bd57f285ebbc0d03786be2fd8"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a6464",
+        "literal_address": "0x000f0688",
+        "literal_value": "fileshare",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:e70946a5ea80bfebd0d21cf988c4b4765d87d8a903509b19100e832f1ee7c6c6"
+      },
+      {
+        "evidence_ids": [
+          "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+          "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+          "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+          "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a6478",
+        "literal_address": "0x000f0694",
+        "literal_value": "/var/etc/upan",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:523cd0ae7b931f1b570f3a8f6fce20cb53dec241c5dab3d83110107db36f5228"
+      },
+      {
+        "evidence_ids": [
+          "evidence:ed8e20d4e78c4968af6e25718be8d9a4c0e75195bba528175d8ccb1faa8daa68",
+          "evidence:43b37083529c838ee4cbe7554b7181504cf217edf7a7df83baa272170bf4a5ab",
+          "evidence:73cc0ca8f673e879d63584ec4f0fed37cba9715e8c702be9ce5ebf819b013de3",
+          "evidence:6059e1432740c75445ce252569762f0e3fcc52f79fa9f3bdd289e24ed2b1eda9"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a64ac",
+        "literal_address": "0x000f06a4",
+        "literal_value": "hasusb",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:4c2e4f46bec9bb74156cd39d1cc34ff59a08bc65c344f49b7baeb20e187be25c"
+      },
+      {
+        "evidence_ids": [
+          "evidence:5d1d5a2e25bc1a17a94e9b72d5f122a7e47643518a2a5b0a5460a6fb85eaa8e9",
+          "evidence:6e902d4731aea43110c9b35f9169b0069f6b373d12b462580531a4c95ddf5646",
+          "evidence:7c026e01f22529657c0dd8f01f605a8e55a88f93a41652175f5c800aae30a595",
+          "evidence:c454ccc8a180e5b4e4ce3815935727296de28dd3987182dec3b596bad6737a6a"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a64dc",
+        "literal_address": "0x000f06a4",
+        "literal_value": "hasusb",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:2165374a3ac6cc4972012b48743e48d78e69e18a4c85c3b4de204c6aa9ba6d30"
+      },
+      {
+        "evidence_ids": [
+          "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+          "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+          "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+          "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a652c",
+        "literal_address": "0x000f06ac",
+        "literal_value": "dlna",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:f0d471b134e4682371fc5adc2d653a30b5927713a694da9ec956305a54fdbe25"
+      },
+      {
+        "evidence_ids": [
+          "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+          "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+          "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+          "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c"
+        ],
+        "function_identity": "bin/httpd@0x000a62d0",
+        "instruction_address": "0x000a655c",
+        "literal_address": "0x000f06ac",
+        "literal_value": "dlna",
+        "pic_base_address": "0x000a62dc",
+        "xref_id": "arm-literal-xref:d034e96891b3de85f23d05f837fda7dea274200482afcde07f552b22f83f53c5"
+      }
+    ],
+    "handler_symbol": "formGetUSBStatus",
+    "registrar_address": "0x17134",
+    "registrar_pair_count": 167,
+    "registration_address": "0x4315c",
+    "route_token": "GetUSBStatus",
+    "source_construct": "elf.arm32-pic-r0-r1-bl/v4:tail-merged:registrar@0x00017134"
+  },
+  "usb_status_route_handler_evidence": [
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:06e69c871fe2b4f5de16245acf957da75b04233bd57f285ebbc0d03786be2fd8",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e70946a5ea80bfebd0d21cf988c4b4765d87d8a903509b19100e832f1ee7c6c6"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:075c05c473aa501cc660ff60106fb3bc5d71b6837a4771c62e707718c366c677",
+      "object_value": "usb.ippd.enable",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647996,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "8d8e65da72cf87747ca42df12e8ae3611e160a290e8f18ecc969ffbcfd7a45be",
+        "locator": "binary:bytes=647988-647996",
+        "span_kind": "binary",
+        "start_byte": 647988,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:776eed084172f84f35a8b8428726d5ec9a0e63fd29fced03cfe4d4ea582eeec4"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-deep-arm-pic-callsite",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 237928,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "25aec6fc1f89fd09971085bf879c25c09adadcef49d673e64d9defbb46a55294",
+        "locator": "binary:bytes=237920-237928",
+        "span_kind": "binary",
+        "start_byte": 237920,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:0fa05277e1d8f985f2bd677e31efc47c47f7074090127ca7bc00c6b0d7f14ddf",
+      "object_value": "printer",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648124,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "85c0c36ffeae1c64a11110353be9395a70ceaa13d2341692bf01724509354c50",
+        "locator": "binary:bytes=648116-648124",
+        "span_kind": "binary",
+        "start_byte": 648116,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e702340b3a07860002fcb2dbe01fc3a83563a1b45ac37b667fd4d5995660bb38"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:753c4c907a7b24141152a675a89886d27c36d80713c8f1c69fa439a74cf13f43"
+    },
+    {
+      "capability": "binds_handler",
+      "confidence": 1.0,
+      "evidence_id": "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "binds_handler",
+      "producer": "native-deep-arm-pic-callsite",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 242016,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "2eb2865f6ff93a9b8fbb2ce7babd42b25dc71b3f5306bba74642e77343cf1530",
+        "locator": "binary:bytes=241992-242016",
+        "span_kind": "binary",
+        "start_byte": 241992,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+      "object_value": "dlna.en",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951931,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "b16671986944cf4a8b61b6d9dfec70c731fb859db5801b906cc7d3aadf57303a",
+        "locator": "binary:bytes=951924-951931",
+        "span_kind": "binary",
+        "start_byte": 951924,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:753c4c907a7b24141152a675a89886d27c36d80713c8f1c69fa439a74cf13f43"
+    },
+    {
+      "capability": "constructs_request",
+      "confidence": 1.0,
+      "evidence_id": "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0",
+      "object_value": "goform/GetUSBStatus?",
+      "observation_kind": "direct_static",
+      "predicate": "constructs_request",
+      "producer": "frontend-request-producer",
+      "producer_version": "0.4.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "webroot_ro/js/main.js",
+        "artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+        "end_byte": 98490,
+        "end_column": 40,
+        "end_line": 2513,
+        "excerpt_sha256": "673510880999d3c9b27122ec7ef389892ee8e5e49348cd546d2723adb4e3f1e2",
+        "locator": "text_utf8:bytes=98470-98490;lines=2513:20-2513:40",
+        "span_kind": "text_utf8",
+        "start_byte": 98470,
+        "start_column": 20,
+        "start_line": 2513
+      },
+      "subject_ref": "frontend-request:dbf1621e88d6d32152744b2588e0c310a054d7bccc4b831d05d991f8ce9e2e6d"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:28ba68b95653c31e905c813e412bba1fb503f2d86ee6e254dcf14297553a3aa6",
+      "object_value": "fileshare",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951953,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "b8fb56be9fd503f1625e9b57415c0a51ce56922c8bf76344e9be1820bb59552d",
+        "locator": "binary:bytes=951944-951953",
+        "span_kind": "binary",
+        "start_byte": 951944,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:cec5026416829d292d4bf772281012421ccfb9c501a56a1c52ac5c5ea8736137"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:326b7910bc849cf73260461f476cc132781cb7a93eb36d55e096abec5feb16e4",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:99cf25f0b50dafa325840f600260b9f80745e871ede78cd44490214fdab2b47c"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:3569e29b8d2195ccfae4b2ef89222468844c15a94697a7c42d2fdfe56083482a",
+      "object_value": "printer",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951943,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "ba70e1dacc17e1a77072ce9705bcbe3bc0063b5792d590f20eefdcd3d876daee",
+        "locator": "binary:bytes=951936-951943",
+        "span_kind": "binary",
+        "start_byte": 951936,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:99cf25f0b50dafa325840f600260b9f80745e871ede78cd44490214fdab2b47c"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:3bb91d5c53fc2afe7517c397f1f20e983acba0fc21e3902441cfd489548086f7",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:776eed084172f84f35a8b8428726d5ec9a0e63fd29fced03cfe4d4ea582eeec4"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:3f1e3353ad4562574e77e86d3c7542efde4d1ae63dd2abb02261c924f9aeac22",
+      "object_value": "fileshare",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648252,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "7fafa21e887a29895505a3a3db48c8af31c5db083765bb97c7826726d6bd6b6d",
+        "locator": "binary:bytes=648244-648252",
+        "span_kind": "binary",
+        "start_byte": 648244,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:cec5026416829d292d4bf772281012421ccfb9c501a56a1c52ac5c5ea8736137"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:43b37083529c838ee4cbe7554b7181504cf217edf7a7df83baa272170bf4a5ab",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:4c2e4f46bec9bb74156cd39d1cc34ff59a08bc65c344f49b7baeb20e187be25c"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+      "object_value": "dlna",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951984,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "eb6f8f3275d4763c15f4581c43ff7488ab553bce12fa642402cb1d4bb4ec392d",
+        "locator": "binary:bytes=951980-951984",
+        "span_kind": "binary",
+        "start_byte": 951980,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:d034e96891b3de85f23d05f837fda7dea274200482afcde07f552b22f83f53c5"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:4732e2123d1e74d2052b268290cc79b2737df6a10997cb1f0d6d20b09d91b772",
+      "object_value": "printer",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951943,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "ba70e1dacc17e1a77072ce9705bcbe3bc0063b5792d590f20eefdcd3d876daee",
+        "locator": "binary:bytes=951936-951943",
+        "span_kind": "binary",
+        "start_byte": 951936,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e702340b3a07860002fcb2dbe01fc3a83563a1b45ac37b667fd4d5995660bb38"
+    },
+    {
+      "capability": "resolves_handler_symbol",
+      "confidence": 1.0,
+      "evidence_id": "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+      "object_value": "formGetUSBStatus|bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "resolves_handler_symbol",
+      "producer": "native-deep-arm-pic-callsite",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 24404,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "270428ed831152b1399274f45ad2e4db6a50c766cc2cda1ff5547a62f1304c13",
+        "locator": "binary:bytes=24396-24404",
+        "span_kind": "binary",
+        "start_byte": 24396,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+      "object_value": "dlna",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648548,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "513b6495494c361f2ea520d4153b001d159954a108302921484bb8dcd63d03a0",
+        "locator": "binary:bytes=648540-648548",
+        "span_kind": "binary",
+        "start_byte": 648540,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:d034e96891b3de85f23d05f837fda7dea274200482afcde07f552b22f83f53c5"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:536cf78a8f4869ebf38225dde9188a9e62f4f7f0b886b97c836218a9e8aee56b",
+      "object_value": "usb.ftp.remote.acess",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648020,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "50bf4033e92243ce249a68cfd88422c3bd1bfa41abfff4125e1f8c2137970157",
+        "locator": "binary:bytes=648012-648020",
+        "span_kind": "binary",
+        "start_byte": 648012,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:c69c15655ffa60a1d4885744ae59a0ced6e148aa46ed35f042bf2d5a66767844"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:523cd0ae7b931f1b570f3a8f6fce20cb53dec241c5dab3d83110107db36f5228"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:5d08c7364070f4377d09efbc075322926efb586ff825f6ee86afd15697d59e24",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e70946a5ea80bfebd0d21cf988c4b4765d87d8a903509b19100e832f1ee7c6c6"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:5d1d5a2e25bc1a17a94e9b72d5f122a7e47643518a2a5b0a5460a6fb85eaa8e9",
+      "object_value": "hasusb",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951978,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "a4a255250b3756b5ebc2cf8251206a312ff76440c9931dcc4090409a4aa23821",
+        "locator": "binary:bytes=951972-951978",
+        "span_kind": "binary",
+        "start_byte": 951972,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:2165374a3ac6cc4972012b48743e48d78e69e18a4c85c3b4de204c6aa9ba6d30"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:6059e1432740c75445ce252569762f0e3fcc52f79fa9f3bdd289e24ed2b1eda9",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:4c2e4f46bec9bb74156cd39d1cc34ff59a08bc65c344f49b7baeb20e187be25c"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:62cbd3fbb7e7fb2a1007944bf9e6589e0885b8599a19b4b27ec286a77e4bd994",
+      "object_value": "fileshare",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951953,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "b8fb56be9fd503f1625e9b57415c0a51ce56922c8bf76344e9be1820bb59552d",
+        "locator": "binary:bytes=951944-951953",
+        "span_kind": "binary",
+        "start_byte": 951944,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e70946a5ea80bfebd0d21cf988c4b4765d87d8a903509b19100e832f1ee7c6c6"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+      "object_value": "/var/etc/upan",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951969,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "d6af41cc439944d01c7d596aac771f90547c0a4a60ae5a357024f158b00dbde4",
+        "locator": "binary:bytes=951956-951969",
+        "span_kind": "binary",
+        "start_byte": 951956,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:523cd0ae7b931f1b570f3a8f6fce20cb53dec241c5dab3d83110107db36f5228"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:66cd8d500760ca3d9faec4f860be1af3cbdea36dc5db6d035d63b41b7b287970",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:776eed084172f84f35a8b8428726d5ec9a0e63fd29fced03cfe4d4ea582eeec4"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:6e902d4731aea43110c9b35f9169b0069f6b373d12b462580531a4c95ddf5646",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:2165374a3ac6cc4972012b48743e48d78e69e18a4c85c3b4de204c6aa9ba6d30"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:73cc0ca8f673e879d63584ec4f0fed37cba9715e8c702be9ce5ebf819b013de3",
+      "object_value": "hasusb",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648372,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "c95b35f4affd0ff2173767a85a441364c3e577da6ba2e573b81c4ce503c31a2d",
+        "locator": "binary:bytes=648364-648372",
+        "span_kind": "binary",
+        "start_byte": 648364,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:4c2e4f46bec9bb74156cd39d1cc34ff59a08bc65c344f49b7baeb20e187be25c"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:78e556f427d7fe50f009cf5925488466c1cead00f96d6b3857a7e07e371c87d3",
+      "object_value": "usb.ftp.remote.acess",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951600,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "9379e3bc5954f4e71f9ec43bc3757e0a4d7d2f073b5c19f7dac8652109ea9629",
+        "locator": "binary:bytes=951580-951600",
+        "span_kind": "binary",
+        "start_byte": 951580,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:c69c15655ffa60a1d4885744ae59a0ced6e148aa46ed35f042bf2d5a66767844"
+    },
+    {
+      "capability": "mentions_endpoint",
+      "confidence": 1.0,
+      "evidence_id": "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+      "object_value": "GetUSBStatus",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_endpoint",
+      "producer": "native-deep-arm-pic-callsite",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 875548,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "c8af23312f4ba9b8bc0e4a5fbaeba30e780e3a5bfa7aea3c16c77b73790d8288",
+        "locator": "binary:bytes=875536-875548",
+        "span_kind": "binary",
+        "start_byte": 875536,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:523cd0ae7b931f1b570f3a8f6fce20cb53dec241c5dab3d83110107db36f5228"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:7bf8514b7222298b56de6a2b6f64eaa32bce22fdc14bb91e88756dc7cc9c611b",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:c69c15655ffa60a1d4885744ae59a0ced6e148aa46ed35f042bf2d5a66767844"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:7c026e01f22529657c0dd8f01f605a8e55a88f93a41652175f5c800aae30a595",
+      "object_value": "hasusb",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648420,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "c8fb7a40d3924fe24f51125964f48b91dce00425054ed0e0830a752a03400b47",
+        "locator": "binary:bytes=648412-648420",
+        "span_kind": "binary",
+        "start_byte": 648412,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:2165374a3ac6cc4972012b48743e48d78e69e18a4c85c3b4de204c6aa9ba6d30"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:d034e96891b3de85f23d05f837fda7dea274200482afcde07f552b22f83f53c5"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:8c8c3dd1658217ad864b23f4b0e01c5b897d8de6ffc68fc8f092c765a111e400",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:cec5026416829d292d4bf772281012421ccfb9c501a56a1c52ac5c5ea8736137"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:8d4e14bef412e4d6d2a66d1deb831959fc134b678732fb47599fd536a5711f6d",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:c69c15655ffa60a1d4885744ae59a0ced6e148aa46ed35f042bf2d5a66767844"
+    },
+    {
+      "capability": "registers_route",
+      "confidence": 1.0,
+      "evidence_id": "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+      "object_value": "GetUSBStatus",
+      "observation_kind": "deterministic_derived",
+      "predicate": "registers_route",
+      "producer": "native-deep-arm-pic-callsite",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 242016,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "2eb2865f6ff93a9b8fbb2ce7babd42b25dc71b3f5306bba74642e77343cf1530",
+        "locator": "binary:bytes=241992-242016",
+        "span_kind": "binary",
+        "start_byte": 241992,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:8ff61513e3e354da84da5d1e1812adf6051569e5bf24b8e1cd95d3ae911afd2b",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e702340b3a07860002fcb2dbe01fc3a83563a1b45ac37b667fd4d5995660bb38"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+      "object_value": "dlna",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648500,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "3ee3844e3d84da137d3e8330ecccbd70f5899e13a350bc7d66dc9b966f2bcef9",
+        "locator": "binary:bytes=648492-648500",
+        "span_kind": "binary",
+        "start_byte": 648492,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:f0d471b134e4682371fc5adc2d653a30b5927713a694da9ec956305a54fdbe25"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+      "object_value": "/var/etc/upan",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648320,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "0d0763ce374a23704002e23638c1d6ca7cde17f52b8245f2e45310523dedb9e0",
+        "locator": "binary:bytes=648312-648320",
+        "span_kind": "binary",
+        "start_byte": 648312,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:523cd0ae7b931f1b570f3a8f6fce20cb53dec241c5dab3d83110107db36f5228"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:f0d471b134e4682371fc5adc2d653a30b5927713a694da9ec956305a54fdbe25"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:b378bce5ebb5c59298d049bcb6b0ddd9d3b8dbbed5214e21fb0497052a12b190",
+      "object_value": "fileshare",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648300,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "40157d8938b6c8c5d8ae3e43ce5e90629d2984736b509f31312cc319198af713",
+        "locator": "binary:bytes=648292-648300",
+        "span_kind": "binary",
+        "start_byte": 648292,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e70946a5ea80bfebd0d21cf988c4b4765d87d8a903509b19100e832f1ee7c6c6"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:753c4c907a7b24141152a675a89886d27c36d80713c8f1c69fa439a74cf13f43"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:bccb5f03688713cb3b92143e3354ea0bad292280acd85937d8ef80bbefbe9379",
+      "object_value": "usb.ippd.enable",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951103,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "97fe4b507823f179c95775430121609ce1be762e5cf81a416408fb0fe5e11181",
+        "locator": "binary:bytes=951088-951103",
+        "span_kind": "binary",
+        "start_byte": 951088,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:776eed084172f84f35a8b8428726d5ec9a0e63fd29fced03cfe4d4ea582eeec4"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:bff2243427e2510c2e417b7dcdb3a2ffac6106f573d2a2b5d8d564b0e438fc03",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e702340b3a07860002fcb2dbe01fc3a83563a1b45ac37b667fd4d5995660bb38"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:c454ccc8a180e5b4e4ce3815935727296de28dd3987182dec3b596bad6737a6a",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:2165374a3ac6cc4972012b48743e48d78e69e18a4c85c3b4de204c6aa9ba6d30"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:d2cd5337c045b0ef23b8cc032ff84e1af6ff7ff622d69812dcba5c0b3399d082",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:cec5026416829d292d4bf772281012421ccfb9c501a56a1c52ac5c5ea8736137"
+    },
+    {
+      "capability": "branches_to_registrar_tail",
+      "confidence": 1.0,
+      "evidence_id": "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+      "object_value": "registrar@0x00017134",
+      "observation_kind": "deterministic_derived",
+      "predicate": "branches_to_registrar_tail",
+      "producer": "native-deep-arm-pic-callsite",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 243504,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "122ad384d3142db64ddce41cf379741969f077ea54bab80f366d6d90fecbb7c2",
+        "locator": "binary:bytes=243496-243504",
+        "span_kind": "binary",
+        "start_byte": 243496,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:d034e96891b3de85f23d05f837fda7dea274200482afcde07f552b22f83f53c5"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+      "object_value": "got@0x000fd3b8",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647908,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "acf6fbe0e7e82153143ba94c27da68f7c74e40375cf83c7759d2fa8c25f8a3bb",
+        "locator": "binary:bytes=647900-647908",
+        "span_kind": "binary",
+        "start_byte": 647900,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:f0d471b134e4682371fc5adc2d653a30b5927713a694da9ec956305a54fdbe25"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:ed8e20d4e78c4968af6e25718be8d9a4c0e75195bba528175d8ccb1faa8daa68",
+      "object_value": "hasusb",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951978,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "a4a255250b3756b5ebc2cf8251206a312ff76440c9931dcc4090409a4aa23821",
+        "locator": "binary:bytes=951972-951978",
+        "span_kind": "binary",
+        "start_byte": 951972,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:4c2e4f46bec9bb74156cd39d1cc34ff59a08bc65c344f49b7baeb20e187be25c"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+      "object_value": "dlna",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 951984,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "eb6f8f3275d4763c15f4581c43ff7488ab553bce12fa642402cb1d4bb4ec392d",
+        "locator": "binary:bytes=951980-951984",
+        "span_kind": "binary",
+        "start_byte": 951980,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:f0d471b134e4682371fc5adc2d653a30b5927713a694da9ec956305a54fdbe25"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:f40eff581489e2994deee20fe8b987f2e295c298b81badb3302809855b76cab1",
+      "object_value": "printer",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648172,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "d1d714cc8ec4a6c672c1c594318a6f06c4f26f1517c013bbdf2e8303df4d8492",
+        "locator": "binary:bytes=648164-648172",
+        "span_kind": "binary",
+        "start_byte": 648164,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:99cf25f0b50dafa325840f600260b9f80745e871ede78cd44490214fdab2b47c"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554",
+      "object_value": "dlna.en",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 648044,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "e7c35f872512995464678d4f0ed2c6da7566b91f02c675d7145dfa915cb89050",
+        "locator": "binary:bytes=648036-648044",
+        "span_kind": "binary",
+        "start_byte": 648036,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:753c4c907a7b24141152a675a89886d27c36d80713c8f1c69fa439a74cf13f43"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:ff95ceceef738e76581c834b5e64ee7d2906b03cb45ebd5748a754888b64c19d",
+      "object_value": "bin/httpd@0x000a62d0",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/httpd",
+        "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+        "end_byte": 647892,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=647888-647892",
+        "span_kind": "binary",
+        "start_byte": 647888,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:99cf25f0b50dafa325840f600260b9f80745e871ede78cd44490214fdab2b47c"
+    }
+  ],
+  "vulnerability_scope_summary": {
+    "category_counts": {
+      "compared_interface": 13,
+      "no_structured_communication": 9,
+      "not_analyzed": 46,
+      "parameter_only": 3
+    },
+    "exact_artifact_expectation_count": 2,
+    "exact_artifact_observed_count": 2,
+    "total_vulnerability_count": 71
+  }
+}

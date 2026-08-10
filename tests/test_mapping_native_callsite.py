@@ -42,6 +42,13 @@ def _arm_bl(instruction_address: int, target_address: int) -> int:
     return 0xEB000000 | ((delta // 4) & 0x00FFFFFF)
 
 
+def _arm_b(instruction_address: int, target_address: int) -> int:
+    delta = target_address - (instruction_address + 8)
+    if delta % 4:
+        raise ValueError("ARM B target must be word aligned")
+    return 0xEA000000 | ((delta // 4) & 0x00FFFFFF)
+
+
 def _arm32_pic_fixture() -> bytes:
     route_one = b"SetOnlineDevName\x00"
     route_two = b"GetDeviceDetail\x00"
@@ -186,7 +193,46 @@ def _arm32_handler_first_pic_fixture() -> bytes:
     return bytes(payload)
 
 
+def _arm32_tail_merged_pic_fixture() -> bytes:
+    payload = bytearray(_arm32_pic_fixture())
+    section_table_offset = struct.unpack_from("<I", payload, 32)[0]
+    text_offset = struct.unpack_from(
+        "<I", payload, section_table_offset + 2 * 40 + 16
+    )[0]
+
+    def put(address: int, value: int) -> None:
+        struct.pack_into(
+            "<I", payload, text_offset + address - 0x1000, value & 0xFFFFFFFF
+        )
+
+    put(0x1020, _arm_b(0x1020, 0x1260))
+    put(0x1024, 0xE1A00000)
+    put(0x1260, 0xE1A01003)  # shared tail: mov r1, r3
+    put(0x1264, _arm_bl(0x1264, 0x1200))
+    return bytes(payload)
+
+
 class ArmPicCallsiteContractTests(unittest.TestCase):
+    def test_tail_merged_registration_enumerates_route_and_handler(self):
+        content = _arm32_tail_merged_pic_fixture()
+
+        result = discover_arm_pic_registrar_bindings(
+            _source("bin/httpd", content), content
+        )
+
+        self.assertEqual(CoverageStatus.COMPLETED, result.coverage_status)
+        self.assertEqual(
+            {"SetOnlineDevName", "GetDeviceDetail"},
+            {item.route_token for item in result.bindings},
+        )
+        binding = next(
+            item for item in result.bindings
+            if item.route_token == "SetOnlineDevName"
+        )
+        self.assertEqual(0x1020, binding.registration_address)
+        self.assertEqual("formSetDeviceName", binding.handler_symbol)
+        self.assertIn("tail-merged", binding.source_construct)
+
     def test_handler_first_r2_route_layout_is_enumerated(self):
         content = _arm32_handler_first_pic_fixture()
         source = _source("bin/httpd", content)
@@ -547,7 +593,7 @@ class ArmPicCallsiteContractTests(unittest.TestCase):
                 for item in deep.bindings
             },
         )
-        self.assertEqual({166}, {item.registrar_pair_count for item in deep.bindings})
+        self.assertEqual({167}, {item.registrar_pair_count for item in deep.bindings})
 
 
 if __name__ == "__main__":

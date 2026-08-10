@@ -10,7 +10,7 @@ from typing import Tuple, Union
 
 from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom, ObservationKind, SpanKind
 from .evidence import EvidenceClaim, SpanSelection, capture_evidence
-from .frontend import FrontendAssetGraphResult
+from .frontend import FrontendAssetGraphResult, FrontendEndpointShape
 from .inventory import SourceArtifactEntry
 from .native_deep import NativeDeepResult
 
@@ -64,15 +64,21 @@ class SetDifferencePolicy:
     max_tokens: int = 20_000
     max_hits_per_token: int = 32
     include_request_action_tokens: bool = False
+    include_fixed_action_dynamic_query: bool = False
     request_action_prefixes: Tuple[str, ...] = ()
     scan_native_only_auxiliary: bool = True
 
     @classmethod
     def route_aware(
-        cls, frontend_auxiliary_only: bool = False,
+        cls,
+        frontend_auxiliary_only: bool = False,
+        include_fixed_action_dynamic_query: bool = True,
     ) -> "SetDifferencePolicy":
         return cls(
             include_request_action_tokens=True,
+            include_fixed_action_dynamic_query=(
+                include_fixed_action_dynamic_query
+            ),
             request_action_prefixes=("/goform/", "goform/"),
             scan_native_only_auxiliary=not frontend_auxiliary_only,
         )
@@ -411,7 +417,16 @@ def attribute_frontend_native_set_difference(
             )
         if policy.include_request_action_tokens:
             for candidate in result.candidates:
-                if candidate.endpoint_shape.value != "exact_literal":
+                action_path_is_fixed = (
+                    candidate.endpoint_shape is FrontendEndpointShape.EXACT_LITERAL
+                    or (
+                        candidate.endpoint_shape
+                        is FrontendEndpointShape.LITERAL_PREFIX
+                        and policy.include_fixed_action_dynamic_query
+                        and "?" in candidate.endpoint
+                    )
+                )
+                if not action_path_is_fixed:
                     continue
                 path = candidate.endpoint.split("?", 1)[0].rstrip("/")
                 if not any(

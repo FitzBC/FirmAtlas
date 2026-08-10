@@ -69,6 +69,7 @@ class FrontendPolicy:
     max_candidates: int = 10_000
     enable_inline_form_literal: bool = True
     enable_tenda_get_set_data: bool = True
+    enable_regex_literals: bool = True
 
     def __post_init__(self) -> None:
         if self.max_source_bytes <= 0 or self.max_candidates <= 0:
@@ -343,9 +344,27 @@ def _parameter_id(
     return "frontend-parameter:{}".format(hashlib.sha256(payload).hexdigest())
 
 
-def _tokenize_javascript(content: bytes) -> Tuple[_Token, ...]:
+def _tokenize_javascript(
+    content: bytes, enable_regex_literals: bool = True,
+) -> Tuple[_Token, ...]:
     tokens = []
     index = 0
+
+    def can_start_regex() -> bool:
+        if not tokens:
+            return True
+        previous = tokens[-1]
+        if previous.kind == "identifier":
+            return previous.value in {
+                b"await", b"case", b"delete", b"in", b"instanceof",
+                b"new", b"of", b"return", b"throw", b"typeof",
+                b"void", b"yield",
+            }
+        return previous.value in {
+            b"(", b"[", b"{", b",", b";", b":", b"=", b"!",
+            b"?", b"&", b"|", b"+", b"-", b"*", b"%", b"~",
+        }
+
     while index < len(content):
         byte = content[index]
         if byte in b" \t\r\n":
@@ -358,6 +377,37 @@ def _tokenize_javascript(content: bytes) -> Tuple[_Token, ...]:
         if content[index : index + 2] == b"/*":
             closing = content.find(b"*/", index + 2)
             index = len(content) if closing < 0 else closing + 2
+            continue
+        if byte == ord("/") and enable_regex_literals and can_start_regex():
+            start = index
+            index += 1
+            in_character_class = False
+            while index < len(content):
+                current = content[index]
+                if current in (ord("\r"), ord("\n")):
+                    break
+                if current == ord("\\"):
+                    index += 2
+                    continue
+                if current == ord("["):
+                    in_character_class = True
+                elif current == ord("]"):
+                    in_character_class = False
+                elif current == ord("/") and not in_character_class:
+                    index += 1
+                    while (
+                        index < len(content)
+                        and chr(content[index]).isalpha()
+                    ):
+                        index += 1
+                    tokens.append(
+                        _Token("regex", content[start:index], start, index)
+                    )
+                    break
+                index += 1
+            else:
+                tokens.append(_Token("punctuation", b"/", start, start + 1))
+                index = start + 1
             continue
         if byte in (ord('"'), ord("'"), ord("`")):
             quote = byte
@@ -393,8 +443,10 @@ def _tokenize_javascript(content: bytes) -> Tuple[_Token, ...]:
     return tuple(tokens)
 
 
-def _page_model_url_properties(content: bytes) -> tuple:
-    tokens = _tokenize_javascript(content)
+def _page_model_url_properties(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     results = []
     index = 0
     prefix = (b"R", b".", b"pageModel", b"(", b"{")
@@ -464,8 +516,10 @@ def _matching_delimiter(
     return len(tokens)
 
 
-def _module_model_parameters(content: bytes) -> tuple:
-    tokens = _tokenize_javascript(content)
+def _module_model_parameters(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     prefix = (b"R", b".", b"moduleModel", b"(", b"{")
     parameters = []
     for index in range(0, max(0, len(tokens) - len(prefix) + 1)):
@@ -514,10 +568,12 @@ def _module_model_parameters(content: bytes) -> tuple:
     return tuple(unique.values())
 
 
-def _page_model_object_parameters(content: bytes) -> tuple:
+def _page_model_object_parameters(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
     """Recover bounded object payload keys consumed by a page-model write."""
 
-    tokens = _tokenize_javascript(content)
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     configurations = (
         ((b"R", b".", b"moduleModel", b"(", b"{"), b"getSubmitData",
          "R.moduleModel.getSubmitData.object"),
@@ -620,9 +676,11 @@ def _assigned_parameters(tokens: Tuple[_Token, ...]) -> dict:
 
 
 def _jquery_post_calls(
-    content: bytes, enable_inline_form_literal: bool = True
+    content: bytes,
+    enable_inline_form_literal: bool = True,
+    enable_regex_literals: bool = True,
 ) -> tuple:
-    tokens = _tokenize_javascript(content)
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     assignments = _assigned_parameters(tokens)
     results = []
     prefix = (b"$", b".", b"post", b"(")
@@ -685,8 +743,10 @@ def _jquery_post_calls(
     return tuple(results)
 
 
-def _jquery_get_json_calls(content: bytes) -> tuple:
-    tokens = _tokenize_javascript(content)
+def _jquery_get_json_calls(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     results = []
     prefix = (b"$", b".", b"getJSON", b"(")
     for index in range(0, max(0, len(tokens) - len(prefix))):
@@ -706,9 +766,11 @@ def _jquery_get_json_calls(content: bytes) -> tuple:
     return tuple(results)
 
 
-def _get_set_data_calls(content: bytes) -> tuple:
+def _get_set_data_calls(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
     """Recover Tenda's bounded ``$.GetSetData.setData`` request wrapper."""
-    tokens = _tokenize_javascript(content)
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     results = []
     prefix = (b"$", b".", b"GetSetData", b".", b"setData", b"(")
     for index in range(0, max(0, len(tokens) - len(prefix) + 1)):
@@ -830,7 +892,9 @@ def _bounded_luci_rpc_value(
     return template, value.start, value.end, True
 
 
-def _luci_rpc_declarations(content: bytes) -> tuple:
+def _luci_rpc_declarations(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
     """Recover statically named LuCI ``rpc.declare`` ubus operations.
 
     LuCI resolves the physical HTTP path at runtime, so the published identity is
@@ -838,7 +902,7 @@ def _luci_rpc_declarations(content: bytes) -> tuple:
     guessed URL. Dynamic object or method expressions remain an explicit gap.
     """
 
-    tokens = _tokenize_javascript(content)
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     results = []
     unsupported = 0
     template_count = 0
@@ -945,8 +1009,10 @@ def _luci_rpc_declarations(content: bytes) -> tuple:
     return tuple(results), unsupported, template_count
 
 
-def _jquery_ajax_calls(content: bytes) -> tuple:
-    tokens = _tokenize_javascript(content)
+def _jquery_ajax_calls(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     results = []
     prefix = (b"$", b".", b"ajax", b"(", b"{")
     for index in range(0, max(0, len(tokens) - len(prefix) + 1)):
@@ -1107,7 +1173,9 @@ def _function_owner(tokens: Tuple[_Token, ...], function_index: int) -> Optional
 
 
 def _shared_cgi_topicurl_calls(
-    content: bytes, external_bindings: Optional[dict] = None
+    content: bytes,
+    external_bindings: Optional[dict] = None,
+    enable_regex_literals: bool = True,
 ) -> tuple:
     """Resolve a shared CGI wrapper plus prototype-level operation selectors.
 
@@ -1117,7 +1185,7 @@ def _shared_cgi_topicurl_calls(
     complete wrapper contract is present in the same constructor function.
     """
 
-    tokens = _tokenize_javascript(content)
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     endpoint_properties = {}
     for index in range(0, max(0, len(tokens) - 3)):
         if (
@@ -1310,9 +1378,11 @@ def _enclosing_function_body_start(
 
 
 def _custom_request_calls(
-    content: bytes, external_bindings: Optional[dict] = None
+    content: bytes,
+    external_bindings: Optional[dict] = None,
+    enable_regex_literals: bool = True,
 ) -> tuple:
-    tokens = _tokenize_javascript(content)
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     results = []
     selector_names = {
         b"action", b"cmd", b"command", b"method", b"operation", b"topicurl"
@@ -1430,10 +1500,12 @@ def _upload_url_parameters(value: _Token) -> tuple:
     return tuple(parameters)
 
 
-def _file_upload_property_calls(content: bytes) -> tuple:
+def _file_upload_property_calls(
+    content: bytes, enable_regex_literals: bool = True,
+) -> tuple:
     """Recover upload URLs stored in a page property and consumed by a helper."""
 
-    tokens = _tokenize_javascript(content)
+    tokens = _tokenize_javascript(content, enable_regex_literals)
     definitions = {}
     for index in range(max(0, len(tokens) - 2)):
         if not (
@@ -1498,7 +1570,9 @@ def _request_literals(
     policy: FrontendPolicy = FrontendPolicy(),
 ) -> tuple:
     discoveries = []
-    luci_rpc, _, _ = _luci_rpc_declarations(content)
+    luci_rpc, _, _ = _luci_rpc_declarations(
+        content, policy.enable_regex_literals
+    )
     for (
         endpoint,
         start_byte,
@@ -1527,7 +1601,9 @@ def _request_literals(
             parameters,
         ))
     page_model_discoveries = []
-    for key, endpoint, start_byte, end_byte in _page_model_url_properties(content):
+    for key, endpoint, start_byte, end_byte in _page_model_url_properties(
+        content, policy.enable_regex_literals
+    ):
         role = (
             FrontendRequestRole.READ
             if key == "getUrl"
@@ -1551,7 +1627,8 @@ def _request_literals(
             )
         )
     module_parameters = (
-        _module_model_parameters(content) + _page_model_object_parameters(content)
+        _module_model_parameters(content, policy.enable_regex_literals)
+        + _page_model_object_parameters(content, policy.enable_regex_literals)
     )
     write_indexes = [
         index
@@ -1568,7 +1645,9 @@ def _request_literals(
         )
     discoveries.extend(page_model_discoveries)
     for endpoint, start_byte, end_byte, parameters in _jquery_post_calls(
-        content, policy.enable_inline_form_literal
+        content,
+        policy.enable_inline_form_literal,
+        policy.enable_regex_literals,
     ):
         discoveries.append(
             (
@@ -1583,7 +1662,9 @@ def _request_literals(
                 parameters,
             )
         )
-    for endpoint, start_byte, end_byte, shape in _jquery_get_json_calls(content):
+    for endpoint, start_byte, end_byte, shape in _jquery_get_json_calls(
+        content, policy.enable_regex_literals
+    ):
         discoveries.append(
             (
                 endpoint,
@@ -1598,7 +1679,9 @@ def _request_literals(
             )
         )
     if policy.enable_tenda_get_set_data:
-        for endpoint, start_byte, end_byte, shape, parameters in _get_set_data_calls(content):
+        for endpoint, start_byte, end_byte, shape, parameters in _get_set_data_calls(
+            content, policy.enable_regex_literals
+        ):
             discoveries.append(
                 (
                     endpoint,
@@ -1620,7 +1703,7 @@ def _request_literals(
         method,
         representation,
         parameters,
-    ) in _jquery_ajax_calls(content):
+    ) in _jquery_ajax_calls(content, policy.enable_regex_literals):
         discoveries.append(
             (
                 endpoint,
@@ -1643,7 +1726,9 @@ def _request_literals(
         representation,
         parameters,
         endpoint_identity,
-    ) in _custom_request_calls(content, external_bindings):
+    ) in _custom_request_calls(
+        content, external_bindings, policy.enable_regex_literals
+    ):
         discoveries.append((
             endpoint, start_byte, end_byte,
             FrontendEndpointShape.EXACT_LITERAL, role, method, representation,
@@ -1661,7 +1746,7 @@ def _request_literals(
         method,
         representation,
         parameters,
-    ) in _file_upload_property_calls(content):
+    ) in _file_upload_property_calls(content, policy.enable_regex_literals):
         discoveries.append((
             endpoint, start_byte, end_byte,
             FrontendEndpointShape.EXACT_LITERAL, role, method, representation,
@@ -1677,7 +1762,9 @@ def _request_literals(
         parameters,
         source_construct,
         _endpoint_identity,
-    ) in _shared_cgi_topicurl_calls(content, external_bindings):
+    ) in _shared_cgi_topicurl_calls(
+        content, external_bindings, policy.enable_regex_literals
+    ):
         discoveries.append(
             (
                 endpoint,
@@ -1781,7 +1868,9 @@ def _discover_frontend_requests(
     parameter_candidates = {}
     evidence_atoms = {}
     diagnostics = []
-    _, unsupported_luci_rpc, template_luci_rpc = _luci_rpc_declarations(content)
+    _, unsupported_luci_rpc, template_luci_rpc = _luci_rpc_declarations(
+        content, policy.enable_regex_literals
+    )
     if unsupported_luci_rpc:
         diagnostics.append(FrontendDiagnostic(
             code="frontend.luci_rpc_dynamic_operation",
@@ -2037,14 +2126,16 @@ def _asset_symbol_definitions(asset: FrontendAssetInput) -> tuple:
     return tuple(definitions)
 
 
-def _request_default_definitions(asset: FrontendAssetInput) -> tuple:
+def _request_default_definitions(
+    asset: FrontendAssetInput, enable_regex_literals: bool = True,
+) -> tuple:
     """Resolve constructor-backed ``receiver.request`` default URL literals."""
 
     try:
         asset.content.decode("utf-8")
     except UnicodeDecodeError:
         return ()
-    tokens = _tokenize_javascript(asset.content)
+    tokens = _tokenize_javascript(asset.content, enable_regex_literals)
     constructor_defaults = {}
     for index in range(max(0, len(tokens) - 8)):
         if not (
@@ -2112,14 +2203,16 @@ def _request_default_definitions(asset: FrontendAssetInput) -> tuple:
     return tuple(definitions)
 
 
-def _page_model_framework_methods(asset: FrontendAssetInput) -> tuple:
+def _page_model_framework_methods(
+    asset: FrontendAssetInput, enable_regex_literals: bool = True,
+) -> tuple:
     """Prove the transport method used by a RouterPage page-model framework."""
 
     try:
         asset.content.decode("utf-8")
     except UnicodeDecodeError:
         return ()
-    tokens = _tokenize_javascript(asset.content)
+    tokens = _tokenize_javascript(asset.content, enable_regex_literals)
     definitions = []
     page_prefix = (b"this", b".", b"page", b"=", b"function", b"(")
     post_prefix = (
@@ -2281,10 +2374,14 @@ def discover_frontend_asset_graph(
             continue
         for identity, symbol, token in (
             *_asset_symbol_definitions(asset),
-            *_request_default_definitions(asset),
+            *_request_default_definitions(
+                asset, policy.enable_regex_literals
+            ),
         ):
             definitions.setdefault(identity, []).append((asset, symbol, token))
-        for method, token in _page_model_framework_methods(asset):
+        for method, token in _page_model_framework_methods(
+            asset, policy.enable_regex_literals
+        ):
             framework_methods.append((asset, method, token))
 
     resolved = {}
@@ -2355,7 +2452,9 @@ def discover_frontend_asset_graph(
             for (
                 endpoint, _start, _end, role, method, representation,
                 parameters, source_construct, identity,
-            ) in _shared_cgi_topicurl_calls(asset.content, external)
+            ) in _shared_cgi_topicurl_calls(
+                asset.content, external, policy.enable_regex_literals
+            )
             if source_construct == "shared-cgi.topicurl.cross-resource"
         }
         candidate_identities.update({
@@ -2372,7 +2471,9 @@ def discover_frontend_asset_graph(
             for (
                 endpoint, _start, _end, role, method, representation,
                 parameters, identity,
-            ) in _custom_request_calls(asset.content, external)
+            ) in _custom_request_calls(
+                asset.content, external, policy.enable_regex_literals
+            )
             if identity is not None
         })
         candidates = list(enriched.candidates)
