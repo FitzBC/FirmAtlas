@@ -1178,7 +1178,7 @@
       ]
     },
     {
-      "case_id": "research-case:14ca9032145dead889153148f117fe5ceded7db977222ee73ba2d8f5c46b06c9",
+      "case_id": "research-case:7d30aa984d5c07cc8f0621df8b664500a373c044dd95f3ad933134b95e00d6fc",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1195,7 +1195,9 @@
         "tail_merged_route_registration",
         "frontend_tokenizer_coverage_repair",
         "disabled_frontend_feature_gate",
-        "residual_ui_request"
+        "residual_ui_request",
+        "bounded_feature_literal_pivot",
+        "family_variant_positive_control"
       ],
       "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers, and is the declared UI path enabled in this product build?",
       "evidence": [
@@ -1810,6 +1812,33 @@
           "locator": "json:$.dlna_relationships",
           "capability": "resolves_target_component_presence",
           "producer": "native-relationship-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "coverage:ac9-dlna-feature-pivots",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json",
+          "source_artifact_sha256": "59d3eb937d8754e0cb2c39177d0023470f99a51e00a9c6efe1f06e7851a57fca",
+          "locator": "json:$.ac9_primary.dlna_feature_pivots",
+          "capability": "bounds_disabled_feature_native_pivots",
+          "producer": "native-arm-feature-pivot@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac18-dlna-route-positive-control",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json",
+          "source_artifact_sha256": "59d3eb937d8754e0cb2c39177d0023470f99a51e00a9c6efe1f06e7851a57fca",
+          "locator": "json:$.ac18_positive_control.dlna_route_bindings",
+          "capability": "proves_neighbor_variant_route_bindings",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-ac18-dlna-family-equivalence",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json",
+          "source_artifact_sha256": "59d3eb937d8754e0cb2c39177d0023470f99a51e00a9c6efe1f06e7851a57fca",
+          "locator": "json:$.family_comparison",
+          "capability": "compares_family_variant_assets_and_feature_state",
+          "producer": "family-variant-report@v1alpha1"
         }
       ],
       "claims": [
@@ -1935,6 +1964,16 @@
           "status": "supported"
         },
         {
+          "claim_id": "claim:dlna-family-variant-positive-control",
+          "statement": "The AC9 build has only three bounded DLNA literal pivots, all inside the verified GetUSBStatus handler, while an independently analyzed official AC18 enabled build registers GetDlnaCfg, SetDlnaCfg, and expandDlnaFile; byte-equivalent fixtures and a normalized-equivalent page asset support a shared family-template and build-pruning candidate without transferring ownership to AC9.",
+          "evidence_refs": [
+            "coverage:ac9-dlna-feature-pivots",
+            "coverage:ac18-dlna-route-positive-control",
+            "coverage:ac9-ac18-dlna-family-equivalence"
+          ],
+          "status": "supported"
+        },
+        {
           "claim_id": "claim:dlna-handler-owner",
           "statement": "No exact Native registration or handler binding currently connects GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform execution path; the adjacent GetUSBStatus binding does not establish an alias for those operations.",
           "evidence_refs": [
@@ -2005,7 +2044,10 @@
             "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
             "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
             "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
-            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554"
+            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554",
+            "coverage:ac9-dlna-feature-pivots",
+            "coverage:ac18-dlna-route-positive-control",
+            "coverage:ac9-ac18-dlna-family-equivalence"
           ],
           "status": "unresolved"
         }
@@ -2098,6 +2140,18 @@
           "creates_obligations": [],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-family-variant-positive-control",
+          "order": 8,
+          "interpretation": "Pivot from the exact disabled feature token into registered AC9 handlers, then compare an official independently mapped AC18 enabled build while preserving artifact-local ownership.",
+          "claim_ids": [
+            "claim:dlna-family-variant-positive-control",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -2136,7 +2190,8 @@
         "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
         "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
         "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding.",
-        "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set."
+        "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set.",
+        "Transferring AC18 handler addresses or vulnerability state to AC9 would confuse a family-level positive control with artifact-local proof."
       ],
       "paper_uses": [
         "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -2145,7 +2200,8 @@
         "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
         "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
         "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner.",
-        "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation."
+        "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation.",
+        "Family holdout showing that enabled variants can prioritize symbols and structures without resolving a disabled target build by analogy."
       ],
       "limitations": [
         "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
@@ -2154,7 +2210,8 @@
         "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
         "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
         "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations.",
-        "A disabled declared UI path does not prove backend absence, runtime inaccessibility, or behavior in another product/version build."
+        "A disabled declared UI path does not prove backend absence, runtime inaccessibility, or behavior in another product/version build.",
+        "The AC18 positive control proves only AC18 bindings; the AC9 benchmark remains a repacked rootfs and may omit partitions or conditional components."
       ]
     }
   ],

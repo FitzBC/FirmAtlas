@@ -93,7 +93,11 @@ from .native_relationship import (
     discover_native_relationships,
 )
 from .native_arm_xref import (
+    ARM_FEATURE_PIVOT_SCHEMA_VERSION,
     ARM_LITERAL_XREF_SCHEMA_VERSION,
+    ArmFeaturePivot,
+    ArmFeaturePivotAnchor,
+    ArmFeaturePivotResult,
     ArmFunctionTarget,
     ArmLiteralAnchor,
     ArmLiteralXref,
@@ -101,6 +105,7 @@ from .native_arm_xref import (
     ArmLiteralXrefProfile,
     ArmLiteralXrefResult,
     discover_arm_literal_xrefs,
+    discover_arm_feature_pivots,
     discover_arm_function_literal_xrefs,
 )
 from .native_command_binding import (
@@ -250,6 +255,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V11,
     BUILTIN_ANALYZER_REGISTRY_V10,
     BUILTIN_ANALYZER_REGISTRY_V9,
     BUILTIN_ANALYZER_REGISTRY_V8,
@@ -391,6 +397,10 @@ __all__ = (
     "NativeCommandTableProfile",
     "discover_native_command_table_bindings",
     "ARM_LITERAL_XREF_SCHEMA_VERSION",
+    "ARM_FEATURE_PIVOT_SCHEMA_VERSION",
+    "ArmFeaturePivot",
+    "ArmFeaturePivotAnchor",
+    "ArmFeaturePivotResult",
     "ArmFunctionTarget",
     "ArmLiteralAnchor",
     "ArmLiteralXref",
@@ -398,6 +408,7 @@ __all__ = (
     "ArmLiteralXrefProfile",
     "ArmLiteralXrefResult",
     "discover_arm_literal_xrefs",
+    "discover_arm_feature_pivots",
     "discover_arm_function_literal_xrefs",
     "NATIVE_RELATIONSHIP_SCHEMA_VERSION",
     "NativeRelationship",
@@ -596,6 +607,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V11",
     "BUILTIN_ANALYZER_REGISTRY_V10",
     "BUILTIN_ANALYZER_REGISTRY_V9",
     "BUILTIN_ANALYZER_REGISTRY_V8",

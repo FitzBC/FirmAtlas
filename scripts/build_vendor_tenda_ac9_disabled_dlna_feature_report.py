@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V11,
     DiscoveryCandidateKind,
     HistoricalVulnerabilityRecord,
     MappingAnalysisProfile,
@@ -41,11 +42,14 @@ _DLNA_ENDPOINTS = (
 
 
 def build() -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(
-        ROOT,
-        ARTIFACT_SHA256,
-        profile=MappingAnalysisProfile.auto(),
-    ))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            ROOT,
+            ARTIFACT_SHA256,
+            profile=MappingAnalysisProfile.auto_v11(),
+        ),
+        registry=BUILTIN_ANALYZER_REGISTRY_V11,
+    )
     gates = [
         item for item in run.catalog.candidates
         if item.candidate_kind is DiscoveryCandidateKind.FRONTEND_FEATURE_GATE

@@ -1,0 +1,1093 @@
+{
+  "ac18_positive_control": {
+    "analysis_run_id": "mapping-analysis-run:5f281992c30aa105c5266406fc02651ff81e043b51f234b365b1c3b8c7c4f9f2",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v12",
+    "catalog_id": "discovery-catalog:4740459ff2eda3da5da632db3d9ded16ea74f89a76c622bc4c573558fa660255",
+    "coverage_status": "partial",
+    "dlna_feature_gate": {
+      "configured_value": "y",
+      "enabled_value": "y",
+      "evidence_ids": [
+        "evidence:cd22c69fd52dd529cb5d8d2441ca80ac426a54a6a743a02363c0a725da54d693",
+        "evidence:9b8951f2c97008f99b71f62871249d80259b1f196f9c525f0f5538171cbf9a27",
+        "evidence:c803cdfe0dc9ddc9396505c97e6ce27635bc6eec4794fb2c340003ad569fd64a",
+        "evidence:4e43c2ac1c30afe6a7c5791426fd1cefa3ca8f2742dabe3354c9b67b5ebfd57d",
+        "evidence:5775024987175cf45698594b732c049cd77e03425f2bb2f53a3b93cb530ce3fa",
+        "evidence:6af142ea36025e37112002306fe1e78ba48a66e7980e5a2f3de29c248ebc8760",
+        "evidence:33c5250c4e152506cfb2ccf7ca0390a1ca55c05479c8e714b2e68cbc4f577ffb",
+        "evidence:ce332683074a4f9710e3e828cac7fa9e5507d1000364ddb2d7a2067a2ef040c7",
+        "evidence:83f6e3a926b3fb9996a3d158615859db04902e67c37265023e325aaa2c0683b0",
+        "evidence:ae8934d2b1a99470343f69f27f9810f01e8c4668e55b5dcdb184294468ff4cb6"
+      ],
+      "feature_symbol": "CONFIG_DLNA_SERVER",
+      "gate_status": "enabled",
+      "page_path": "webroot_ro/dlna.html",
+      "request_candidate_refs": "[\"frontend-request:8d9b45c0bb253450c24418a88c3718e0df76d2c7ab2f18468fdc243d384b066d\",\"frontend-request:546eaeb30b2e120541048bc5c13cf88515c305aae409cbd30c3f4e685fd58eec\",\"frontend-request:02207369388afc530ed82262af01a3165a3cc16f14869278b9f81be8d06ba2c4\",\"frontend-request:6178796e94a5ff48056254880c73509e1ca1d51012aaea04e794c4c1b6716903\"]",
+      "request_endpoints": "[\"/goform/refreshDLNA\",\"goform/GetDlnaCfg\",\"goform/SetDlnaCfg\",\"goform/expandDlnaFile?\"]",
+      "script_paths": "[\"webroot_ro/js/dlna.js\"]",
+      "ui_target_id": "usb_dlna"
+    },
+    "dlna_feature_pivots": [
+      {
+        "candidate_id": "arm-feature-pivot:9f7ba2c6e09c67b44d6194dcf6187158a5958e290e53c1ea50a2c810e3924d5e",
+        "evidence_ids": [
+          "evidence:5fdb983bea96fb896c448f38fb1b657439befcc49ea979b3fe08b001bbc99ade",
+          "evidence:52b7116b92dda54ff356ed85247371670943ea50bcb9af01be1628746f886056",
+          "evidence:5a9148530c7b42b8b2083a7d74049cebdfbd37bcae48806909343f3392acdec6",
+          "evidence:c60c44ecddd1bbacc652261cb966fd972a382d63fcf217368ed9c84f9e0f06d7",
+          "evidence:c63d66a59de420a44acb4e67d22e2f2ae1632faa204dd38c1dd515d5f859f7fc",
+          "evidence:19ce6e100180ac3f75aa81010e9ae908d342cff41af15539a02ca9832a7e1e2d",
+          "evidence:69fb22aa9c81c4695a54b94af6b5f7b0a9076dccae901e1e7155b9f9288f9124",
+          "evidence:b92b351e662f0daf8793bfe7407ed7a460521946f84d9bb880e2140b9f95c0c1",
+          "evidence:68bb8f6e69b8a8d4496cc47e6fd99f65eb58726ed13f7337b5c8325e4dc1f8f8",
+          "evidence:1372542ac8a34d7daec42ac1e6aa27e7f9459f42f105eb8939ac852da9671475",
+          "evidence:3ea859169c2fe49aa40dad7afc9a98fa89895c7fbd2afa08bd304c5532390010"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b0e70",
+        "handler_identity": "bin/httpd@0x000b0e70",
+        "handler_symbol": "getDLNAserverCfg",
+        "instruction_address": "0x000b1138",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "/tmp/dlna_scanner_state",
+        "route_binding_ref": "native-route-binding:63cad58df8f5fdb9ab3be518fcfc637c0ced1bcb51cc29deaed8cf5329d0abc5",
+        "route_token": "GetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:df5a6455020957c8d051e0d43fbca94f74bcd71eb16ca9470fc425cba6b57d26",
+        "evidence_ids": [
+          "evidence:f4cbe4010a2a914a6cd6be253248818c687549cca4afb6eba8d62dba97d05270",
+          "evidence:081fcf786f1fa639f336fc05479d22a7396d80015184145a5026fac76553d15e",
+          "evidence:9a9c9c00686d2ac21c0f6677c1ee1edc22eb09d1b9469f8f5d134d0b614936f4",
+          "evidence:3ffdb18caced6da485d3eafd8b3ce6f1753c3c89064c76779694f217825ba1f3",
+          "evidence:c63d66a59de420a44acb4e67d22e2f2ae1632faa204dd38c1dd515d5f859f7fc",
+          "evidence:19ce6e100180ac3f75aa81010e9ae908d342cff41af15539a02ca9832a7e1e2d",
+          "evidence:69fb22aa9c81c4695a54b94af6b5f7b0a9076dccae901e1e7155b9f9288f9124",
+          "evidence:b92b351e662f0daf8793bfe7407ed7a460521946f84d9bb880e2140b9f95c0c1",
+          "evidence:68bb8f6e69b8a8d4496cc47e6fd99f65eb58726ed13f7337b5c8325e4dc1f8f8",
+          "evidence:605be62467117249160646265a106396dabe31c21d342ca2b1515035a8551a89",
+          "evidence:3f3dd0eae61fd974bf588351b8e2e182404dbac83287f81c90ad5b49bbe1b2e5"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b0e70",
+        "handler_identity": "bin/httpd@0x000b0e70",
+        "handler_symbol": "getDLNAserverCfg",
+        "instruction_address": "0x000b108c",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.db",
+        "route_binding_ref": "native-route-binding:63cad58df8f5fdb9ab3be518fcfc637c0ced1bcb51cc29deaed8cf5329d0abc5",
+        "route_token": "GetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:867a7eac3a85470e952d27230a26d59106a84cb2bb3026ce3e8023b24319010f",
+        "evidence_ids": [
+          "evidence:c473beb5a0bf0c67d6706c9e8f0f884715b94f9e90e7366b756cc6017450eaf7",
+          "evidence:fdc80101e06a6259582e8d0e381cc8d72e1e0dc888441c2d3f0d0b42fdc71795",
+          "evidence:c3b1561e27f6937bf107e2a938bf21d5f2727fc2d7004902a429ad5fa8cb52f3",
+          "evidence:20aa18a5b0c0acaf41fc34eb5629dacc3864ac255fb17f35521274ee24c0a397",
+          "evidence:c63d66a59de420a44acb4e67d22e2f2ae1632faa204dd38c1dd515d5f859f7fc",
+          "evidence:19ce6e100180ac3f75aa81010e9ae908d342cff41af15539a02ca9832a7e1e2d",
+          "evidence:69fb22aa9c81c4695a54b94af6b5f7b0a9076dccae901e1e7155b9f9288f9124",
+          "evidence:b92b351e662f0daf8793bfe7407ed7a460521946f84d9bb880e2140b9f95c0c1",
+          "evidence:68bb8f6e69b8a8d4496cc47e6fd99f65eb58726ed13f7337b5c8325e4dc1f8f8",
+          "evidence:96bdfb1d8b525fe724078df4bffd9508494be734b69d5bcfd0ff30bd0791ba3a",
+          "evidence:bdd1903f24824f13a283290580f74a75d59adb64ff3f293d9800b97c39fc2fd7"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b0e70",
+        "handler_identity": "bin/httpd@0x000b0e70",
+        "handler_symbol": "getDLNAserverCfg",
+        "instruction_address": "0x000b10a4",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.en",
+        "route_binding_ref": "native-route-binding:63cad58df8f5fdb9ab3be518fcfc637c0ced1bcb51cc29deaed8cf5329d0abc5",
+        "route_token": "GetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:5a0d96c67c043c367d72c245ad7ee9c21a3e7f8ad7dac8404636dded7b99b13d",
+        "evidence_ids": [
+          "evidence:4f6af26942a9569d84011a4ff09f24aeb537ccb9c98fb9c0c9abbd06aa139c86",
+          "evidence:405e9868ff8d6e4ee70d2aa1ea5bef418c793ec946ae6eb5d1c07bc4034d8001",
+          "evidence:dee1d1e8f06fae58158843eeb9c88f2704f0bad369265e737f3a09a4fdd8e5de",
+          "evidence:61c1209acad5c4aae0ef198c32ddca36e182af9a1fb3c810e4f7f2c656666265",
+          "evidence:c63d66a59de420a44acb4e67d22e2f2ae1632faa204dd38c1dd515d5f859f7fc",
+          "evidence:19ce6e100180ac3f75aa81010e9ae908d342cff41af15539a02ca9832a7e1e2d",
+          "evidence:69fb22aa9c81c4695a54b94af6b5f7b0a9076dccae901e1e7155b9f9288f9124",
+          "evidence:b92b351e662f0daf8793bfe7407ed7a460521946f84d9bb880e2140b9f95c0c1",
+          "evidence:68bb8f6e69b8a8d4496cc47e6fd99f65eb58726ed13f7337b5c8325e4dc1f8f8",
+          "evidence:d6b409feacb5bcb62e931e915ea83440352bcc85bc96a983085ae1cc97167a28",
+          "evidence:0d416bd0315e36c4f6eed0c38b190f30626597b7d4c617a051890901b286c28a"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b0e70",
+        "handler_identity": "bin/httpd@0x000b0e70",
+        "handler_symbol": "getDLNAserverCfg",
+        "instruction_address": "0x000b10bc",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.server.name",
+        "route_binding_ref": "native-route-binding:63cad58df8f5fdb9ab3be518fcfc637c0ced1bcb51cc29deaed8cf5329d0abc5",
+        "route_token": "GetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:dc7d1bbb4629766cf20018bce20084e85b463843bf07666e7dc2aa3c5491d21d",
+        "evidence_ids": [
+          "evidence:0652f91b08083914037dd8b413577d65a65b44a4cf976343c9182983bfbea1cb",
+          "evidence:8b7a99368b62c6271c722d6597113ac1cda6b69a3c3f8e8308bbc228bdda3599",
+          "evidence:c48232a6fe2f3300544b811092ae6fe978755b5776dd6c90ad9915f8ec0664f4",
+          "evidence:f998bd06fd1902ba5fed7fd54d7beccb6365058944224c62a52d9af27b175129",
+          "evidence:c63d66a59de420a44acb4e67d22e2f2ae1632faa204dd38c1dd515d5f859f7fc",
+          "evidence:19ce6e100180ac3f75aa81010e9ae908d342cff41af15539a02ca9832a7e1e2d",
+          "evidence:69fb22aa9c81c4695a54b94af6b5f7b0a9076dccae901e1e7155b9f9288f9124",
+          "evidence:b92b351e662f0daf8793bfe7407ed7a460521946f84d9bb880e2140b9f95c0c1",
+          "evidence:68bb8f6e69b8a8d4496cc47e6fd99f65eb58726ed13f7337b5c8325e4dc1f8f8",
+          "evidence:9218dfca965c90c75d6b312c1d92710c2d690955fa362e098dcc6e3ac9391fb7",
+          "evidence:b711fdbd0fe8d5be54fed1d4a78c29462fcd5351b0a3631556f5b4f43b03f735"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b0e70",
+        "handler_identity": "bin/httpd@0x000b0e70",
+        "handler_symbol": "getDLNAserverCfg",
+        "instruction_address": "0x000b10e4",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlnaEn",
+        "route_binding_ref": "native-route-binding:63cad58df8f5fdb9ab3be518fcfc637c0ced1bcb51cc29deaed8cf5329d0abc5",
+        "route_token": "GetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:f2a068ebb30ffed114709e02456aa6f561380329ccdbd07b8075e8ba5c771c58",
+        "evidence_ids": [
+          "evidence:ad9241633580840c3fc6cef5dcd38dfbe7e7b1ec6428f37697976c77b7971f09",
+          "evidence:7ba50897bd566fb65364d811d1cf446fd989089b9cd2c2c7bc10f3df69d06ace",
+          "evidence:05e795a13f680a902fe6f3e4db06d806039676d6f2864a5428563c3fc15ad3ea",
+          "evidence:6f9cc5d091f5e31b1e5719088e17f5cb73bf64cea28f88a7246c071ff265dd21",
+          "evidence:c63d66a59de420a44acb4e67d22e2f2ae1632faa204dd38c1dd515d5f859f7fc",
+          "evidence:19ce6e100180ac3f75aa81010e9ae908d342cff41af15539a02ca9832a7e1e2d",
+          "evidence:69fb22aa9c81c4695a54b94af6b5f7b0a9076dccae901e1e7155b9f9288f9124",
+          "evidence:b92b351e662f0daf8793bfe7407ed7a460521946f84d9bb880e2140b9f95c0c1",
+          "evidence:68bb8f6e69b8a8d4496cc47e6fd99f65eb58726ed13f7337b5c8325e4dc1f8f8",
+          "evidence:83c2b82de021d0aef43782440c27d1cc8e8cc54f22abad88214dccf3e5ad685e",
+          "evidence:6c0615e94d36d941228e36bbb6e8c5ea550c18c583e2f3a770cdfa8f1c99b482"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b0e70",
+        "handler_identity": "bin/httpd@0x000b0e70",
+        "handler_symbol": "getDLNAserverCfg",
+        "instruction_address": "0x000b1314",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlnaScanStatus",
+        "route_binding_ref": "native-route-binding:63cad58df8f5fdb9ab3be518fcfc637c0ced1bcb51cc29deaed8cf5329d0abc5",
+        "route_token": "GetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:bfe7a8d3bda8790f1b0144fb6f5e8fb0349bf4779f8493495c916b4f1d06cf4f",
+        "evidence_ids": [
+          "evidence:8c381f6abee457f083ab8a209f74932acd88ee54da49fe925151cb25e783081f",
+          "evidence:3d6a3335d604943bf9ce7473a6c821bc984008c55a157c0a48a6c5c83d534d7b",
+          "evidence:41e80cbb938890dd460e2818ee1d1875aa53aa9aa66ccd23dc456c40d54cbc5d",
+          "evidence:2b7dcd8fca2b5179ca14e3d75df2f1600e65d700b2eae86b9f3a3c4a4e512afd",
+          "evidence:4f7cc47c08f50c21f692b038fb7b35d38d03749d8cdf389ce5973d7b31eb4b99",
+          "evidence:09abf3f8e9b59bbdc414a895049a83c7e3e38833326f4cd40bb914d8e7cc09eb",
+          "evidence:f1b6b32a13c333868c63927f8b513f10df089131db780725261a481f974ba951",
+          "evidence:2b1334df6c715981cea349c005016a1fa3b11f09aeee8513e427526e523030ea",
+          "evidence:9ed032ad62aee5fb914f2149d3415d25f22170c9e41996bdc1c5ec2ada902116",
+          "evidence:00d49f2c5d28ab177eb30c42abca5844afa0ab3f7a8ab69454a487ea591eadec",
+          "evidence:98b028b1c63d8906927484828f28829a48660a401b63a44e0712ce0f0e15adda",
+          "evidence:a85303a2091d8ed37f0ac1eec007fdfafa0786961d2f58744c7b9f1a8970db66"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000a63f8",
+        "handler_identity": "bin/httpd@0x000a63f8",
+        "handler_symbol": "formGetUSBStatus",
+        "instruction_address": "0x000a6684",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna",
+        "route_binding_ref": "native-route-binding:e01401a26faaab0656fdb54897b1624139556ce878e87a09fbcb8483b64fce13",
+        "route_token": "GetUSBStatus",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:e4cc84e1d287d8f4e14f32c7d8ba2941f0da4b9ad67ce1ca1124086b2f5a7828",
+        "evidence_ids": [
+          "evidence:8a6b9b0f2cb191dbd007a837f389863297971c1801deecb22b1ddea849df4f6c",
+          "evidence:f3f06ad4591c09e66dbf4caf1f5467b4d6e718add0878de97cbc1d2a09e88733",
+          "evidence:a563ee1b4e698723570313b84163d7679ad2fcbeea1c01bbf61537ba16d91386",
+          "evidence:866798683e28debd748e585d94cb712f3cb15f051b51d3e46c3f19b1f1c6394c",
+          "evidence:4f7cc47c08f50c21f692b038fb7b35d38d03749d8cdf389ce5973d7b31eb4b99",
+          "evidence:09abf3f8e9b59bbdc414a895049a83c7e3e38833326f4cd40bb914d8e7cc09eb",
+          "evidence:f1b6b32a13c333868c63927f8b513f10df089131db780725261a481f974ba951",
+          "evidence:2b1334df6c715981cea349c005016a1fa3b11f09aeee8513e427526e523030ea",
+          "evidence:9ed032ad62aee5fb914f2149d3415d25f22170c9e41996bdc1c5ec2ada902116",
+          "evidence:00d49f2c5d28ab177eb30c42abca5844afa0ab3f7a8ab69454a487ea591eadec",
+          "evidence:12ad0776ed7d7d2d33619813590c5c0b85954d210eaf2972f644d11fd91659e2",
+          "evidence:777e9c205370f635851bf3a3cdd6200c840ba249f60ad1618ac5ad4bfa36975d"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000a63f8",
+        "handler_identity": "bin/httpd@0x000a63f8",
+        "handler_symbol": "formGetUSBStatus",
+        "instruction_address": "0x000a6654",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna",
+        "route_binding_ref": "native-route-binding:e01401a26faaab0656fdb54897b1624139556ce878e87a09fbcb8483b64fce13",
+        "route_token": "GetUSBStatus",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:8f9d08e814e35b0851642f42a118abf9da4cd12d8d758983f98907043da95b44",
+        "evidence_ids": [
+          "evidence:5200b886a8d4bf1a1dad905a29824f548656b464eca9deaf51634c15b603d766",
+          "evidence:246a31aa8e3465df3bda2f9bb220b5dd496a4944ac9df25c0ce4b8ad3a010758",
+          "evidence:dbd7a970de3bad6bda5d3eb4884fb966280b9991169727d5f87e08291a2c1ec3",
+          "evidence:dd885637433bba612e9f399101a0a722452d90b3acb71175436218158ff0ac6a",
+          "evidence:4f7cc47c08f50c21f692b038fb7b35d38d03749d8cdf389ce5973d7b31eb4b99",
+          "evidence:09abf3f8e9b59bbdc414a895049a83c7e3e38833326f4cd40bb914d8e7cc09eb",
+          "evidence:f1b6b32a13c333868c63927f8b513f10df089131db780725261a481f974ba951",
+          "evidence:2b1334df6c715981cea349c005016a1fa3b11f09aeee8513e427526e523030ea",
+          "evidence:9ed032ad62aee5fb914f2149d3415d25f22170c9e41996bdc1c5ec2ada902116",
+          "evidence:00d49f2c5d28ab177eb30c42abca5844afa0ab3f7a8ab69454a487ea591eadec",
+          "evidence:503485aae3ee615700e4ea2a1d1c8c5e4f3586276aaf2ecc20a4571a6733a5a2",
+          "evidence:78f5024a18df3c9dc3b218d12b5b40479e3a4c174aca0d9824753cb74f6c64e4"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000a63f8",
+        "handler_identity": "bin/httpd@0x000a63f8",
+        "handler_symbol": "formGetUSBStatus",
+        "instruction_address": "0x000a648c",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.en",
+        "route_binding_ref": "native-route-binding:e01401a26faaab0656fdb54897b1624139556ce878e87a09fbcb8483b64fce13",
+        "route_token": "GetUSBStatus",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:3b7aef4ee48d40b1bf5137c9c366f0bdf5c493bd642aa5d7743fdcaa9cdc2b7c",
+        "evidence_ids": [
+          "evidence:d9ba2ec98ff633317a03bf60b288f37c608c2d46972a19140d836323bc4b7998",
+          "evidence:2780228f4f75d4d59362e8a263a50b171c87799d128f8345b6653d3871a2099e",
+          "evidence:e744e828f8509f70693b501566ab54a25bb0ef7435b016dc1a48b863e29e0d8b",
+          "evidence:aaaf77665ea13a33fd2a95446b2a8a25717646b4c0f6f34ad3b52295fe7f5861",
+          "evidence:4fe112e95e99570e83605188e264d57191101e9f34afbe1999701eaf6bd040a1",
+          "evidence:ea46883bc7309143997ea9279014dfb9feba37a0ace0c3c48ce878253029bf94",
+          "evidence:d48ad5bfc5f8a3784c295afcb0c90e770167747801fa6f2f412038bfab0c3e94",
+          "evidence:5244cefaa9a372c3038eaf123cef7d6a8a533dc87f43d1b9d29ac6bbcb34fc8f",
+          "evidence:4522f72ce0f9715923b9324400cdf1d0ef5952b70d3e940b47027e2bad043f0b",
+          "evidence:ea051e0711e6af08f4b10c12e62551546de9b942d9eaa59347f0a249e5c10a38",
+          "evidence:a3492e8225f29d61642c1d1b097212d6a47c15ecf32e525394d128246b1d2421"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1fdc",
+        "handler_identity": "bin/httpd@0x000b1fdc",
+        "handler_symbol": "formDLNAserver",
+        "instruction_address": "0x000b2200",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.db",
+        "route_binding_ref": "native-route-binding:0fe85197c5d0918eb7d9cc7d4e4be22b5d5c7dd70e4939d8850983507b9a8824",
+        "route_token": "SetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:2aa05f73991ee7a02deb9a714d54bf890d0f7d825a36425561e4225cac5eedce",
+        "evidence_ids": [
+          "evidence:6d76afb5e765e08d43fdeda1f96b7fbd67e3f2906e210083dbe5475fe8204443",
+          "evidence:db60ea39d40fd6db88971e0df876798ad82e1cdc2cd910cf878de034777d2eb6",
+          "evidence:256585063773f4914057699c0fc62dc1201361ba60fb06b4ea1159d8240dfd4b",
+          "evidence:7ff97e4c9c5a371eb77e0477a8cd4a3493d682a62e69c606c4d0220ee1238d2a",
+          "evidence:4fe112e95e99570e83605188e264d57191101e9f34afbe1999701eaf6bd040a1",
+          "evidence:ea46883bc7309143997ea9279014dfb9feba37a0ace0c3c48ce878253029bf94",
+          "evidence:d48ad5bfc5f8a3784c295afcb0c90e770167747801fa6f2f412038bfab0c3e94",
+          "evidence:5244cefaa9a372c3038eaf123cef7d6a8a533dc87f43d1b9d29ac6bbcb34fc8f",
+          "evidence:4522f72ce0f9715923b9324400cdf1d0ef5952b70d3e940b47027e2bad043f0b",
+          "evidence:0d3660f2f1a986417b1bd6ed8b2d9c60d84ccbd1440e3e0aa0898a7239a12d79",
+          "evidence:467a026dd9e0318022cdb279c7c0c7a166de98b3329872cbdbe18db56d232d8a"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1fdc",
+        "handler_identity": "bin/httpd@0x000b1fdc",
+        "handler_symbol": "formDLNAserver",
+        "instruction_address": "0x000b23ac",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.en",
+        "route_binding_ref": "native-route-binding:0fe85197c5d0918eb7d9cc7d4e4be22b5d5c7dd70e4939d8850983507b9a8824",
+        "route_token": "SetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:f8e2c90923dd5e4f2db15734c03dd7d1a6da711392a85d0a8655b867d761dc6e",
+        "evidence_ids": [
+          "evidence:7a258ef6ba1bc6762d229ce53eb3762d5997bf204c6a792e968bae975b8857db",
+          "evidence:396eea1317818b779b1ecaecc7eb3690fa39909b5c0cae2ca68fd1a28ce1936e",
+          "evidence:46bfa678d4d01d13fb981ae47d3b8391c30c600e0f7e27d36e4cca80a2303f04",
+          "evidence:6c63957516672ece961cb6f57a80932c37d806b4388e0b8e244c1f013fb50705",
+          "evidence:4fe112e95e99570e83605188e264d57191101e9f34afbe1999701eaf6bd040a1",
+          "evidence:ea46883bc7309143997ea9279014dfb9feba37a0ace0c3c48ce878253029bf94",
+          "evidence:d48ad5bfc5f8a3784c295afcb0c90e770167747801fa6f2f412038bfab0c3e94",
+          "evidence:5244cefaa9a372c3038eaf123cef7d6a8a533dc87f43d1b9d29ac6bbcb34fc8f",
+          "evidence:4522f72ce0f9715923b9324400cdf1d0ef5952b70d3e940b47027e2bad043f0b",
+          "evidence:9d7564b5ed61d3792c40f55917212baf6c15b31d1c157ea6f3a9fe352c2057a1",
+          "evidence:0ed34efc45f1ed814cc3225c173fdfa67e6b2f5b68d572d2b73bef4d7bd31c69"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1fdc",
+        "handler_identity": "bin/httpd@0x000b1fdc",
+        "handler_symbol": "formDLNAserver",
+        "instruction_address": "0x000b23c0",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.en",
+        "route_binding_ref": "native-route-binding:0fe85197c5d0918eb7d9cc7d4e4be22b5d5c7dd70e4939d8850983507b9a8824",
+        "route_token": "SetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:62dd1b91cf58eb0d6d1e08eb0cf37b8854d16fe52251c9e4deb797ad41e7a595",
+        "evidence_ids": [
+          "evidence:4419305e9a846d18ff673f68f8766660cb98dbcee8baed6b2455e053fc87b766",
+          "evidence:28aba229f8ec3dc829d5c4c5d60f3fe822e8901caeabb1cf57fce83d402a7113",
+          "evidence:575f899c4fabafb532246e47ba4997af9cd625ed19667e0363e9c57bcd348a81",
+          "evidence:c2e8442d7211eaede9d8c4f343d55b0c15d0cb8632d23b66844fed73dc948ab9",
+          "evidence:4fe112e95e99570e83605188e264d57191101e9f34afbe1999701eaf6bd040a1",
+          "evidence:ea46883bc7309143997ea9279014dfb9feba37a0ace0c3c48ce878253029bf94",
+          "evidence:d48ad5bfc5f8a3784c295afcb0c90e770167747801fa6f2f412038bfab0c3e94",
+          "evidence:5244cefaa9a372c3038eaf123cef7d6a8a533dc87f43d1b9d29ac6bbcb34fc8f",
+          "evidence:4522f72ce0f9715923b9324400cdf1d0ef5952b70d3e940b47027e2bad043f0b",
+          "evidence:40d6fff5b7d5801d1692daa6a314edea44df86d33b43a33589a5b10ed92313e2",
+          "evidence:5410bf55a905a5dd01c6ce747a6e17d230b702ef883f67a5aafae02bf842beff"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1fdc",
+        "handler_identity": "bin/httpd@0x000b1fdc",
+        "handler_symbol": "formDLNAserver",
+        "instruction_address": "0x000b23d4",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.server.name",
+        "route_binding_ref": "native-route-binding:0fe85197c5d0918eb7d9cc7d4e4be22b5d5c7dd70e4939d8850983507b9a8824",
+        "route_token": "SetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:7f0167ab5421d67079411ed1e6ab74f7813c223890a681e0275893ef1c018367",
+        "evidence_ids": [
+          "evidence:c5123eb3c7d00751714d929205be8988270dc8779046f1f3652df8c19fdd102c",
+          "evidence:ef5c01130228853da53619db29383344301cd76904d2411c16f1f7de443ffbd9",
+          "evidence:dc0dba21ac3db4cde8766f07b56d83a74f60252155d6e2f6fe44c1b8ae3c848f",
+          "evidence:4b0cd69c73706ced9b314dd58c7893f694c3d5d054e48322e2eb97bd48bd3267",
+          "evidence:4fe112e95e99570e83605188e264d57191101e9f34afbe1999701eaf6bd040a1",
+          "evidence:ea46883bc7309143997ea9279014dfb9feba37a0ace0c3c48ce878253029bf94",
+          "evidence:d48ad5bfc5f8a3784c295afcb0c90e770167747801fa6f2f412038bfab0c3e94",
+          "evidence:5244cefaa9a372c3038eaf123cef7d6a8a533dc87f43d1b9d29ac6bbcb34fc8f",
+          "evidence:4522f72ce0f9715923b9324400cdf1d0ef5952b70d3e940b47027e2bad043f0b",
+          "evidence:3e6730e718b4073279b3d054a8f39ab611e1a08ec77335203a92cc81e7522564",
+          "evidence:4d3723f0affacb6dc1fe2b810fa94803f9bde802ebcba4952cd7ab227e9eb9f7"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1fdc",
+        "handler_identity": "bin/httpd@0x000b1fdc",
+        "handler_symbol": "formDLNAserver",
+        "instruction_address": "0x000b2174",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlnaEn",
+        "route_binding_ref": "native-route-binding:0fe85197c5d0918eb7d9cc7d4e4be22b5d5c7dd70e4939d8850983507b9a8824",
+        "route_token": "SetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:dd4b0c9fcc649b2490c99586d072ad9c19155877ad3e955034d68ba142367b56",
+        "evidence_ids": [
+          "evidence:3aa005d647e01bd6ec8d5caab4310390ef29e5384828f171bd3983b8ad074f92",
+          "evidence:f1d8d50652550a9524f8ad71cef339cbac5f70809f5961bcea1b51efc3a93992",
+          "evidence:9735587c7101d29232fb116f1d89c5b2158a64111ac56093439ec9fc3b39e7e9",
+          "evidence:d0d8ecf5d18e4cef6fb02ce9edd0aa9630f3183edefc7945a941bdd35999b8fb",
+          "evidence:4fe112e95e99570e83605188e264d57191101e9f34afbe1999701eaf6bd040a1",
+          "evidence:ea46883bc7309143997ea9279014dfb9feba37a0ace0c3c48ce878253029bf94",
+          "evidence:d48ad5bfc5f8a3784c295afcb0c90e770167747801fa6f2f412038bfab0c3e94",
+          "evidence:5244cefaa9a372c3038eaf123cef7d6a8a533dc87f43d1b9d29ac6bbcb34fc8f",
+          "evidence:4522f72ce0f9715923b9324400cdf1d0ef5952b70d3e940b47027e2bad043f0b",
+          "evidence:f5136dc88028b985d6d4ba9f04ee5dd5dd2326301373ad3c403e1c61eeb02534",
+          "evidence:6fafae937913973aba098583d3aba891ad997d89fe3079c84b8dc69a73e0b986"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1fdc",
+        "handler_identity": "bin/httpd@0x000b1fdc",
+        "handler_symbol": "formDLNAserver",
+        "instruction_address": "0x000b24b4",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "op=%d,string_info=minidlna",
+        "route_binding_ref": "native-route-binding:0fe85197c5d0918eb7d9cc7d4e4be22b5d5c7dd70e4939d8850983507b9a8824",
+        "route_token": "SetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:15395210b065eb0c8ee61cc4ee87c01d28504b73ad37b49ef169dd8e971a0fe7",
+        "evidence_ids": [
+          "evidence:859cca13c91ea24c7948f58c7e357f7f43a215dc09f163df69938705d76bea07",
+          "evidence:cdff0b4bc49f4c3a55e09af977cde306f5ef3726236443f1bfd208cf431c4d05",
+          "evidence:8b7b7690289b8da699b4c4f7c8cfe7c375f04b613efe4441121885c4cb46f61c",
+          "evidence:8014b446e58e13aced0be3e601e9fad54f8604d3459a39f9e26d3c58b094ebda",
+          "evidence:e29cd28e8999883ce4f179e75bfa12352d0f84fe68491a191cc99cefe75e2bcd",
+          "evidence:3938460c51b6671ac36990ca8964839a2aa76638f7092fbba7bd18d0313fdce4",
+          "evidence:920573a94de49a53dd30e8c8e36f99bfa289d0cb59d4ced6285cdefd5f745273",
+          "evidence:63a4a37807b29be9258f548a44cb8562478deb0a71a66c3fca399f0e8ccf7183",
+          "evidence:5ec39d7a7744fff092ad549c9dfa942fd221292105e5324e8d73126353c55f8d",
+          "evidence:1ec64c67c4597fc1fe6600cfff65defc13e73b29319f82d61f20025321f7af6a",
+          "evidence:042ce6dd5b5cf4712ad5b60f29548502e0864a58af40234ba753b18e5d88cc0f"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1984",
+        "handler_identity": "bin/httpd@0x000b1984",
+        "handler_symbol": "formExpandDlnaFile",
+        "instruction_address": "0x000b1c8c",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": ".dlnacache",
+        "route_binding_ref": "native-route-binding:91fa9a7f8464f186ba7037b8d44cf480fc19f6dc07c17aa52cbfef49d941e079",
+        "route_token": "expandDlnaFile",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:9a6484a709648ef2e1adb25b90f64e7c2e9329731623095cbfa308d90d73a44a",
+        "evidence_ids": [
+          "evidence:2ac13e3e10df49f9cc74001a2f2dc07ec72cb6ed1f03636f0535305579cb88c4",
+          "evidence:41229b347d8b6cc2493c0f28246b8273486d30b4058cef917b3971a9ad3062de",
+          "evidence:f325e1cc166d748b4e1e96e54bb1a9d5c3cffc72dabe697513d87cd3fe9fbc2f",
+          "evidence:3bd06df598367e8dddbbe4e227a9ddd5fb9cb085c9adcb62e1875f5d56a152ed",
+          "evidence:e29cd28e8999883ce4f179e75bfa12352d0f84fe68491a191cc99cefe75e2bcd",
+          "evidence:3938460c51b6671ac36990ca8964839a2aa76638f7092fbba7bd18d0313fdce4",
+          "evidence:920573a94de49a53dd30e8c8e36f99bfa289d0cb59d4ced6285cdefd5f745273",
+          "evidence:63a4a37807b29be9258f548a44cb8562478deb0a71a66c3fca399f0e8ccf7183",
+          "evidence:5ec39d7a7744fff092ad549c9dfa942fd221292105e5324e8d73126353c55f8d",
+          "evidence:a1ccde5382e2c15dd5f774b1ee32c6caabe528a93ace4ab194bea08b8cdf17e2",
+          "evidence:86f82d89c9ae80674e1caa274aa77c6c5469bed247b79153e53b3adc81f33398"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000b1984",
+        "handler_identity": "bin/httpd@0x000b1984",
+        "handler_symbol": "formExpandDlnaFile",
+        "instruction_address": "0x000b1b1c",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.db",
+        "route_binding_ref": "native-route-binding:91fa9a7f8464f186ba7037b8d44cf480fc19f6dc07c17aa52cbfef49d941e079",
+        "route_token": "expandDlnaFile",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:eb33d5d6c23afc06a8c9458deb596b81e81afe60665799a62a3b910a173eb409"
+      }
+    ],
+    "dlna_route_bindings": [
+      {
+        "candidate_id": "native-route-binding:63cad58df8f5fdb9ab3be518fcfc637c0ced1bcb51cc29deaed8cf5329d0abc5",
+        "evidence_ids": [
+          "evidence:c63d66a59de420a44acb4e67d22e2f2ae1632faa204dd38c1dd515d5f859f7fc",
+          "evidence:19ce6e100180ac3f75aa81010e9ae908d342cff41af15539a02ca9832a7e1e2d",
+          "evidence:69fb22aa9c81c4695a54b94af6b5f7b0a9076dccae901e1e7155b9f9288f9124",
+          "evidence:b92b351e662f0daf8793bfe7407ed7a460521946f84d9bb880e2140b9f95c0c1",
+          "evidence:68bb8f6e69b8a8d4496cc47e6fd99f65eb58726ed13f7337b5c8325e4dc1f8f8"
+        ],
+        "handler_address": "0xb0e70",
+        "handler_identity": "bin/httpd@0x000b0e70",
+        "handler_symbol": "getDLNAserverCfg",
+        "profile": "arm32-pic-r0-r1-bl/v4",
+        "registrar_address": "0x171ec",
+        "registrar_pair_count": "170",
+        "registration_address": "0x438dc",
+        "route_token": "GetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-native-association:b278662e227c072ea3811e49628520bd2c8cce3a8ba3deeea05032b531486771"
+      },
+      {
+        "candidate_id": "native-route-binding:0fe85197c5d0918eb7d9cc7d4e4be22b5d5c7dd70e4939d8850983507b9a8824",
+        "evidence_ids": [
+          "evidence:4fe112e95e99570e83605188e264d57191101e9f34afbe1999701eaf6bd040a1",
+          "evidence:ea46883bc7309143997ea9279014dfb9feba37a0ace0c3c48ce878253029bf94",
+          "evidence:d48ad5bfc5f8a3784c295afcb0c90e770167747801fa6f2f412038bfab0c3e94",
+          "evidence:5244cefaa9a372c3038eaf123cef7d6a8a533dc87f43d1b9d29ac6bbcb34fc8f",
+          "evidence:4522f72ce0f9715923b9324400cdf1d0ef5952b70d3e940b47027e2bad043f0b"
+        ],
+        "handler_address": "0xb1fdc",
+        "handler_identity": "bin/httpd@0x000b1fdc",
+        "handler_symbol": "formDLNAserver",
+        "profile": "arm32-pic-r0-r1-bl/v4",
+        "registrar_address": "0x171ec",
+        "registrar_pair_count": "170",
+        "registration_address": "0x438c0",
+        "route_token": "SetDlnaCfg",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-native-association:65d930dad62316f1f130ed14657b5fd83bc05a5e64fedbcb9eed59773bb13e05"
+      },
+      {
+        "candidate_id": "native-route-binding:91fa9a7f8464f186ba7037b8d44cf480fc19f6dc07c17aa52cbfef49d941e079",
+        "evidence_ids": [
+          "evidence:e29cd28e8999883ce4f179e75bfa12352d0f84fe68491a191cc99cefe75e2bcd",
+          "evidence:3938460c51b6671ac36990ca8964839a2aa76638f7092fbba7bd18d0313fdce4",
+          "evidence:920573a94de49a53dd30e8c8e36f99bfa289d0cb59d4ced6285cdefd5f745273",
+          "evidence:63a4a37807b29be9258f548a44cb8562478deb0a71a66c3fca399f0e8ccf7183",
+          "evidence:5ec39d7a7744fff092ad549c9dfa942fd221292105e5324e8d73126353c55f8d"
+        ],
+        "handler_address": "0xb1984",
+        "handler_identity": "bin/httpd@0x000b1984",
+        "handler_symbol": "formExpandDlnaFile",
+        "profile": "arm32-pic-r0-r1-bl/v4",
+        "registrar_address": "0x171ec",
+        "registrar_pair_count": "170",
+        "registration_address": "0x438f8",
+        "route_token": "expandDlnaFile",
+        "source_path": "bin/httpd",
+        "target_ref": "native-registrar:dfdcabeebd6ca011624cf1e029af4c26b32eb0b79f7d55bffde69341303e7b0c"
+      }
+    ],
+    "firmware_artifact_sha256": "359d2feac6a7d28bd45a11e60a7062945152f516978deb7d54daea84d9211410",
+    "mapping_summary": {
+      "candidate_count": 1942,
+      "dlna_feature_pivot_count": 17,
+      "dlna_route_binding_count": 3,
+      "evidence_count": 5409,
+      "open_obligation_count": 62
+    },
+    "profile_id": "firmatlas.mapping.profile/auto-v12",
+    "refresh_dlna_set_difference": [
+      {
+        "attribution_kind": "frontend_operation_native_absent",
+        "candidate_id": "set-difference:e51192d201dbd1a6831d42f8d68d6cea49efbb4e91333bde44d47076936e77da",
+        "claim_status": "supported",
+        "difference_side": "frontend_only",
+        "evidence_ids": [
+          "evidence:6af142ea36025e37112002306fe1e78ba48a66e7980e5a2f3de29c248ebc8760"
+        ],
+        "interpretation": "A direct frontend request selects the operation, but the profiled native dispatcher has no registration.",
+        "matched_artifact_paths": "[]",
+        "open_obligation": "Resolve the request through alternate dispatch tables, upload modes, scripts, or another runtime principal."
+      }
+    ],
+    "stages": [
+      {
+        "coverage_status": "partial",
+        "diagnostics": [
+          "inventory.symlink_target_missing"
+        ],
+        "input_count": 853,
+        "name": "inventory",
+        "output_count": 853
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 853,
+        "name": "source_plan",
+        "output_count": 428
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 130,
+        "name": "frontend",
+        "output_count": 134
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 130,
+        "name": "frontend_asset_graph",
+        "output_count": 32
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 130,
+        "name": "frontend_feature_gate",
+        "output_count": 3
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 256,
+        "name": "parameter_clue",
+        "output_count": 143
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 111,
+        "name": "response_fixture",
+        "output_count": 553
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 186,
+        "name": "native_relationship",
+        "output_count": 100
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "native_command_binding",
+        "output_count": 1
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 2,
+        "name": "arm_literal_xref",
+        "output_count": 14
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 2,
+        "name": "arm_feature_pivot",
+        "output_count": 35
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "web_configuration",
+        "output_count": 5
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "script_backend",
+        "output_count": 0
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 186,
+        "name": "native",
+        "output_count": 717
+      },
+      {
+        "coverage_status": "not_applicable",
+        "diagnostics": [
+          "no selected sources"
+        ],
+        "input_count": 0,
+        "name": "native_ubus_registration",
+        "output_count": 0
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "arm_pic_callsite",
+        "output_count": 76
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 186,
+        "name": "arm_pic_registrar",
+        "output_count": 191
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 186,
+        "name": "set_difference",
+        "output_count": 89
+      },
+      {
+        "coverage_status": "not_applicable",
+        "diagnostics": [
+          "no ubus operations"
+        ],
+        "input_count": 0,
+        "name": "ubus_backend",
+        "output_count": 0
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [
+          "no_eligible_analyzer"
+        ],
+        "input_count": 214,
+        "name": "scheduler",
+        "output_count": 62
+      },
+      {
+        "coverage_status": "partial",
+        "diagnostics": [
+          "open obligations remain but no unattempted eligible analyzer is available"
+        ],
+        "input_count": 428,
+        "name": "catalog",
+        "output_count": 1942
+      }
+    ]
+  },
+  "ac9_primary": {
+    "analysis_run_id": "mapping-analysis-run:5fbaa469b6f9873e9018481c8d48c698867cc360db047cd777f59c78cfd259cc",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v12",
+    "catalog_id": "discovery-catalog:b0b414db4cba295a043d54ee6c9e35d3720922cadfabd37e788b2dec19ae1a13",
+    "coverage_status": "completed",
+    "dlna_feature_gate": {
+      "configured_value": "n",
+      "enabled_value": "y",
+      "evidence_ids": [
+        "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+        "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+        "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+        "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+        "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+        "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+        "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+        "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+        "evidence:a9140c29ffd6d920917bf2066aacc4154f69d64f0ff764b452001df352738c09",
+        "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95"
+      ],
+      "feature_symbol": "CONFIG_DLNA_SERVER",
+      "gate_status": "disabled",
+      "page_path": "webroot_ro/dlna.html",
+      "request_candidate_refs": "[\"frontend-request:8d9b45c0bb253450c24418a88c3718e0df76d2c7ab2f18468fdc243d384b066d\",\"frontend-request:546eaeb30b2e120541048bc5c13cf88515c305aae409cbd30c3f4e685fd58eec\",\"frontend-request:02207369388afc530ed82262af01a3165a3cc16f14869278b9f81be8d06ba2c4\",\"frontend-request:6178796e94a5ff48056254880c73509e1ca1d51012aaea04e794c4c1b6716903\"]",
+      "request_endpoints": "[\"/goform/refreshDLNA\",\"goform/GetDlnaCfg\",\"goform/SetDlnaCfg\",\"goform/expandDlnaFile?\"]",
+      "script_paths": "[\"webroot_ro/js/dlna.js\"]",
+      "ui_target_id": "usb_dlna"
+    },
+    "dlna_feature_pivots": [
+      {
+        "candidate_id": "arm-feature-pivot:5adaa6d8bb5fffdf69146a9b8e9bda4d80a051241ee3bc0629e268f799a6d61f",
+        "evidence_ids": [
+          "evidence:8e809f0c660ccfea1e19f3688e9895ee603eea8be6c3f459fa1c9d85a1739986",
+          "evidence:938cfbc79eda8f3a1f3f9f1192a23b224dde91c11f8bc25598bf6c5cb7a1d3a2",
+          "evidence:91f02fdc42c17d20204dd398c07c9040cf8e5227ec74d8ce7b6b21a6a2d717b4",
+          "evidence:36b641768ae43af70d0f70586d7a04f3809e32fbb9d352875540374476551eb4",
+          "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+          "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+          "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+          "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+          "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+          "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+          "evidence:289eb4649406f09179691a1e3879f304fe2317e23a4ef00b4313323d834ae4e9",
+          "evidence:4e503fad2e5b4e823ed4ed62e1f68d4e57e6e94e915a63a8f8ca2f18d8fed914"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000a62d0",
+        "handler_identity": "bin/httpd@0x000a62d0",
+        "handler_symbol": "formGetUSBStatus",
+        "instruction_address": "0x000a655c",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna",
+        "route_binding_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c",
+        "route_token": "GetUSBStatus",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:ed3bdbdde9fc24292de132dfc2f473c2dc0f11890412dbe6f42d79335ea0c04a",
+        "evidence_ids": [
+          "evidence:6d33f66743f53ee548e563d1b220da3ecad42ba03444f66e472c8fd24393a480",
+          "evidence:bea0247a98a09262a887cbaf62e233cd71dd353e7a1824891c27f7ee7a80ad94",
+          "evidence:1e1280984ea76eb9763096532d070cf5b70e57c068b915dcae97461873014bd7",
+          "evidence:c81212d180b2ba9dbb9d8e513bcb3c3a22fbed863aba0cc6cf940af54640d3fa",
+          "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+          "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+          "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+          "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+          "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+          "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+          "evidence:e3e7f6ac4c7f530511a86558b5b7573d765405bc9c040b283741c5e646b9f035",
+          "evidence:603842e0e3196fdda365c273984e8b080bfdf3dc9d7105dd58a2aa47995620f7"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000a62d0",
+        "handler_identity": "bin/httpd@0x000a62d0",
+        "handler_symbol": "formGetUSBStatus",
+        "instruction_address": "0x000a652c",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna",
+        "route_binding_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c",
+        "route_token": "GetUSBStatus",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      },
+      {
+        "candidate_id": "arm-feature-pivot:862d43ef9c754294038d0fa6333bc20d3f5befe09921dad667361d801d8bbdb9",
+        "evidence_ids": [
+          "evidence:fae033c153ef6378850478d8e8ac01fa37ecff775d3ee17a7065df139c11d202",
+          "evidence:1ebf83cc6c6751990eb07b9e17b07a4fa2a291c5b2a55cb0e4f96a56ca41cac3",
+          "evidence:485a79872266f30d66311106a6e018607654dbed3c421c96f81446bf7279a442",
+          "evidence:77d4f702b9db1fd2f317c25505eefe61943dd554f029480c801458d2cf5f2133",
+          "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+          "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+          "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+          "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+          "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+          "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+          "evidence:3dc26e91f13bce987217e2b9e5371129d35fdb1f7f4656cd402447aefb847901",
+          "evidence:0ec433d907144d9fe645b61b45f8d154714d76622960073edf642bf3a38cb5c7"
+        ],
+        "feature_token": "dlna",
+        "function_identity": "bin/httpd@0x000a62d0",
+        "handler_identity": "bin/httpd@0x000a62d0",
+        "handler_symbol": "formGetUSBStatus",
+        "instruction_address": "0x000a6364",
+        "interpretation": "A verified route handler references an exact allocated literal containing the feature token; this is an adjacency clue, not operation ownership.",
+        "literal_value": "dlna.en",
+        "route_binding_ref": "native-route-binding:e68c84af5b13bbc165d992904ec24de066c0834631bf58d45253e33ac8f9512c",
+        "route_token": "GetUSBStatus",
+        "source_path": "bin/httpd",
+        "target_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      }
+    ],
+    "dlna_route_bindings": [],
+    "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+    "mapping_summary": {
+      "candidate_count": 4393,
+      "dlna_feature_pivot_count": 3,
+      "dlna_route_binding_count": 0,
+      "evidence_count": 12221,
+      "open_obligation_count": 64
+    },
+    "profile_id": "firmatlas.mapping.profile/auto-v12",
+    "refresh_dlna_set_difference": [
+      {
+        "attribution_kind": "frontend_feature_disabled",
+        "candidate_id": "set-difference:36e6926f880873548198f1fd7018452bc135833a3a445e85c6da9a3d7c414b92",
+        "claim_status": "supported",
+        "difference_side": "frontend_only",
+        "evidence_ids": [
+          "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+          "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+          "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+          "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+          "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+          "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24"
+        ],
+        "interpretation": "The configured frontend feature is disabled and gates the page that issues this operation; the bundled request is residual in the declared UI path.",
+        "matched_artifact_paths": "[\"webroot_ro/dlna.html\",\"webroot_ro/js/dlna.js\",\"webroot_ro/js/macro_config.js\",\"webroot_ro/js/main.js\"]",
+        "open_obligation": "A disabled frontend feature does not prove the backend implementation is absent; test direct requests, alternate clients, conditional components, and version-matched builds before assigning ownership."
+      }
+    ],
+    "stages": [
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1038,
+        "name": "inventory",
+        "output_count": 1038
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1038,
+        "name": "source_plan",
+        "output_count": 529
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 130,
+        "name": "frontend",
+        "output_count": 134
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 130,
+        "name": "frontend_asset_graph",
+        "output_count": 32
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 130,
+        "name": "frontend_feature_gate",
+        "output_count": 3
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 451,
+        "name": "parameter_clue",
+        "output_count": 143
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 111,
+        "name": "response_fixture",
+        "output_count": 553
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 287,
+        "name": "native_relationship",
+        "output_count": 101
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "native_command_binding",
+        "output_count": 1
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 2,
+        "name": "arm_literal_xref",
+        "output_count": 14
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 2,
+        "name": "arm_feature_pivot",
+        "output_count": 21
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "web_configuration",
+        "output_count": 5
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "script_backend",
+        "output_count": 0
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 287,
+        "name": "native",
+        "output_count": 3187
+      },
+      {
+        "coverage_status": "not_applicable",
+        "diagnostics": [
+          "no selected sources"
+        ],
+        "input_count": 0,
+        "name": "native_ubus_registration",
+        "output_count": 0
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 1,
+        "name": "arm_pic_callsite",
+        "output_count": 74
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 287,
+        "name": "arm_pic_registrar",
+        "output_count": 188
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [],
+        "input_count": 287,
+        "name": "set_difference",
+        "output_count": 92
+      },
+      {
+        "coverage_status": "not_applicable",
+        "diagnostics": [
+          "no ubus operations"
+        ],
+        "input_count": 0,
+        "name": "ubus_backend",
+        "output_count": 0
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [
+          "no_eligible_analyzer"
+        ],
+        "input_count": 212,
+        "name": "scheduler",
+        "output_count": 64
+      },
+      {
+        "coverage_status": "completed",
+        "diagnostics": [
+          "open obligations remain but no unattempted eligible analyzer is available"
+        ],
+        "input_count": 529,
+        "name": "catalog",
+        "output_count": 4393
+      }
+    ]
+  },
+  "artifact_provenance": {
+    "ac18_positive_control": {
+      "artifact_kind": "official-vendor-raw-firmware-zip",
+      "download_url": "https://static.tenda.com.cn/tdcweb/download/uploadfile/AC18/ac18_kf_V15.03.05.19%286318_%29_cn.zip",
+      "firmware_bin_sha256": "7f226515e19d9f8243068e880da74135da495df78821d6044a92f40af29811a5",
+      "httpd_sha256": "addecb1e2d5e7befe200b75d925c52d84f3d60db5f18c1071136648e0f70d388",
+      "release_page": "https://www.tenda.com.cn/download/detail-2683.html",
+      "release_version": "V15.03.05.19(6318)",
+      "zip_sha256": "359d2feac6a7d28bd45a11e60a7062945152f516978deb7d54daea84d9211410"
+    },
+    "ac9_primary": {
+      "artifact_kind": "benchmark-repacked-rootfs-zip",
+      "artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+      "embedded_version": "V15.03.05.19 / ac9_V2.0.0.0(6318)_cn",
+      "source": "FirmEmuHub BM-2024-00012"
+    }
+  },
+  "evidence_boundary": "Feature pivots are candidate investigation edges. AC18 bindings are facts about AC18 only and do not resolve the AC9 handler-owner obligation.",
+  "family_comparison": {
+    "feature_transition": "CONFIG_DLNA_SERVER:n->y",
+    "fixture_sha256": {
+      "webroot_ro/goform/GetDlnaCfg.txt": {
+        "ac18": "5ca0c81a03950ce1aee475f18f6381c82c9d87e6e71adca107469b6cc6585bcc",
+        "ac9": "5ca0c81a03950ce1aee475f18f6381c82c9d87e6e71adca107469b6cc6585bcc"
+      },
+      "webroot_ro/goform/SetDlnaCfg.txt": {
+        "ac18": "fe30f8de191a71df7b9555df04533daf32360e1e3198b32d65fe2d43390a7e7b",
+        "ac9": "fe30f8de191a71df7b9555df04533daf32360e1e3198b32d65fe2d43390a7e7b"
+      },
+      "webroot_ro/goform/expandDlnaFile.txt": {
+        "ac18": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+        "ac9": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0"
+      }
+    },
+    "interpretation": "family-template-plus-build-pruning-candidate",
+    "normalized_dlna_asset_sha256": {
+      "ac18": "29cb6c509bfbb016ee1f0de2cd5b013114f3d61947a2acd3a910da0b6f2b14ec",
+      "ac9": "29cb6c509bfbb016ee1f0de2cd5b013114f3d61947a2acd3a910da0b6f2b14ec"
+    },
+    "route_binding_transition": "three-routes:absent->registered"
+  },
+  "historical_vulnerability_context": {
+    "scope_rule": "Historical CVE route/parameter records seed expectations only; they do not transfer AC18 vulnerability status to AC9.",
+    "source_report": "docs/firmware-mapping/samples/r2-14-vendor-tenda-ac9-disabled-dlna-feature.json",
+    "source_report_sha256": "b02c346ba6615402f4bb8c9361ee71325fda7941df77238eb3fbfcf410bce9a5"
+  },
+  "open_obligations": [
+    "obtain and partition-compare an official AC9 raw firmware image",
+    "exclude alias/hash dispatch and omitted conditional components in AC9",
+    "recover active frontend invocation reachability for refreshDLNA"
+  ],
+  "sample_role": "primary-vendor-tenda-ac9-with-official-ac18-positive-control",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-15/v1alpha1"
+}

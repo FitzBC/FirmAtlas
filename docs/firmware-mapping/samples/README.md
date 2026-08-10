@@ -1,7 +1,7 @@
 # 代表性通信类别与样本基线
 
-> 基线版本：M1.4
-> 数据观察日期：2026-08-09
+> 基线版本：M1.5
+> 数据观察日期：2026-08-10
 > 机器可读清单：[representative-corpus.json](./representative-corpus.json)
 
 已发布的样本过程说明：
@@ -35,6 +35,7 @@
 - [M1-23 X5000R 潜在隐藏接口](./m1-23-x5000r-potential-hidden-interfaces.json)：在 Source Inventory、Frontend 和 Set Difference completed 门槛下保存 10 条 native registration + handler + zero-observed-reference 信号，并固定非后门/非运行时结论边界；进度说明见 [M1-23 记录](../progress/2026-08-09-m1-23-potential-hidden-interfaces.md)。
 - [M1-24 OpenWrt AC9 双版本差异](./m1-24-openwrt-ac9-version-diff.json)：固定两个官方 Artifact、Binwalk 谱系、不可变 release context 和 coverage-aware diff；Frontend Producer v0.4.0 恢复 53 个去重 LuCI/ubus 逻辑操作（含一个有界动态模板），并因其具体运行时实例未解析而保持 partial；进度说明见 [M1-24 记录](../progress/2026-08-09-m1-24-version-aware-mapping-diff.md)。
 - [M1-25 OpenWrt AC9 ubus 后端图](./m1-25-openwrt-ac9-ubus-backend.json)：恢复 53 个去重逻辑操作（含 1 个动态模板），并分别发布 rpcd 执行主体、25 条静态 Lua binding、30 条 Native plugin candidate、72 条 ACL grant 和未决 owner/registration-table 义务；进度说明见 [M1-25 记录](../progress/2026-08-09-m1-25-ubus-backend-graph.md)。
+- [R2-15 AC9/AC18 DLNA feature pivot](./r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json)：以 AC9 为主样本，保存 3 条相邻 USB 状态 pivot、0 条 DLNA 配置 binding，并用官方 AC18 启用 build 的 17 条 DLNA pivot 与 3 条真实 binding 作同家族阳性对照；不迁移 owner 或漏洞状态。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
@@ -98,6 +99,14 @@
 
 它是开发样本，不进入最终无泄漏测试结果。
 
+**Tenda AC18 / same-family enabled-DLNA positive control**
+
+- 官方版本：`V15.03.05.19(6318)`，ZIP SHA-256 `359d2feac6a7d28bd45a11e60a7062945152f516978deb7d54daea84d9211410`；
+- `CONFIG_DLNA_SERVER=y`，携带 `minidlna` 与配置；
+- 确定性恢复 `GetDlnaCfg → getDLNAserverCfg`、`SetDlnaCfg → formDLNAserver`、`expandDlnaFile → formExpandDlnaFile`；
+- `refreshDLNA` 仍为 Frontend-only，是防止“同页面即同型后端”误推理的真实阴性；
+- 角色：same-vendor validation，只用于验证结构迁移和 feature/component 差分，不把 AC18 事实迁移为 AC9 owner 或漏洞结论。
+
 **OpenWrt Tenda AC9 target / Lua route → LuCI JSON-RPC/ubus 版本迁移**
 
 - 真实版本：OpenWrt `18.06.7` 与 `19.07.8` 官方 bcm53xx/generic target；
@@ -149,7 +158,6 @@ R2 起该例作为原厂 Tenda AC9 的同硬件控制面对照，而非主样本
 
 ### Tier B：平台已有固件候选
 
-- Tenda AC18：同厂商 goform 家族验证；
 - D-Link DIR-846 A1：`/HNAP1` 共享信封验证；
 - D-Link DIR-823G：版本和历史漏洞丰富，保留为 holdout，冷启动阶段不得输入目标 PoC。
 

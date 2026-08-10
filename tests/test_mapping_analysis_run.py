@@ -76,6 +76,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "native_relationship",
                 "native_command_binding",
                 "arm_literal_xref",
+                "arm_feature_pivot",
                 "scheduler", "catalog",
             },
             {stage.stage_name for stage in first.stages},
@@ -257,9 +258,9 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v11", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v12", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v11",
+            "firmatlas.mapping.analyzer-registry/builtin-v12",
             result.analyzer_registry_id,
         )
 
@@ -448,6 +449,39 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
                 == "bin/time_check@0x00015868"
             },
         )
+        feature_pivot_stage = next(
+            item for item in result.stages
+            if item.stage_name == "arm_feature_pivot"
+        )
+        self.assertEqual(
+            CoverageStatus.COMPLETED, feature_pivot_stage.coverage_status
+        )
+        self.assertEqual(21, feature_pivot_stage.output_count)
+        feature_pivots = [
+            item for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.ARM_FEATURE_PIVOT
+        ]
+        dlna_pivots = [
+            item for item in feature_pivots
+            if dict(item.attributes)["feature_token"] == "dlna"
+        ]
+        self.assertEqual(3, len(dlna_pivots))
+        self.assertEqual(
+            {"dlna", "dlna.en"},
+            {dict(item.attributes)["literal_value"] for item in dlna_pivots},
+        )
+        self.assertEqual(
+            {"GetUSBStatus"},
+            {dict(item.attributes)["route_token"] for item in dlna_pivots},
+        )
+        self.assertEqual(
+            {"formGetUSBStatus"},
+            {dict(item.attributes)["handler_symbol"] for item in dlna_pivots},
+        )
+        self.assertTrue(all(
+            item.claim_status.value == "candidate" for item in dlna_pivots
+        ))
 
 
 if __name__ == "__main__":

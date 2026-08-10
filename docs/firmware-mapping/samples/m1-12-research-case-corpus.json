@@ -1178,7 +1178,7 @@
       ]
     },
     {
-      "case_id": "research-case:e0732db6db165717aee29c7c31f99aa1f038d92c876779d71054476c0285f95d",
+      "case_id": "research-case:7d30aa984d5c07cc8f0621df8b664500a373c044dd95f3ad933134b95e00d6fc",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1193,9 +1193,13 @@
         "symbol_profiled_command_table",
         "arm_pic_literal_xref",
         "tail_merged_route_registration",
-        "frontend_tokenizer_coverage_repair"
+        "frontend_tokenizer_coverage_repair",
+        "disabled_frontend_feature_gate",
+        "residual_ui_request",
+        "bounded_feature_literal_pivot",
+        "family_variant_positive_control"
       ],
-      "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers?",
+      "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers, and is the declared UI path enabled in this product build?",
       "evidence": [
         {
           "evidence_ref": "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
@@ -1214,6 +1218,15 @@
           "locator": "text_utf8:bytes=315-327;lines=13:14-13:26",
           "capability": "observes_response_field",
           "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=682-699;lines=21:14-21:31",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
         },
         {
           "evidence_ref": "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
@@ -1322,6 +1335,15 @@
           "locator": "text_utf8:bytes=198-210;lines=9:14-9:26",
           "capability": "observes_response_field",
           "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=716-733;lines=22:14-22:31",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
         },
         {
           "evidence_ref": "evidence:89a6ec1a45a9527f9a101fcf9c881af076020fce5054d6362f51f3f0f5f720d1",
@@ -1729,6 +1751,60 @@
           "producer": "native-arm-literal-xref@0.1.0"
         },
         {
+          "evidence_ref": "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=17382-17412;lines=534:17-534:47",
+          "capability": "maps_feature_to_ui_target",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=17554-17635;lines=540:13-541:50",
+          "capability": "reveals_feature_target",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=99665-99674;lines=2548:36-2548:45",
+          "capability": "routes_feature_target_to_page",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/macro_config.js",
+          "source_artifact_sha256": "998408b3a5b83e5bb571570f8da70ad985dd2219fd34533f0441b0d1a0d8e274",
+          "locator": "text_utf8:bytes=2009-2010;lines=66:26-66:27",
+          "capability": "declares_feature_value",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/dlna.html",
+          "source_artifact_sha256": "89bd6c3533cb3b90b704a1982a137968460ad3834c93fb38002b2d6ea5d6d9d5",
+          "locator": "text_utf8:bytes=4199-4242;lines=83:18-83:61",
+          "capability": "loads_feature_script",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=4670-4689;lines=134:13-134:32",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
           "evidence_ref": "coverage:ac9-native-relationship-target-resolution",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-11-vendor-tenda-ac9-native-relationships.json",
@@ -1736,14 +1812,60 @@
           "locator": "json:$.dlna_relationships",
           "capability": "resolves_target_component_presence",
           "producer": "native-relationship-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "coverage:ac9-dlna-feature-pivots",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json",
+          "source_artifact_sha256": "59d3eb937d8754e0cb2c39177d0023470f99a51e00a9c6efe1f06e7851a57fca",
+          "locator": "json:$.ac9_primary.dlna_feature_pivots",
+          "capability": "bounds_disabled_feature_native_pivots",
+          "producer": "native-arm-feature-pivot@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac18-dlna-route-positive-control",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json",
+          "source_artifact_sha256": "59d3eb937d8754e0cb2c39177d0023470f99a51e00a9c6efe1f06e7851a57fca",
+          "locator": "json:$.ac18_positive_control.dlna_route_bindings",
+          "capability": "proves_neighbor_variant_route_bindings",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-ac18-dlna-family-equivalence",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json",
+          "source_artifact_sha256": "59d3eb937d8754e0cb2c39177d0023470f99a51e00a9c6efe1f06e7851a57fca",
+          "locator": "json:$.family_comparison",
+          "capability": "compares_family_variant_assets_and_feature_state",
+          "producer": "family-variant-report@v1alpha1"
         }
       ],
       "claims": [
         {
           "claim_id": "claim:dlna-frontend-request",
-          "statement": "The UI constructs the expandDlnaFile request.",
+          "statement": "The DLNA page script constructs GetDlnaCfg, SetDlnaCfg, refreshDLNA, and expandDlnaFile requests.",
           "evidence_refs": [
-            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95"
+            "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+            "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+            "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-feature-disabled-ui-path",
+          "statement": "CONFIG_DLNA_SERVER is n while the UI reveal predicate requires y; the exact feature-map, route, page, and same-stem script chain therefore classifies all four bundled DLNA requests as residual requests behind a disabled declared UI path.",
+          "evidence_refs": [
+            "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+            "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+            "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+            "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+            "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+            "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+            "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+            "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c"
           ],
           "status": "supported"
         },
@@ -1842,10 +1964,28 @@
           "status": "supported"
         },
         {
+          "claim_id": "claim:dlna-family-variant-positive-control",
+          "statement": "The AC9 build has only three bounded DLNA literal pivots, all inside the verified GetUSBStatus handler, while an independently analyzed official AC18 enabled build registers GetDlnaCfg, SetDlnaCfg, and expandDlnaFile; byte-equivalent fixtures and a normalized-equivalent page asset support a shared family-template and build-pruning candidate without transferring ownership to AC9.",
+          "evidence_refs": [
+            "coverage:ac9-dlna-feature-pivots",
+            "coverage:ac18-dlna-route-positive-control",
+            "coverage:ac9-ac18-dlna-family-equivalence"
+          ],
+          "status": "supported"
+        },
+        {
           "claim_id": "claim:dlna-handler-owner",
           "statement": "No exact Native registration or handler binding currently connects GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform execution path; the adjacent GetUSBStatus binding does not establish an alias for those operations.",
           "evidence_refs": [
+            "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+            "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
             "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+            "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+            "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+            "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+            "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+            "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+            "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
             "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
             "evidence:0997150397e185c0ec3e56c9c957ea2646eacfc1cbcdb90aaedfa89198f1f034",
             "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
@@ -1904,7 +2044,10 @@
             "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
             "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
             "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
-            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554"
+            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554",
+            "coverage:ac9-dlna-feature-pivots",
+            "coverage:ac18-dlna-route-positive-control",
+            "coverage:ac9-ac18-dlna-family-equivalence"
           ],
           "status": "unresolved"
         }
@@ -1985,6 +2128,30 @@
           "creates_obligations": [],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-disabled-feature-gate",
+          "order": 7,
+          "interpretation": "Follow the exact macro-to-menu-to-page-to-script chain and classify the four frontend-only operations as residual requests without converting UI disablement into backend absence.",
+          "claim_ids": [
+            "claim:dlna-feature-disabled-ui-path",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-family-variant-positive-control",
+          "order": 8,
+          "interpretation": "Pivot from the exact disabled feature token into registered AC9 handlers, then compare an official independently mapped AC18 enabled build while preserving artifact-local ownership.",
+          "claim_ids": [
+            "claim:dlna-family-variant-positive-control",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -2022,7 +2189,9 @@
         "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
         "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
         "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
-        "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding."
+        "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding.",
+        "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set.",
+        "Transferring AC18 handler addresses or vulnerability state to AC9 would confuse a family-level positive control with artifact-local proof."
       ],
       "paper_uses": [
         "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -2030,7 +2199,9 @@
         "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
         "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
         "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
-        "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner."
+        "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner.",
+        "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation.",
+        "Family holdout showing that enabled variants can prioritize symbols and structures without resolving a disabled target build by analogy."
       ],
       "limitations": [
         "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
@@ -2038,7 +2209,9 @@
         "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
         "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
         "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
-        "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations."
+        "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations.",
+        "A disabled declared UI path does not prove backend absence, runtime inaccessibility, or behavior in another product/version build.",
+        "The AC18 positive control proves only AC18 bindings; the AC9 benchmark remains a repacked rootfs and may omit partitions or conditional components."
       ]
     }
   ],
@@ -2046,7 +2219,7 @@
     "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
     "paper_ready": true,
     "case_count": 3,
-    "evidence_line_count": 13,
+    "evidence_line_count": 14,
     "issues": []
   }
 }

@@ -15,7 +15,7 @@ from .frontend_feature_gate import FrontendFeatureGateResult
 from .parameter_clue import FrontendParameterClueIndex
 from .response_fixture import ResponseFixtureResult
 from .native_relationship import NativeRelationshipResult
-from .native_arm_xref import ArmLiteralXrefResult
+from .native_arm_xref import ArmFeaturePivotResult, ArmLiteralXrefResult
 from .native_command_binding import NativeCommandBindingResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
@@ -59,6 +59,7 @@ class DiscoveryProducerKind(str, Enum):
     RESPONSE_FIXTURE = "response_fixture"
     NATIVE_RELATIONSHIP = "native_relationship"
     ARM_LITERAL_XREF = "arm_literal_xref"
+    ARM_FEATURE_PIVOT = "arm_feature_pivot"
     NATIVE_COMMAND_BINDING = "native_command_binding"
 
 
@@ -88,6 +89,7 @@ class DiscoveryCandidateKind(str, Enum):
     RESPONSE_FIXTURE_CONTRACT = "response_fixture_contract"
     NATIVE_RELATIONSHIP = "native_relationship"
     ARM_LITERAL_XREF = "arm_literal_xref"
+    ARM_FEATURE_PIVOT = "arm_feature_pivot"
     NATIVE_COMMAND_BINDING = "native_command_binding"
 
 
@@ -173,6 +175,22 @@ class DiscoveryProducerBatch:
             if results else AnalyzerIdentity("native-arm-literal-xref", "0.1.0")
         )
         return cls(DiscoveryProducerKind.ARM_LITERAL_XREF, producer, scope, results)
+
+    @classmethod
+    def arm_feature_pivot(
+        cls, results: Tuple[ArmFeaturePivotResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-arm-feature-pivot", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.ARM_FEATURE_PIVOT,
+            producer,
+            scope,
+            results,
+        )
 
     @classmethod
     def native_command_binding(
@@ -475,6 +493,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
     native_protection_target_refs = set()
     native_service_target_refs = set()
     ubus_backend_target_refs = set()
+    arm_feature_pivot_binding_refs = set()
     producer_obligations = []
     for batch in sorted(value.batches, key=lambda x: (x.producer_kind.value, x.scope)):
         statuses = []
@@ -740,6 +759,44 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("pic_base_address", "0x{:08x}".format(
                                 item.pic_base_address
                             )),
+                        ),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.ARM_FEATURE_PIVOT:
+                for item in result.pivots:
+                    arm_feature_pivot_binding_refs.add(item.route_binding_ref)
+                    candidates.append(DiscoveryCandidate(
+                        item.pivot_id,
+                        DiscoveryCandidateKind.ARM_FEATURE_PIVOT,
+                        "{}|{}|{}".format(
+                            item.feature_token,
+                            item.route_token,
+                            item.literal_value,
+                        ),
+                        DiscoveryClaimStatus.CANDIDATE,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        (
+                            ("target_ref", item.target_ref),
+                            ("feature_token", item.feature_token),
+                            ("literal_value", item.literal_value),
+                            ("function_identity", "{}@0x{:08x}".format(
+                                result.source_path,
+                                item.function_start_address,
+                            )),
+                            ("instruction_address", "0x{:08x}".format(
+                                item.instruction_address
+                            )),
+                            ("route_binding_ref", item.route_binding_ref),
+                            ("route_token", item.route_token),
+                            ("handler_identity", item.handler_identity),
+                            ("handler_symbol", item.handler_symbol),
+                            (
+                                "interpretation",
+                                "A verified route handler references an exact "
+                                "allocated literal containing the feature token; "
+                                "this is an adjacency clue, not operation ownership.",
+                            ),
                         ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_COMMAND_BINDING:
@@ -1243,6 +1300,11 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
         raise ValueError("native service assembly references unknown catalog candidate")
     if any(target not in candidate_ids for target in ubus_backend_target_refs):
         raise ValueError("ubus backend result references unknown catalog candidate")
+    if any(
+        target not in candidate_ids
+        for target in arm_feature_pivot_binding_refs
+    ):
+        raise ValueError("ARM feature pivot references unknown route binding")
     if value.scheduler is not None:
         obligations = normalize_scheduler_obligations((
             *value.scheduler.open_obligations,

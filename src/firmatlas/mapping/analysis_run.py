@@ -48,8 +48,10 @@ from .native_command_binding import (
     discover_native_command_table_bindings,
 )
 from .native_arm_xref import (
+    ArmFeaturePivotAnchor,
     ArmFunctionTarget,
     ArmLiteralXrefPolicy,
+    discover_arm_feature_pivots,
     discover_arm_function_literal_xrefs,
 )
 from .native import discover_native_hints
@@ -101,7 +103,8 @@ _AUTO_V9_ANALYZERS = _AUTO_V8_ANALYZERS + (
     "native_command_binding", "arm_literal_xref",
 )
 _AUTO_V10_ANALYZERS = _AUTO_V9_ANALYZERS
-_AUTO_ANALYZERS = _AUTO_V10_ANALYZERS + ("frontend_feature_gate",)
+_AUTO_V11_ANALYZERS = _AUTO_V10_ANALYZERS + ("frontend_feature_gate",)
+_AUTO_ANALYZERS = _AUTO_V11_ANALYZERS + ("arm_feature_pivot",)
 
 
 @dataclass(frozen=True)
@@ -121,7 +124,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v11", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v12", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v11(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v11", _AUTO_V11_ANALYZERS)
 
     @classmethod
     def auto_v10(cls) -> "MappingAnalysisProfile":
@@ -177,7 +184,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v11", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v12", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v11(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v11",
+            _AUTO_V11_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v10(cls) -> "MappingAnalyzerRegistry":
@@ -256,6 +270,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V11 = MappingAnalyzerRegistry.builtin_v11()
 BUILTIN_ANALYZER_REGISTRY_V10 = MappingAnalyzerRegistry.builtin_v10()
 BUILTIN_ANALYZER_REGISTRY_V9 = MappingAnalyzerRegistry.builtin_v9()
 BUILTIN_ANALYZER_REGISTRY_V8 = MappingAnalyzerRegistry.builtin_v8()
@@ -471,6 +486,83 @@ def _arm_pic_callsite_applicable(content: bytes) -> bool:
     )
 
 
+_FEATURE_PIVOT_GENERIC_TOKENS = frozenset({
+    "config", "feature", "menu", "module", "modules", "server", "status",
+    "system", "target", "webroot",
+})
+
+
+def _feature_pivot_anchors(frontend_feature_gates) -> Tuple[ArmFeaturePivotAnchor, ...]:
+    if frontend_feature_gates is None:
+        return ()
+    anchors = set()
+    for gate in frontend_feature_gates.gates:
+        for token in re.findall(r"[a-z0-9]+", gate.ui_target_id.lower()):
+            if (
+                len(token) >= 4
+                and token not in _FEATURE_PIVOT_GENERIC_TOKENS
+            ):
+                anchors.add(ArmFeaturePivotAnchor(gate.gate_id, token))
+    return tuple(sorted(anchors, key=lambda item: (
+        item.feature_token, item.target_ref,
+    )))
+
+
+def _feature_pivot_binding_view(registrar_inventory, native_deep):
+    anchored = {
+        (
+            result.source_path,
+            binding.route_token,
+            binding.handler_address,
+        ): (result, binding)
+        for result in native_deep
+        for binding in result.bindings
+    }
+    views = []
+    for result in registrar_inventory:
+        evidence_by_id = {
+            atom.evidence_id: atom for atom in result.evidence_atoms
+        }
+        bindings = []
+        for binding in result.bindings:
+            replacement = anchored.get((
+                result.source_path,
+                binding.route_token,
+                binding.handler_address,
+            ))
+            if replacement is None:
+                chosen = binding
+            else:
+                source_result, chosen = replacement
+                if source_result.producer != result.producer:
+                    raise ValueError(
+                        "feature pivot binding views require one native producer"
+                    )
+                evidence_by_id.update(
+                    (atom.evidence_id, atom)
+                    for atom in source_result.evidence_atoms
+                    if atom.evidence_id in chosen.evidence_ids
+                )
+            bindings.append(chosen)
+        selected_ids = {
+            evidence_id
+            for binding in bindings
+            for evidence_id in binding.evidence_ids
+        }
+        views.append(replace(
+            result,
+            bindings=tuple(bindings),
+            evidence_atoms=tuple(sorted(
+                (
+                    atom for evidence_id, atom in evidence_by_id.items()
+                    if evidence_id in selected_ids
+                ),
+                key=lambda atom: atom.evidence_id,
+            )),
+        ))
+    return tuple(views)
+
+
 def analyze_extracted_root(
     request: MappingAnalysisRequest,
     registry: MappingAnalyzerRegistry = BUILTIN_ANALYZER_REGISTRY,
@@ -509,6 +601,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v9",
                 "firmatlas.mapping.profile/auto-v10",
                 "firmatlas.mapping.profile/auto-v11",
+                "firmatlas.mapping.profile/auto-v12",
             }
         ),
         enable_tenda_get_set_data=(
@@ -519,6 +612,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v9",
                 "firmatlas.mapping.profile/auto-v10",
                 "firmatlas.mapping.profile/auto-v11",
+                "firmatlas.mapping.profile/auto-v12",
             }
         ),
         enable_regex_literals=(
@@ -526,6 +620,7 @@ def analyze_extracted_root(
             in {
                 "firmatlas.mapping.profile/auto-v10",
                 "firmatlas.mapping.profile/auto-v11",
+                "firmatlas.mapping.profile/auto-v12",
             }
         ),
     )
@@ -762,6 +857,26 @@ def analyze_extracted_root(
         )
         for result in registrar_inventory
     )
+    feature_pivot_anchors = _feature_pivot_anchors(frontend_feature_gates)
+    feature_pivot_binding_view = _feature_pivot_binding_view(
+        registrar_inventory, native_deep
+    )
+    arm_feature_pivots = tuple(
+        discover_arm_feature_pivots(
+            selected_by_path[result.source_path][0],
+            selected_by_path[result.source_path][1],
+            feature_pivot_anchors,
+            result,
+            policy=request.arm_literal_xref_policy,
+        )
+        for result in feature_pivot_binding_view
+        if (
+            "arm_feature_pivot" in request.profile.enabled_analyzers
+            and feature_pivot_anchors
+            and result.bindings
+            and result.source_path in selected_by_path
+        )
+    )
     native_ubus = tuple(
         registry.analyze_source("native_ubus_registration", source, content)
         for source, content, kinds in selected
@@ -810,6 +925,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v9",
                     "firmatlas.mapping.profile/auto-v10",
                     "firmatlas.mapping.profile/auto-v11",
+                    "firmatlas.mapping.profile/auto-v12",
                 }
                 else ()
             )
@@ -827,12 +943,14 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v9",
                         "firmatlas.mapping.profile/auto-v10",
                         "firmatlas.mapping.profile/auto-v11",
+                        "firmatlas.mapping.profile/auto-v12",
                     },
                     include_fixed_action_dynamic_query=(
                         request.profile.profile_id
                         in {
                             "firmatlas.mapping.profile/auto-v10",
                             "firmatlas.mapping.profile/auto-v11",
+                            "firmatlas.mapping.profile/auto-v12",
                         }
                     ),
                 ),
@@ -886,6 +1004,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.arm_literal_xref,
             arm_literal_xrefs,
             "auto:arm-literal-xref",
+        ))
+    if "arm_feature_pivot" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.arm_feature_pivot,
+            arm_feature_pivots,
+            "auto:arm-feature-pivot",
         ))
     if "arm_pic_callsite" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -978,6 +1102,31 @@ def analyze_extracted_root(
             "arm_literal_xref",
             arm_literal_xrefs,
             sum(len(item.xrefs) for item in arm_literal_xrefs),
+        ))
+    if "arm_feature_pivot" in request.profile.enabled_analyzers:
+        stages.insert(9, MappingAnalysisStage(
+            "arm_feature_pivot",
+            (
+                CoverageStatus.COMPLETED
+                if arm_feature_pivots and all(
+                    item.coverage_status is CoverageStatus.COMPLETED
+                    for item in arm_feature_pivots
+                )
+                else CoverageStatus.PARTIAL
+                if arm_feature_pivots
+                else CoverageStatus.NOT_APPLICABLE
+            ),
+            len(arm_feature_pivots),
+            sum(len(item.pivots) for item in arm_feature_pivots),
+            tuple(sorted({
+                diagnostic
+                for item in arm_feature_pivots
+                for diagnostic in item.diagnostics
+            })) if arm_feature_pivots else (
+                "no frontend feature anchors"
+                if not feature_pivot_anchors
+                else "no applicable ARM registrar bindings",
+            ),
         ))
     if "frontend_feature_gate" in request.profile.enabled_analyzers:
         graph_stage_index = next(

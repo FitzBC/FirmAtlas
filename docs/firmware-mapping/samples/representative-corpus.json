@@ -1,6 +1,6 @@
 {
-  "corpus_version": "firmatlas.mapping.corpus/m1.2",
-  "recorded_at": "2026-08-09",
+  "corpus_version": "firmatlas.mapping.corpus/m1.3",
+  "recorded_at": "2026-08-10",
   "source": "FirmAtlas semantic observations and firmware candidate catalog",
   "rules": {
     "vulnerability_text_is_not_firmware_truth": true,
@@ -56,18 +56,21 @@
       "sample_id": "tenda-ac18-goform-family-validation",
       "vendor": "Tenda",
       "model": "AC18",
-      "firmware_candidate_id": "wustl:3805bdff1c730e906e57a1c74da97e1d13f98896d90cc0b67a30cab9d7108361",
-      "availability": "catalog_candidate",
+      "firmware_candidate_id": "tenda-official:detail-2683",
+      "availability": "local_official_artifact",
+      "artifact_sha256": "359d2feac6a7d28bd45a11e60a7062945152f516978deb7d54daea84d9211410",
+      "firmware_version": "V15.03.05.19(6318)",
       "category": "form_handler",
       "subtype": "goform_camel_registry",
       "anchors": [
-        "/goform/SetOnlineDevName",
-        "/goform/SetStaticRouteCfg",
-        "/goform/SetPptpServerCfg"
+        "/goform/GetDlnaCfg",
+        "/goform/SetDlnaCfg",
+        "/goform/expandDlnaFile"
       ],
       "role": "same-vendor-validation",
       "target_milestones": ["M1", "M2", "M5"],
-      "evidence_basis": "exact-version firmware candidate and vulnerability semantic observations"
+      "evidence_basis": "official Tenda release/CDN artifact plus independent auto-v12 route-handler replay",
+      "coverage_note": "three DLNA bindings verified; refreshDLNA remains frontend-only; Inventory remains partial for conservative symlink handling"
     },
     {
       "sample_id": "dlink-dir846-hnap-validation",

@@ -24,6 +24,12 @@ from .native_deep import (
 
 ARM_LITERAL_XREF_SCHEMA_VERSION = "firmatlas.mapping.arm-literal-xref/v1alpha1"
 _PRODUCER = AnalyzerIdentity("native-arm-literal-xref", "0.1.0")
+ARM_FEATURE_PIVOT_SCHEMA_VERSION = (
+    "firmatlas.mapping.arm-feature-pivot/v1alpha1"
+)
+_FEATURE_PIVOT_PRODUCER = AnalyzerIdentity(
+    "native-arm-feature-pivot", "0.1.0"
+)
 _CONTENT_KINDS = frozenset({"file", "hardlink", "archive", "archive_member"})
 
 
@@ -37,6 +43,24 @@ class ArmLiteralAnchor:
             raise ValueError("ARM literal anchor requires target_ref and literal_value")
         if "\x00" in self.literal_value:
             raise ValueError("ARM literal anchor cannot contain NUL")
+
+
+@dataclass(frozen=True)
+class ArmFeaturePivotAnchor:
+    target_ref: str
+    feature_token: str
+
+    def __post_init__(self) -> None:
+        if (
+            not self.target_ref.strip()
+            or len(self.feature_token.strip()) < 4
+            or not self.feature_token.strip().isascii()
+            or not self.feature_token.strip().isalnum()
+        ):
+            raise ValueError(
+                "ARM feature pivot requires an ASCII alphanumeric token "
+                "of at least four characters"
+            )
 
 
 @dataclass(frozen=True)
@@ -105,6 +129,44 @@ class ArmLiteralXrefResult:
             "coverage_status": self.coverage_status.value,
             "producer": asdict(self.producer),
             "xrefs": [asdict(item) for item in self.xrefs],
+            "evidence_atoms": [item.to_dict() for item in self.evidence_atoms],
+        }
+
+
+@dataclass(frozen=True)
+class ArmFeaturePivot:
+    pivot_id: str
+    target_ref: str
+    feature_token: str
+    literal_value: str
+    function_start_address: int
+    instruction_address: int
+    route_binding_ref: str
+    route_token: str
+    handler_identity: str
+    handler_symbol: str
+    source_construct: str
+    evidence_ids: Tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ArmFeaturePivotResult:
+    source_path: str
+    coverage_status: CoverageStatus
+    processed_bytes: int
+    producer: AnalyzerIdentity
+    profile: str
+    pivots: Tuple[ArmFeaturePivot, ...]
+    evidence_atoms: Tuple[EvidenceAtom, ...]
+    diagnostics: Tuple[str, ...] = ()
+    schema_version: str = ARM_FEATURE_PIVOT_SCHEMA_VERSION
+
+    def to_dict(self) -> dict:
+        return {
+            **asdict(self),
+            "coverage_status": self.coverage_status.value,
+            "producer": asdict(self.producer),
+            "pivots": [asdict(item) for item in self.pivots],
             "evidence_atoms": [item.to_dict() for item in self.evidence_atoms],
         }
 
@@ -363,6 +425,210 @@ def _allocated_ascii_literals(elf, content: bytes, minimum: int = 4):
                     values.add(value)
             index = max(index + 1, start + 1)
     return tuple(sorted(values))
+
+
+def discover_arm_feature_pivots(
+    source: SourceArtifactEntry,
+    content: bytes,
+    anchors: Tuple[ArmFeaturePivotAnchor, ...],
+    registrar: "NativeDeepResult",
+    profile: ArmLiteralXrefProfile = ArmLiteralXrefProfile(),
+    policy: ArmLiteralXrefPolicy = ArmLiteralXrefPolicy(),
+) -> ArmFeaturePivotResult:
+    """Join bounded feature-related literals to verified ARM route handlers."""
+
+    if registrar.source_path != source.canonical_path:
+        raise ValueError("ARM feature pivot registrar source does not match")
+    ordered = tuple(sorted(set(anchors), key=lambda item: (
+        item.feature_token.lower(), item.target_ref,
+    )))
+    if len(ordered) > policy.max_anchors:
+        return ArmFeaturePivotResult(
+            source.canonical_path,
+            CoverageStatus.SKIPPED_BY_POLICY,
+            0,
+            _FEATURE_PIVOT_PRODUCER,
+            profile.name,
+            (),
+            (),
+            ("arm_feature_pivot.anchor_budget_exceeded",),
+        )
+    probe = discover_arm_literal_xrefs(source, content, (), profile, policy)
+    if probe.coverage_status is not CoverageStatus.COMPLETED:
+        return ArmFeaturePivotResult(
+            source.canonical_path,
+            probe.coverage_status,
+            probe.processed_bytes,
+            _FEATURE_PIVOT_PRODUCER,
+            profile.name,
+            (),
+            probe.evidence_atoms,
+            probe.diagnostics,
+        )
+    try:
+        elf = _parse_elf(content)
+        literals = _allocated_ascii_literals(elf, content)
+    except (TypeError, ValueError, struct.error):
+        literals = ()
+    anchor_by_internal_ref = {
+        "feature-pivot-anchor:" + hashlib.sha256(json.dumps(
+            [anchor.target_ref, anchor.feature_token.lower()],
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode()).hexdigest(): anchor
+        for anchor in ordered
+    }
+    literal_anchors = tuple(
+        ArmLiteralAnchor(internal_ref, literal)
+        for internal_ref, anchor in anchor_by_internal_ref.items()
+        for literal in literals
+        if anchor.feature_token.lower() in literal.lower()
+    )
+    if len(literal_anchors) > policy.max_anchors:
+        return ArmFeaturePivotResult(
+            source.canonical_path,
+            CoverageStatus.SKIPPED_BY_POLICY,
+            len(content),
+            _FEATURE_PIVOT_PRODUCER,
+            profile.name,
+            (),
+            (),
+            ("arm_feature_pivot.literal_budget_exceeded",),
+        )
+    xrefs = discover_arm_literal_xrefs(
+        source, content, literal_anchors, profile, policy
+    )
+    bindings = {}
+    for item in registrar.bindings:
+        bindings.setdefault(item.handler_address, []).append(item)
+    evidence_by_id = {
+        atom.evidence_id: atom
+        for atom in (*xrefs.evidence_atoms, *registrar.evidence_atoms)
+    }
+    pivots = []
+    for xref in xrefs.xrefs:
+        matched_bindings = bindings.get(xref.function_start_address, ())
+        anchor = anchor_by_internal_ref[xref.target_ref]
+        if not matched_bindings:
+            continue
+        for binding in matched_bindings:
+            if binding.handler_symbol is None:
+                continue
+            pivot_id = "arm-feature-pivot:" + hashlib.sha256(json.dumps(
+                [
+                    source.canonical_path,
+                    anchor.target_ref,
+                    anchor.feature_token.lower(),
+                    xref.literal_value,
+                    xref.instruction_address,
+                    binding.binding_id,
+                ],
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ).encode()).hexdigest()
+            literal_atom = capture_evidence(
+                source,
+                content,
+                SpanSelection(
+                    SpanKind.BINARY,
+                    xref.literal_offset,
+                    xref.literal_offset
+                    + len(xref.literal_value.encode("utf-8")),
+                ),
+                EvidenceClaim(
+                    pivot_id,
+                    "matches_feature_literal",
+                    "{}->{}".format(
+                        anchor.feature_token.lower(), xref.literal_value
+                    ),
+                    ObservationKind.DETERMINISTIC_DERIVED,
+                    "matches_feature_literal",
+                    0.9,
+                ),
+                _FEATURE_PIVOT_PRODUCER,
+            )
+            handler_atom = capture_evidence(
+                source,
+                content,
+                SpanSelection(
+                    SpanKind.BINARY,
+                    xref.instruction_offset,
+                    xref.instruction_offset + 8,
+                ),
+                EvidenceClaim(
+                    pivot_id,
+                    "associates_feature_with_registered_handler",
+                    "{}->{}".format(
+                        anchor.feature_token.lower(), binding.route_token
+                    ),
+                    ObservationKind.DETERMINISTIC_DERIVED,
+                    "associates_feature_with_registered_handler",
+                    0.9,
+                ),
+                _FEATURE_PIVOT_PRODUCER,
+            )
+            evidence_by_id[literal_atom.evidence_id] = literal_atom
+            evidence_by_id[handler_atom.evidence_id] = handler_atom
+            evidence_ids = tuple(dict.fromkeys((
+                *xref.evidence_ids,
+                *binding.evidence_ids,
+                literal_atom.evidence_id,
+                handler_atom.evidence_id,
+            )))
+            pivots.append(ArmFeaturePivot(
+                pivot_id,
+                anchor.target_ref,
+                anchor.feature_token.lower(),
+                xref.literal_value,
+                xref.function_start_address,
+                xref.instruction_address,
+                binding.binding_id,
+                binding.route_token,
+                binding.handler_identity,
+                binding.handler_symbol,
+                "arm32.feature-literal-xref+verified-registrar-handler",
+                evidence_ids,
+            ))
+    limited = len(pivots) > policy.max_xrefs
+    if limited:
+        pivots = sorted(pivots, key=lambda item: item.pivot_id)[:policy.max_xrefs]
+    selected_evidence_ids = {
+        evidence_id for item in pivots for evidence_id in item.evidence_ids
+    }
+    coverage = (
+        CoverageStatus.COMPLETED
+        if (
+            xrefs.coverage_status is CoverageStatus.COMPLETED
+            and registrar.coverage_status is CoverageStatus.COMPLETED
+            and not limited
+        )
+        else CoverageStatus.PARTIAL
+    )
+    diagnostics = tuple(sorted({
+        *xrefs.diagnostics,
+        *(
+            ()
+            if registrar.coverage_status is CoverageStatus.COMPLETED
+            else ("arm_feature_pivot.registrar_coverage_incomplete",)
+        ),
+        *(("arm_feature_pivot.pivot_budget_exhausted",) if limited else ()),
+    }))
+    return ArmFeaturePivotResult(
+        source.canonical_path,
+        coverage,
+        len(content),
+        _FEATURE_PIVOT_PRODUCER,
+        profile.name,
+        tuple(sorted(pivots, key=lambda item: item.pivot_id)),
+        tuple(sorted(
+            (
+                atom for evidence_id, atom in evidence_by_id.items()
+                if evidence_id in selected_evidence_ids
+            ),
+            key=lambda atom: atom.evidence_id,
+        )),
+        diagnostics,
+    )
 
 
 def discover_arm_function_literal_xrefs(

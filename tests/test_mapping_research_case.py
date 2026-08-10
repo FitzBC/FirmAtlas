@@ -271,7 +271,8 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual(
             [
                 "supported", "supported", "supported", "supported",
-                "supported", "supported", "supported", "unresolved",
+                "supported", "supported", "supported", "supported",
+                "unresolved",
             ],
             [claim["status"] for claim in case["claims"]],
         )
@@ -319,8 +320,27 @@ class ResearchCaseTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            "stage:dlna-disabled-feature-gate",
+            "stage:dlna-family-variant-positive-control",
             case["stages"][-1]["stage_id"],
+        )
+        family_evidence = {
+            item["evidence_ref"]: item
+            for item in case["evidence"]
+            if item["evidence_ref"].startswith("coverage:ac9-ac18-")
+            or item["evidence_ref"].startswith("coverage:ac18-dlna-")
+            or item["evidence_ref"].startswith("coverage:ac9-dlna-")
+        }
+        self.assertEqual(
+            {
+                "coverage:ac9-dlna-feature-pivots",
+                "coverage:ac18-dlna-route-positive-control",
+                "coverage:ac9-ac18-dlna-family-equivalence",
+            },
+            set(family_evidence),
+        )
+        self.assertEqual(
+            {"coverage_ledger"},
+            {item["kind"] for item in family_evidence.values()},
         )
         feature_gate = [
             item for item in case["evidence"]

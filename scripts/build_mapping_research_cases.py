@@ -42,6 +42,10 @@ AC9_R2_14_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-14-vendor-tenda-ac9-disabled-dlna-feature.json"
 )
+AC9_R2_15_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1028,6 +1032,9 @@ def build_ac9_dlna_fixture_split_case():
     feature_gate_report = json.loads(
         AC9_R2_14_REPORT.read_text(encoding="utf-8")
     )
+    family_pivot_report = json.loads(
+        AC9_R2_15_REPORT.read_text(encoding="utf-8")
+    )
     usb_status_dlna_xref_ids = {
         item["xref_id"]
         for item in usb_status_report["usb_status_route_handler_chain"][
@@ -1139,7 +1146,41 @@ def build_ac9_dlna_fixture_split_case():
         "resolves_target_component_presence",
         "native-relationship-report@v1alpha1",
     )
-    evidence = (*atom_evidence, target_resolution_ref)
+    family_report_sha = hashlib.sha256(AC9_R2_15_REPORT.read_bytes()).hexdigest()
+    ac9_feature_pivot_ref = CaseEvidenceReference(
+        "coverage:ac9-dlna-feature-pivots",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_15_REPORT.as_posix(),
+        family_report_sha,
+        "json:$.ac9_primary.dlna_feature_pivots",
+        "bounds_disabled_feature_native_pivots",
+        "native-arm-feature-pivot@0.1.0",
+    )
+    ac18_positive_control_ref = CaseEvidenceReference(
+        "coverage:ac18-dlna-route-positive-control",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_15_REPORT.as_posix(),
+        family_report_sha,
+        "json:$.ac18_positive_control.dlna_route_bindings",
+        "proves_neighbor_variant_route_bindings",
+        "native-deep-arm-pic-callsite@0.1.0",
+    )
+    family_equivalence_ref = CaseEvidenceReference(
+        "coverage:ac9-ac18-dlna-family-equivalence",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_15_REPORT.as_posix(),
+        family_report_sha,
+        "json:$.family_comparison",
+        "compares_family_variant_assets_and_feature_state",
+        "family-variant-report@v1alpha1",
+    )
+    evidence = (
+        *atom_evidence,
+        target_resolution_ref,
+        ac9_feature_pivot_ref,
+        ac18_positive_control_ref,
+        family_equivalence_ref,
+    )
     by_capability = {}
     for item in evidence:
         by_capability.setdefault(item.capability, []).append(item.evidence_ref)
@@ -1218,6 +1259,8 @@ def build_ac9_dlna_fixture_split_case():
             "frontend_tokenizer_coverage_repair",
             "disabled_frontend_feature_gate",
             "residual_ui_request",
+            "bounded_feature_literal_pivot",
+            "family_variant_positive_control",
         ),
         research_question=(
             "Do bundled DLNA request code and JSON response fixtures prove that "
@@ -1277,6 +1320,20 @@ def build_ac9_dlna_fixture_split_case():
                 ),
             ),
             CaseClaim(
+                "claim:dlna-family-variant-positive-control",
+                "The AC9 build has only three bounded DLNA literal pivots, all "
+                "inside the verified GetUSBStatus handler, while an independently "
+                "analyzed official AC18 enabled build registers GetDlnaCfg, "
+                "SetDlnaCfg, and expandDlnaFile; byte-equivalent fixtures and a "
+                "normalized-equivalent page asset support a shared family-template "
+                "and build-pruning candidate without transferring ownership to AC9.",
+                (
+                    ac9_feature_pivot_ref.evidence_ref,
+                    ac18_positive_control_ref.evidence_ref,
+                    family_equivalence_ref.evidence_ref,
+                ),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
                 "No exact Native registration or handler binding currently connects "
                 "GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform "
@@ -1289,6 +1346,9 @@ def build_ac9_dlna_fixture_split_case():
                     *command_binding_refs, *literal_xref_refs,
                     *usb_status_frontend_refs, *usb_status_binding_refs,
                     *usb_status_literal_xref_refs,
+                    ac9_feature_pivot_ref.evidence_ref,
+                    ac18_positive_control_ref.evidence_ref,
+                    family_equivalence_ref.evidence_ref,
                 ),
                 CaseClaimStatus.UNRESOLVED,
             ),
@@ -1348,6 +1408,16 @@ def build_ac9_dlna_fixture_split_case():
                     "claim:dlna-handler-owner",
                 ),
             ),
+            CaseStage(
+                "stage:dlna-family-variant-positive-control", 8,
+                "Pivot from the exact disabled feature token into registered AC9 "
+                "handlers, then compare an official independently mapped AC18 "
+                "enabled build while preserving artifact-local ownership.",
+                (
+                    "claim:dlna-family-variant-positive-control",
+                    "claim:dlna-handler-owner",
+                ),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1372,6 +1442,7 @@ def build_ac9_dlna_fixture_split_case():
             "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
             "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding.",
             "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set.",
+            "Transferring AC18 handler addresses or vulnerability state to AC9 would confuse a family-level positive control with artifact-local proof.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -1381,6 +1452,7 @@ def build_ac9_dlna_fixture_split_case():
             "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
             "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner.",
             "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation.",
+            "Family holdout showing that enabled variants can prioritize symbols and structures without resolving a disabled target build by analogy.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
@@ -1390,6 +1462,7 @@ def build_ac9_dlna_fixture_split_case():
             "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
             "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations.",
             "A disabled declared UI path does not prove backend absence, runtime inaccessibility, or behavior in another product/version build.",
+            "The AC18 positive control proves only AC18 bindings; the AC9 benchmark remains a repacked rootfs and may omit partitions or conditional components.",
         ),
     ))
 

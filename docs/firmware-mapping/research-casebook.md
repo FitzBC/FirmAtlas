@@ -263,6 +263,14 @@ refreshDLNA / expandDlnaFile` 归因为 disabled-feature residual。单看宏值
 义务仍 open。这个案例可用于研究产品变体中的残留 UI 资产，以及为何“解释了前端差集”
 不等于“证明了执行端缺失”。
 
+R2-15 把相邻状态调查固化为通用 ARM feature pivot，并加入官方 AC18 启用 build 作为家族
+阳性对照。AC9 中由 `dlna` 功能词恢复的三条 pivot 全部落在已验证的
+`GetUSBStatus → formGetUSBStatus`，仍没有三条 DLNA 配置 route binding；AC18 则独立恢复
+`GetDlnaCfg / SetDlnaCfg / expandDlnaFile` 及各自 handler。两者的 DLNA 页面模板和三个 fixture
+高度一致，但 feature/component/binding 状态发生一致分裂。案例因此新增第八阶段与 supported
+的 family-variant-positive-control claim；“共享模板 + build 裁剪”仍是跨样本解释，不能把
+AC18 地址或漏洞状态迁移成 AC9 事实，核心 owner 义务继续 open。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：
