@@ -68,6 +68,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertEqual(
             {
                 "inventory", "source_plan", "frontend", "frontend_asset_graph",
+                "frontend_feature_gate",
                 "web_configuration",
                 "script_backend", "native", "native_ubus_registration",
                 "arm_pic_callsite", "arm_pic_registrar", "set_difference",
@@ -138,6 +139,47 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertEqual(CoverageStatus.PARTIAL, frontend.coverage_status)
         self.assertIn("frontend.invalid_utf8", frontend.diagnostics)
         self.assertEqual(0, len(result.catalog.candidates))
+
+    def test_auto_profile_attributes_requests_to_a_disabled_frontend_feature(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "webroot_ro/js").mkdir(parents=True)
+            (root / "webroot_ro/js/macro_config.js").write_text(
+                'var CONFIG_DLNA_SERVER="n";', encoding="utf-8"
+            )
+            (root / "webroot_ro/js/main.js").write_text(
+                '''var modulesObj={"usb_dlna":CONFIG_DLNA_SERVER},prop;
+if(modulesObj[prop]=="y"){$("#"+prop).removeClass("none");}
+case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
+                encoding="utf-8",
+            )
+            (root / "webroot_ro/dlna.html").write_text(
+                '<script src="js/dlna.js"></script>', encoding="utf-8"
+            )
+            (root / "webroot_ro/js/dlna.js").write_text(
+                '$.getJSON("goform/GetDlnaCfg", cb);', encoding="utf-8"
+            )
+
+            result = analyze_extracted_root(MappingAnalysisRequest(
+                root=root,
+                firmware_artifact_sha256=hashlib.sha256(
+                    b"feature-gated-firmware"
+                ).hexdigest(),
+            ))
+
+        stage = next(
+            item for item in result.stages
+            if item.stage_name == "frontend_feature_gate"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
+        self.assertEqual(1, stage.output_count)
+        candidate = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.FRONTEND_FEATURE_GATE
+        )
+        self.assertEqual("CONFIG_DLNA_SERVER", candidate.canonical_identity)
+        self.assertEqual("disabled", dict(candidate.attributes)["gate_status"])
 
     def test_cli_writes_full_run_and_prints_a_bounded_summary(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -215,9 +257,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v10", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v11", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v10",
+            "firmatlas.mapping.analyzer-registry/builtin-v11",
             result.analyzer_registry_id,
         )
 
@@ -271,6 +313,55 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         self.assertEqual(
             "formGetUSBStatus",
             dict(usb_status_handler.attributes)["handler_symbol"],
+        )
+        feature_gate_stage = next(
+            item for item in result.stages
+            if item.stage_name == "frontend_feature_gate"
+        )
+        self.assertEqual(
+            CoverageStatus.COMPLETED, feature_gate_stage.coverage_status
+        )
+        self.assertEqual(3, feature_gate_stage.output_count)
+        dlna_gate = next(
+            item for item in result.catalog.candidates
+            if (
+                item.candidate_kind
+                is DiscoveryCandidateKind.FRONTEND_FEATURE_GATE
+                and item.canonical_identity == "CONFIG_DLNA_SERVER"
+            )
+        )
+        dlna_gate_attributes = dict(dlna_gate.attributes)
+        self.assertEqual("disabled", dlna_gate_attributes["gate_status"])
+        self.assertEqual("n", dlna_gate_attributes["configured_value"])
+        self.assertEqual("y", dlna_gate_attributes["enabled_value"])
+        self.assertEqual("usb_dlna", dlna_gate_attributes["ui_target_id"])
+        self.assertEqual(
+            [
+                "/goform/refreshDLNA",
+                "goform/GetDlnaCfg",
+                "goform/SetDlnaCfg",
+                "goform/expandDlnaFile?",
+            ],
+            json.loads(dlna_gate_attributes["request_endpoints"]),
+        )
+        feature_disabled = {
+            item.canonical_identity
+            for item in result.catalog.candidates
+            if (
+                item.candidate_kind
+                is DiscoveryCandidateKind.SET_DIFFERENCE_ATTRIBUTION
+                and dict(item.attributes)["attribution_kind"]
+                == "frontend_feature_disabled"
+            )
+        }
+        self.assertEqual(
+            {
+                "GetDlnaCfg",
+                "SetDlnaCfg",
+                "expandDlnaFile",
+                "refreshDLNA",
+            },
+            feature_disabled,
         )
         usb_status_binding = next(
             item for item in result.catalog.candidates

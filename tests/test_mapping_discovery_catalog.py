@@ -25,6 +25,7 @@ from firmatlas.mapping import (
     discover_web_configuration,
     discover_native_hints,
     discover_frontend_asset_graph,
+    discover_frontend_feature_gates,
     FrontendAssetInput,
     ParameterClueArtifact,
     ParameterClueArtifactRole,
@@ -35,6 +36,51 @@ from firmatlas.mapping import (
 
 
 class DiscoveryCatalogContractTests(unittest.TestCase):
+    def test_feature_gate_batch_publishes_disabled_request_scope(self):
+        contents = {
+            "webroot_ro/js/macro_config.js": b'var CONFIG_DLNA_SERVER="n";',
+            "webroot_ro/js/main.js": b'''var modulesObj={"usb_dlna":CONFIG_DLNA_SERVER},prop;
+if(modulesObj[prop]=="y"){$("#"+prop).removeClass("none");}
+case "usb_dlna": showIframe("DLNA","dlna.html",620,450);''',
+            "webroot_ro/dlna.html": b'<script src="js/dlna.js"></script>',
+            "webroot_ro/js/dlna.js": b'$.getJSON("goform/GetDlnaCfg", cb);',
+        }
+        assets = tuple(
+            FrontendAssetInput(self.source(path, content), content)
+            for path, content in contents.items()
+        )
+        frontend = discover_frontend_asset_graph(assets)
+        feature_gates = discover_frontend_feature_gates(assets, frontend)
+
+        catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
+            firmware_artifact_sha256="1" * 64,
+            source_inventory_sha256="2" * 64,
+            batches=(
+                DiscoveryProducerBatch.frontend(
+                    frontend.results, "frontend-assets"
+                ),
+                DiscoveryProducerBatch.frontend_feature_gate(
+                    (feature_gates,), "frontend-feature-gates"
+                ),
+            ),
+        ))
+
+        candidate = next(
+            item for item in catalog.candidates
+            if item.candidate_kind.value == "frontend_feature_gate"
+        )
+        attributes = dict(candidate.attributes)
+        self.assertEqual("CONFIG_DLNA_SERVER", candidate.canonical_identity)
+        self.assertEqual("supported", candidate.claim_status.value)
+        self.assertEqual("disabled", attributes["gate_status"])
+        self.assertEqual("n", attributes["configured_value"])
+        self.assertEqual("y", attributes["enabled_value"])
+        self.assertEqual("usb_dlna", attributes["ui_target_id"])
+        self.assertEqual("webroot_ro/dlna.html", attributes["page_path"])
+        self.assertEqual(
+            '["goform/GetDlnaCfg"]', attributes["request_endpoints"]
+        )
+
     def test_native_relationship_batch_publishes_graph_ready_component_edges(self):
         content = (
             b"\x7fELF\x01\x01" + b"\x00" * 58

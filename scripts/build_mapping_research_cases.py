@@ -38,6 +38,10 @@ AC9_R2_13_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-13-vendor-tenda-ac9-tail-merged-usb-status.json"
 )
+AC9_R2_14_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-14-vendor-tenda-ac9-disabled-dlna-feature.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1021,6 +1025,9 @@ def build_ac9_dlna_fixture_split_case():
     usb_status_report = json.loads(
         AC9_R2_13_REPORT.read_text(encoding="utf-8")
     )
+    feature_gate_report = json.loads(
+        AC9_R2_14_REPORT.read_text(encoding="utf-8")
+    )
     usb_status_dlna_xref_ids = {
         item["xref_id"]
         for item in usb_status_report["usb_status_route_handler_chain"][
@@ -1033,8 +1040,11 @@ def build_ac9_dlna_fixture_split_case():
         *relationship_report["dlna_relationship_evidence"],
         *command_chain_report["daemon_command_chain_evidence"],
         *usb_status_report["usb_status_route_handler_evidence"],
+        *feature_gate_report["disabled_dlna_feature_chain"]["gate_evidence"],
+        *feature_gate_report["disabled_dlna_feature_chain"]["request_evidence"],
     )
     selected = []
+    selected_ids = set()
     for atom in atoms:
         source_path = atom["source_span"]["artifact_path"]
         capability = atom["capability"]
@@ -1072,6 +1082,11 @@ def build_ac9_dlna_fixture_split_case():
             producer == "frontend-request-producer"
             and atom["object_value"] == "goform/GetUSBStatus?"
         )
+        is_feature_gate = producer == "frontend-feature-gate"
+        is_disabled_dlna_request = (
+            producer == "frontend-request-producer"
+            and source_path == "webroot_ro/js/dlna.js"
+        )
         if (
             is_dlna_frontend_request
             or is_fixture_or_architecture
@@ -1079,14 +1094,20 @@ def build_ac9_dlna_fixture_split_case():
             or is_selected_command_or_xref
             or is_usb_status_binding
             or is_usb_status_frontend
+            or is_feature_gate
+            or is_disabled_dlna_request
         ):
-            selected.append(atom)
+            if atom["evidence_id"] not in selected_ids:
+                selected.append(atom)
+                selected_ids.add(atom["evidence_id"])
     atom_evidence = tuple(
         CaseEvidenceReference(
             atom["evidence_id"],
             (
                 CaseEvidenceKind.FRONTEND_REQUEST
                 if atom["producer"] == "frontend-request-producer"
+                else CaseEvidenceKind.FRONTEND_FEATURE_GATE
+                if atom["producer"] == "frontend-feature-gate"
                 else CaseEvidenceKind.RESPONSE_FIXTURE
                 if atom["producer"] == "response-fixture-producer"
                 else CaseEvidenceKind.NATIVE_RELATIONSHIP
@@ -1128,6 +1149,10 @@ def build_ac9_dlna_fixture_split_case():
             item.kind is CaseEvidenceKind.FRONTEND_REQUEST
             and item.source_path == "webroot_ro/js/dlna.js"
         )
+    )
+    feature_gate_refs = tuple(
+        item.evidence_ref for item in evidence
+        if item.kind is CaseEvidenceKind.FRONTEND_FEATURE_GATE
     )
     fixture_refs = tuple(
         item.evidence_ref for item in evidence
@@ -1191,17 +1216,29 @@ def build_ac9_dlna_fixture_split_case():
             "arm_pic_literal_xref",
             "tail_merged_route_registration",
             "frontend_tokenizer_coverage_repair",
+            "disabled_frontend_feature_gate",
+            "residual_ui_request",
         ),
         research_question=(
             "Do bundled DLNA request code and JSON response fixtures prove that "
-            "the analyzed firmware registers the corresponding goform handlers?"
+            "the analyzed firmware registers the corresponding goform handlers, "
+            "and is the declared UI path enabled in this product build?"
         ),
         evidence=evidence,
         claims=(
             CaseClaim(
                 "claim:dlna-frontend-request",
-                "The UI constructs the expandDlnaFile request.",
+                "The DLNA page script constructs GetDlnaCfg, SetDlnaCfg, "
+                "refreshDLNA, and expandDlnaFile requests.",
                 frontend_refs,
+            ),
+            CaseClaim(
+                "claim:dlna-feature-disabled-ui-path",
+                "CONFIG_DLNA_SERVER is n while the UI reveal predicate requires y; "
+                "the exact feature-map, route, page, and same-stem script chain "
+                "therefore classifies all four bundled DLNA requests as residual "
+                "requests behind a disabled declared UI path.",
+                (*feature_gate_refs, *frontend_refs),
             ),
             CaseClaim(
                 "claim:dlna-response-contract",
@@ -1246,7 +1283,8 @@ def build_ac9_dlna_fixture_split_case():
                 "execution path; the adjacent GetUSBStatus binding does not establish "
                 "an alias for those operations.",
                 (
-                    *frontend_refs, *fixture_refs, *architecture_refs,
+                    *frontend_refs, *feature_gate_refs,
+                    *fixture_refs, *architecture_refs,
                     *relationship_refs, *target_resolution_refs,
                     *command_binding_refs, *literal_xref_refs,
                     *usb_status_frontend_refs, *usb_status_binding_refs,
@@ -1300,6 +1338,16 @@ def build_ac9_dlna_fixture_split_case():
                     "claim:dlna-handler-owner",
                 ),
             ),
+            CaseStage(
+                "stage:dlna-disabled-feature-gate", 7,
+                "Follow the exact macro-to-menu-to-page-to-script chain and "
+                "classify the four frontend-only operations as residual requests "
+                "without converting UI disablement into backend absence.",
+                (
+                    "claim:dlna-feature-disabled-ui-path",
+                    "claim:dlna-handler-owner",
+                ),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1323,6 +1371,7 @@ def build_ac9_dlna_fixture_split_case():
             "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
             "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
             "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding.",
+            "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -1331,6 +1380,7 @@ def build_ac9_dlna_fixture_split_case():
             "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
             "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
             "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner.",
+            "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
@@ -1339,6 +1389,7 @@ def build_ac9_dlna_fixture_split_case():
             "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
             "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
             "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations.",
+            "A disabled declared UI path does not prove backend absence, runtime inaccessibility, or behavior in another product/version build.",
         ),
     ))
 

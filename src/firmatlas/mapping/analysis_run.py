@@ -24,6 +24,10 @@ from .frontend import (
     discover_frontend_asset_graph,
     discover_frontend_requests,
 )
+from .frontend_feature_gate import (
+    FrontendFeatureGatePolicy,
+    discover_frontend_feature_gates,
+)
 from .inventory import InventoryPolicy, SourceArtifactEntry, build_inventory
 from .parameter_clue import (
     ParameterClueArtifact,
@@ -96,7 +100,8 @@ _AUTO_V8_ANALYZERS = _AUTO_V7_ANALYZERS + ("native_relationship",)
 _AUTO_V9_ANALYZERS = _AUTO_V8_ANALYZERS + (
     "native_command_binding", "arm_literal_xref",
 )
-_AUTO_ANALYZERS = _AUTO_V9_ANALYZERS
+_AUTO_V10_ANALYZERS = _AUTO_V9_ANALYZERS
+_AUTO_ANALYZERS = _AUTO_V10_ANALYZERS + ("frontend_feature_gate",)
 
 
 @dataclass(frozen=True)
@@ -116,7 +121,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v10", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v11", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v10(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v10", _AUTO_V10_ANALYZERS)
 
     @classmethod
     def auto_v9(cls) -> "MappingAnalysisProfile":
@@ -168,7 +177,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v10", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v11", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v10(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v10",
+            _AUTO_V10_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v9(cls) -> "MappingAnalyzerRegistry":
@@ -240,6 +256,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V10 = MappingAnalyzerRegistry.builtin_v10()
 BUILTIN_ANALYZER_REGISTRY_V9 = MappingAnalyzerRegistry.builtin_v9()
 BUILTIN_ANALYZER_REGISTRY_V8 = MappingAnalyzerRegistry.builtin_v8()
 BUILTIN_ANALYZER_REGISTRY_V7 = MappingAnalyzerRegistry.builtin_v7()
@@ -262,6 +279,9 @@ class MappingAnalysisRequest:
     native_relationship_policy: NativeRelationshipPolicy = NativeRelationshipPolicy()
     native_command_binding_policy: NativeCommandBindingPolicy = NativeCommandBindingPolicy()
     arm_literal_xref_policy: ArmLiteralXrefPolicy = ArmLiteralXrefPolicy()
+    frontend_feature_gate_policy: FrontendFeatureGatePolicy = (
+        FrontendFeatureGatePolicy()
+    )
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "root", Path(self.root))
@@ -488,6 +508,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v8",
                 "firmatlas.mapping.profile/auto-v9",
                 "firmatlas.mapping.profile/auto-v10",
+                "firmatlas.mapping.profile/auto-v11",
             }
         ),
         enable_tenda_get_set_data=(
@@ -497,11 +518,15 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v8",
                 "firmatlas.mapping.profile/auto-v9",
                 "firmatlas.mapping.profile/auto-v10",
+                "firmatlas.mapping.profile/auto-v11",
             }
         ),
         enable_regex_literals=(
             request.profile.profile_id
-            == "firmatlas.mapping.profile/auto-v10"
+            in {
+                "firmatlas.mapping.profile/auto-v10",
+                "firmatlas.mapping.profile/auto-v11",
+            }
         ),
     )
     frontend_graph = None
@@ -519,6 +544,21 @@ def analyze_extracted_root(
             discover_frontend_requests(source, content, frontend_policy)
             for source, content in frontend_sources
         )
+    frontend_feature_gates = (
+        discover_frontend_feature_gates(
+            tuple(
+                FrontendAssetInput(source, content)
+                for source, content in frontend_sources
+            ),
+            frontend_graph,
+            request.frontend_feature_gate_policy,
+        )
+        if (
+            "frontend_feature_gate" in request.profile.enabled_analyzers
+            and frontend_graph is not None
+        )
+        else None
+    )
     parameter_clues = None
     parameter_clue_artifacts = ()
     if (
@@ -769,6 +809,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v8",
                     "firmatlas.mapping.profile/auto-v9",
                     "firmatlas.mapping.profile/auto-v10",
+                    "firmatlas.mapping.profile/auto-v11",
                 }
                 else ()
             )
@@ -785,12 +826,17 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v8",
                         "firmatlas.mapping.profile/auto-v9",
                         "firmatlas.mapping.profile/auto-v10",
+                        "firmatlas.mapping.profile/auto-v11",
                     },
                     include_fixed_action_dynamic_query=(
                         request.profile.profile_id
-                        == "firmatlas.mapping.profile/auto-v10"
+                        in {
+                            "firmatlas.mapping.profile/auto-v10",
+                            "firmatlas.mapping.profile/auto-v11",
+                        }
                     ),
                 ),
+                feature_gates=frontend_feature_gates,
             )
     initial_obligations = (
         *((correlation.obligations) if correlation is not None else ()),
@@ -805,6 +851,12 @@ def analyze_extracted_root(
         _batch(DiscoveryProducerBatch.script_backend, scripts, "auto:script-backend"),
         _batch(DiscoveryProducerBatch.native, native, "auto:native"),
     ]
+    if "frontend_feature_gate" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.frontend_feature_gate,
+            (frontend_feature_gates,) if frontend_feature_gates is not None else (),
+            "auto:frontend-feature-gate",
+        ))
     if "parameter_clue" in request.profile.enabled_analyzers:
         batches.append(_batch(
             DiscoveryProducerBatch.parameter_clue,
@@ -926,6 +978,23 @@ def analyze_extracted_root(
             "arm_literal_xref",
             arm_literal_xrefs,
             sum(len(item.xrefs) for item in arm_literal_xrefs),
+        ))
+    if "frontend_feature_gate" in request.profile.enabled_analyzers:
+        graph_stage_index = next(
+            index for index, item in enumerate(stages)
+            if item.stage_name == "frontend_asset_graph"
+        )
+        stages.insert(graph_stage_index + 1, MappingAnalysisStage(
+            "frontend_feature_gate",
+            frontend_feature_gates.coverage_status
+            if frontend_feature_gates is not None
+            else CoverageStatus.NOT_APPLICABLE,
+            len(frontend_sources),
+            len(frontend_feature_gates.gates)
+            if frontend_feature_gates is not None else 0,
+            frontend_feature_gates.diagnostics
+            if frontend_feature_gates is not None
+            else ("frontend asset graph unavailable",),
         ))
     if "native_ubus_registration" in request.profile.enabled_analyzers:
         stages.append(_stage(

@@ -2,8 +2,8 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1 corpus gate 仍为 `partial`；R2-03 AC9 历史 expectation diff 与对象载荷参数闭环已验证
-> 最近更新：2026-08-09
+> 当前状态：M1 corpus gate 仍为 `partial`；R2-14 AC9 disabled frontend feature gate 已验证
+> 最近更新：2026-08-10
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
 本文档是 FirmAtlas 新一代固件通信测绘工具的唯一主控入口。后续会话或 Agent 开始相关工作时，必须先阅读本文、仓库根目录 `AGENTS.md`、根目录 `CONTEXT.md`，再阅读当前里程碑指向的设计和进度记录。
@@ -93,6 +93,7 @@
 | [R2-05 AC9 双向 PIC literal pool](./progress/2026-08-09-r2-05-ac9-bidirectional-pic.md) | Samba 漏检根因、ARM 负向 literal、59 条绑定与状态迁移 | ARM Profile、literal addressing 或 AC9 binding 集合变化时 |
 | [R2-06 AC9 registrar 全量枚举](./progress/2026-08-09-r2-06-ac9-registrar-inventory.md) | 无 anchor 枚举、双进程 185 条注册、110 条潜在隐藏接口 | registrar、route-aware 差集或 hidden coverage gate 变化时 |
 | [R2-07 AC9 handler-first 注册布局](./progress/2026-08-09-r2-07-ac9-handler-first.md) | Upnp/SysLog 漏检根因、287 个 Native 辅助制品、DLNA 剩余义务 | ARM 参数布局、Frontend-only 归因或辅助检索策略变化时 |
+| [R2-14 AC9 disabled DLNA feature](./progress/2026-08-10-r2-14-ac9-disabled-dlna-feature.md) | 五段 UI 功能开关、四条残留 DLNA 请求、非后端缺失边界 | feature gate、产品变体或 Frontend-only 归因变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 

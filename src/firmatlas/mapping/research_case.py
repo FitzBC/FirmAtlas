@@ -25,6 +25,7 @@ def _validate_unique_strings(values: Tuple[str, ...], label: str) -> None:
 
 class CaseEvidenceKind(str, Enum):
     FRONTEND_REQUEST = "frontend_request"
+    FRONTEND_FEATURE_GATE = "frontend_feature_gate"
     RESPONSE_FIXTURE = "response_fixture"
     WEB_CONFIGURATION = "web_configuration"
     SCRIPT_BACKEND = "script_backend"

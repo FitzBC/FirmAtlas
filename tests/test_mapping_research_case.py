@@ -247,7 +247,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][0]
 
         self.assertTrue(corpus["validation"]["paper_ready"])
-        self.assertEqual(13, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(14, corpus["validation"]["evidence_line_count"])
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
             [case["claims"][index]["status"] for index in (2, 3, 4)],
@@ -271,7 +271,7 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual(
             [
                 "supported", "supported", "supported", "supported",
-                "supported", "supported", "unresolved",
+                "supported", "supported", "supported", "unresolved",
             ],
             [claim["status"] for claim in case["claims"]],
         )
@@ -287,7 +287,7 @@ class ResearchCaseTests(unittest.TestCase):
             item for item in case["evidence"]
             if item["kind"] == "frontend_request"
         ]
-        self.assertEqual(2, len(frontend))
+        self.assertEqual(5, len(frontend))
         self.assertEqual(
             {"constructs_request"},
             {item["capability"] for item in frontend},
@@ -319,8 +319,23 @@ class ResearchCaseTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            "stage:dlna-usb-status-route-handler",
+            "stage:dlna-disabled-feature-gate",
             case["stages"][-1]["stage_id"],
+        )
+        feature_gate = [
+            item for item in case["evidence"]
+            if item["kind"] == "frontend_feature_gate"
+        ]
+        self.assertEqual(5, len(feature_gate))
+        self.assertEqual(
+            {
+                "declares_feature_value",
+                "maps_feature_to_ui_target",
+                "reveals_feature_target",
+                "routes_feature_target_to_page",
+                "loads_feature_script",
+            },
+            {item["capability"] for item in feature_gate},
         )
         resolution = next(
             item for item in case["evidence"]

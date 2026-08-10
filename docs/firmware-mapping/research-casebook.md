@@ -253,6 +253,16 @@ DLNA 状态”，但不能把 `GetUSBStatus` 当成 `GetDlnaCfg / SetDlnaCfg / r
 expandDlnaFile` 的别名。因此案例新增 supported 相邻路径 claim，而核心 handler-owner
 obligation 继续 open；这比用共享状态字符串强行关闭义务更符合证据边界。
 
+R2-14 为这四条未绑定操作增加了产品配置层解释，但仍没有越界关闭 handler owner。
+`macro_config.js` 声明 `CONFIG_DLNA_SERVER=n`；`main.js` 将该符号映射到 `usb_dlna`，
+且只有配置值为 `y` 才移除隐藏样式；同一 target 路由到 `dlna.html`，页面再加载同名
+`js/dlna.js`。只有五段全部成立时，工具才把其中 `GetDlnaCfg / SetDlnaCfg /
+refreshDLNA / expandDlnaFile` 归因为 disabled-feature residual。单看宏值不足以证明页面
+受它控制；完整 UI 禁用链也不足以证明后端不存在。因此案例新增 supported
+`claim:dlna-feature-disabled-ui-path` 和第七阶段，但 `claim:dlna-handler-owner` 仍 unresolved、
+义务仍 open。这个案例可用于研究产品变体中的残留 UI 资产，以及为何“解释了前端差集”
+不等于“证明了执行端缺失”。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：

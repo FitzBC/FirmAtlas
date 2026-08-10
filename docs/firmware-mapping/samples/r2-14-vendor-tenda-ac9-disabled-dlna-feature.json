@@ -1,0 +1,687 @@
+{
+  "analysis_run_id": "mapping-analysis-run:536d37f8d20df17772e5f6bbc6bd85688845f87e61ebd2c542404ba02a9fed33",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v11",
+  "catalog_id": "discovery-catalog:6e5aef9e43f4d7510395e781c90e67c0bedaee26b37263550ff37b602217eef5",
+  "coverage_status": "completed",
+  "disabled_dlna_feature_chain": {
+    "configured_value": "n",
+    "enabled_value": "y",
+    "feature_gate_candidate_id": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343",
+    "feature_symbol": "CONFIG_DLNA_SERVER",
+    "gate_evidence": [
+      {
+        "capability": "maps_feature_to_ui_target",
+        "confidence": 1.0,
+        "evidence_id": "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+        "object_value": "CONFIG_DLNA_SERVER->usb_dlna",
+        "observation_kind": "deterministic_derived",
+        "predicate": "maps_feature_to_ui_target",
+        "producer": "frontend-feature-gate",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/main.js",
+          "artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "end_byte": 17412,
+          "end_column": 47,
+          "end_line": 534,
+          "excerpt_sha256": "0affb0ca451a3b71ef5363c3d386a2c705608ed2ca4fcd87f72e4a33303986a0",
+          "locator": "text_utf8:bytes=17382-17412;lines=534:17-534:47",
+          "span_kind": "text_utf8",
+          "start_byte": 17382,
+          "start_column": 17,
+          "start_line": 534
+        },
+        "subject_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      },
+      {
+        "capability": "reveals_feature_target",
+        "confidence": 1.0,
+        "evidence_id": "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+        "object_value": "usb_dlna=y",
+        "observation_kind": "deterministic_derived",
+        "predicate": "reveals_feature_target",
+        "producer": "frontend-feature-gate",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/main.js",
+          "artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "end_byte": 17635,
+          "end_column": 50,
+          "end_line": 541,
+          "excerpt_sha256": "119e57eb8d3dbf6eedcd986ea9780ffedfc7561ed17875f9b6d5c58cb96d58c2",
+          "locator": "text_utf8:bytes=17554-17635;lines=540:13-541:50",
+          "span_kind": "text_utf8",
+          "start_byte": 17554,
+          "start_column": 13,
+          "start_line": 540
+        },
+        "subject_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      },
+      {
+        "capability": "routes_feature_target_to_page",
+        "confidence": 1.0,
+        "evidence_id": "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+        "object_value": "usb_dlna->webroot_ro/dlna.html",
+        "observation_kind": "deterministic_derived",
+        "predicate": "routes_feature_target_to_page",
+        "producer": "frontend-feature-gate",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/main.js",
+          "artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "end_byte": 99674,
+          "end_column": 45,
+          "end_line": 2548,
+          "excerpt_sha256": "9463accbf126df100c4108d5d3561ccf2458ad263fdff31f9a1f9b26c26558c7",
+          "locator": "text_utf8:bytes=99665-99674;lines=2548:36-2548:45",
+          "span_kind": "text_utf8",
+          "start_byte": 99665,
+          "start_column": 36,
+          "start_line": 2548
+        },
+        "subject_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      },
+      {
+        "capability": "declares_feature_value",
+        "confidence": 1.0,
+        "evidence_id": "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+        "object_value": "CONFIG_DLNA_SERVER=n",
+        "observation_kind": "deterministic_derived",
+        "predicate": "declares_feature_value",
+        "producer": "frontend-feature-gate",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/macro_config.js",
+          "artifact_sha256": "998408b3a5b83e5bb571570f8da70ad985dd2219fd34533f0441b0d1a0d8e274",
+          "end_byte": 2010,
+          "end_column": 27,
+          "end_line": 66,
+          "excerpt_sha256": "1b16b1df538ba12dc3f97edbb85caa7050d46c148134290feba80f8236c83db9",
+          "locator": "text_utf8:bytes=2009-2010;lines=66:26-66:27",
+          "span_kind": "text_utf8",
+          "start_byte": 2009,
+          "start_column": 26,
+          "start_line": 66
+        },
+        "subject_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      },
+      {
+        "capability": "loads_feature_script",
+        "confidence": 1.0,
+        "evidence_id": "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+        "object_value": "webroot_ro/dlna.html->webroot_ro/js/dlna.js",
+        "observation_kind": "deterministic_derived",
+        "predicate": "loads_feature_script",
+        "producer": "frontend-feature-gate",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/dlna.html",
+          "artifact_sha256": "89bd6c3533cb3b90b704a1982a137968460ad3834c93fb38002b2d6ea5d6d9d5",
+          "end_byte": 4242,
+          "end_column": 61,
+          "end_line": 83,
+          "excerpt_sha256": "895a35c5d46b38e09375f7df1a7afb8f8674b20bcb7c1a4ae549130a42be0fc6",
+          "locator": "text_utf8:bytes=4199-4242;lines=83:18-83:61",
+          "span_kind": "text_utf8",
+          "start_byte": 4199,
+          "start_column": 18,
+          "start_line": 83
+        },
+        "subject_ref": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343"
+      }
+    ],
+    "page_path": "webroot_ro/dlna.html",
+    "request_endpoints": [
+      "/goform/refreshDLNA",
+      "goform/GetDlnaCfg",
+      "goform/SetDlnaCfg",
+      "goform/expandDlnaFile?"
+    ],
+    "request_evidence": [
+      {
+        "capability": "constructs_request",
+        "confidence": 1.0,
+        "evidence_id": "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+        "object_value": "goform/GetDlnaCfg",
+        "observation_kind": "direct_static",
+        "predicate": "constructs_request",
+        "producer": "frontend-request-producer",
+        "producer_version": "0.4.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/dlna.js",
+          "artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "end_byte": 699,
+          "end_column": 31,
+          "end_line": 21,
+          "excerpt_sha256": "3870ce82d0b95183476ff70980ca67435b9ef932cc55c271033a9564d939cf5b",
+          "locator": "text_utf8:bytes=682-699;lines=21:14-21:31",
+          "span_kind": "text_utf8",
+          "start_byte": 682,
+          "start_column": 14,
+          "start_line": 21
+        },
+        "subject_ref": "frontend-request:546eaeb30b2e120541048bc5c13cf88515c305aae409cbd30c3f4e685fd58eec"
+      },
+      {
+        "capability": "constructs_request",
+        "confidence": 1.0,
+        "evidence_id": "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+        "object_value": "goform/SetDlnaCfg",
+        "observation_kind": "direct_static",
+        "predicate": "constructs_request",
+        "producer": "frontend-request-producer",
+        "producer_version": "0.4.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/dlna.js",
+          "artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "end_byte": 733,
+          "end_column": 31,
+          "end_line": 22,
+          "excerpt_sha256": "a67b746a98f32f5210519c631ebbb8522470f32094d280d5259b608a4cd6616b",
+          "locator": "text_utf8:bytes=716-733;lines=22:14-22:31",
+          "span_kind": "text_utf8",
+          "start_byte": 716,
+          "start_column": 14,
+          "start_line": 22
+        },
+        "subject_ref": "frontend-request:02207369388afc530ed82262af01a3165a3cc16f14869278b9f81be8d06ba2c4"
+      },
+      {
+        "capability": "constructs_request",
+        "confidence": 1.0,
+        "evidence_id": "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+        "object_value": "goform/expandDlnaFile?",
+        "observation_kind": "direct_static",
+        "predicate": "constructs_request",
+        "producer": "frontend-request-producer",
+        "producer_version": "0.4.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/dlna.js",
+          "artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "end_byte": 4065,
+          "end_column": 53,
+          "end_line": 113,
+          "excerpt_sha256": "906d735a1c961c7539b35703c0a0e6de9fbb8b13bf7d16e3b18b4b041934066d",
+          "locator": "text_utf8:bytes=4043-4065;lines=113:31-113:53",
+          "span_kind": "text_utf8",
+          "start_byte": 4043,
+          "start_column": 31,
+          "start_line": 113
+        },
+        "subject_ref": "frontend-request:6178796e94a5ff48056254880c73509e1ca1d51012aaea04e794c4c1b6716903"
+      },
+      {
+        "capability": "resolves_transport_method",
+        "confidence": 1.0,
+        "evidence_id": "evidence:a9140c29ffd6d920917bf2066aacc4154f69d64f0ff764b452001df352738c09",
+        "object_value": "POST",
+        "observation_kind": "deterministic_derived",
+        "predicate": "uses_transport_method",
+        "producer": "frontend-request-producer",
+        "producer_version": "0.4.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/libs/public.js",
+          "artifact_sha256": "873550b11395e398be025556006d7c97a66f6ea98b88db4de96f0b4db59373cd",
+          "end_byte": 35148,
+          "end_column": 11,
+          "end_line": 1335,
+          "excerpt_sha256": "72231043bc1807e6f740b235eb7511ecb33255a6a375435631196de8a9750d4b",
+          "locator": "text_utf8:bytes=35144-35148;lines=1335:7-1335:11",
+          "span_kind": "text_utf8",
+          "start_byte": 35144,
+          "start_column": 7,
+          "start_line": 1335
+        },
+        "subject_ref": "frontend-request:02207369388afc530ed82262af01a3165a3cc16f14869278b9f81be8d06ba2c4"
+      },
+      {
+        "capability": "constructs_request",
+        "confidence": 1.0,
+        "evidence_id": "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+        "object_value": "/goform/refreshDLNA",
+        "observation_kind": "direct_static",
+        "predicate": "constructs_request",
+        "producer": "frontend-request-producer",
+        "producer_version": "0.4.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/js/dlna.js",
+          "artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "end_byte": 4689,
+          "end_column": 32,
+          "end_line": 134,
+          "excerpt_sha256": "20372ed9c7694324db55a5113c469685d9528fc68efea2b3d76b71d2d809bf11",
+          "locator": "text_utf8:bytes=4670-4689;lines=134:13-134:32",
+          "span_kind": "text_utf8",
+          "start_byte": 4670,
+          "start_column": 13,
+          "start_line": 134
+        },
+        "subject_ref": "frontend-request:8d9b45c0bb253450c24418a88c3718e0df76d2c7ab2f18468fdc243d384b066d"
+      }
+    ],
+    "requests": [
+      {
+        "endpoint": "/goform/refreshDLNA",
+        "evidence_ids": [
+          "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c"
+        ],
+        "request_candidate_id": "frontend-request:8d9b45c0bb253450c24418a88c3718e0df76d2c7ab2f18468fdc243d384b066d",
+        "source_path": "webroot_ro/js/dlna.js"
+      },
+      {
+        "endpoint": "goform/GetDlnaCfg",
+        "evidence_ids": [
+          "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597"
+        ],
+        "request_candidate_id": "frontend-request:546eaeb30b2e120541048bc5c13cf88515c305aae409cbd30c3f4e685fd58eec",
+        "source_path": "webroot_ro/js/dlna.js"
+      },
+      {
+        "endpoint": "goform/SetDlnaCfg",
+        "evidence_ids": [
+          "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+          "evidence:a9140c29ffd6d920917bf2066aacc4154f69d64f0ff764b452001df352738c09"
+        ],
+        "request_candidate_id": "frontend-request:02207369388afc530ed82262af01a3165a3cc16f14869278b9f81be8d06ba2c4",
+        "source_path": "webroot_ro/js/dlna.js"
+      },
+      {
+        "endpoint": "goform/expandDlnaFile?",
+        "evidence_ids": [
+          "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95"
+        ],
+        "request_candidate_id": "frontend-request:6178796e94a5ff48056254880c73509e1ca1d51012aaea04e794c4c1b6716903",
+        "source_path": "webroot_ro/js/dlna.js"
+      }
+    ],
+    "script_paths": [
+      "webroot_ro/js/dlna.js"
+    ],
+    "ui_target_id": "usb_dlna"
+  },
+  "dlna_set_difference_attributions": [
+    {
+      "attribution_kind": "frontend_feature_disabled",
+      "candidate_id": "set-difference:2d1d32988c5450402c84b013a5ecc704f97b0c27717d543cac6c8f44e4988f73",
+      "difference_side": "frontend_only",
+      "evidence_ids": [
+        "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+        "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+        "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+        "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+        "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+        "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24"
+      ],
+      "interpretation": "The configured frontend feature is disabled and gates the page that issues this operation; the bundled request is residual in the declared UI path.",
+      "matched_artifact_paths": [
+        "webroot_ro/dlna.html",
+        "webroot_ro/js/dlna.js",
+        "webroot_ro/js/macro_config.js",
+        "webroot_ro/js/main.js"
+      ],
+      "open_obligation": "A disabled frontend feature does not prove the backend implementation is absent; test direct requests, alternate clients, conditional components, and version-matched builds before assigning ownership.",
+      "operation": "GetDlnaCfg"
+    },
+    {
+      "attribution_kind": "frontend_feature_disabled",
+      "candidate_id": "set-difference:4f78b9260cd64738e499d8b9f5371692d921126512914407dcdc861f5e1e11ff",
+      "difference_side": "frontend_only",
+      "evidence_ids": [
+        "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+        "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+        "evidence:a9140c29ffd6d920917bf2066aacc4154f69d64f0ff764b452001df352738c09",
+        "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+        "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+        "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+        "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24"
+      ],
+      "interpretation": "The configured frontend feature is disabled and gates the page that issues this operation; the bundled request is residual in the declared UI path.",
+      "matched_artifact_paths": [
+        "webroot_ro/dlna.html",
+        "webroot_ro/js/dlna.js",
+        "webroot_ro/js/libs/public.js",
+        "webroot_ro/js/macro_config.js",
+        "webroot_ro/js/main.js"
+      ],
+      "open_obligation": "A disabled frontend feature does not prove the backend implementation is absent; test direct requests, alternate clients, conditional components, and version-matched builds before assigning ownership.",
+      "operation": "SetDlnaCfg"
+    },
+    {
+      "attribution_kind": "frontend_feature_disabled",
+      "candidate_id": "set-difference:4f24f986476e31eb77739b122ea3203ebd39c25b0978918ccb496665194c1bf8",
+      "difference_side": "frontend_only",
+      "evidence_ids": [
+        "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+        "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+        "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+        "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+        "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+        "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24"
+      ],
+      "interpretation": "The configured frontend feature is disabled and gates the page that issues this operation; the bundled request is residual in the declared UI path.",
+      "matched_artifact_paths": [
+        "webroot_ro/dlna.html",
+        "webroot_ro/js/dlna.js",
+        "webroot_ro/js/macro_config.js",
+        "webroot_ro/js/main.js"
+      ],
+      "open_obligation": "A disabled frontend feature does not prove the backend implementation is absent; test direct requests, alternate clients, conditional components, and version-matched builds before assigning ownership.",
+      "operation": "expandDlnaFile"
+    },
+    {
+      "attribution_kind": "frontend_feature_disabled",
+      "candidate_id": "set-difference:36e6926f880873548198f1fd7018452bc135833a3a445e85c6da9a3d7c414b92",
+      "difference_side": "frontend_only",
+      "evidence_ids": [
+        "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+        "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+        "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+        "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+        "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+        "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24"
+      ],
+      "interpretation": "The configured frontend feature is disabled and gates the page that issues this operation; the bundled request is residual in the declared UI path.",
+      "matched_artifact_paths": [
+        "webroot_ro/dlna.html",
+        "webroot_ro/js/dlna.js",
+        "webroot_ro/js/macro_config.js",
+        "webroot_ro/js/main.js"
+      ],
+      "open_obligation": "A disabled frontend feature does not prove the backend implementation is absent; test direct requests, alternate clients, conditional components, and version-matched builds before assigning ownership.",
+      "operation": "refreshDLNA"
+    }
+  ],
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "frontend_feature_gates": [
+    {
+      "candidate_id": "frontend-feature-gate:a864b2afc9361191a38f1e8a438a545c045aa77782ea368a1592e0bdcadcd343",
+      "configured_value": "n",
+      "enabled_value": "y",
+      "evidence_ids": [
+        "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+        "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+        "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+        "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+        "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+        "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+        "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+        "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+        "evidence:a9140c29ffd6d920917bf2066aacc4154f69d64f0ff764b452001df352738c09",
+        "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95"
+      ],
+      "feature_symbol": "CONFIG_DLNA_SERVER",
+      "gate_status": "disabled",
+      "page_path": "webroot_ro/dlna.html",
+      "request_candidate_refs": [
+        "frontend-request:8d9b45c0bb253450c24418a88c3718e0df76d2c7ab2f18468fdc243d384b066d",
+        "frontend-request:546eaeb30b2e120541048bc5c13cf88515c305aae409cbd30c3f4e685fd58eec",
+        "frontend-request:02207369388afc530ed82262af01a3165a3cc16f14869278b9f81be8d06ba2c4",
+        "frontend-request:6178796e94a5ff48056254880c73509e1ca1d51012aaea04e794c4c1b6716903"
+      ],
+      "request_endpoints": [
+        "/goform/refreshDLNA",
+        "goform/GetDlnaCfg",
+        "goform/SetDlnaCfg",
+        "goform/expandDlnaFile?"
+      ],
+      "script_paths": [
+        "webroot_ro/js/dlna.js"
+      ],
+      "ui_target_id": "usb_dlna"
+    },
+    {
+      "candidate_id": "frontend-feature-gate:8f4379c988140836ae1672c9e69b3d491b59d7de3096d7f62f495963f103060e",
+      "configured_value": "y",
+      "enabled_value": "y",
+      "evidence_ids": [
+        "evidence:4eb22f15163843133bd45f8c4a9d883ed4578a2794b96f7f14b6ddf4e37fb079",
+        "evidence:e54851b95c748dbdd15af19e353010ff78651d20f1fdbc74ec2ebbb7ce44274e",
+        "evidence:e3657c0184c3ac092afb271f3210f426516d8ca1f70b9312b46b98ca730a1ec2",
+        "evidence:1c7e6909ae56bbe733181b6a87484bdffe0bba53760ec9f765afa5a835374909",
+        "evidence:d75d1ea224d02b16ac828d4c96d06de76b9f2b02216ed3872221c081104f068d",
+        "evidence:af69f81cd3f851c209dff215374f5db72043940aa29bc1a57b4ec7764cbdfc86",
+        "evidence:6d50d3cc67c0640bb9b185541b5a978e5a79b8ab154664a48780b32637b921b4",
+        "evidence:59573773ad228cdf2185d6303c5b6da2ceb3e745e03d7defa28548fcd057de63"
+      ],
+      "feature_symbol": "CONFIG_FILE_SHARE",
+      "gate_status": "enabled",
+      "page_path": "webroot_ro/samba.html",
+      "request_candidate_refs": [
+        "frontend-request:4c7a99427c12e6b46407f4b024e60f98d3b93d40e45ac7ff5e6e3a7126748c69",
+        "frontend-request:f9ad52d1518c2b6d9c0788373ccd0b7123d520204f35c12ec6fd6cb3f8cfad8f"
+      ],
+      "request_endpoints": [
+        "goform/GetSambaCfg",
+        "goform/SetSambaCfg"
+      ],
+      "script_paths": [
+        "webroot_ro/js/samba.js"
+      ],
+      "ui_target_id": "usb_samba"
+    },
+    {
+      "candidate_id": "frontend-feature-gate:6b2328443ee5ae8717c1d8e9faaae79f786d39a5a7bd05ebf2c37e0f43c5dc65",
+      "configured_value": "y",
+      "enabled_value": "y",
+      "evidence_ids": [
+        "evidence:30f60eb7eba77a746cfdcb71086c7415654e16058f325487e26020459f5775f1",
+        "evidence:e4467ba73ad506835659e7c42205622bf07144ebfd981992d84e46ca888f15d8",
+        "evidence:0a0f4f4c081ba7ec65d61ca60ffbd1a4d7cb36de565d66b8e426c9998025123b",
+        "evidence:b02c24bcbdd106808539a88468376a127c26a84adf544b3078a716b237ce0362",
+        "evidence:d7ca5c3251511f590ef306d4274f71837448e40bef86447de83971de201fe2ca",
+        "evidence:935bafe2367e78442e642e8de81bb43d3ca88c20db30f4a64a0147d385b70d46",
+        "evidence:b65cc6ac78e6de2fef146d87d8b054b3239acb1d306dd78e2a36b79d7d98ce52",
+        "evidence:a6ce80a9783c0fc87d10c9b62af3ac2ccab0c56bca006e6c36bd07dd52cbab45"
+      ],
+      "feature_symbol": "CONFIG_PRINTER_SERVER",
+      "gate_status": "enabled",
+      "page_path": "webroot_ro/printer.html",
+      "request_candidate_refs": [
+        "frontend-request:86d35489451626ca539f4210871f5d9bbcbe65075323925d1f24e493cf011d8e",
+        "frontend-request:fc73f561f1baef11b696aabddad27c7aaaac4b18828fef164e26233ae69ac269"
+      ],
+      "request_endpoints": [
+        "goform/GetPrinterCfg",
+        "goform/SetPrinterCfg"
+      ],
+      "script_paths": [
+        "webroot_ro/js/printer.js"
+      ],
+      "ui_target_id": "usb_printer"
+    }
+  ],
+  "historical_expectation_summary": {
+    "not_assessable": 5,
+    "observed": 8
+  },
+  "interpretation": {
+    "explains": "The four bundled requests are residual in the declared UI path, which explains their frontend-only catalog shape in this artifact.",
+    "not_claimed": "Runtime reachability, route ownership, vulnerability presence, or exploitability.",
+    "still_unresolved": "A disabled UI feature does not prove backend implementation absence; direct requests, alternate clients, conditional components, and version-matched builds remain to test.",
+    "supported": "The product macro sets CONFIG_DLNA_SERVER=n while the UI reveals usb_dlna only for value y; that target opens dlna.html, whose same-stem dlna.js issues exactly four DLNA operations."
+  },
+  "mapping_summary": {
+    "candidate_count": 4372,
+    "disabled_frontend_feature_gate_count": 1,
+    "evidence_count": 12095,
+    "feature_disabled_operation_count": 4,
+    "frontend_feature_gate_count": 3,
+    "open_obligation_count": 64,
+    "parameter_count": 696,
+    "potential_hidden_interface_count": 84
+  },
+  "profile_id": "firmatlas.mapping.profile/auto-v11",
+  "sample_role": "primary-vendor-tenda-ac9-disabled-feature-attribution",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-14/v1alpha1",
+  "stages": [
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "inventory",
+      "output_count": 1038
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "source_plan",
+      "output_count": 529
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend",
+      "output_count": 134
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend_asset_graph",
+      "output_count": 32
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend_feature_gate",
+      "output_count": 3
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 451,
+      "name": "parameter_clue",
+      "output_count": 143
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 111,
+      "name": "response_fixture",
+      "output_count": 553
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native_relationship",
+      "output_count": 101
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "native_command_binding",
+      "output_count": 1
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 2,
+      "name": "arm_literal_xref",
+      "output_count": 14
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "web_configuration",
+      "output_count": 5
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "script_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native",
+      "output_count": 3187
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no selected sources"
+      ],
+      "input_count": 0,
+      "name": "native_ubus_registration",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "arm_pic_callsite",
+      "output_count": 74
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "arm_pic_registrar",
+      "output_count": 188
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "set_difference",
+      "output_count": 92
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no ubus operations"
+      ],
+      "input_count": 0,
+      "name": "ubus_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "no_eligible_analyzer"
+      ],
+      "input_count": 212,
+      "name": "scheduler",
+      "output_count": 64
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "open obligations remain but no unattempted eligible analyzer is available"
+      ],
+      "input_count": 529,
+      "name": "catalog",
+      "output_count": 4372
+    }
+  ],
+  "vulnerability_scope_summary": {
+    "category_counts": {
+      "compared_interface": 13,
+      "no_structured_communication": 9,
+      "not_analyzed": 46,
+      "parameter_only": 3
+    },
+    "exact_artifact_expectation_count": 2,
+    "exact_artifact_observed_count": 2,
+    "total_vulnerability_count": 71
+  }
+}

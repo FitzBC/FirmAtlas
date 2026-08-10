@@ -6,11 +6,15 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 import hashlib
 import json
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom, ObservationKind, SpanKind
 from .evidence import EvidenceClaim, SpanSelection, capture_evidence
 from .frontend import FrontendAssetGraphResult, FrontendEndpointShape
+from .frontend_feature_gate import (
+    FrontendFeatureGateResult,
+    FrontendFeatureGateStatus,
+)
 from .inventory import SourceArtifactEntry
 from .native_deep import NativeDeepResult
 
@@ -20,6 +24,9 @@ SET_DIFFERENCE_ATTRIBUTION_SCHEMA_VERSION = (
 )
 _PRODUCER = AnalyzerIdentity("frontend-native-set-difference", "0.1.0")
 _ROUTE_AWARE_PRODUCER = AnalyzerIdentity("frontend-native-set-difference", "0.2.0")
+_FEATURE_GATE_PRODUCER = AnalyzerIdentity(
+    "frontend-native-set-difference", "0.3.0"
+)
 _CONTENT_KINDS = frozenset({"file", "hardlink", "archive", "archive_member"})
 
 
@@ -34,6 +41,7 @@ class DifferenceSide(str, Enum):
 
 
 class DifferenceAttributionKind(str, Enum):
+    FRONTEND_FEATURE_DISABLED = "frontend_feature_disabled"
     FRONTEND_DECLARATION_NATIVE_ABSENT = "frontend_declaration_native_absent"
     FRONTEND_OPERATION_NATIVE_ABSENT = "frontend_operation_native_absent"
     FRONTEND_CONSUMER_NATIVE_ABSENT = "frontend_consumer_native_absent"
@@ -340,12 +348,16 @@ def attribute_frontend_native_set_difference(
     native_inventory: Union[NativeDeepResult, Tuple[NativeDeepResult, ...]],
     artifacts: Tuple[AttributionArtifact, ...],
     policy: SetDifferencePolicy = SetDifferencePolicy(),
+    feature_gates: Optional[FrontendFeatureGateResult] = None,
 ) -> SetDifferenceAttributionResult:
     """Explain both set differences without promoting a hypothesis to a binding."""
 
     producer = (
-        _ROUTE_AWARE_PRODUCER
-        if policy.include_request_action_tokens else _PRODUCER
+        _FEATURE_GATE_PRODUCER
+        if feature_gates is not None
+        else _ROUTE_AWARE_PRODUCER
+        if policy.include_request_action_tokens
+        else _PRODUCER
     )
     diagnostics = []
     if len(artifacts) > policy.max_artifacts:
@@ -448,6 +460,27 @@ def attribute_frontend_native_set_difference(
                 frontend_constructs.setdefault(token, set()).add(
                     candidate.source_construct
                 )
+    disabled_gates_by_token = {}
+    feature_gate_evidence = {}
+    if feature_gates is not None:
+        feature_gate_evidence = {
+            atom.evidence_id: atom for atom in feature_gates.evidence_atoms
+        }
+        for gate in feature_gates.gates:
+            if gate.status is not FrontendFeatureGateStatus.DISABLED:
+                continue
+            if any(
+                evidence_id not in feature_gate_evidence
+                for evidence_id in gate.evidence_ids
+            ):
+                raise ValueError(
+                    "frontend feature gate references unknown evidence"
+                )
+            for endpoint in gate.request_endpoints:
+                path = endpoint.split("?", 1)[0].rstrip("/")
+                token = path.rsplit("/", 1)[-1]
+                if token:
+                    disabled_gates_by_token.setdefault(token, []).append(gate)
     native_inventories = (
         native_inventory if isinstance(native_inventory, tuple)
         else (native_inventory,)
@@ -559,8 +592,38 @@ def attribute_frontend_native_set_difference(
                 side, web_hits, native_hits, native_variant_hits,
                 tuple(sorted(frontend_constructs.get(token, ()))),
             )
+            disabled_gates = tuple(disabled_gates_by_token.get(token, ()))
+            if side is DifferenceSide.FRONTEND_ONLY and len(disabled_gates) == 1:
+                kind = DifferenceAttributionKind.FRONTEND_FEATURE_DISABLED
+                interpretation = (
+                    "The configured frontend feature is disabled and gates the "
+                    "page that issues this operation; the bundled request is "
+                    "residual in the declared UI path."
+                )
+                obligation = (
+                    "A disabled frontend feature does not prove the backend "
+                    "implementation is absent; test direct requests, alternate "
+                    "clients, conditional components, and version-matched builds "
+                    "before assigning ownership."
+                )
+            attributed_disabled_gates = (
+                disabled_gates
+                if (
+                    side is DifferenceSide.FRONTEND_ONLY
+                    and len(disabled_gates) == 1
+                )
+                else ()
+            )
             paths = tuple(sorted({
                 hit.artifact.source.canonical_path for hit in hits
+            } | {
+                feature_gate_evidence[evidence_id].source_span.artifact_path
+                for gate in attributed_disabled_gates
+                for evidence_id in gate.evidence_ids
+            } | {
+                frontend_evidence[evidence_id].source_span.artifact_path
+                for evidence_id in frontend_members.get(token, ())
+                if attributed_disabled_gates
             }))
             attribution_id = _identity(token, side, kind, paths)
             proof = []
@@ -590,6 +653,9 @@ def attribute_frontend_native_set_difference(
                 if side is DifferenceSide.FRONTEND_ONLY
                 else native_members[token]
             )
+            upstream = set(upstream)
+            for gate in attributed_disabled_gates:
+                upstream.update(gate.evidence_ids)
             records.append(SetDifferenceAttribution(
                 attribution_id, token, side, kind, tuple(sorted(upstream)),
                 tuple(atom.evidence_id for atom in proof), paths,
@@ -614,7 +680,11 @@ def attribute_frontend_native_set_difference(
         for item in records
         for evidence_id in item.upstream_evidence_ids
     }
-    upstream_atoms = {**frontend_evidence, **native_evidence}
+    upstream_atoms = {
+        **frontend_evidence,
+        **native_evidence,
+        **feature_gate_evidence,
+    }
     return SetDifferenceAttributionResult(
         CoverageStatus.PARTIAL if partial else CoverageStatus.COMPLETED,
         sum(len(item.content) for item in valid_artifacts),

@@ -10,12 +10,14 @@ from firmatlas.mapping import (
     DifferenceAttributionKind,
     DifferenceSide,
     FrontendAssetInput,
+    FrontendFeatureGateStatus,
     NativeRouteAnchor,
     SetDifferencePolicy,
     SourceArtifactEntry,
     assemble_discovery_catalog,
     attribute_frontend_native_set_difference,
     discover_frontend_asset_graph,
+    discover_frontend_feature_gates,
     discover_mips_inline_route_bindings,
     replay_evidence,
 )
@@ -71,6 +73,57 @@ function Dispatcher() {
 
 
 class FrontendNativeSetDifferenceContractTests(unittest.TestCase):
+    def test_disabled_frontend_feature_explains_missing_native_operation(self):
+        contents = {
+            "www/js/macro_config.js": b'var CONFIG_DLNA_SERVER="n";',
+            "www/js/main.js": b'''var modulesObj={"usb_dlna":CONFIG_DLNA_SERVER},prop;
+if(modulesObj[prop]=="y"){$("#"+prop).removeClass("none");}
+case "usb_dlna":showIframe(_("DLNA"),"dlna.html",620,450);''',
+            "www/dlna.html": b'<script src="js/dlna.js"></script>',
+            "www/js/dlna.js": b'$.getJSON("goform/GetDlnaCfg", cb);',
+        }
+        assets = tuple(_asset(path, content) for path, content in contents.items())
+        frontend = discover_frontend_asset_graph(assets)
+        feature_gates = discover_frontend_feature_gates(assets, frontend)
+        self.assertEqual(
+            FrontendFeatureGateStatus.DISABLED,
+            feature_gates.gates[0].status,
+        )
+        _, native = _upstreams((), ("NativeOnly",))
+
+        result = attribute_frontend_native_set_difference(
+            frontend,
+            native,
+            (),
+            SetDifferencePolicy.route_aware(),
+            feature_gates=feature_gates,
+        )
+
+        attribution = next(
+            item for item in result.attributions
+            if item.token == "GetDlnaCfg"
+        )
+        self.assertEqual(DifferenceSide.FRONTEND_ONLY, attribution.side)
+        self.assertEqual(
+            DifferenceAttributionKind.FRONTEND_FEATURE_DISABLED,
+            attribution.kind,
+        )
+        self.assertIn("disabled", attribution.interpretation)
+        self.assertIn("does not prove", attribution.open_obligation)
+        self.assertTrue(
+            set(feature_gates.gates[0].evidence_ids)
+            <= set(attribution.upstream_evidence_ids)
+        )
+        self.assertEqual(
+            (
+                "www/dlna.html",
+                "www/js/dlna.js",
+                "www/js/macro_config.js",
+                "www/js/main.js",
+            ),
+            attribution.matched_artifact_paths,
+        )
+
     def test_low_entropy_selector_value_is_not_compared_as_route_identity(self):
         frontend = discover_frontend_asset_graph((
             _asset(

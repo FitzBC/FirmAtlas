@@ -1,0 +1,2168 @@
+{
+  "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
+  "cases": [
+    {
+      "case_id": "research-case:54d49d58e915b70c96fec901ffc75fd4e76f31b532eb2c8b9aff3d394f36447b",
+      "schema_version": "firmatlas.mapping.research-case/v1alpha1",
+      "case_key": "tenda-ac9-split-web-stack-goform-ownership",
+      "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
+      "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+      "architecture_tags": [
+        "split_web_stack",
+        "nginx_fastcgi_sidecar",
+        "goform_camel_registry",
+        "arm_pic_registration"
+      ],
+      "research_question": "When nginx exposes only /cgi-bin/luci/ and /download/, which binary actually owns the frontend-observed /goform operations?",
+      "evidence": [
+        {
+          "evidence_ref": "evidence:21b00efacd8603336bf79a222508fb50cfcf290ff3f2a70613b07d2150f2724c",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/online_list.js",
+          "source_artifact_sha256": "dd06a5b73cfd64686e5faaf497784190ac5b06801d9f6beb3fb8d90b7bf5cf87",
+          "locator": "text_utf8:bytes=8902-8925;lines=293:10-293:33",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:a0da24eeb4bf15b945e4e22ec43809393277d3e894d8fc5477dd9152523b8f5e",
+          "kind": "web_configuration",
+          "source_path": "etc_ro/nginx/conf/nginx.conf",
+          "source_artifact_sha256": "66d18e21c0224ae7f738f8b97a7d4bc699669cd695e8f0432b7f8d3f54ac3663",
+          "locator": "text_utf8:bytes=703-707;lines=36:22-36:26",
+          "capability": "listens_on",
+          "producer": "web-configuration-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:5e3cbb6617a5d9733512054d473bfe1eefd9ea35c5169f9b6428f416c5290a29",
+          "kind": "web_configuration",
+          "source_path": "etc_ro/nginx/conf/nginx.conf",
+          "source_artifact_sha256": "66d18e21c0224ae7f738f8b97a7d4bc699669cd695e8f0432b7f8d3f54ac3663",
+          "locator": "text_utf8:bytes=971-985;lines=49:17-49:31",
+          "capability": "maps_namespace",
+          "producer": "web-configuration-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:24b22b2b30f09ac9486cf461f223e93f1455bee974ba2d22055985cd4e291cd2",
+          "kind": "web_configuration",
+          "source_path": "etc_ro/nginx/conf/nginx_init.sh",
+          "source_artifact_sha256": "c1e33c019efab0ac120c99c0abf8b66bbbdb6b64ba2ea855abcace257195b9a1",
+          "locator": "text_utf8:bytes=114-138;lines=6:33-6:57",
+          "capability": "starts",
+          "producer": "web-configuration-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:b63bed9e6504f0d6467d6a85cff55e4df243325d8cbb0a71868ae1236e836048",
+          "kind": "native_hint",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=874584-874600",
+          "capability": "mentions_endpoint",
+          "producer": "native-shallow-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:dhttpd-selected-components-0-of-6",
+          "kind": "coverage_ledger",
+          "source_path": "bin/dhttpd",
+          "source_artifact_sha256": "df31d8a86065c2292d6281e16653c6f0d61474265befc9ad55f4860532dad79b",
+          "locator": "coverage:complete-native-shallow;selected_action_components=0/6",
+          "capability": "bounds_candidate_search",
+          "producer": "native-shallow-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:93147f41fefb653b38dc9ad0ee3833bd129f16f4a3e7ede8ca2524e9c770ce2e",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=240340-240368",
+          "capability": "registers_route",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=240340-240368",
+          "capability": "binds_handler",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:frontend-goform",
+          "statement": "The web UI constructs POST goform/SetOnlineDevName.",
+          "evidence_refs": [
+            "evidence:21b00efacd8603336bf79a222508fb50cfcf290ff3f2a70613b07d2150f2724c"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:fastcgi-branch",
+          "statement": "A distinct nginx branch listens on :8180 and forwards /cgi-bin/luci/ to 127.0.0.1:8188, where app_data_center is started.",
+          "evidence_refs": [
+            "evidence:a0da24eeb4bf15b945e4e22ec43809393277d3e894d8fc5477dd9152523b8f5e",
+            "evidence:5e3cbb6617a5d9733512054d473bfe1eefd9ea35c5169f9b6428f416c5290a29",
+            "evidence:24b22b2b30f09ac9486cf461f223e93f1455bee974ba2d22055985cd4e291cd2"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:namespace-divergence",
+          "statement": "The observed nginx namespaces do not establish ownership of /goform; backend ownership must remain unresolved at this stage.",
+          "evidence_refs": [
+            "evidence:21b00efacd8603336bf79a222508fb50cfcf290ff3f2a70613b07d2150f2724c",
+            "evidence:5e3cbb6617a5d9733512054d473bfe1eefd9ea35c5169f9b6428f416c5290a29"
+          ],
+          "status": "unresolved"
+        },
+        {
+          "claim_id": "claim:shallow-priority",
+          "statement": "Exact action-component evidence prioritizes httpd over dhttpd, but does not yet prove a handler binding.",
+          "evidence_refs": [
+            "evidence:b63bed9e6504f0d6467d6a85cff55e4df243325d8cbb0a71868ae1236e836048",
+            "coverage:dhttpd-selected-components-0-of-6"
+          ],
+          "status": "unresolved"
+        },
+        {
+          "claim_id": "claim:httpd-handler-binding",
+          "statement": "ARM PIC call-site validation proves SetOnlineDevName is registered by bin/httpd and bound to formSetDeviceName at 0x00060ee8.",
+          "evidence_refs": [
+            "evidence:93147f41fefb653b38dc9ad0ee3833bd129f16f4a3e7ede8ca2524e9c770ce2e",
+            "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5"
+          ],
+          "status": "supported"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "stage:frontend-request",
+          "order": 1,
+          "interpretation": "Recover the externally visible operation without guessing its backend.",
+          "claim_ids": [
+            "claim:frontend-goform"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-separation",
+          "order": 2,
+          "interpretation": "Publish the nginx/FastCGI chain as a separate branch and retain ownership as an obligation.",
+          "claim_ids": [
+            "claim:fastcgi-branch",
+            "claim:namespace-divergence"
+          ],
+          "creates_obligations": [
+            "obligation:goform-owner"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:native-candidate-ranking",
+          "order": 3,
+          "interpretation": "Use bounded shallow evidence to select a deep-analysis target, not to publish a binding.",
+          "claim_ids": [
+            "claim:shallow-priority"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:native-callsite-proof",
+          "order": 4,
+          "interpretation": "Require route and handler arguments at the same validated registrar call-site before resolving ownership.",
+          "claim_ids": [
+            "claim:httpd-handler-binding"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [
+            "obligation:goform-owner"
+          ],
+          "rejects_obligations": []
+        }
+      ],
+      "obligations": [
+        {
+          "obligation_id": "obligation:goform-owner",
+          "statement": "Identify the binary and handler that register the /goform operation.",
+          "required_capability": "binds_handler",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:93147f41fefb653b38dc9ad0ee3833bd129f16f4a3e7ede8ca2524e9c770ce2e",
+            "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5"
+          ]
+        }
+      ],
+      "counterfactuals": [
+        "A firmware-level or path-style merge would incorrectly assign /goform to the observed nginx/FastCGI namespace.",
+        "Choosing dhttpd by filename alone would spend deep-analysis effort on the weaker candidate.",
+        "Treating a route string and a similar symbol name as a binding would skip the registrar call-site proof."
+      ],
+      "paper_uses": [
+        "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
+        "Ablation case comparing frontend-only, configuration-only, shallow-native, and full evidence fusion.",
+        "Worked example for obligation-preserving analysis and false-merge prevention."
+      ],
+      "limitations": [
+        "The native result proves selected static registrations, not runtime reachability or authentication state.",
+        "The dhttpd negative control is bounded by the declared shallow producer and is not proof of total runtime non-participation.",
+        "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality."
+      ]
+    },
+    {
+      "case_id": "research-case:d3565a0e4481f8f8ae68106cadddf66ef6539c30103e988b3479599c556169a9",
+      "schema_version": "firmatlas.mapping.research-case/v1alpha1",
+      "case_key": "totolink-x5000r-shared-cgi-selector-dispatch",
+      "title": "TOTOLINK X5000R: one CGI endpoint, multiple logical operations",
+      "firmware_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+      "architecture_tags": [
+        "lighttpd_cgi",
+        "shared_cgi_dispatcher",
+        "json_topicurl_selector",
+        "hybrid_query_and_json_dispatch",
+        "custom_session_path_gate"
+      ],
+      "research_question": "How can operations sharing /cgi-bin/cstecgi.cgi be kept distinct, which native dispatch structure implements each selector, and which static request-protection gates actually cover that CGI path?",
+      "evidence": [
+        {
+          "evidence_ref": "evidence:ac676e494b61634f6a3790c2df35424d851c97b54e4cd45d875f2233c2ec521d",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/config_ie.js",
+          "source_artifact_sha256": "6147395422cc29a9d77628450603d08f58fb8ed8b8b7916701e2eecf41183f0e",
+          "locator": "text_utf8:bytes=1382-1402;lines=1:1277-1:1297",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:0eef36d58656acdc469c9d18fb9c28443d1d73b03ebdf264130b5dbda1a20e00",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/config_ie.js",
+          "source_artifact_sha256": "6147395422cc29a9d77628450603d08f58fb8ed8b8b7916701e2eecf41183f0e",
+          "locator": "text_utf8:bytes=1429-1439;lines=1:1324-1:1334",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:d0f3c62891c645bfb8b754b2e96398c38829ce44963a5ec536530c460edd32cc",
+          "kind": "web_configuration",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=5556-5560;lines=147:31-147:35",
+          "capability": "listens_on",
+          "producer": "web-configuration-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:bbae0a4136479b40f2b645fee3bdef752d153659122bed6b345d88e21feba878",
+          "kind": "web_configuration",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=8344-8354;lines=238:2-238:12",
+          "capability": "binds_handler",
+          "producer": "web-configuration-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:af51c25c0f5de49cce076d4851c699b81084a1e9455c67163d3c6ea122f467a1",
+          "kind": "native_hint",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=233632-233642",
+          "capability": "mentions_endpoint",
+          "producer": "native-shallow-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:340a0168af128fbe29827a9d42f4c5b6687017ad1152d2ed166c46835f962d31",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/topicurl.js",
+          "source_artifact_sha256": "2170e9339adf4c3579ba015f19105c2ec03d1695796881589b0c5b163e059366",
+          "locator": "text_utf8:bytes=787-806;lines=1:788-1:807",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:f4dbb6c496f66cd5482a332eb3c531765d62e1abe32b50c74c6aa11637011458",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/topicurl.js",
+          "source_artifact_sha256": "2170e9339adf4c3579ba015f19105c2ec03d1695796881589b0c5b163e059366",
+          "locator": "text_utf8:bytes=2510-2518;lines=1:2511-1:2519",
+          "capability": "serializes_parameter",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:33ac181ea5411f80f15906f644c74de347614209d73b33e280e412d2970628d4",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/topicurl.js",
+          "source_artifact_sha256": "2170e9339adf4c3579ba015f19105c2ec03d1695796881589b0c5b163e059366",
+          "locator": "text_utf8:bytes=2520-2529;lines=1:2521-1:2530",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:7fae6c104f1f2dfd69650f3c02b095bfe85bb7f3b25bdd6de54c16919c0e305a",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/config.js",
+          "source_artifact_sha256": "83aa98623d98aeffbcee6748a5c176f2c52bf1e9bdc9e722f111cadc2b31e739",
+          "locator": "text_utf8:bytes=806-826;lines=1:807-1:827",
+          "capability": "resolves_endpoint_binding",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:7b8f6bc1380ed52f3b870059b0d9fdf6e31d08c1d6668712397c34f8578f08b5",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=240172-240181",
+          "capability": "mentions_endpoint",
+          "producer": "native-deep-mips-inline-route-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:40f4546d6cd758973c602b975270fd34a65952eb0af3480684e4df9c1f1f9b75",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=2008-2024",
+          "capability": "resolves_table_symbol",
+          "producer": "native-deep-mips-inline-route-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:aa8f5f7a8b5cad1c0f36a8e6f603f37bd27a49409b107efb9ad8b15dda37c4f5",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=240172-240240",
+          "capability": "registers_route",
+          "producer": "native-deep-mips-inline-route-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:6df24edc5d0e4dc1e08efb25e9551a410f8a56acd526181f30ddaa10e1755f88",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=240172-240240",
+          "capability": "binds_handler",
+          "producer": "native-deep-mips-inline-route-table@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-mips-dispatch-set-difference",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-16-x5000r-mips-dispatch.json",
+          "source_artifact_sha256": "cb1c549c5248b5f31f20257f30c0d634dde8e2eee81de43381967f6d1ea37d4f",
+          "locator": "json:$.counts",
+          "capability": "bounds_candidate_search",
+          "producer": "mips-dispatch-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
+          "kind": "native_value_flow",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=133772-133780",
+          "capability": "maps_parameter_to_state",
+          "producer": "native-mips-handler-value-flow@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f",
+          "kind": "native_value_flow",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=133792-133800",
+          "capability": "maps_parameter_to_state",
+          "producer": "native-mips-handler-value-flow@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-setlancfg-handler-prefix",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-17-x5000r-mips-value-flow.json",
+          "source_artifact_sha256": "5dbda7815d736bba9cb2e083748b07cfc0f1f873a46fe77e2606cc0172bbb576",
+          "locator": "json:$.coverage",
+          "capability": "bounds_value_flow_scope",
+          "producer": "mips-handler-value-flow-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+          "kind": "set_difference",
+          "source_path": "www/advance/dos.html",
+          "source_artifact_sha256": "d024fbc7305e5f777b41084e3b3bed3ae3a3169f7d9b6ceccdf18ddca0b0511b",
+          "locator": "text_utf8:bytes=3306-3315;lines=58:765-58:774",
+          "capability": "mentions_operation_token",
+          "producer": "frontend-native-set-difference@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+          "kind": "set_difference",
+          "source_path": "www/wan_ie.html",
+          "source_artifact_sha256": "3c6be0fc821f033fc3af38b3b9ee688120b5368a2dc800a560a74c4a9f380820",
+          "locator": "text_utf8:bytes=10173-10184;lines=1:10174-1:10185",
+          "capability": "mentions_operation_token",
+          "producer": "frontend-native-set-difference@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+          "kind": "set_difference",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=11640-11653",
+          "capability": "mentions_operation_variant",
+          "producer": "frontend-native-set-difference@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-set-difference-attribution",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-18-x5000r-set-difference.json",
+          "source_artifact_sha256": "73aa8b4db9fc84792c51db4afd1b1f6d3eddbc56e50123240843a588b3ddaa55",
+          "locator": "json:$.attribution_counts",
+          "capability": "attributes_set_difference",
+          "producer": "set-difference-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:01b3a330fa09b9fa1f6951ebc6265bb37196e6384a33f1e64534fb69e3c4112a",
+          "kind": "frontend_request",
+          "source_path": "www/static/js/kr.js",
+          "source_artifact_sha256": "a2d27291e824ee0fc8fbad0b0eb23e981ed9db7e07fdf89eb6c301205657e52b",
+          "locator": "text_utf8:bytes=1519-1539;lines=1:1520-1:1540",
+          "capability": "resolves_endpoint_binding",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:e312a99e46a58c2daafe389faa164f3d5b4008f1eea34287ddbe66aaaa642177",
+          "kind": "frontend_request",
+          "source_path": "www/wan_ie.html",
+          "source_artifact_sha256": "3c6be0fc821f033fc3af38b3b9ee688120b5368a2dc800a560a74c4a9f380820",
+          "locator": "text_utf8:bytes=6447-6458;lines=1:6448-1:6459",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:83bcc17baff831a4f286d1b5286147e068adc965ecf0ba3228ddbee89dc1c0d3",
+          "kind": "frontend_request",
+          "source_path": "www/wan_ie.html",
+          "source_artifact_sha256": "3c6be0fc821f033fc3af38b3b9ee688120b5368a2dc800a560a74c4a9f380820",
+          "locator": "text_utf8:bytes=10173-10184;lines=1:10174-1:10185",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:2840a161f73b3015b5e8393dbc88179d70e6439929224f5d900ed45838a409d0",
+          "kind": "frontend_request",
+          "source_path": "www/advance/config.html",
+          "source_artifact_sha256": "e4ed2ad59c3d574bcf5abcad8a0091aac876e4a72bdb205526944721fd7bffe4",
+          "locator": "text_utf8:bytes=2377-2393;lines=57:514-57:530",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:ec15c78cfd749e28153a6b617362e41c678d9009c128ae970b7a1ac0e1af741a",
+          "kind": "frontend_request",
+          "source_path": "www/advance/config.html",
+          "source_artifact_sha256": "e4ed2ad59c3d574bcf5abcad8a0091aac876e4a72bdb205526944721fd7bffe4",
+          "locator": "text_utf8:bytes=2362-2368;lines=57:499-57:505",
+          "capability": "selects_operation",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-expanded-frontend-scope",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-19-x5000r-expanded-frontend.json",
+          "source_artifact_sha256": "5232273a6ef7acd70e532a9ef26e96f977712cd296b9034baaae0dd6683245f7",
+          "locator": "json:$.scope_closure",
+          "capability": "closes_frontend_scope_gap",
+          "producer": "expanded-frontend-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=189852-189876",
+          "capability": "selects_transport_mode",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190000-190060",
+          "capability": "parses_upload_body",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190272-190388",
+          "capability": "constructs_dispatch_payload",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190392-190420",
+          "capability": "normalizes_operation_suffix",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=190628-190664",
+          "capability": "selects_dispatch_table",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+          "kind": "native_binding",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9",
+          "locator": "binary:bytes=237860-237928",
+          "capability": "binds_handler",
+          "producer": "native-mips-cgi-nested-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-nested-upload-dispatch",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-20-x5000r-nested-dispatch.json",
+          "source_artifact_sha256": "f861d9f9de8fddcd24fd0fdcd1f608a99ee4ab0576e22fe2910ba7d48c359c7d",
+          "locator": "json:$.native_dispatch",
+          "capability": "binds_upload_mode",
+          "producer": "nested-dispatch-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+          "kind": "native_protection",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31380-31520",
+          "capability": "selects_protection_scope",
+          "producer": "native-mips-request-protection@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+          "kind": "native_protection",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=37860-37872",
+          "capability": "invokes_authenticator",
+          "producer": "native-mips-request-protection@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+          "kind": "native_protection",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=35464-35524",
+          "capability": "validates_session_cookie",
+          "producer": "native-mips-request-protection@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+          "kind": "native_protection",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31520-31568",
+          "capability": "enforces_auth_redirect",
+          "producer": "native-mips-request-protection@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977",
+          "kind": "native_protection",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=31380-31520",
+          "capability": "classifies_request_scope",
+          "producer": "native-mips-request-protection@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-request-protection",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-21-x5000r-request-protection.json",
+          "source_artifact_sha256": "3d80257d965110ed58bb4b12caadee6e1ee2684183605dd4747f4be666ace030",
+          "locator": "json:$.protection_analysis",
+          "capability": "maps_auth_guard",
+          "producer": "request-protection-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:14d3736dfba5d6076335e303471997dde64fe1be5a7ca45eaeb6d0da9186c612",
+          "kind": "native_service_assembly",
+          "source_path": "sbin/rc",
+          "source_artifact_sha256": "06bb0133c8e84dbe66e5b50d14a2da30f550c5f96c71a2a1c085f3e72ebf1a7c",
+          "locator": "binary:bytes=36632-36644",
+          "capability": "enters_service_bootstrap",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:745154952409e4487d62a5bd8a92df73875de038912cf3fc50bd76c7e57a6624",
+          "kind": "native_service_assembly",
+          "source_path": "sbin/rc",
+          "source_artifact_sha256": "06bb0133c8e84dbe66e5b50d14a2da30f550c5f96c71a2a1c085f3e72ebf1a7c",
+          "locator": "binary:bytes=46764-46776",
+          "capability": "schedules_service_launcher",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:07a865c5f28c93dfe821511f0a161b700f3a86ddb3412ab59b3a17d24bf5e6b0",
+          "kind": "native_service_assembly",
+          "source_path": "sbin/rc",
+          "source_artifact_sha256": "06bb0133c8e84dbe66e5b50d14a2da30f550c5f96c71a2a1c085f3e72ebf1a7c",
+          "locator": "binary:bytes=251880-251927",
+          "capability": "defines_service_arguments",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:2ce5ca93095e4ad51bea5c915f181e8042af0a0b39b9a03f36db95e5c6567d64",
+          "kind": "native_service_assembly",
+          "source_path": "sbin/rc",
+          "source_artifact_sha256": "06bb0133c8e84dbe66e5b50d14a2da30f550c5f96c71a2a1c085f3e72ebf1a7c",
+          "locator": "binary:bytes=291604-291628",
+          "capability": "orders_service_arguments",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:37a6599d2de737e244b5c91fd0a9eafab8c149563efbe22f3e3dfe5142590b34",
+          "kind": "native_service_assembly",
+          "source_path": "sbin/rc",
+          "source_artifact_sha256": "06bb0133c8e84dbe66e5b50d14a2da30f550c5f96c71a2a1c085f3e72ebf1a7c",
+          "locator": "binary:bytes=43796-43820",
+          "capability": "invokes_service_launcher",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d2ee6f5d3565fddc127bb6fbc56e7e5524556595c565d05e1d5973d38b5a3341",
+          "kind": "native_service_assembly",
+          "source_path": "usr/sbin/lighttpd",
+          "source_artifact_sha256": "8f2003be1b14f9f3e5567d663918a688b6c6c9f7463466e97778ef5af00729aa",
+          "locator": "binary:bytes=0-64",
+          "capability": "resolves_server_artifact",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:126f5f64cbf2eb921b9629b995345840917a89be9aa73ef44f77b851b4bd9732",
+          "kind": "native_service_assembly",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=0-64;lines=1:1-3:33",
+          "capability": "loads_server_configuration",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:95e5a2899396a30ad920f39c2838dacef0dfc562d716c143141a0a696e8c490d",
+          "kind": "native_service_assembly",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=5490-5560;lines=143:30-147:35",
+          "capability": "exposes_listeners",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:7760bcc17531bc3d677d9579937aba1b094cf828b4ba366a53e9131051d97d2d",
+          "kind": "native_service_assembly",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=5518-5523;lines=145:25-145:30",
+          "capability": "maps_document_root",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:99bb5ef14b289639b11eabcfaaa1adf982d25de686ab4a2772fb08edc4b4b063",
+          "kind": "native_service_assembly",
+          "source_path": "lighttp/lighttpd.conf",
+          "source_artifact_sha256": "18916e824942442c1f9da7ead9916bf62257bcbd44797eca6c153341078e97e6",
+          "locator": "text_utf8:bytes=8344-8354;lines=238:2-238:12",
+          "capability": "binds_cgi_namespace",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:9f9fb21c6f6d88407ddf0ada7511faccaeec40477e54ca9b26561f90284105cf",
+          "kind": "native_service_assembly",
+          "source_path": "www/cgi-bin/cstecgi.cgi",
+          "source_artifact_sha256": "cb2aeef6f8a7a944e907181102cd240472f04c3c6857c2fd894a0d50ba347b93",
+          "locator": "binary:bytes=0-64",
+          "capability": "resolves_request_artifact",
+          "producer": "native-mips-service-assembly@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-service-assembly",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-22-x5000r-service-assembly.json",
+          "source_artifact_sha256": "24ef2319727e17c37412867b5ef63c4f844ba026c26ccc51e83f27cb9473ca0c",
+          "locator": "json:$.service_assembly_analysis",
+          "capability": "assembles_static_service",
+          "producer": "service-assembly-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "coverage:x5000r-potential-hidden-interfaces",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/m1-23-x5000r-potential-hidden-interfaces.json",
+          "source_artifact_sha256": "5a2589577f4b643e9ecdb0e0d03cd0bdc8d4bc68a6b8e100a78c7aa319eede7f",
+          "locator": "json:$.items",
+          "capability": "indexes_potential_hidden_interfaces",
+          "producer": "potential-hidden-interface-report@v1alpha1"
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:x5000r-shared-endpoint",
+          "statement": "The frontend posts JSON operation getInitCfg to /cgi-bin/cstecgi.cgi.",
+          "evidence_refs": [
+            "evidence:ac676e494b61634f6a3790c2df35424d851c97b54e4cd45d875f2233c2ec521d",
+            "evidence:0eef36d58656acdc469c9d18fb9c28443d1d73b03ebdf264130b5dbda1a20e00"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-cgi-execution",
+          "statement": "lighttpd listens on 8080 and enables CGI execution for /cgi-bin/.",
+          "evidence_refs": [
+            "evidence:d0f3c62891c645bfb8b754b2e96398c38829ce44963a5ec536530c460edd32cc",
+            "evidence:bbae0a4136479b40f2b645fee3bdef752d153659122bed6b345d88e21feba878"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-native-selector-presence",
+          "statement": "The MIPS cstecgi.cgi binary contains the getInitCfg selector.",
+          "evidence_refs": [
+            "evidence:af51c25c0f5de49cce076d4851c699b81084a1e9455c67163d3c6ea122f467a1"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-cross-resource-endpoint",
+          "statement": "Asset-graph resolution binds globalConfig.cgiUrl in config.js to the wrapper consumed in topicurl.js and recovers 199 statically enumerated topicurl operations.",
+          "evidence_refs": [
+            "evidence:340a0168af128fbe29827a9d42f4c5b6687017ad1152d2ed166c46835f962d31",
+            "evidence:33ac181ea5411f80f15906f644c74de347614209d73b33e280e412d2970628d4",
+            "evidence:7fae6c104f1f2dfd69650f3c02b095bfe85bb7f3b25bdd6de54c16919c0e305a"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-native-handler-binding",
+          "statement": "At the cross-resource frontend stage, the static topicurl selectors were not yet bound to concrete native handler functions or value-flow paths.",
+          "evidence_refs": [
+            "evidence:33ac181ea5411f80f15906f644c74de347614209d73b33e280e412d2970628d4",
+            "evidence:af51c25c0f5de49cce076d4851c699b81084a1e9455c67163d3c6ea122f467a1"
+          ],
+          "status": "unresolved"
+        },
+        {
+          "claim_id": "claim:x5000r-inline-table-bindings",
+          "statement": "Exported inline route tables bind 123 of 199 static frontend selectors to executable MIPS addresses; 124 registration proofs are retained because getTelnetCfg appears twice, while setLanCfg binds table entry 0x0044aa2c to handler 0x004209b8.",
+          "evidence_refs": [
+            "evidence:7b8f6bc1380ed52f3b870059b0d9fdf6e31d08c1d6668712397c34f8578f08b5",
+            "evidence:40f4546d6cd758973c602b975270fd34a65952eb0af3480684e4df9c1f1f9b75",
+            "evidence:aa8f5f7a8b5cad1c0f36a8e6f603f37bd27a49409b107efb9ad8b15dda37c4f5",
+            "evidence:6df24edc5d0e4dc1e08efb25e9551a410f8a56acd526181f30ddaa10e1755f88",
+            "coverage:x5000r-mips-dispatch-set-difference"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-setlancfg-prefix-value-flow",
+          "statement": "The branch-free prefix of setLanCfg maps request parameters lanIp and lanNetmask through websGetVar into nvram_set keys lan_ipaddr and lan_netmask; analysis stops at the first conditional branch.",
+          "evidence_refs": [
+            "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
+            "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f",
+            "coverage:x5000r-setlancfg-handler-prefix"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-set-difference-attribution",
+          "statement": "A bounded scan attributes the 76 frontend-only operations as 38 auxiliary-page consumers and 38 wrapper-only declarations, while the 14 native-only registrations contain three frontend-scope gaps, one cross-native suffix-token variant, and ten registrations without a frontend reference; these are evidence shapes and search hypotheses, not proof of runtime ownership or causality.",
+          "evidence_refs": [
+            "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+            "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+            "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+            "coverage:x5000r-set-difference-attribution"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-expanded-frontend-scope",
+          "statement": "Expanding the first-class frontend graph to kr.js, wan_ie.html, and advance/config.html recovers getWanIeCfg, setWanIeCfg, and setUploadSetting with distinct request architectures; the frontend inventory grows from 199 to 203 operations, all three prior scope gaps leave the Native-only set, and the residual difference becomes 77 frontend-only versus 11 native-only operations.",
+          "evidence_refs": [
+            "evidence:01b3a330fa09b9fa1f6951ebc6265bb37196e6384a33f1e64534fb69e3c4112a",
+            "evidence:e312a99e46a58c2daafe389faa164f3d5b4008f1eea34287ddbe66aaaa642177",
+            "evidence:83bcc17baff831a4f286d1b5286147e068adc965ecf0ba3228ddbee89dc1c0d3",
+            "evidence:2840a161f73b3015b5e8393dbc88179d70e6439929224f5d900ed45838a409d0",
+            "coverage:x5000r-expanded-frontend-scope"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-nested-upload-dispatch",
+          "statement": "The MIPS CGI main dispatcher recognizes action=upload, extracts the second ampersand-delimited query segment, parses the multipart body through cutUploadFile, carries the segment into JSON topicurl, normalizes the slash suffix to setUploadSetting, selects set_handle_t, and invokes the exact handler registered at 0x0044a124 -> 0x0042bf14.",
+          "evidence_refs": [
+            "evidence:ec15c78cfd749e28153a6b617362e41c678d9009c128ae970b7a1ac0e1af741a",
+            "evidence:2840a161f73b3015b5e8393dbc88179d70e6439929224f5d900ed45838a409d0",
+            "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+            "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+            "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+            "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+            "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+            "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+            "coverage:x5000r-nested-upload-dispatch"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-custom-auth-path-exclusion",
+          "statement": "The vendor-modified lighttpd protects matching .asp/.html/.htm/config.dat/login CGI response paths through userloginAuth, checkLoginUser, SESSION_ID extraction, session-table lookup, and HTTP 302 denial, but /cgi-bin/cstecgi.cgi matches none of those path gates and therefore reaches the separately proved upload dispatcher outside this static guard scope.",
+          "evidence_refs": [
+            "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+            "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+            "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+            "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+            "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977",
+            "coverage:x5000r-request-protection"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-static-service-assembly",
+          "statement": "The rc initialization chain calls init_router -> start_services_once -> start_httpd, whose bounded argv selects /usr/sbin/lighttpd with /lighttp/lighttpd.conf; that configuration exposes 80/8080, maps /www/, and binds /cgi-bin/ to the shipped www/cgi-bin/cstecgi.cgi artifact.",
+          "evidence_refs": [
+            "evidence:14d3736dfba5d6076335e303471997dde64fe1be5a7ca45eaeb6d0da9186c612",
+            "evidence:745154952409e4487d62a5bd8a92df73875de038912cf3fc50bd76c7e57a6624",
+            "evidence:07a865c5f28c93dfe821511f0a161b700f3a86ddb3412ab59b3a17d24bf5e6b0",
+            "evidence:2ce5ca93095e4ad51bea5c915f181e8042af0a0b39b9a03f36db95e5c6567d64",
+            "evidence:37a6599d2de737e244b5c91fd0a9eafab8c149563efbe22f3e3dfe5142590b34",
+            "evidence:d2ee6f5d3565fddc127bb6fbc56e7e5524556595c565d05e1d5973d38b5a3341",
+            "evidence:126f5f64cbf2eb921b9629b995345840917a89be9aa73ef44f77b851b4bd9732",
+            "evidence:95e5a2899396a30ad920f39c2838dacef0dfc562d716c143141a0a696e8c490d",
+            "evidence:7760bcc17531bc3d677d9579937aba1b094cf828b4ba366a53e9131051d97d2d",
+            "evidence:99bb5ef14b289639b11eabcfaaa1adf982d25de686ab4a2772fb08edc4b4b063",
+            "evidence:9f9fb21c6f6d88407ddf0ada7511faccaeec40477e54ca9b26561f90284105cf",
+            "coverage:x5000r-service-assembly"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:x5000r-potential-hidden-interfaces",
+          "statement": "After completed frontend and set-difference coverage, ten cstecgi.cgi registrations retain exact native handlers but have no observed frontend or auxiliary-native reference; they are preserved as potential hidden interfaces with open runtime-cause obligations, not labeled as backdoors.",
+          "evidence_refs": [
+            "coverage:x5000r-potential-hidden-interfaces"
+          ],
+          "status": "supported"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "stage:x5000r-frontend",
+          "order": 1,
+          "interpretation": "Separate the physical CGI endpoint from its logical JSON selector.",
+          "claim_ids": [
+            "claim:x5000r-shared-endpoint"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-web-native",
+          "order": 2,
+          "interpretation": "Confirm CGI execution and prioritize the concrete MIPS binary without claiming a handler binding.",
+          "claim_ids": [
+            "claim:x5000r-cgi-execution",
+            "claim:x5000r-native-selector-presence"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-cross-resource-endpoint"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-cross-resource-resolution",
+          "order": 3,
+          "interpretation": "Resolve the endpoint definition and wrapper consumption across separate frontend assets while preserving both source locations.",
+          "claim_ids": [
+            "claim:x5000r-cross-resource-endpoint"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-selector-handler"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-cross-resource-endpoint"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-open-native-boundary",
+          "order": 4,
+          "interpretation": "Retain selector-to-native-handler and native value-flow recovery as explicit work.",
+          "claim_ids": [
+            "claim:x5000r-native-handler-binding"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-inline-native-table",
+          "order": 5,
+          "interpretation": "Use exported symbol sizes and the 64-byte inline route plus executable pointer layout to close a verified selector subset without hiding unmatched operations.",
+          "claim_ids": [
+            "claim:x5000r-inline-table-bindings"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-setlancfg-prefix-value-flow"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-setlancfg-prefix-value-flow",
+          "order": 6,
+          "interpretation": "Resolve GP/GOT calls and register provenance only through the first branch, proving two request-parameter to configuration-state mappings while preserving the branched suffix as unknown.",
+          "claim_ids": [
+            "claim:x5000r-setlancfg-prefix-value-flow"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-branched-value-flow",
+            "obligation:x5000r-set-difference-shape"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-setlancfg-prefix-value-flow"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-set-difference-attribution",
+          "order": 7,
+          "interpretation": "Classify both sides of the frontend/native difference with exact, bounded auxiliary evidence; keep suffix-token variants separate from exact matches and retain unresolved runtime causes.",
+          "claim_ids": [
+            "claim:x5000r-set-difference-attribution"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-frontend-scope-expansion"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-set-difference-shape"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-expanded-frontend-scope",
+          "order": 8,
+          "interpretation": "Promote the two referenced pages and kr.request implementation into the analyzed graph, preserving explicit URL, inherited default URL, payload-variable, and multipart upload-selector evidence as different request architectures.",
+          "claim_ids": [
+            "claim:x5000r-expanded-frontend-scope"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-upload-mode-owner"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-frontend-scope-expansion"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-nested-upload-dispatch",
+          "order": 9,
+          "interpretation": "Replay the bounded MIPS main control-flow from upload-mode recognition through selector extraction, multipart parsing, JSON topicurl construction, slash-suffix normalization, set_handle_t selection, and exact handler invocation.",
+          "claim_ids": [
+            "claim:x5000r-nested-upload-dispatch"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-upload-runtime-reachability",
+            "obligation:x5000r-upload-auth-guard"
+          ],
+          "resolves_obligations": [
+            "obligation:x5000r-upload-mode-owner"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-custom-auth-path-exclusion",
+          "order": 10,
+          "interpretation": "Trace the custom lighttpd suffix gate into SESSION_ID validation and HTTP 302 enforcement, then compare its exact protected path set with the upload CGI path instead of inferring authentication from the presence of login functions.",
+          "claim_ids": [
+            "claim:x5000r-custom-auth-path-exclusion"
+          ],
+          "creates_obligations": [
+            "obligation:x5000r-static-service-assembly"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": [
+            "obligation:x5000r-upload-auth-guard"
+          ]
+        },
+        {
+          "stage_id": "stage:x5000r-static-service-assembly",
+          "order": 11,
+          "interpretation": "Replay the init_router to service-group to start_httpd calls, recover the exact _eval argv vector, and resolve its server/config/CGI artifacts without treating static assembly as a live process observation.",
+          "claim_ids": [
+            "claim:x5000r-static-service-assembly"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [
+            "obligation:x5000r-static-service-assembly"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:x5000r-potential-hidden-interface-index",
+          "order": 12,
+          "interpretation": "Apply the completed-coverage gate to the residual native-only registrations and publish all ten as a cross-firmware-queryable uncertainty class without upgrading static absence into a runtime or security conclusion.",
+          "claim_ids": [
+            "claim:x5000r-potential-hidden-interfaces"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        }
+      ],
+      "obligations": [
+        {
+          "obligation_id": "obligation:x5000r-cross-resource-endpoint",
+          "statement": "Resolve globalConfig.cgiUrl from its defining asset into topicurl wrapper consumers.",
+          "required_capability": "resolves_endpoint_binding",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:340a0168af128fbe29827a9d42f4c5b6687017ad1152d2ed166c46835f962d31",
+            "evidence:7fae6c104f1f2dfd69650f3c02b095bfe85bb7f3b25bdd6de54c16919c0e305a"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-selector-handler",
+          "statement": "Bind or explain the residual 77 frontend-only operations after scope expansion; upload is a newly recovered outer selector and must not be forced into the inline topicurl tables.",
+          "required_capability": "binds_handler",
+          "status": "open",
+          "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:x5000r-setlancfg-prefix-value-flow",
+          "statement": "Recover request-parameter to state writes in the straight-line setLanCfg prefix.",
+          "required_capability": "maps_parameter_to_state",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:65068ce79bc8a710cbe30d9614bdecf0007d3e7d1319432405bab218ff3c9b1d",
+            "evidence:1a7119907f1f9f7e8f1e803e58560217703364813025bc453d4fc11e55b4d59f"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-branched-value-flow",
+          "statement": "Recover branch-dependent DHCP state writes and downstream commit/network/sensitive sinks without merging mutually exclusive paths.",
+          "required_capability": "traces_branched_value_flow",
+          "status": "open",
+          "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:x5000r-set-difference-shape",
+          "statement": "Attribute the observed 76 frontend-only and 14 native-only operations without converting string similarity into a handler binding.",
+          "required_capability": "attributes_set_difference",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:48c0ae04fd6e114f4f6980da1bf7345aff258957469d8bee893a648e28dc9277",
+            "evidence:4c27b133facef90524fbb2f238c4927c5a5e854543265e1579204ba85f6d75cc",
+            "evidence:df7756729dbf120b10d0460438f7187623d6ce7314d8ce85a75a5a0b8ab5c6a4",
+            "coverage:x5000r-set-difference-attribution"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-frontend-scope-expansion",
+          "statement": "Expand the first-class frontend asset graph to cover wan_ie.html and advance/config.html, then determine whether their three exact selectors change the dispatcher comparison.",
+          "required_capability": "expands_frontend_scope",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:01b3a330fa09b9fa1f6951ebc6265bb37196e6384a33f1e64534fb69e3c4112a",
+            "evidence:e312a99e46a58c2daafe389faa164f3d5b4008f1eea34287ddbe66aaaa642177",
+            "evidence:83bcc17baff831a4f286d1b5286147e068adc965ecf0ba3228ddbee89dc1c0d3",
+            "evidence:2840a161f73b3015b5e8393dbc88179d70e6439929224f5d900ed45838a409d0",
+            "coverage:x5000r-expanded-frontend-scope"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-upload-mode-owner",
+          "statement": "Determine which upload-mode dispatcher consumes action=upload before setUploadSetting reaches the inline native registration, without treating their URL adjacency as a direct call edge.",
+          "required_capability": "binds_upload_mode",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:469a1724198b6c62aa45d85858d7fa6e6d54d720a5010aba54aeff8a637bf53a",
+            "evidence:7ba281dfa74b05759b9f20d6a7b84f7abab5dc2f871aab44957b6ba018a5b74a",
+            "evidence:3d00d3f04153c618cfab025441c125a843bcc2517f50856df7ccbf35b1401bbd",
+            "evidence:784717b02a18e526c5a837d5c1302c169a3206d9ce6f91c9f2f38d8b1ff70376",
+            "evidence:e03704a5b65ab6cd2113068c5599edc41c799777778b8d7f2cc57a5d601d9ed6",
+            "evidence:266baa8d476660a993a4476f3dc5fa95ecfc29ca2eace7c8c517b77e992f0816",
+            "coverage:x5000r-nested-upload-dispatch"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-upload-runtime-reachability",
+          "statement": "Verify that the upload path is reachable in the deployed runtime configuration and request lifecycle.",
+          "required_capability": "verifies_runtime_reachability",
+          "status": "open",
+          "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:x5000r-static-service-assembly",
+          "statement": "Prove that the shipped initialization path selects the web server, configuration, CGI namespace, and request artifact.",
+          "required_capability": "assembles_static_service",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:14d3736dfba5d6076335e303471997dde64fe1be5a7ca45eaeb6d0da9186c612",
+            "evidence:745154952409e4487d62a5bd8a92df73875de038912cf3fc50bd76c7e57a6624",
+            "evidence:07a865c5f28c93dfe821511f0a161b700f3a86ddb3412ab59b3a17d24bf5e6b0",
+            "evidence:2ce5ca93095e4ad51bea5c915f181e8042af0a0b39b9a03f36db95e5c6567d64",
+            "evidence:37a6599d2de737e244b5c91fd0a9eafab8c149563efbe22f3e3dfe5142590b34",
+            "evidence:d2ee6f5d3565fddc127bb6fbc56e7e5524556595c565d05e1d5973d38b5a3341",
+            "evidence:126f5f64cbf2eb921b9629b995345840917a89be9aa73ef44f77b851b4bd9732",
+            "evidence:95e5a2899396a30ad920f39c2838dacef0dfc562d716c143141a0a696e8c490d",
+            "evidence:7760bcc17531bc3d677d9579937aba1b094cf828b4ba366a53e9131051d97d2d",
+            "evidence:99bb5ef14b289639b11eabcfaaa1adf982d25de686ab4a2772fb08edc4b4b063",
+            "evidence:9f9fb21c6f6d88407ddf0ada7511faccaeec40477e54ca9b26561f90284105cf",
+            "coverage:x5000r-service-assembly"
+          ]
+        },
+        {
+          "obligation_id": "obligation:x5000r-upload-auth-guard",
+          "statement": "Recover authentication and authorization guards applied before the upload-mode branch.",
+          "required_capability": "maps_auth_guard",
+          "status": "rejected",
+          "closure_evidence_refs": [
+            "evidence:00078b1dcdbde38a6323e0458697834454e6c0df2d830be7c8d5b9ba7557dc4e",
+            "evidence:e4fd7ac52f78bbddfd1156c1a541216ba013ee05f3fc67a9ed10828ffe6a18ca",
+            "evidence:14672792d961e5f439a7cfb3ba0f1c440d91e52ddf77780781d2cd0e18871801",
+            "evidence:d42f0701efb9ebf7eac1112e34eb916408f873e785db5749caabd87b46d82a90",
+            "evidence:36cbf6aae3090fab8d7d27000a90dfb3aeeedea42d2e87ac36ab8d62ec3b6977",
+            "coverage:x5000r-request-protection"
+          ]
+        }
+      ],
+      "counterfactuals": [
+        "Path-only grouping would collapse many distinct operations into one CGI interface.",
+        "Frontend-only analysis would not identify cstecgi.cgi as a MIPS deep-analysis target.",
+        "A native string hit alone would incorrectly imply a proved selector-to-handler binding.",
+        "A single-resource frontend pass would miss 199 wrapper operations whose endpoint is defined in another asset.",
+        "Treating a selector string hit as a binding would hide the 76 frontend-only and 14 Native-only operation differences.",
+        "Linear scanning past the first conditional branch could combine mutually exclusive DHCP paths into a false value-flow.",
+        "Substring matching would misclassify loginAuth as an exact cross-native occurrence because usr/sbin/lighttpd contains userloginAuth; the suffix-token variant remains only a candidate clue.",
+        "Analyzing only shared wrapper files would leave three implemented operations labeled Native-only; conversely, flattening the multipart URL would hide the distinct outer upload mode and inner setUploadSetting selector.",
+        "Treating the setUploadSetting table entry alone as proof would miss the preceding action=upload branch, multipart parser, query-segment transfer, and slash normalization that make the handler reachable from this request shape.",
+        "Finding SESSION_ID and checkLoginUser in lighttpd would falsely imply that every CGI request is protected; only branch-level comparison shows that the suffix gate excludes /cgi-bin/cstecgi.cgi.",
+        "Finding a start_httpd function or lighttpd strings alone would not prove the service is part of the initialization chain or which configuration and CGI artifact it selects."
+      ],
+      "paper_uses": [
+        "Motivating example for operation identity below a shared physical endpoint.",
+        "Ablation of path-only, frontend-plus-config, and native-dispatch analysis.",
+        "Evidence-preserving example of closing a cross-resource JavaScript obligation while retaining a native value-flow obligation.",
+        "Frontend/native set-difference experiment for version drift, dead UI code, and alternate backend hypotheses.",
+        "Instruction-level example showing why handler ownership alone is insufficient: concrete request fields must be followed into configuration state.",
+        "Evidence-backed case study showing how frontend/native set differences expose incomplete asset scope, wrapper-only declarations, and native registrations without inventing backend equivalence.",
+        "Scope-expansion example showing three request architectures behind one CGI: direct literal request, inherited kr.request default with payload-variable selector, and multipart upload URL with nested selectors.",
+        "Instruction-level nested-dispatch example showing why a firmware map can identify the correct binary and handler where endpoint text or vulnerability prose cannot.",
+        "Cross-binary protection-scope example showing why page authentication and CGI operation authorization must be mapped independently before reasoning about a vulnerability mechanism.",
+        "Static service-assembly example separating boot-path configuration proof from live runtime observation.",
+        "Coverage-gated hidden-interface candidate set for cross-firmware prevalence, handler clustering, and later runtime-resolution experiments."
+      ],
+      "limitations": [
+        "The 199 operations are statically enumerated wrapper assignments; dynamically constructed selectors may still exist.",
+        "Only the branch-free setLanCfg prefix is proven; DHCP branches, commits, network reconfiguration, and sensitive sinks remain open.",
+        "CGI execution configuration does not prove runtime reachability or authentication state.",
+        "The two setLanCfg mappings do not establish exploitability, runtime reachability, or dangerous sink access.",
+        "Set-difference categories describe observed static evidence only; version drift, dead code, alternate processes, generated requests, and runtime registration still require separate proof.",
+        "The deterministic Profile proves the static native control-flow edge from action=upload to setUploadSetting, but it does not prove runtime reachability, authentication state, or exploitability.",
+        "The custom-auth Profile rejects a guard only within the shipped lighttpd response path and cstecgi dispatcher evidence; external proxies, runtime configuration changes, network policy, and exploitability remain outside this static claim.",
+        "The service-assembly Profile proves the shipped initialization and configuration chain, not that a particular boot completed or that the process and listeners were observed live.",
+        "A missing observed frontend reference does not distinguish a hidden client, direct API, dead code, version skew, or runtime-only registration without additional evidence."
+      ]
+    },
+    {
+      "case_id": "research-case:14ca9032145dead889153148f117fe5ceded7db977222ee73ba2d8f5c46b06c9",
+      "schema_version": "firmatlas.mapping.research-case/v1alpha1",
+      "case_key": "tenda-ac9-dlna-fixture-daemon-split",
+      "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
+      "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+      "architecture_tags": [
+        "frontend_response_fixture",
+        "unresolved_goform_binding",
+        "minidlna_supervisor",
+        "usb_media_mount",
+        "embedded_process_ipc_relationships",
+        "missing_target_component",
+        "symbol_profiled_command_table",
+        "arm_pic_literal_xref",
+        "tail_merged_route_registration",
+        "frontend_tokenizer_coverage_repair",
+        "disabled_frontend_feature_gate",
+        "residual_ui_request"
+      ],
+      "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers, and is the declared UI path enabled in this product build?",
+      "evidence": [
+        {
+          "evidence_ref": "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=588-600;lines=22:14-22:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0997150397e185c0ec3e56c9c957ea2646eacfc1cbcdb90aaedfa89198f1f034",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=315-327;lines=13:14-13:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=682-699;lines=21:14-21:31",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=470-482;lines=18:14-18:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0e9b164c05f972248018dd5f67fd5b60ca21e2d22556b85dca0a2d87ac8d254b",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=551-563;lines=21:14-21:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:1c4ef4042b3271134e31f4b74c3309be46839ca8f7fe62c6e0e13bada6b620c0",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=234-246;lines=10:14-10:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:2be8cabc3ac8346904c1fc87bc736d06b82609b1b58aa7507b9acfa728eaad4d",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=49-57;lines=4:14-4:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:3ad08032db9895aad3e835b9725599f69f106c54486292e1596c1ecccebc08a0",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=167-175;lines=8:14-8:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4243dc13572525dd8be26949093db95ce478247d8e9c83cfa69eb7efad06b703",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=520-528;lines=20:14-20:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:436ce7ddc7154cc89547d317d8222e5f478540ac3bc690a619e0c63d4c753bf9",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=117-129;lines=6:14-6:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:448607bd874b573c7ed6dc930093e04dbcb42e330340ba3af6d09f49738b1e0d",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=284-292;lines=12:14-12:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:475c30c1ce3f49cef3d48a0b8f042b27843e2ac45b1c7d4488499ddc58e4c8d4",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=80-92;lines=5:14-5:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4d51084bb5f8f2894ea014d3cb7657a9ea2e5c81676041e0a458d14416223f68",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=351-363;lines=14:14-14:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:50e57cd60a076cfe830551092e440cd8e3bdc474273d5297374472cca96ff78b",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=433-445;lines=17:14-17:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:644f900fd987b461ed746fcb97e9192c3f61c7c279f18d205dbe52ad476e7e6f",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=198-210;lines=9:14-9:26",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=716-733;lines=22:14-22:31",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:89a6ec1a45a9527f9a101fcf9c881af076020fce5054d6362f51f3f0f5f720d1",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=0-1;lines=1:1-1:2",
+          "capability": "observes_fixture_endpoint",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=4043-4065;lines=113:31-113:53",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:b4dc620966cd2cb3821992747bcde8608ad42e04819ae5d5308eac2fb2d80fb0",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=402-410;lines=16:14-16:22",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:f22c8296a16b7891bed007de4a970f1465e712b1aaabfd3c5903e9a763961d49",
+          "kind": "response_fixture",
+          "source_path": "webroot_ro/goform/expandDlnaFile.txt",
+          "source_artifact_sha256": "f08d9e5c7d08b9a937905fa575e95b57f11ce109a15f2295a4e304452a4943a0",
+          "locator": "text_utf8:bytes=8-19;lines=2:6-2:17",
+          "capability": "observes_response_field",
+          "producer": "response-fixture-producer@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:b8bd263c2d1f1138b69416a5b690c13ee88c30f25be69c78e17f505066675934",
+          "kind": "web_configuration",
+          "source_path": "etc_ro/init.d/rcS",
+          "source_artifact_sha256": "f77e4a67f220c70222b254c94b915710535f02680b11c91e7bfa1aa4e0f09551",
+          "locator": "text_utf8:bytes=256-269;lines=16:10-16:23",
+          "capability": "prepares_media_mount",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:a91ac0adceb329031f0138e1a02e904b98c3be19d2b694b848af01ad06c9ae07",
+          "kind": "web_configuration",
+          "source_path": "etc_ro/nginx/conf/nginx.conf",
+          "source_artifact_sha256": "66d18e21c0224ae7f738f8b97a7d4bc699669cd695e8f0432b7f8d3f54ac3663",
+          "locator": "text_utf8:bytes=1096-1110;lines=56:10-56:24",
+          "capability": "aliases_media_download",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:eb542224a941cff16d8d415c4c11d2aa07ab214b1ab056cbe483694195816289",
+          "kind": "native_hint",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951924-951931",
+          "capability": "reads_dlna_state",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78",
+          "kind": "native_hint",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=96365-96373",
+          "capability": "monitors_media_daemon",
+          "producer": "ac9-dlna-architecture-clue-report@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
+          "kind": "native_relationship",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103416-103440",
+          "capability": "declares_native_relationship",
+          "producer": "native-embedded-command-relationship@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
+          "kind": "native_relationship",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=870164-870183",
+          "capability": "declares_native_relationship",
+          "producer": "native-embedded-command-relationship@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103304-103312",
+          "capability": "names_managed_process",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55400-55404",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=96272-96285",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55400-55404",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=1828-1844",
+          "capability": "resolves_command_table_symbol",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55428-55436",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55412-55420",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55488-55496",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103672-103676",
+          "capability": "binds_command_handler",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103416-103440",
+          "capability": "declares_bound_command",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=97448-97474",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55412-55420",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=237920-237928",
+          "capability": "establishes_pic_base",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=241992-242016",
+          "capability": "binds_handler",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951924-951931",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=98470-98490;lines=2513:20-2513:40",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951980-951984",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=24396-24404",
+          "capability": "resolves_handler_symbol",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648540-648548",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951956-951969",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=875536-875548",
+          "capability": "mentions_endpoint",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=241992-242016",
+          "capability": "registers_route",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648492-648500",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648312-648320",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647888-647892",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+          "kind": "native_binding",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=243496-243504",
+          "capability": "branches_to_registrar_tail",
+          "producer": "native-deep-arm-pic-callsite@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=647900-647908",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=951980-951984",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554",
+          "kind": "native_literal_xref",
+          "source_path": "bin/httpd",
+          "source_artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "locator": "binary:bytes=648036-648044",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=17382-17412;lines=534:17-534:47",
+          "capability": "maps_feature_to_ui_target",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=17554-17635;lines=540:13-541:50",
+          "capability": "reveals_feature_target",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/main.js",
+          "source_artifact_sha256": "bfbbae7e60f61c41c73f23d2ab4e79372785789407c9f4a04e619a8739159834",
+          "locator": "text_utf8:bytes=99665-99674;lines=2548:36-2548:45",
+          "capability": "routes_feature_target_to_page",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/js/macro_config.js",
+          "source_artifact_sha256": "998408b3a5b83e5bb571570f8da70ad985dd2219fd34533f0441b0d1a0d8e274",
+          "locator": "text_utf8:bytes=2009-2010;lines=66:26-66:27",
+          "capability": "declares_feature_value",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+          "kind": "frontend_feature_gate",
+          "source_path": "webroot_ro/dlna.html",
+          "source_artifact_sha256": "89bd6c3533cb3b90b704a1982a137968460ad3834c93fb38002b2d6ea5d6d9d5",
+          "locator": "text_utf8:bytes=4199-4242;lines=83:18-83:61",
+          "capability": "loads_feature_script",
+          "producer": "frontend-feature-gate@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+          "kind": "frontend_request",
+          "source_path": "webroot_ro/js/dlna.js",
+          "source_artifact_sha256": "f020cbc0cea850071cb288f6c07c6dee3dde3638921e68afad51db1ce79895de",
+          "locator": "text_utf8:bytes=4670-4689;lines=134:13-134:32",
+          "capability": "constructs_request",
+          "producer": "frontend-request-producer@0.4.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-native-relationship-target-resolution",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-11-vendor-tenda-ac9-native-relationships.json",
+          "source_artifact_sha256": "7beba6946739c7852ca92c9d355955803b27882fe415038bb8953f39fb954bc9",
+          "locator": "json:$.dlna_relationships",
+          "capability": "resolves_target_component_presence",
+          "producer": "native-relationship-report@v1alpha1"
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:dlna-frontend-request",
+          "statement": "The DLNA page script constructs GetDlnaCfg, SetDlnaCfg, refreshDLNA, and expandDlnaFile requests.",
+          "evidence_refs": [
+            "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+            "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+            "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-feature-disabled-ui-path",
+          "statement": "CONFIG_DLNA_SERVER is n while the UI reveal predicate requires y; the exact feature-map, route, page, and same-stem script chain therefore classifies all four bundled DLNA requests as residual requests behind a disabled declared UI path.",
+          "evidence_refs": [
+            "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+            "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+            "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+            "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+            "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+            "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+            "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+            "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-response-contract",
+          "statement": "A bundled JSON fixture declares the expandDlnaFile response shape.",
+          "evidence_refs": [
+            "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
+            "evidence:0997150397e185c0ec3e56c9c957ea2646eacfc1cbcdb90aaedfa89198f1f034",
+            "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
+            "evidence:0e9b164c05f972248018dd5f67fd5b60ca21e2d22556b85dca0a2d87ac8d254b",
+            "evidence:1c4ef4042b3271134e31f4b74c3309be46839ca8f7fe62c6e0e13bada6b620c0",
+            "evidence:2be8cabc3ac8346904c1fc87bc736d06b82609b1b58aa7507b9acfa728eaad4d",
+            "evidence:3ad08032db9895aad3e835b9725599f69f106c54486292e1596c1ecccebc08a0",
+            "evidence:4243dc13572525dd8be26949093db95ce478247d8e9c83cfa69eb7efad06b703",
+            "evidence:436ce7ddc7154cc89547d317d8222e5f478540ac3bc690a619e0c63d4c753bf9",
+            "evidence:448607bd874b573c7ed6dc930093e04dbcb42e330340ba3af6d09f49738b1e0d",
+            "evidence:475c30c1ce3f49cef3d48a0b8f042b27843e2ac45b1c7d4488499ddc58e4c8d4",
+            "evidence:4d51084bb5f8f2894ea014d3cb7657a9ea2e5c81676041e0a458d14416223f68",
+            "evidence:50e57cd60a076cfe830551092e440cd8e3bdc474273d5297374472cca96ff78b",
+            "evidence:644f900fd987b461ed746fcb97e9192c3f61c7c279f18d205dbe52ad476e7e6f",
+            "evidence:89a6ec1a45a9527f9a101fcf9c881af076020fce5054d6362f51f3f0f5f720d1",
+            "evidence:b4dc620966cd2cb3821992747bcde8608ad42e04819ae5d5308eac2fb2d80fb0",
+            "evidence:f22c8296a16b7891bed007de4a970f1465e712b1aaabfd3c5903e9a763961d49"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-daemon-architecture",
+          "statement": "Independent static evidence establishes media mount preparation, nginx download aliasing, httpd DLNA state text, and minidlna monitoring.",
+          "evidence_refs": [
+            "evidence:b8bd263c2d1f1138b69416a5b690c13ee88c30f25be69c78e17f505066675934",
+            "evidence:a91ac0adceb329031f0138e1a02e904b98c3be19d2b694b848af01ad06c9ae07",
+            "evidence:eb542224a941cff16d8d415c4c11d2aa07ab214b1ab056cbe483694195816289",
+            "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-native-relationships",
+          "statement": "Embedded commands establish httpd signaling minidlna and time_check posting literal topic 51 operation 6 to netctrl; the minidlna target artifact is absent from this rootfs.",
+          "evidence_refs": [
+            "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
+            "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
+            "coverage:ac9-native-relationship-target-resolution"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-supervision-command-handler",
+          "statement": "The daemon_exe_info record binds minidlna and literal topic 51 operation 6 to handler 0x15868; that handler references the media mount and time_check_daemon_minidlna literals.",
+          "evidence_refs": [
+            "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+            "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+            "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+            "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+            "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+            "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+            "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+            "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+            "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+            "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+            "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-usb-status-route-handler",
+          "statement": "main.js constructs GetUSBStatus; a tail-merged ARM registration binds that route to formGetUSBStatus@0xa62d0, whose exact function references dlna.en, /var/etc/upan, and dlna literals.",
+          "evidence_refs": [
+            "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0",
+            "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+            "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+            "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+            "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+            "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+            "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+            "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+            "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+            "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+            "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+            "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc",
+            "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+            "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+            "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c",
+            "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+            "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+            "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e",
+            "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615",
+            "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+            "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+            "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:dlna-handler-owner",
+          "statement": "No exact Native registration or handler binding currently connects GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform execution path; the adjacent GetUSBStatus binding does not establish an alias for those operations.",
+          "evidence_refs": [
+            "evidence:0a09b301b9a48a15744da7bc5290a870dbc8c2fd60f6b9f587f93465c823c597",
+            "evidence:6ef4ab2df7889fbcce93cd2e859fb9b42342c9f2ea2c38aec9cf0788771027c5",
+            "evidence:9ac87d025c6449a1916e17456c6c90c76da32ee58a7ccbdf43bdf8fd68ca5f95",
+            "evidence:b2d76b6ce21d583881aab8a7a5cdbd225d2b04a89c574b22b832272493f75e3c",
+            "evidence:34c7317e13a6f89c979559a450f2eb44ecdac3a4bf4f94fa16a48454aec9af41",
+            "evidence:aceedd01d676afe402497d62eca971087a0cb8802cf1d5d3386043c588280650",
+            "evidence:bb6872ff27b226ae4706d146b561328e91e08ca475fefc25dbea8485f77cb9df",
+            "evidence:cb706eff46e047fab32973561191382db0c338af594a3b6c477d77c538984c2c",
+            "evidence:d7ce5e530bf3f36611df1c740cb0de2fe050585affdd9dfd13ee7a5378695f24",
+            "evidence:08d1d7afe2c2f2f2aa53de2b6f6a3c05b7abd85c1c308e2ff36fa672fb121da6",
+            "evidence:0997150397e185c0ec3e56c9c957ea2646eacfc1cbcdb90aaedfa89198f1f034",
+            "evidence:0a6a99d01d1ff4ad1e29f8441b2e466409a35caeb1307217e6e0280d877b1751",
+            "evidence:0e9b164c05f972248018dd5f67fd5b60ca21e2d22556b85dca0a2d87ac8d254b",
+            "evidence:1c4ef4042b3271134e31f4b74c3309be46839ca8f7fe62c6e0e13bada6b620c0",
+            "evidence:2be8cabc3ac8346904c1fc87bc736d06b82609b1b58aa7507b9acfa728eaad4d",
+            "evidence:3ad08032db9895aad3e835b9725599f69f106c54486292e1596c1ecccebc08a0",
+            "evidence:4243dc13572525dd8be26949093db95ce478247d8e9c83cfa69eb7efad06b703",
+            "evidence:436ce7ddc7154cc89547d317d8222e5f478540ac3bc690a619e0c63d4c753bf9",
+            "evidence:448607bd874b573c7ed6dc930093e04dbcb42e330340ba3af6d09f49738b1e0d",
+            "evidence:475c30c1ce3f49cef3d48a0b8f042b27843e2ac45b1c7d4488499ddc58e4c8d4",
+            "evidence:4d51084bb5f8f2894ea014d3cb7657a9ea2e5c81676041e0a458d14416223f68",
+            "evidence:50e57cd60a076cfe830551092e440cd8e3bdc474273d5297374472cca96ff78b",
+            "evidence:644f900fd987b461ed746fcb97e9192c3f61c7c279f18d205dbe52ad476e7e6f",
+            "evidence:89a6ec1a45a9527f9a101fcf9c881af076020fce5054d6362f51f3f0f5f720d1",
+            "evidence:b4dc620966cd2cb3821992747bcde8608ad42e04819ae5d5308eac2fb2d80fb0",
+            "evidence:f22c8296a16b7891bed007de4a970f1465e712b1aaabfd3c5903e9a763961d49",
+            "evidence:b8bd263c2d1f1138b69416a5b690c13ee88c30f25be69c78e17f505066675934",
+            "evidence:a91ac0adceb329031f0138e1a02e904b98c3be19d2b694b848af01ad06c9ae07",
+            "evidence:eb542224a941cff16d8d415c4c11d2aa07ab214b1ab056cbe483694195816289",
+            "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78",
+            "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
+            "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
+            "coverage:ac9-native-relationship-target-resolution",
+            "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+            "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+            "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+            "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+            "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+            "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+            "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+            "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+            "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+            "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+            "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b",
+            "evidence:2033615d3417b7027f4efabd154f5774cb90f983a8d32037396313a2960554b0",
+            "evidence:0b79f7257a351d630b41be871c6199bab55bca813b4606cdcab38957d6f27757",
+            "evidence:141fa33e4d7f1aa1b910dc35c7c8a4ff74a21df219f61799c67a776048b98038",
+            "evidence:4c83475319c430b73eafa4bff7cf88c32eea35188b99412fd29c82a53d5fc2f1",
+            "evidence:795524348831966af8e9e63b753eb5862950a11edb373dc519b0c4616536c9c0",
+            "evidence:8e9bef551f919eeaed63181f572c95eb75c7f29ef0958a09e291889bafa9825c",
+            "evidence:d66d70f2694516701dfeab55ecea4dc3a7ace227b4d2462bbc9a69782f8a5818",
+            "evidence:125a6930d4aa7761af53f074fb224795860ebf2f292efc4f1534f7814f1b129e",
+            "evidence:1f0902788779079aae60e16b804b2a73bf7fcc2975167b0d6f82b08a2ed014cc",
+            "evidence:43e7033ad04b5f388b07c11e6985d6643ab01e450a7ead55c9f4fc65d9ba825d",
+            "evidence:4ea2e3d6bc891fc3303f39009781f493bbce944517f0a0887be07e81cae317da",
+            "evidence:59d6f5a6edc5078f2f85574d4bc7178e28ba5cc7ac3df75bd4f9ea451fc0fcdc",
+            "evidence:6667977fb488f7454f64218d714d27f83e8ee9324d6811003fc1a38bf520ed61",
+            "evidence:7a926b34068d8b04d31d2e557f9e457457cb5854f8e7122ac73215f6abe3152d",
+            "evidence:88144d65a32a9adc01e70eba382dfd61a6b67169c9727da2618d56b4910da23c",
+            "evidence:91f55cecbe24711122a6ec4ee58e4bbe5def5f2873541df8b843b45ca4b5ee4f",
+            "evidence:9454b83281f965472b487b76210dd4815aa796837166b1afec156e90213541a1",
+            "evidence:a1c5695aa1df7033403547fd206ee8a093b72bc41a26b2854266cb9326cadf4e",
+            "evidence:b8d89be3b7562a57ae71d5b07b80be15f43472fe26fbe2ffc398da6971ca5615",
+            "evidence:d88559aba2a6e26b2f9cd520732a9ae58d9780551a48cdedc67f84d12265b576",
+            "evidence:dd43fe49f2792ada61006415401667e96e2e5a50c0fad744c7ded9551bb0b1f5",
+            "evidence:ef67127514efa81fd7865585bc000a62417a470b444708aef038e699b06dcd15",
+            "evidence:f44c4ee7d7c57c28937f95133041d7ad3f8408dc7b70aa888416bdb0e17c5554"
+          ],
+          "status": "unresolved"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "stage:dlna-frontend",
+          "order": 1,
+          "interpretation": "Recover the request while leaving backend ownership open.",
+          "claim_ids": [
+            "claim:dlna-frontend-request"
+          ],
+          "creates_obligations": [
+            "obligation:dlna-handler-owner"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-response-fixture",
+          "order": 2,
+          "interpretation": "Recover response fields as fixture-declared clues, not runtime facts.",
+          "claim_ids": [
+            "claim:dlna-response-contract"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-daemon-architecture",
+          "order": 3,
+          "interpretation": "Recover the independent media mount and daemon supervision branch.",
+          "claim_ids": [
+            "claim:dlna-daemon-architecture",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-native-relationships",
+          "order": 4,
+          "interpretation": "Recover embedded process/IPC edges and verify target presence without promoting them to executed callsites.",
+          "claim_ids": [
+            "claim:dlna-native-relationships",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [
+            "obligation:dlna-supervisor-ipc-binding"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-command-handler-xref",
+          "order": 5,
+          "interpretation": "Resolve the daemon command-table callback and prove literals referenced by that exact ARM function.",
+          "claim_ids": [
+            "claim:dlna-supervision-command-handler",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [
+            "obligation:dlna-supervisor-ipc-binding"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-usb-status-route-handler",
+          "order": 6,
+          "interpretation": "Repair regex-aware frontend tokenization, replay the nonlocal tail-merged ARM registration, and deepen only that verified handler to function-scoped literal xrefs without treating it as an alias for the still-unbound DLNA operations.",
+          "claim_ids": [
+            "claim:dlna-usb-status-route-handler",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-disabled-feature-gate",
+          "order": 7,
+          "interpretation": "Follow the exact macro-to-menu-to-page-to-script chain and classify the four frontend-only operations as residual requests without converting UI disablement into backend absence.",
+          "claim_ids": [
+            "claim:dlna-feature-disabled-ui-path",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        }
+      ],
+      "obligations": [
+        {
+          "obligation_id": "obligation:dlna-handler-owner",
+          "statement": "Locate or reject a route registration and handler for the DLNA goform operations.",
+          "required_capability": "binds_handler",
+          "status": "open",
+          "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:dlna-supervisor-ipc-binding",
+          "statement": "Bind the minidlna supervisor state path to its exact IPC command handler.",
+          "required_capability": "binds_command_handler",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+            "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+            "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+            "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+            "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+            "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+            "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+            "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+            "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+            "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+            "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b"
+          ]
+        }
+      ],
+      "counterfactuals": [
+        "Treating a response fixture filename as a route table would invent a handler binding.",
+        "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
+        "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
+        "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
+        "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
+        "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding.",
+        "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set."
+      ],
+      "paper_uses": [
+        "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
+        "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
+        "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
+        "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
+        "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
+        "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner.",
+        "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation."
+      ],
+      "limitations": [
+        "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
+        "The fixture may be development data and does not establish runtime response values.",
+        "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
+        "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
+        "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
+        "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations.",
+        "A disabled declared UI path does not prove backend absence, runtime inaccessibility, or behavior in another product/version build."
+      ]
+    }
+  ],
+  "validation": {
+    "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
+    "paper_ready": true,
+    "case_count": 3,
+    "evidence_line_count": 14,
+    "issues": []
+  }
+}

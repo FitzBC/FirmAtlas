@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V10,
     DiscoveryCandidateKind,
     HistoricalVulnerabilityRecord,
     MappingAnalysisProfile,
@@ -43,9 +44,12 @@ def _xref_row(item) -> dict:
 
 
 def build() -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(
-        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto()
-    ))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v10()
+        ),
+        registry=BUILTIN_ANALYZER_REGISTRY_V10,
+    )
     request_candidates = [
         item for item in run.catalog.candidates
         if (

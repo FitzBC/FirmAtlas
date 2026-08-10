@@ -11,6 +11,7 @@ from typing import Optional, Tuple
 
 from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom
 from .frontend import FrontendProducerResult
+from .frontend_feature_gate import FrontendFeatureGateResult
 from .parameter_clue import FrontendParameterClueIndex
 from .response_fixture import ResponseFixtureResult
 from .native_relationship import NativeRelationshipResult
@@ -41,6 +42,7 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 class DiscoveryProducerKind(str, Enum):
     FRONTEND = "frontend"
+    FRONTEND_FEATURE_GATE = "frontend_feature_gate"
     WEB_CONFIGURATION = "web_configuration"
     SCRIPT_BACKEND = "script_backend"
     NATIVE = "native"
@@ -62,6 +64,7 @@ class DiscoveryProducerKind(str, Enum):
 
 class DiscoveryCandidateKind(str, Enum):
     REQUEST_INTERFACE = "request_interface"
+    FRONTEND_FEATURE_GATE = "frontend_feature_gate"
     WEB_CONFIGURATION = "web_configuration"
     SCRIPT_SOURCE = "script_source"
     SCRIPT_ROUTE = "script_route"
@@ -111,6 +114,22 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("frontend-request-producer", "0.1.0")
         )
         return cls(DiscoveryProducerKind.FRONTEND, producer, scope, results)
+
+    @classmethod
+    def frontend_feature_gate(
+        cls, results: Tuple[FrontendFeatureGateResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("frontend-feature-gate", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.FRONTEND_FEATURE_GATE,
+            producer,
+            scope,
+            results,
+        )
 
     @classmethod
     def parameter_clue(
@@ -494,6 +513,59 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                         (item.literal_value,) if item.literal_value is not None else (),
                         item.is_operation_selector, item.source_construct,
                         item.evidence_ids,
+                    ))
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.FRONTEND_FEATURE_GATE
+            ):
+                requests = {
+                    item.candidate_id: item
+                    for item in candidates
+                    if item.candidate_kind
+                    is DiscoveryCandidateKind.REQUEST_INTERFACE
+                }
+                for item in result.gates:
+                    if any(
+                        request_id not in requests
+                        for request_id in item.request_candidate_ids
+                    ):
+                        raise ValueError(
+                            "frontend feature gate references unknown request"
+                        )
+                    proof_ids = tuple(dict.fromkeys((
+                        *item.evidence_ids,
+                        *(
+                            evidence_id
+                            for request_id in item.request_candidate_ids
+                            for evidence_id in requests[request_id].evidence_ids
+                        ),
+                    )))
+                    candidates.append(DiscoveryCandidate(
+                        item.gate_id,
+                        DiscoveryCandidateKind.FRONTEND_FEATURE_GATE,
+                        item.feature_symbol,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.page_path,
+                        item.source_construct,
+                        proof_ids,
+                        (
+                            ("gate_status", item.status.value),
+                            ("configured_value", item.configured_value),
+                            ("enabled_value", item.enabled_value),
+                            ("ui_target_id", item.ui_target_id),
+                            ("page_path", item.page_path),
+                            ("script_paths", json.dumps(
+                                item.script_paths, separators=(",", ":")
+                            )),
+                            ("request_candidate_refs", json.dumps(
+                                item.request_candidate_ids,
+                                separators=(",", ":"),
+                            )),
+                            ("request_endpoints", json.dumps(
+                                item.request_endpoints,
+                                separators=(",", ":"),
+                            )),
+                        ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.PARAMETER_CLUE:
                 request_identities = {
