@@ -2,7 +2,7 @@
 
 日期：2026-08-11
 
-状态：本轮实现完成，真实 AC9 双进程回放一致，全量本地回归通过；待提交与 GitHub 推送。
+状态：本轮实现完成，真实 AC9 双进程回放一致，全量本地回归通过，已提交并推送 GitHub。
 
 ## 1. 本轮问题
 
@@ -181,4 +181,5 @@ HTTP：
 - 主样本继续固定为 Tenda AC9；其他固件只做类别或家族对照。
 - 本轮属于 firmware communication-mapping research/productization 范围。
 - 按用户明确要求，本轮不执行 SSH 远程部署；本地验证后提交并推送 GitHub。
+- GitHub `main` 已推送；远端 revision 由本轮最终 Git 记录固定。
 - 后续会话应从本记录、机器报告及 research casebook 的 historical-interface-overlay stage 继续，不要把跨版本 observation 改写成漏洞事实。
