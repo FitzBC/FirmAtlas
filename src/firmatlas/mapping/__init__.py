@@ -238,7 +238,13 @@ from .extraction import (
     WorkerExtractionRequest,
 )
 from .container_worker import ContainerBinwalkConfig, ContainerBinwalkWorker
-from .repository import CatalogConflictError, DiscoveryCatalogRepository
+from .repository import (
+    COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION,
+    CatalogConflictError,
+    CommunicationGraphConflictError,
+    CommunicationGraphQuery,
+    DiscoveryCatalogRepository,
+)
 from .native_deep import (
     NATIVE_DEEP_RESULT_SCHEMA_VERSION,
     ArmPicCallsiteProfile,
@@ -622,6 +628,9 @@ __all__ = (
     "ContainerBinwalkConfig",
     "ContainerBinwalkWorker",
     "CatalogConflictError",
+    "COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION",
+    "CommunicationGraphConflictError",
+    "CommunicationGraphQuery",
     "DiscoveryCatalogRepository",
     "NATIVE_DEEP_RESULT_SCHEMA_VERSION",
     "ArmPicCallsiteProfile",

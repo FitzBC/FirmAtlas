@@ -54,6 +54,10 @@ AC9_R2_17_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-17-vendor-tenda-ac9-ac18-dlna-communication-graph.json"
 )
+AC9_R2_18_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-18-vendor-tenda-ac9-graph-query.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1217,6 +1221,15 @@ def build_ac9_dlna_fixture_split_case():
         "controls_artifact_local_route_handler_projection",
         "communication-architecture-graph@v1alpha1",
     )
+    query_report_sha = hashlib.sha256(AC9_R2_18_REPORT.read_bytes()).hexdigest()
+    ac9_graph_query_ref = CaseEvidenceReference(
+        "coverage:ac9-dlna-persisted-graph-query",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_18_REPORT.as_posix(), query_report_sha,
+        "json:$.queries",
+        "replays_persisted_graph_queries_with_evidence",
+        "communication-graph-query@v1alpha1",
+    )
     evidence = (
         *atom_evidence,
         target_resolution_ref,
@@ -1227,6 +1240,7 @@ def build_ac9_dlna_fixture_split_case():
         ac18_reachability_ref,
         ac9_graph_ref,
         ac18_graph_ref,
+        ac9_graph_query_ref,
     )
     by_capability = {}
     for item in evidence:
@@ -1402,6 +1416,14 @@ def build_ac9_dlna_fixture_split_case():
                 (ac9_graph_ref.evidence_ref, ac18_graph_ref.evidence_ref),
             ),
             CaseClaim(
+                "claim:dlna-persisted-graph-query",
+                "The completed AC9 graph survives immutable SQLite publication "
+                "and repository reopen, then yields bounded interface, parameter, "
+                "completeness, minidlna-component, and dlnaEn-evidence queries "
+                "without changing the four open Web owner obligations.",
+                (ac9_graph_query_ref.evidence_ref,),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
                 "In the AC9 artifact, no exact Native registration or handler binding connects "
                 "GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform "
@@ -1421,6 +1443,7 @@ def build_ac9_dlna_fixture_split_case():
                     ac18_reachability_ref.evidence_ref,
                     ac9_graph_ref.evidence_ref,
                     ac18_graph_ref.evidence_ref,
+                    ac9_graph_query_ref.evidence_ref,
                 ),
                 CaseClaimStatus.UNRESOLVED,
             ),
@@ -1509,6 +1532,16 @@ def build_ac9_dlna_fixture_split_case():
                     "claim:dlna-handler-owner",
                 ),
             ),
+            CaseStage(
+                "stage:dlna-persisted-graph-query", 11,
+                "Publish the complete artifact-local graph with its source "
+                "Catalog, reopen storage, and replay bounded UI/query views "
+                "while preserving evidence and unresolved ownership.",
+                (
+                    "claim:dlna-persisted-graph-query",
+                    "claim:dlna-handler-owner",
+                ),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1536,6 +1569,7 @@ def build_ac9_dlna_fixture_split_case():
             "Transferring AC18 handler addresses or vulnerability state to AC9 would confuse a family-level positive control with artifact-local proof.",
             "Treating declared-but-unreached as dead code or runtime inaccessibility would overstate a bounded static call-graph result.",
             "Hiding a stale open obligation after deeper binding evidence arrives would make the graph contradict its own evidence timeline.",
+            "Reimplementing graph traversal in each UI would allow view filters to become an unreviewed second inference engine.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -1548,6 +1582,7 @@ def build_ac9_dlna_fixture_split_case():
             "Family holdout showing that enabled variants can prioritize symbols and structures without resolving a disabled target build by analogy.",
             "Frontend reachability ablation separating request declaration, bounded active paths, and commented or unreached functions.",
             "Graph-projection case showing artifact-local owner separation and a late-evidence obligation state transition.",
+            "Persistence/query case showing that reproducible analyst views can preserve the same evidence and open obligations across process restarts.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",

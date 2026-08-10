@@ -144,6 +144,24 @@ PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
 
 该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Frontend Feature Gate、Frontend Invocation Reachability、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。可选 `--graph-output` 会从同一 Catalog 生成确定性的通信架构图 read model；`--graph-focus` 可重复，按精确接口身份进行有界语义跳转，制品归属边不会扩大焦点。当前默认仍为冻结的 `auto-v13`，图谱不是新的分析 Profile，也不会创造运行时或漏洞事实。AC9 的 3 条 DLNA feature pivot 全部落在 `GetUSBStatus → formGetUSBStatus@0xa62d0`，没有三条 DLNA 配置 binding；官方 AC18 启用 build 则恢复 `GetDlnaCfg / SetDlnaCfg / expandDlnaFile` 及各自 handler。该家族阳性对照支持 build 裁剪候选，但不会把 AC18 owner 或漏洞状态迁移给 AC9。首要样本最新结果见 [R2-17 通信架构图](./docs/firmware-mapping/progress/2026-08-10-r2-17-ac9-dlna-communication-graph.md)，前端调用基线见 [R2-16](./docs/firmware-mapping/progress/2026-08-10-r2-16-ac9-dlna-frontend-reachability.md)，功能 pivot 基线见 [R2-15](./docs/firmware-mapping/progress/2026-08-10-r2-15-ac9-ac18-feature-pivot.md)。参数线索索引对已验证的前端请求参数执行有界同固件精确 token 检索，显式发布阳性、阴性与覆盖受限结果，但不会把字符串共现冒充数据流。
 
+将 AnalyzeRun 与图发布到本地 SQLite，并用与后续 HTTP/Console 相同的语义查询：
+
+```bash
+PYTHONPATH=src python3 -m firmatlas.cli mapping publish-graph \
+  --database var/firmatlas.db \
+  --catalog-document mapping-analysis-run.json \
+  communication-graph.json
+
+PYTHONPATH=src python3 -m firmatlas.cli mapping query-graph \
+  --database var/firmatlas.db <graph-id> \
+  --preset parameter_state \
+  --focus-identity goform/SetDlnaCfg \
+  --max-hops 2
+```
+
+发布会验证 graph 与源 Catalog 的 firmware、coverage 和 EvidenceAtom 闭包；查询返回无悬空边的
+节点/边、facet、Coverage Ledger 与完整 EvidenceAtom。AC9 实证见 [R2-18 持久化图查询](./docs/firmware-mapping/progress/2026-08-11-r2-18-ac9-persisted-graph-query.md)。
+
 历史漏洞接口只能在声明版本与当前制品范围明确后用于测绘差异，不能直接当作固件真值：
 
 ```bash

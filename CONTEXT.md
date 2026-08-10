@@ -164,6 +164,13 @@ Catalog identity 和既有 EvidenceAtom，Coverage Ledger 与未决义务作为�
 也不创建运行时可达、漏洞、跨版本 owner 或新的固件事实。
 _Avoid_: 图数据库真值、字符串关系图、运行时拓扑、UI 推断、漏洞传播图
 
+**通信架构图查询（Communication Architecture Graph Query）**：
+对已持久化的通信架构图按稳定节点身份、精确 canonical identity、view preset、节点/边类别、
+状态、文本或 EvidenceAtom 身份执行有界选择，并从同一源 Discovery Catalog 回填证据详情。
+查询预算截断或焦点缺失必须显式为 partial，输出不得包含悬空边。查询只选择既有事实，不得
+创建接口、参数、owner、跨版本关系、运行时或漏洞结论。
+_Avoid_: UI 本地拼图、模糊 owner 搜索、图数据库推理、证据复制、漏洞传播查询
+
 **固件测绘快照（Firmware Mapping Snapshot）**：
 针对一个固件制品、在固定分析策略和分析器版本下发布的不可变通信架构、接口、参数、证据与覆盖状态集合。
 _Avoid_: Analysis Snapshot、最新扫描、报告文件

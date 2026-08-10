@@ -214,6 +214,61 @@ class CommunicationArchitectureGraph:
     diagnostics: Tuple[str, ...] = ()
     schema_version: str = COMMUNICATION_GRAPH_SCHEMA_VERSION
 
+    def __post_init__(self) -> None:
+        if self.schema_version != COMMUNICATION_GRAPH_SCHEMA_VERSION:
+            raise ValueError("unsupported communication graph schema_version")
+        graph_digest = self.graph_id.removeprefix("communication-graph:")
+        if (
+            not self.graph_id.startswith("communication-graph:")
+            or len(graph_digest) != 64
+            or any(character not in "0123456789abcdef" for character in graph_digest)
+        ):
+            raise ValueError("communication graph requires stable graph_id")
+        if not self.source_catalog_id.strip():
+            raise ValueError("communication graph requires source_catalog_id")
+        if (
+            len(self.firmware_artifact_sha256) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in self.firmware_artifact_sha256
+            )
+        ):
+            raise ValueError("communication graph requires firmware SHA-256")
+        node_ids = {item.node_id for item in self.nodes}
+        edge_ids = {item.edge_id for item in self.edges}
+        if len(node_ids) != len(self.nodes):
+            raise ValueError("duplicate communication graph node identity")
+        if len(edge_ids) != len(self.edges):
+            raise ValueError("duplicate communication graph edge identity")
+        for edge in self.edges:
+            if edge.source_ref not in node_ids or edge.target_ref not in node_ids:
+                raise ValueError("communication graph edge references unknown graph node")
+            if edge.edge_id != _stable_id(
+                "communication-edge",
+                edge.edge_kind.value,
+                edge.source_ref,
+                edge.target_ref,
+                edge.origin_ref,
+            ):
+                raise ValueError("communication graph requires stable edge identity")
+        for item in (*self.nodes, *self.edges):
+            if not item.evidence_ids or len(item.evidence_ids) == len(
+                set(item.evidence_ids)
+            ):
+                continue
+            raise ValueError("communication graph evidence references must be unique")
+        preset_ids = {item.preset_id for item in self.view_presets}
+        if len(preset_ids) != len(self.view_presets):
+            raise ValueError("duplicate communication graph view preset")
+        known_node_kinds = {item.value for item in CommunicationGraphNodeKind}
+        known_edge_kinds = {item.value for item in CommunicationGraphEdgeKind}
+        if any(
+            not set(preset.node_kinds).issubset(known_node_kinds)
+            or not set(preset.edge_kinds).issubset(known_edge_kinds)
+            for preset in self.view_presets
+        ):
+            raise ValueError("communication graph view preset has unknown kind")
+
     def to_dict(self) -> dict:
         return {
             "schema_version": self.schema_version,
@@ -239,6 +294,85 @@ class CommunicationArchitectureGraph:
             "view_presets": [asdict(item) for item in self.view_presets],
             "diagnostics": list(self.diagnostics),
         }
+
+    @classmethod
+    def from_dict(cls, value: dict) -> "CommunicationArchitectureGraph":
+        try:
+            return cls(
+                graph_id=str(value["graph_id"]),
+                source_catalog_id=str(value["source_catalog_id"]),
+                firmware_artifact_sha256=str(
+                    value["firmware_artifact_sha256"]
+                ),
+                source_catalog_coverage_status=CoverageStatus(
+                    value["source_catalog_coverage_status"]
+                ),
+                projection_status=CoverageStatus(value["projection_status"]),
+                nodes=tuple(
+                    CommunicationGraphNode(
+                        node_id=str(item["node_id"]),
+                        node_kind=CommunicationGraphNodeKind(
+                            item["node_kind"]
+                        ),
+                        label=str(item["label"]),
+                        status=str(item["status"]),
+                        source_path=str(item["source_path"]),
+                        evidence_ids=tuple(item.get("evidence_ids", ())),
+                        attributes=tuple(
+                            tuple(pair) for pair in item.get("attributes", ())
+                        ),
+                    )
+                    for item in value["nodes"]
+                ),
+                edges=tuple(
+                    CommunicationGraphEdge(
+                        edge_id=str(item["edge_id"]),
+                        edge_kind=CommunicationGraphEdgeKind(
+                            item["edge_kind"]
+                        ),
+                        source_ref=str(item["source_ref"]),
+                        target_ref=str(item["target_ref"]),
+                        status=str(item["status"]),
+                        origin_ref=str(item["origin_ref"]),
+                        evidence_ids=tuple(item.get("evidence_ids", ())),
+                        attributes=tuple(
+                            tuple(pair) for pair in item.get("attributes", ())
+                        ),
+                    )
+                    for item in value["edges"]
+                ),
+                coverage=tuple(
+                    CommunicationGraphCoverage(
+                        scope=str(item["scope"]),
+                        producer_kind=str(item["producer_kind"]),
+                        producer=str(item["producer"]),
+                        producer_version=str(item["producer_version"]),
+                        status=CoverageStatus(item["status"]),
+                        required=bool(item["required"]),
+                        processed_result_count=int(
+                            item["processed_result_count"]
+                        ),
+                        diagnostic=str(item.get("diagnostic", "")),
+                    )
+                    for item in value["coverage"]
+                ),
+                view_presets=tuple(
+                    CommunicationGraphViewPreset(
+                        preset_id=str(item["preset_id"]),
+                        title=str(item["title"]),
+                        node_kinds=tuple(item["node_kinds"]),
+                        edge_kinds=tuple(item["edge_kinds"]),
+                        description=str(item["description"]),
+                    )
+                    for item in value["view_presets"]
+                ),
+                diagnostics=tuple(value.get("diagnostics", ())),
+                schema_version=str(value["schema_version"]),
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            if isinstance(exc, ValueError):
+                raise
+            raise ValueError("invalid communication graph document") from exc
 
 
 def _stable_id(prefix: str, *values: str) -> str:

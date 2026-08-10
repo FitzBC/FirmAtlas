@@ -219,6 +219,15 @@ Frontend/Native association 被保留为中间节点，因此 route binding 沿
 删除悬空边并把 projection 标为 partial。Graph 同时携带源 Catalog coverage、四个 view preset
 和开放 obligation，但不改变 Catalog 或产生新的固件主张。
 
+R2-18 在现有 SQLite Adapter 内深化持久化与查询 Interface：
+`publish_communication_graph(graph)` 只接受可从 `from_dict/to_dict` 往返且引用已发布源 Catalog
+的图；graph/source catalog firmware、coverage 和 EvidenceAtom 闭包必须一致。同 graph identity
+同内容重复发布幂等，不同内容冲突；图、节点和边索引在一个事务中写入。查询 Interface 是
+`query_communication_graph(graph_id, CommunicationGraphQuery)`：preset 先限制允许类别，精确节点
+或 canonical identity 形成种子，语义 BFS 有界扩展，文本/EvidenceAtom/status 只选择既有节点，
+最后应用 node/edge budget 并删除悬空边。结果同时返回 facet、源 Catalog EvidenceAtom、coverage、
+view preset 和诊断。CLI、后续 HTTP Adapter 与 Console 必须复用该 Interface，不得复制筛选规则。
+
 M1-05 Web Configuration Producer 的公开 Interface 是 `discover_web_configuration(source_entry, source_bytes, policy)`。当前声明支持 nginx、直接 POSIX shell 的 `nginx`/`spawn-fcgi` 启动形式，以及模板中的 proprietary httpd `Control/Alias/Location/External` 静态块，发布 listener、document root、namespace mapping、auth requirement、service start 和 external handler binding。嵌入 PHP 会先被等长屏蔽而不会执行或作为静态配置；配置事实与 frontend candidate 保持不同身份。`completed` 只表示声明格式和构造执行完成，不表示任意 Web server 配置、模板控制流或运行时可达性均已恢复。
 
 M1-06B Script Backend Producer 的公开 Interface 是 `discover_script_backend(source_entry, source_bytes, policy)`。当前声明支持厂商 ASP 的 `Request_Form/TCWebApi_*`、PHP superglobal 与显式框架 route、PHP-XGI `ACTION_POST/query/queryEnc/set/setEnc`、LuCI `entry/formvalue`、Shell CGI shebang与环境变量。它分别发布 CGI program、显式 route、parameter、selector、configuration access 和 template read；文件路径、扩展名和模板读取不能产生 `registers_route`。PHP-XGI 扫描要求同一源码存在 `$ACTION_POST` dialect anchor，复杂 set 表达式不发明参数身份；组合 LuCI 路径或规范化 HTTP header 使用 `deterministic_derived` 证据，仍保留精确来源 span。

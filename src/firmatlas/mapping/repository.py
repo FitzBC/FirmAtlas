@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -12,12 +13,59 @@ import threading
 from typing import Any, Optional
 
 from .discovery_catalog import DiscoveryCatalog
+from .communication_graph import (
+    CommunicationArchitectureGraph,
+    CommunicationGraphEdgeKind,
+    CommunicationGraphNodeKind,
+)
 from .hidden_interface import project_potential_hidden_interface_document
 from .snapshot_diff import MappingReleaseContext, compare_mapping_catalog_documents
 
 
+COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION = (
+    "firmatlas.mapping.communication-graph-query-result/v1alpha1"
+)
+
+
 class CatalogConflictError(RuntimeError):
     """A catalog identity was reused for content with a different digest."""
+
+
+class CommunicationGraphConflictError(RuntimeError):
+    """A graph identity was reused for content with a different digest."""
+
+
+@dataclass(frozen=True)
+class CommunicationGraphQuery:
+    text: str = ""
+    preset_id: str = ""
+    node_kinds: tuple = ()
+    edge_kinds: tuple = ()
+    statuses: tuple = ()
+    evidence_id: str = ""
+    focus_node_ids: tuple = ()
+    focus_canonical_identities: tuple = ()
+    max_hops: int = 2
+    max_nodes: int = 500
+    max_edges: int = 1_000
+
+    def __post_init__(self) -> None:
+        if self.max_hops < 0 or self.max_nodes <= 0 or self.max_edges <= 0:
+            raise ValueError("communication graph query budgets are invalid")
+        for values in (
+            self.node_kinds, self.edge_kinds, self.statuses,
+            self.focus_node_ids, self.focus_canonical_identities,
+        ):
+            if len(values) != len(set(values)):
+                raise ValueError("communication graph query filters must be unique")
+        if not set(self.node_kinds).issubset(
+            item.value for item in CommunicationGraphNodeKind
+        ):
+            raise ValueError("communication graph query has unknown node kind")
+        if not set(self.edge_kinds).issubset(
+            item.value for item in CommunicationGraphEdgeKind
+        ):
+            raise ValueError("communication graph query has unknown edge kind")
 
 
 def _utc_now() -> str:
@@ -119,6 +167,65 @@ class DiscoveryCatalogRepository:
                     ON mapping_potential_hidden_interfaces(
                         firmware_artifact_sha256, registration_artifact_path
                     );
+                CREATE TABLE IF NOT EXISTS mapping_communication_graphs (
+                    graph_id TEXT PRIMARY KEY,
+                    schema_version TEXT NOT NULL,
+                    source_catalog_id TEXT NOT NULL,
+                    firmware_artifact_sha256 TEXT NOT NULL,
+                    source_catalog_coverage_status TEXT NOT NULL,
+                    projection_status TEXT NOT NULL,
+                    node_count INTEGER NOT NULL,
+                    edge_count INTEGER NOT NULL,
+                    content_sha256 TEXT NOT NULL,
+                    document_json TEXT NOT NULL,
+                    published_at TEXT NOT NULL,
+                    FOREIGN KEY(source_catalog_id)
+                        REFERENCES mapping_discovery_catalogs(catalog_id)
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_mapping_graph_catalog
+                    ON mapping_communication_graphs(
+                        source_catalog_id, published_at DESC
+                    );
+                CREATE INDEX IF NOT EXISTS idx_mapping_graph_firmware
+                    ON mapping_communication_graphs(
+                        firmware_artifact_sha256, published_at DESC
+                    );
+                CREATE TABLE IF NOT EXISTS mapping_communication_graph_nodes (
+                    graph_id TEXT NOT NULL,
+                    node_id TEXT NOT NULL,
+                    node_kind TEXT NOT NULL,
+                    label TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    source_path TEXT NOT NULL,
+                    search_text TEXT NOT NULL,
+                    node_json TEXT NOT NULL,
+                    PRIMARY KEY(graph_id, node_id),
+                    FOREIGN KEY(graph_id)
+                        REFERENCES mapping_communication_graphs(graph_id)
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_mapping_graph_node_kind
+                    ON mapping_communication_graph_nodes(
+                        graph_id, node_kind, label
+                    );
+                CREATE TABLE IF NOT EXISTS mapping_communication_graph_edges (
+                    graph_id TEXT NOT NULL,
+                    edge_id TEXT NOT NULL,
+                    edge_kind TEXT NOT NULL,
+                    source_ref TEXT NOT NULL,
+                    target_ref TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    edge_json TEXT NOT NULL,
+                    PRIMARY KEY(graph_id, edge_id),
+                    FOREIGN KEY(graph_id)
+                        REFERENCES mapping_communication_graphs(graph_id)
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_mapping_graph_edge_kind
+                    ON mapping_communication_graph_edges(
+                        graph_id, edge_kind, source_ref, target_ref
+                    );
                 """
             )
             rows = self._connection.execute(
@@ -179,6 +286,393 @@ class DiscoveryCatalogRepository:
 
     def publish(self, catalog: DiscoveryCatalog) -> dict:
         return self.publish_dict(catalog.to_dict())
+
+    def publish_communication_graph(
+        self, graph: CommunicationArchitectureGraph
+    ) -> dict:
+        """Publish one validated graph and its query indexes atomically."""
+
+        document = graph.to_dict()
+        payload = _encoded(document)
+        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        with self._lock, self._connection:
+            catalog_row = self._connection.execute(
+                """SELECT firmware_artifact_sha256, document_json
+                   FROM mapping_discovery_catalogs WHERE catalog_id = ?""",
+                (graph.source_catalog_id,),
+            ).fetchone()
+            if catalog_row is None:
+                raise ValueError("communication graph source catalog is not published")
+            if (
+                catalog_row["firmware_artifact_sha256"]
+                != graph.firmware_artifact_sha256
+            ):
+                raise ValueError("communication graph firmware does not match source catalog")
+            catalog = json.loads(catalog_row["document_json"])
+            if (
+                catalog.get("coverage_status")
+                != graph.source_catalog_coverage_status.value
+            ):
+                raise ValueError(
+                    "communication graph source coverage does not match catalog"
+                )
+            catalog_evidence_ids = {
+                item["evidence_id"] for item in catalog.get("evidence_atoms", [])
+            }
+            if any(
+                evidence_id not in catalog_evidence_ids
+                for item in (*graph.nodes, *graph.edges)
+                for evidence_id in item.evidence_ids
+            ):
+                raise ValueError("communication graph references unknown catalog evidence")
+            existing = self._connection.execute(
+                """SELECT content_sha256 FROM mapping_communication_graphs
+                   WHERE graph_id = ?""",
+                (graph.graph_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing["content_sha256"] != digest:
+                    raise CommunicationGraphConflictError(
+                        "communication graph identity already contains different content"
+                    )
+                return {
+                    "graph_id": graph.graph_id,
+                    "created": False,
+                    "content_sha256": digest,
+                }
+            self._connection.execute(
+                """INSERT INTO mapping_communication_graphs (
+                    graph_id, schema_version, source_catalog_id,
+                    firmware_artifact_sha256,
+                    source_catalog_coverage_status, projection_status,
+                    node_count, edge_count, content_sha256, document_json,
+                    published_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    graph.graph_id, graph.schema_version,
+                    graph.source_catalog_id, graph.firmware_artifact_sha256,
+                    graph.source_catalog_coverage_status.value,
+                    graph.projection_status.value, len(graph.nodes),
+                    len(graph.edges), digest, payload, _utc_now(),
+                ),
+            )
+            for node in document["nodes"]:
+                searchable = " ".join((
+                    node["label"], node["source_path"], node["status"],
+                    " ".join(
+                        str(part)
+                        for pair in node.get("attributes", [])
+                        for part in pair
+                    ),
+                ))
+                self._connection.execute(
+                    """INSERT INTO mapping_communication_graph_nodes (
+                        graph_id, node_id, node_kind, label, status,
+                        source_path, search_text, node_json
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        graph.graph_id, node["node_id"], node["node_kind"],
+                        node["label"], node["status"], node["source_path"],
+                        _search_text(searchable), _encoded(node),
+                    ),
+                )
+            for edge in document["edges"]:
+                self._connection.execute(
+                    """INSERT INTO mapping_communication_graph_edges (
+                        graph_id, edge_id, edge_kind, source_ref,
+                        target_ref, status, edge_json
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        graph.graph_id, edge["edge_id"], edge["edge_kind"],
+                        edge["source_ref"], edge["target_ref"],
+                        edge["status"], _encoded(edge),
+                    ),
+                )
+        return {
+            "graph_id": graph.graph_id,
+            "created": True,
+            "content_sha256": digest,
+        }
+
+    def list_communication_graphs(
+        self, limit: int = 50, offset: int = 0
+    ) -> dict:
+        limit, offset = max(1, min(limit, 100)), max(0, offset)
+        with self._lock:
+            total = self._connection.execute(
+                "SELECT COUNT(*) FROM mapping_communication_graphs"
+            ).fetchone()[0]
+            rows = self._connection.execute(
+                """SELECT graph_id, schema_version, source_catalog_id,
+                          firmware_artifact_sha256,
+                          source_catalog_coverage_status, projection_status,
+                          node_count, edge_count, published_at
+                   FROM mapping_communication_graphs
+                   ORDER BY published_at DESC, graph_id
+                   LIMIT ? OFFSET ?""",
+                (limit, offset),
+            ).fetchall()
+        return {
+            "items": [dict(row) for row in rows],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    def query_communication_graph(
+        self, graph_id: str,
+        query: CommunicationGraphQuery = CommunicationGraphQuery(),
+    ) -> Optional[dict]:
+        """Query one immutable graph and resolve evidence from its source Catalog."""
+
+        with self._lock:
+            row = self._connection.execute(
+                """SELECT document_json, source_catalog_id
+                   FROM mapping_communication_graphs WHERE graph_id = ?""",
+                (graph_id,),
+            ).fetchone()
+            if row is None:
+                return None
+            catalog_row = self._connection.execute(
+                """SELECT document_json FROM mapping_discovery_catalogs
+                   WHERE catalog_id = ?""",
+                (row["source_catalog_id"],),
+            ).fetchone()
+        graph = CommunicationArchitectureGraph.from_dict(
+            json.loads(row["document_json"])
+        )
+        preset_by_id = {
+            item.preset_id: item for item in graph.view_presets
+        }
+        if query.preset_id and query.preset_id not in preset_by_id:
+            raise ValueError("communication graph query has unknown preset")
+        preset = preset_by_id.get(query.preset_id)
+        allowed_node_kinds = (
+            set(preset.node_kinds) if preset is not None
+            else {item.value for item in CommunicationGraphNodeKind}
+        )
+        allowed_edge_kinds = (
+            set(preset.edge_kinds) if preset is not None
+            else {item.value for item in CommunicationGraphEdgeKind}
+        )
+        if query.node_kinds:
+            allowed_node_kinds.intersection_update(query.node_kinds)
+        if query.edge_kinds:
+            allowed_edge_kinds.intersection_update(query.edge_kinds)
+        allowed_nodes = {
+            item.node_id: item for item in graph.nodes
+            if item.node_kind.value in allowed_node_kinds
+            and (not query.statuses or item.status in query.statuses)
+        }
+        allowed_edges = tuple(
+            item for item in graph.edges
+            if item.edge_kind.value in allowed_edge_kinds
+            and item.source_ref in allowed_nodes
+            and item.target_ref in allowed_nodes
+            and (not query.statuses or item.status in query.statuses)
+        )
+        diagnostics = []
+        seeds = set()
+        for node_id in query.focus_node_ids:
+            if node_id in allowed_nodes:
+                seeds.add(node_id)
+            else:
+                diagnostics.append(
+                    "communication_graph_query.focus_node_not_found:{}".format(
+                        node_id
+                    )
+                )
+        for identity in query.focus_canonical_identities:
+            matching = {
+                item.node_id for item in allowed_nodes.values()
+                if dict(item.attributes).get("canonical_identity") == identity
+            }
+            if not matching:
+                diagnostics.append(
+                    "communication_graph_query.focus_identity_not_found:{}".format(
+                        identity
+                    )
+                )
+            seeds.update(matching)
+        text_tokens = _search_text(query.text).split()
+        if text_tokens:
+            text_matches = {
+                item.node_id for item in allowed_nodes.values()
+                if all(
+                    token in _search_text(" ".join((
+                        item.label, item.source_path, item.status,
+                        item.node_kind.value,
+                        " ".join(
+                            str(part)
+                            for pair in item.attributes for part in pair
+                        ),
+                    )))
+                    for token in text_tokens
+                )
+            }
+            seeds = seeds & text_matches if seeds else text_matches
+        if query.evidence_id:
+            evidence_matches = {
+                item.node_id for item in allowed_nodes.values()
+                if query.evidence_id in item.evidence_ids
+            }
+            for edge in allowed_edges:
+                if query.evidence_id in edge.evidence_ids:
+                    evidence_matches.update((edge.source_ref, edge.target_ref))
+            seeds = seeds & evidence_matches if seeds else evidence_matches
+        focus_requested = bool(
+            query.focus_node_ids or query.focus_canonical_identities
+        )
+        selection_filter = bool(
+            focus_requested or text_tokens or query.evidence_id
+        )
+        distances = {}
+        if selection_filter:
+            distances.update((node_id, 0) for node_id in seeds)
+            frontier = set(seeds)
+            if focus_requested:
+                for distance in range(1, query.max_hops + 1):
+                    reached = set()
+                    for edge in allowed_edges:
+                        if (
+                            edge.source_ref in frontier
+                            and edge.target_ref not in distances
+                        ):
+                            reached.add(edge.target_ref)
+                        if (
+                            edge.target_ref in frontier
+                            and edge.source_ref not in distances
+                        ):
+                            reached.add(edge.source_ref)
+                    if not reached:
+                        break
+                    distances.update(
+                        (node_id, distance) for node_id in reached
+                    )
+                    frontier = reached
+        else:
+            distances.update((node_id, 0) for node_id in allowed_nodes)
+        selected_ids = set(distances)
+        pre_budget_nodes = tuple(sorted(
+            (allowed_nodes[node_id] for node_id in selected_ids),
+            key=lambda item: (distances[item.node_id], item.node_id),
+        ))
+        pre_budget_edges = tuple(sorted(
+            (
+                item for item in allowed_edges
+                if item.source_ref in selected_ids
+                and item.target_ref in selected_ids
+            ),
+            key=lambda item: item.edge_id,
+        ))
+        selected_nodes = pre_budget_nodes[:query.max_nodes]
+        selected_node_ids = {item.node_id for item in selected_nodes}
+        eligible_edges = tuple(
+            item for item in pre_budget_edges
+            if item.source_ref in selected_node_ids
+            and item.target_ref in selected_node_ids
+        )
+        selected_edges = eligible_edges[:query.max_edges]
+        if (
+            len(pre_budget_nodes) > query.max_nodes
+            or len(eligible_edges) > query.max_edges
+        ):
+            diagnostics.append("communication_graph_query.budget_exceeded")
+        query_status = "partial" if diagnostics else "completed"
+        graph_document = graph.to_dict()
+        node_document_by_id = {
+            item["node_id"]: item for item in graph_document["nodes"]
+        }
+        nodes = [
+            node_document_by_id[item.node_id] for item in selected_nodes
+        ]
+        selected_edge_ids = {item.edge_id for item in selected_edges}
+        edge_document_by_id = {
+            item["edge_id"]: item for item in graph_document["edges"]
+        }
+        edges = [
+            edge_document_by_id[item.edge_id] for item in selected_edges
+            if item.edge_id in selected_edge_ids
+        ]
+        evidence_ids = {
+            evidence_id
+            for item in (*selected_nodes, *selected_edges)
+            for evidence_id in item.evidence_ids
+        }
+        catalog = json.loads(catalog_row["document_json"])
+        graph_summary = {
+            "schema_version": graph.schema_version,
+            "graph_id": graph.graph_id,
+            "source_catalog_id": graph.source_catalog_id,
+            "firmware_artifact_sha256": graph.firmware_artifact_sha256,
+            "source_catalog_coverage_status": (
+                graph.source_catalog_coverage_status.value
+            ),
+            "projection_status": graph.projection_status.value,
+        }
+        combined_diagnostics = sorted(dict.fromkeys((
+            *graph.diagnostics, *diagnostics,
+        )))
+        query_document = asdict(query)
+        query_identity = {
+            "schema_version": COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION,
+            "graph_id": graph.graph_id,
+            "query": query_document,
+            "query_status": query_status,
+            "node_ids": [item.node_id for item in selected_nodes],
+            "edge_ids": [item.edge_id for item in selected_edges],
+            "diagnostics": combined_diagnostics,
+        }
+        query_id = "communication-graph-query:{}".format(hashlib.sha256(
+            _encoded(query_identity).encode("utf-8")
+        ).hexdigest())
+        return {
+            "schema_version": COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION,
+            "query_id": query_id,
+            "graph": graph_summary,
+            "query": query_document,
+            "query_status": query_status,
+            "nodes": nodes,
+            "edges": edges,
+            "total_node_count": len(pre_budget_nodes),
+            "total_edge_count": len(pre_budget_edges),
+            "selected_node_count": len(nodes),
+            "selected_edge_count": len(edges),
+            "evidence_atoms": [
+                item for item in catalog.get("evidence_atoms", [])
+                if item.get("evidence_id") in evidence_ids
+            ],
+            "facets": {
+                "node_kinds": dict(sorted(
+                    (
+                        kind,
+                        sum(item.node_kind.value == kind for item in pre_budget_nodes),
+                    )
+                    for kind in sorted({
+                        item.node_kind.value for item in pre_budget_nodes
+                    })
+                )),
+                "edge_kinds": dict(sorted(
+                    (
+                        kind,
+                        sum(item.edge_kind.value == kind for item in eligible_edges),
+                    )
+                    for kind in sorted({
+                        item.edge_kind.value for item in eligible_edges
+                    })
+                )),
+                "statuses": dict(sorted(
+                    (
+                        status,
+                        sum(item.status == status for item in pre_budget_nodes),
+                    )
+                    for status in sorted({item.status for item in pre_budget_nodes})
+                )),
+            },
+            "coverage": graph_document["coverage"],
+            "view_presets": graph_document["view_presets"],
+            "diagnostics": combined_diagnostics,
+        }
 
     def publish_dict(self, document: dict) -> dict:
         catalog_id = str(document.get("catalog_id", ""))

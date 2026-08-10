@@ -169,6 +169,13 @@ response contract、nested dispatch/protection/service assembly、Coverage Ledge
 governance obligation；旧式未解析 target ref 必须降级 projection 并删除悬空边。真实 AC9/AC18
 DLNA 正控固定 AC9 0 个直接 owner、AC18 3 个直接 owner；历史 CVE 参数只能作为独立 overlay。
 
+Communication Architecture Graph Persistence/Query 回归必须验证：文档往返、schema/稳定 edge
+identity、重复节点/边、悬空引用、源 Catalog/firmware/coverage/EvidenceAtom 闭包；SQLite 发布必须
+原子、幂等、冲突拒绝且关闭重开后仍可查询。preset、精确 identity、文本、EvidenceAtom、类别与
+预算查询必须共用同一 Interface；预算或缺失焦点为 partial，任何结果都不得含 dangling edge。
+真实 AC9 固定验证 completed 的 5,674-node/7,212-edge 全图可重开，并保留 DLNA interface、parameter、
+completeness、minidlna component 与 dlnaEn EvidenceAtom 五类中间查询。
+
 MIPS Nested Dispatch 回归必须从公开 Interface 同时验证 transport branch、第二 query segment 的 index/delimiter、multipart parser、payload topicurl、slash suffix、operation table loop 和 exact handler entry。真实 X5000R 固定为 `action=upload → setting/setUploadSetting → set_handle_t@0x0044a124 → 0x0042bf14`。将 segment index 改为 2、清除 upload guard branch、清除表项匹配后的间接调用或篡改持久化 table claim 时，结果必须 partial/rejected，不能由 strings 或表项补偿。
 
 MIPS Request Protection 回归必须从公开 Interface 同时验证路径 gate 的 auth/skip 两类分支、`userloginAuth → checkLoginUser`、`SESSION_ID` cookie、session-table lookup 和拒绝状态写入。真实 X5000R 固定对照 `/advance/config.html → guarded_by_path_gate` 与 `/cgi-bin/cstecgi.cgi → excluded_from_path_gate`；清除 auth call、将 302 改为 200、篡改 cookie key、违反 source digest/预算或反转分类时必须 fail closed。

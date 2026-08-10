@@ -287,6 +287,15 @@ operation + supported 三段原生证明”的 `satisfies_obligation` 边；原�
 只把 AC18 制品内已经证实的义务显示为 satisfied，AC9 状态不变。案例新增
 第十阶段，保留这段状态迁移而不把最终成功倒写成从未出现过滞后。
 
+R2-18 证明该案例不是一次性报告：AC9 completed Catalog 投影出 5,674 个节点、7,212 条边，
+与源 Catalog 一起不可变发布到 SQLite；关闭并重新打开 repository 后，同 graph identity 仍可按
+interface、parameter、completeness、component text 和 EvidenceAtom 查询。DLNA 接口视图返回
+36 节点/35 边，参数视图返回 16/12，完整性视图返回 62/63；`minidlna` 查询同时保留 absent
+component、`time_check` command handler 和 `httpd → minidlna` relation，`dlnaEn` 下钻回填
+constructs_request、resolves_transport_method、serializes_parameter 三条原始证据。查询没有关闭
+AC9 的四条 Web owner 义务，也没有把相邻 daemon 关系改写成 route owner。案例新增第十一阶段，
+用于说明可视化查询必须是事实选择层，而不是第二套推理器。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：

@@ -272,7 +272,7 @@ class ResearchCaseTests(unittest.TestCase):
             [
                 "supported", "supported", "supported", "supported",
                 "supported", "supported", "supported", "supported",
-                "supported", "supported", "unresolved",
+                "supported", "supported", "supported", "unresolved",
             ],
             [claim["status"] for claim in case["claims"]],
         )
@@ -320,7 +320,7 @@ class ResearchCaseTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            "stage:dlna-communication-graph-projection",
+            "stage:dlna-persisted-graph-query",
             case["stages"][-1]["stage_id"],
         )
         family_evidence = {
@@ -339,6 +339,7 @@ class ResearchCaseTests(unittest.TestCase):
                 "coverage:ac18-dlna-frontend-reachability-control",
                 "coverage:ac9-dlna-communication-graph",
                 "coverage:ac18-dlna-communication-graph-control",
+                "coverage:ac9-dlna-persisted-graph-query",
             },
             set(family_evidence),
         )

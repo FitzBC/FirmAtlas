@@ -132,6 +132,46 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "list-catalogs", help="list published discovery catalog summaries"
     )
     _database_argument(list_parser)
+    publish_graph_parser = mapping_subparsers.add_parser(
+        "publish-graph",
+        help="publish a graph with its source Catalog from an analysis run",
+    )
+    _database_argument(publish_graph_parser)
+    publish_graph_parser.add_argument(
+        "--catalog-document", required=True,
+        help="path to a Discovery Catalog or AnalyzeRun JSON document",
+    )
+    publish_graph_parser.add_argument(
+        "document", help="path to a communication graph JSON document",
+    )
+    list_graphs_parser = mapping_subparsers.add_parser(
+        "list-graphs", help="list persisted communication graph summaries",
+    )
+    _database_argument(list_graphs_parser)
+    query_graph_parser = mapping_subparsers.add_parser(
+        "query-graph", help="query one persisted communication graph",
+    )
+    _database_argument(query_graph_parser)
+    query_graph_parser.add_argument("graph_id")
+    query_graph_parser.add_argument("--query", default="")
+    query_graph_parser.add_argument("--preset", default="")
+    query_graph_parser.add_argument(
+        "--node-kind", action="append", default=[]
+    )
+    query_graph_parser.add_argument(
+        "--edge-kind", action="append", default=[]
+    )
+    query_graph_parser.add_argument("--status", action="append", default=[])
+    query_graph_parser.add_argument("--evidence-id", default="")
+    query_graph_parser.add_argument(
+        "--focus-node", action="append", default=[]
+    )
+    query_graph_parser.add_argument(
+        "--focus-identity", action="append", default=[]
+    )
+    query_graph_parser.add_argument("--max-hops", type=int, default=2)
+    query_graph_parser.add_argument("--max-nodes", type=int, default=500)
+    query_graph_parser.add_argument("--max-edges", type=int, default=1000)
     args = parser.parse_args(argv)
 
     if args.command == "demo-report":
@@ -203,15 +243,56 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         finally:
             repository.close()
     if args.command == "mapping":
-        from .mapping.repository import DiscoveryCatalogRepository
+        from .mapping.communication_graph import (
+            CommunicationArchitectureGraph,
+        )
+        from .mapping.repository import (
+            CommunicationGraphQuery,
+            DiscoveryCatalogRepository,
+        )
 
         repository = DiscoveryCatalogRepository(args.database)
         try:
             if args.mapping_command == "publish-catalog":
                 document = json.loads(Path(args.document).read_text(encoding="utf-8"))
                 result = repository.publish_dict(document)
-            else:
+            elif args.mapping_command == "list-catalogs":
                 result = repository.list_catalogs()
+            elif args.mapping_command == "publish-graph":
+                catalog_document = json.loads(
+                    Path(args.catalog_document).read_text(encoding="utf-8")
+                )
+                catalog = catalog_document.get("catalog", catalog_document)
+                graph = CommunicationArchitectureGraph.from_dict(json.loads(
+                    Path(args.document).read_text(encoding="utf-8")
+                ))
+                result = {
+                    "catalog": repository.publish_dict(catalog),
+                    "graph": repository.publish_communication_graph(graph),
+                }
+            elif args.mapping_command == "list-graphs":
+                result = repository.list_communication_graphs()
+            else:
+                result = repository.query_communication_graph(
+                    args.graph_id,
+                    CommunicationGraphQuery(
+                        text=args.query,
+                        preset_id=args.preset,
+                        node_kinds=tuple(args.node_kind),
+                        edge_kinds=tuple(args.edge_kind),
+                        statuses=tuple(args.status),
+                        evidence_id=args.evidence_id,
+                        focus_node_ids=tuple(args.focus_node),
+                        focus_canonical_identities=tuple(
+                            args.focus_identity
+                        ),
+                        max_hops=args.max_hops,
+                        max_nodes=args.max_nodes,
+                        max_edges=args.max_edges,
+                    ),
+                )
+                if result is None:
+                    raise ValueError("communication graph does not exist")
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         finally:

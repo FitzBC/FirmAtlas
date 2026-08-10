@@ -20,6 +20,7 @@ from firmatlas.mapping import (
     DiscoveryProducerKind,
     DiscoveryProducerBatch,
     CommunicationGraphPolicy,
+    CommunicationArchitectureGraph,
     CommunicationGraphNodeKind,
     CommunicationGraphEdgeKind,
     EvidenceAtom,
@@ -39,6 +40,28 @@ from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class CommunicationArchitectureGraphContractTests(unittest.TestCase):
+    def test_graph_document_round_trips_and_rejects_dangling_edges(self):
+        request = DiscoveryCandidate(
+            "request:apply", DiscoveryCandidateKind.REQUEST_INTERFACE,
+            "/apply", DiscoveryClaimStatus.CANDIDATE,
+            "www/index.html", "html-form", ("evidence:1",),
+        )
+        graph = project_communication_architecture_graph(
+            self.catalog((request,))
+        )
+
+        restored = CommunicationArchitectureGraph.from_dict(graph.to_dict())
+
+        self.assertEqual(graph, restored)
+        invalid = graph.to_dict()
+        invalid["edges"][0]["target_ref"] = "missing:node"
+        with self.assertRaisesRegex(ValueError, "unknown graph node"):
+            CommunicationArchitectureGraph.from_dict(invalid)
+        invalid_edge_id = graph.to_dict()
+        invalid_edge_id["edges"][0]["edge_id"] = "communication-edge:bad"
+        with self.assertRaisesRegex(ValueError, "stable edge identity"):
+            CommunicationArchitectureGraph.from_dict(invalid_edge_id)
+
     def test_projects_request_parameter_and_invocation_with_evidence(self):
         content = b'''function submitConfig() {
   $.post("/goform/SetCfg", "deviceName=router", callback);

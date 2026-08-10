@@ -38,6 +38,7 @@
 - [R2-15 AC9/AC18 DLNA feature pivot](./r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json)：以 AC9 为主样本，保存 3 条相邻 USB 状态 pivot、0 条 DLNA 配置 binding，并用官方 AC18 启用 build 的 17 条 DLNA pivot 与 3 条真实 binding 作同家族阳性对照；不迁移 owner 或漏洞状态。
 - [R2-16 AC9/AC18 DLNA frontend reachability](./r2-16-vendor-tenda-ac9-ac18-dlna-reachability.json)：以 AC9 为主样本，逐请求区分顶层声明、有界活动路径与已声明但未达；AC18 仅作同家族正控，静态分类不提升为运行时执行或漏洞结论。
 - [R2-17 AC9/AC18 DLNA communication graph](./r2-17-vendor-tenda-ac9-ac18-dlna-communication-graph.json)：从同一 Catalog 生成证据、覆盖和义务可下钻的焦点图；AC9 69 节点/121 边且 4 条 owner 义务保持开放，AC18 92 节点/183 边并独立确证 3 条 route→handler，`refreshDLNA` 继续为真实阴性。
+- [R2-18 AC9 persisted graph query](./r2-18-vendor-tenda-ac9-graph-query.json)：持久化 completed 的 AC9 全图（5,674 节点/7,212 边），关闭重开后回放 interface/parameter/completeness/minidlna component/dlnaEn evidence 五类查询；所有结果保留 facet、Coverage Ledger、EvidenceAtom 与预算状态。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
