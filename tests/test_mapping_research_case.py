@@ -247,7 +247,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][0]
 
         self.assertTrue(corpus["validation"]["paper_ready"])
-        self.assertEqual(11, corpus["validation"]["evidence_line_count"])
+        self.assertEqual(13, corpus["validation"]["evidence_line_count"])
         self.assertEqual(
             ["unresolved", "unresolved", "supported"],
             [case["claims"][index]["status"] for index in (2, 3, 4)],
@@ -269,12 +269,19 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual("tenda-ac9-dlna-fixture-daemon-split", case["case_key"])
         self.assertEqual(3, corpus["validation"]["case_count"])
         self.assertEqual(
-            ["supported", "supported", "supported", "supported", "unresolved"],
+            [
+                "supported", "supported", "supported", "supported",
+                "supported", "unresolved",
+            ],
             [claim["status"] for claim in case["claims"]],
         )
+        obligations = {
+            item["obligation_id"]: item for item in case["obligations"]
+        }
+        self.assertEqual("open", obligations["obligation:dlna-handler-owner"]["status"])
         self.assertEqual(
-            "open",
-            case["obligations"][0]["status"],
+            "resolved",
+            obligations["obligation:dlna-supervisor-ipc-binding"]["status"],
         )
         frontend = [
             item for item in case["evidence"]
@@ -287,6 +294,20 @@ class ResearchCaseTests(unittest.TestCase):
             if item["kind"] == "native_relationship"
         ]
         self.assertEqual(2, len(relationships))
+        self.assertEqual(
+            4,
+            sum(
+                item["kind"] == "native_command_binding"
+                for item in case["evidence"]
+            ),
+        )
+        self.assertEqual(
+            8,
+            sum(
+                item["kind"] == "native_literal_xref"
+                for item in case["evidence"]
+            ),
+        )
         resolution = next(
             item for item in case["evidence"]
             if item["evidence_ref"]

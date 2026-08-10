@@ -14,6 +14,8 @@ from .frontend import FrontendProducerResult
 from .parameter_clue import FrontendParameterClueIndex
 from .response_fixture import ResponseFixtureResult
 from .native_relationship import NativeRelationshipResult
+from .native_arm_xref import ArmLiteralXrefResult
+from .native_command_binding import NativeCommandBindingResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -54,6 +56,8 @@ class DiscoveryProducerKind(str, Enum):
     PARAMETER_CLUE = "parameter_clue"
     RESPONSE_FIXTURE = "response_fixture"
     NATIVE_RELATIONSHIP = "native_relationship"
+    ARM_LITERAL_XREF = "arm_literal_xref"
+    NATIVE_COMMAND_BINDING = "native_command_binding"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -80,6 +84,8 @@ class DiscoveryCandidateKind(str, Enum):
     PARAMETER_CLUE_ASSESSMENT = "parameter_clue_assessment"
     RESPONSE_FIXTURE_CONTRACT = "response_fixture_contract"
     NATIVE_RELATIONSHIP = "native_relationship"
+    ARM_LITERAL_XREF = "arm_literal_xref"
+    NATIVE_COMMAND_BINDING = "native_command_binding"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -138,6 +144,26 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("native-embedded-command-relationship", "0.1.0")
         )
         return cls(DiscoveryProducerKind.NATIVE_RELATIONSHIP, producer, scope, results)
+
+    @classmethod
+    def arm_literal_xref(
+        cls, results: Tuple[ArmLiteralXrefResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results else AnalyzerIdentity("native-arm-literal-xref", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.ARM_LITERAL_XREF, producer, scope, results)
+
+    @classmethod
+    def native_command_binding(
+        cls, results: Tuple[NativeCommandBindingResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results else AnalyzerIdentity("native-symbol-command-table", "0.1.0")
+        )
+        return cls(DiscoveryProducerKind.NATIVE_COMMAND_BINDING, producer, scope, results)
 
     @classmethod
     def web_configuration(
@@ -613,6 +639,62 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                                 )),
                                 ("open_obligation", result.open_obligation),
                             ) if raw is not None
+                        ),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.ARM_LITERAL_XREF:
+                for item in result.xrefs:
+                    candidates.append(DiscoveryCandidate(
+                        item.xref_id,
+                        DiscoveryCandidateKind.ARM_LITERAL_XREF,
+                        "{}@0x{:08x}|{}".format(
+                            result.source_path,
+                            item.function_start_address,
+                            item.literal_value,
+                        ),
+                        DiscoveryClaimStatus.CANDIDATE,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        (
+                            ("target_ref", item.target_ref),
+                            ("literal_value", item.literal_value),
+                            ("literal_address", "0x{:08x}".format(item.literal_address)),
+                            ("instruction_address", "0x{:08x}".format(
+                                item.instruction_address
+                            )),
+                            ("function_identity", "{}@0x{:08x}".format(
+                                result.source_path, item.function_start_address
+                            )),
+                            ("pic_base_address", "0x{:08x}".format(
+                                item.pic_base_address
+                            )),
+                        ),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE_COMMAND_BINDING:
+                for item in result.bindings:
+                    candidates.append(DiscoveryCandidate(
+                        item.binding_id,
+                        DiscoveryCandidateKind.NATIVE_COMMAND_BINDING,
+                        "{}|{}|handler=0x{:08x}".format(
+                            result.source_path, item.process_name,
+                            item.handler_address,
+                        ),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        (
+                            ("table_symbol", item.table_symbol),
+                            ("registration_address", "0x{:08x}".format(
+                                item.registration_address
+                            )),
+                            ("process_name", item.process_name),
+                            ("command", item.command),
+                            ("handler_identity", item.handler_identity),
+                            ("handler_address", "0x{:08x}".format(
+                                item.handler_address
+                            )),
+                            ("binding_status", item.binding_status.value),
                         ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.WEB_CONFIGURATION:

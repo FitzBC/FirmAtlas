@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Build the AC9 auto-v8 native embedded-command relationship report."""
+"""Build AC9 auto-v9 daemon command-table and ARM literal-xref report."""
 
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 import json
 from pathlib import Path
 
 from firmatlas.mapping import (
-    BUILTIN_ANALYZER_REGISTRY_V8,
     DiscoveryCandidateKind,
     HistoricalVulnerabilityRecord,
     MappingAnalysisProfile,
@@ -28,57 +26,55 @@ from build_vendor_tenda_ac9_registrar_inventory_report import (
 )
 
 
-def _attributes(candidate) -> dict:
-    return dict(candidate.attributes)
-
-
 def build() -> dict:
     run = analyze_extracted_root(MappingAnalysisRequest(
-        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v8()
-    ), registry=BUILTIN_ANALYZER_REGISTRY_V8)
-    relationships = [
+        ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto()
+    ))
+    command_bindings = [
         item for item in run.catalog.candidates
-        if item.candidate_kind is DiscoveryCandidateKind.NATIVE_RELATIONSHIP
+        if item.candidate_kind is DiscoveryCandidateKind.NATIVE_COMMAND_BINDING
     ]
-    relationship_rows = []
-    for item in relationships:
-        attributes = _attributes(item)
-        relationship_rows.append({
-            "relationship_id": item.candidate_id,
-            "source_component": attributes["source_component"],
-            "action": attributes["action"],
-            "target_component": attributes["target_component"],
-            "command": attributes["command"],
-            "target_artifact_paths": json.loads(
-                attributes["target_artifact_paths"]
-            ),
-            "target_resolution_status": attributes["target_resolution_status"],
-            "relationship_kind": attributes["relationship_kind"],
-            "binding_status": attributes["binding_status"],
-            "topic": attributes.get("topic"),
-            "operation": attributes.get("operation"),
-            "arguments": json.loads(attributes["arguments"]),
-            "open_obligation": attributes["open_obligation"],
+    xrefs = [
+        item for item in run.catalog.candidates
+        if item.candidate_kind is DiscoveryCandidateKind.ARM_LITERAL_XREF
+    ]
+    if len(command_bindings) != 1:
+        raise RuntimeError(
+            "AC9 command binding expectation changed: {}".format(
+                len(command_bindings)
+            )
+        )
+    binding = command_bindings[0]
+    binding_attributes = dict(binding.attributes)
+    related_xrefs = [
+        item for item in xrefs
+        if dict(item.attributes)["target_ref"] == binding.candidate_id
+    ]
+    if len(related_xrefs) != 2:
+        raise RuntimeError(
+            "AC9 bound handler literal-xref expectation changed: {}".format(
+                len(related_xrefs)
+            )
+        )
+    xref_rows = [
+        {
+            "xref_id": item.candidate_id,
+            "literal_value": dict(item.attributes)["literal_value"],
+            "literal_address": dict(item.attributes)["literal_address"],
+            "instruction_address": dict(item.attributes)["instruction_address"],
+            "function_identity": dict(item.attributes)["function_identity"],
+            "pic_base_address": dict(item.attributes)["pic_base_address"],
             "evidence_ids": list(item.evidence_ids),
-        })
-    relationship_rows.sort(key=lambda item: item["relationship_id"])
+        }
+        for item in related_xrefs
+    ]
+    xref_rows.sort(key=lambda item: item["literal_value"])
+    chain_evidence_ids = {
+        *binding.evidence_ids,
+        *(evidence_id for item in related_xrefs for evidence_id in item.evidence_ids),
+    }
     evidence_by_id = {
         item.evidence_id: item.to_dict() for item in run.catalog.evidence_atoms
-    }
-    dlna_rows = [
-        item for item in relationship_rows
-        if (
-            item["source_component"] == "bin/httpd"
-            and item["target_component"] == "minidlna"
-        ) or (
-            item["source_component"] == "bin/time_check"
-            and item["target_component"] == "netctrl"
-            and item["topic"] == "51"
-            and item["operation"] == "6"
-        )
-    ]
-    dlna_evidence_ids = {
-        evidence_id for item in dlna_rows for evidence_id in item["evidence_ids"]
     }
 
     expectations = load_historical_expectations(json.loads(
@@ -91,12 +87,9 @@ def build() -> dict:
         tuple(HistoricalVulnerabilityRecord(**item) for item in scope["records"]),
     )
     hidden = build_potential_hidden_interface_index(run.catalog)
-    kind_counts = Counter(item["relationship_kind"] for item in relationship_rows)
-    status_counts = Counter(item["binding_status"] for item in relationship_rows)
-    target_counts = Counter(item["target_component"] for item in relationship_rows)
     return {
-        "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-11/v1alpha1",
-        "sample_role": "primary-vendor-tenda-ac9-native-relationship-iteration",
+        "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-12/v1alpha1",
+        "sample_role": "primary-vendor-tenda-ac9-daemon-command-chain-iteration",
         "firmware_artifact_sha256": ARTIFACT_SHA256,
         "analysis_run_id": run.analysis_run_id,
         "catalog_id": run.catalog.catalog_id,
@@ -109,13 +102,8 @@ def build() -> dict:
             "evidence_count": len(run.catalog.evidence_atoms),
             "open_obligation_count": len(run.catalog.open_obligations),
             "potential_hidden_interface_count": len(hidden.items),
-            "native_relationship_count": len(relationship_rows),
-            "native_relationship_source_count": len({
-                item["source_component"] for item in relationship_rows
-            }),
-            "resolved_target_count": sum(
-                bool(item["target_artifact_paths"]) for item in relationship_rows
-            ),
+            "native_command_binding_count": len(command_bindings),
+            "bound_handler_literal_xref_count": len(related_xrefs),
         },
         "stages": [
             {
@@ -127,21 +115,21 @@ def build() -> dict:
             }
             for item in run.stages
         ],
-        "relationship_distribution": {
-            "by_kind": dict(sorted(kind_counts.items())),
-            "by_binding_status": dict(sorted(status_counts.items())),
-            "top_targets": [
-                {"target_component": target, "count": count}
-                for target, count in sorted(
-                    target_counts.items(), key=lambda item: (-item[1], item[0])
-                )[:20]
-            ],
+        "daemon_command_chain": {
+            "binding_id": binding.candidate_id,
+            "table_symbol": binding_attributes["table_symbol"],
+            "registration_address": binding_attributes["registration_address"],
+            "process_name": binding_attributes["process_name"],
+            "command": binding_attributes["command"],
+            "handler_identity": binding_attributes["handler_identity"],
+            "handler_address": binding_attributes["handler_address"],
+            "binding_status": binding_attributes["binding_status"],
+            "evidence_ids": list(binding.evidence_ids),
+            "handler_literal_xrefs": xref_rows,
         },
-        "relationships": relationship_rows,
-        "dlna_relationships": dlna_rows,
-        "dlna_relationship_evidence": [
+        "daemon_command_chain_evidence": [
             evidence_by_id[evidence_id]
-            for evidence_id in sorted(dlna_evidence_ids)
+            for evidence_id in sorted(chain_evidence_ids)
         ],
         "historical_expectation_summary": historical_diff.to_dict()["summary"],
         "historical_expectation_entries": [
@@ -164,17 +152,18 @@ def build() -> dict:
         },
         "interpretation": {
             "supported": (
-                "complete embedded commands establish candidate sender-to-target "
-                "process-control and CFM IPC relationships, with literal topic, "
-                "operation, and argument fields preserved when present"
+                "the daemon_exe_info dynamic-symbol record binds process minidlna "
+                "and command cfm post netctrl 51?op=6 to executable handler 0x15868; "
+                "that exact handler function references /var/etc/upan and "
+                "time_check_daemon_minidlna through proven ARM PIC GOT xrefs"
             ),
-            "unresolved": (
-                "the DLNA fixture/state clues are not yet connected by a proven "
-                "code callsite to the exact time_check topic 51 operation 6 command"
+            "still_unresolved": (
+                "no exact goform route registration or handler binding connects "
+                "the DLNA frontend/fixture contract to this supervision chain"
             ),
             "not_claimed": (
-                "embedded commands executed, targets were live, routes were reachable, "
-                "or historical vulnerabilities are present"
+                "the command executed at runtime, minidlna was present, a DLNA "
+                "goform operation reached the handler, or a vulnerability exists"
             ),
         },
     }

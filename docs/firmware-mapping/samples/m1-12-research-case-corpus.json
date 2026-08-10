@@ -1178,7 +1178,7 @@
       ]
     },
     {
-      "case_id": "research-case:551e34f27e925d64ac9cacb0460be0f414729072167d9b4bb61d69be70270557",
+      "case_id": "research-case:c545a2095789a598d783c57905490031b34c581991be309bb26a0aaa57a279d2",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1189,7 +1189,9 @@
         "minidlna_supervisor",
         "usb_media_mount",
         "embedded_process_ipc_relationships",
-        "missing_target_component"
+        "missing_target_component",
+        "symbol_profiled_command_table",
+        "arm_pic_literal_xref"
       ],
       "research_question": "Do bundled DLNA request code and JSON response fixtures prove that the analyzed firmware registers the corresponding goform handlers?",
       "evidence": [
@@ -1410,6 +1412,114 @@
           "producer": "native-embedded-command-relationship@0.1.0"
         },
         {
+          "evidence_ref": "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103304-103312",
+          "capability": "names_managed_process",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55400-55404",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=96272-96285",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55400-55404",
+          "capability": "bounds_candidate_function",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=1828-1844",
+          "capability": "resolves_command_table_symbol",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55428-55436",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55412-55420",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55488-55496",
+          "capability": "references_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103672-103676",
+          "capability": "binds_command_handler",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+          "kind": "native_command_binding",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=103416-103440",
+          "capability": "declares_bound_command",
+          "producer": "native-symbol-command-table@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=97448-97474",
+          "capability": "mentions_literal",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b",
+          "kind": "native_literal_xref",
+          "source_path": "bin/time_check",
+          "source_artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+          "locator": "binary:bytes=55412-55420",
+          "capability": "establishes_pic_base",
+          "producer": "native-arm-literal-xref@0.1.0"
+        },
+        {
           "evidence_ref": "coverage:ac9-native-relationship-target-resolution",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-11-vendor-tenda-ac9-native-relationships.json",
@@ -1474,6 +1584,25 @@
           "status": "supported"
         },
         {
+          "claim_id": "claim:dlna-supervision-command-handler",
+          "statement": "The daemon_exe_info record binds minidlna and literal topic 51 operation 6 to handler 0x15868; that handler references the media mount and time_check_daemon_minidlna literals.",
+          "evidence_refs": [
+            "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+            "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+            "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+            "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+            "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+            "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+            "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+            "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+            "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+            "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+            "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b"
+          ],
+          "status": "supported"
+        },
+        {
           "claim_id": "claim:dlna-handler-owner",
           "statement": "No exact Native registration or handler binding currently connects the frontend/fixture contract to a goform execution path.",
           "evidence_refs": [
@@ -1501,7 +1630,19 @@
             "evidence:fbad3916972da6ae94fb779a96d2b17755e695f07042c53b5c7945f5a51fac78",
             "evidence:26bf1ca8f6296489a932f6c9db13e0a507d9ca3a240b30670c2c9ac09339082c",
             "evidence:a0559953f38547070d48c3ed1ce6369b16842b8195c7aa78ce51a7c0b9766041",
-            "coverage:ac9-native-relationship-target-resolution"
+            "coverage:ac9-native-relationship-target-resolution",
+            "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+            "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+            "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+            "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+            "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+            "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+            "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+            "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+            "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+            "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+            "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b"
           ],
           "status": "unresolved"
         }
@@ -1551,8 +1692,24 @@
             "claim:dlna-native-relationships",
             "claim:dlna-handler-owner"
           ],
-          "creates_obligations": [],
+          "creates_obligations": [
+            "obligation:dlna-supervisor-ipc-binding"
+          ],
           "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:dlna-command-handler-xref",
+          "order": 5,
+          "interpretation": "Resolve the daemon command-table callback and prove literals referenced by that exact ARM function.",
+          "claim_ids": [
+            "claim:dlna-supervision-command-handler",
+            "claim:dlna-handler-owner"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [
+            "obligation:dlna-supervisor-ipc-binding"
+          ],
           "rejects_obligations": []
         }
       ],
@@ -1563,25 +1720,48 @@
           "required_capability": "binds_handler",
           "status": "open",
           "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:dlna-supervisor-ipc-binding",
+          "statement": "Bind the minidlna supervisor state path to its exact IPC command handler.",
+          "required_capability": "binds_command_handler",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+            "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+            "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+            "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+            "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+            "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+            "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+            "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+            "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+            "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+            "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+            "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b"
+          ]
         }
       ],
       "counterfactuals": [
         "Treating a response fixture filename as a route table would invent a handler binding.",
         "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
         "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
-        "Treating an embedded command as an executed callsite would conceal the absent minidlna target component."
+        "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
+        "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain."
       ],
       "paper_uses": [
         "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
         "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
         "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
-        "Missing-component example where an exact process target is named but absent from the analyzed rootfs."
+        "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
+        "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open."
       ],
       "limitations": [
         "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
         "The fixture may be development data and does not establish runtime response values.",
         "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
-        "The exact topic 51 operation 6 command is not yet tied by a code callsite to the nearby minidlna state strings."
+        "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
+        "The proven static callback chain does not show that the callback or its embedded command executed at runtime."
       ]
     }
   ],
@@ -1589,7 +1769,7 @@
     "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
     "paper_ready": true,
     "case_count": 3,
-    "evidence_line_count": 11,
+    "evidence_line_count": 13,
     "issues": []
   }
 }

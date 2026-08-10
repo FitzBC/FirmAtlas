@@ -34,6 +34,8 @@ class CaseEvidenceKind(str, Enum):
     NATIVE_PROTECTION = "native_protection"
     NATIVE_SERVICE_ASSEMBLY = "native_service_assembly"
     NATIVE_RELATIONSHIP = "native_relationship"
+    NATIVE_COMMAND_BINDING = "native_command_binding"
+    NATIVE_LITERAL_XREF = "native_literal_xref"
     SET_DIFFERENCE = "set_difference"
     COVERAGE_LEDGER = "coverage_ledger"
     RUNTIME_OBSERVATION = "runtime_observation"

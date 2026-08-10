@@ -1,0 +1,675 @@
+{
+  "analysis_run_id": "mapping-analysis-run:8c52869ece1247710062273e9acd2d52f68d10d4e98814a4fa447e1bdc33528d",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v9",
+  "catalog_id": "discovery-catalog:7aa32628c922b2efe99171cf03b26750ed80209bd89f1a28e58ed8df3777658a",
+  "coverage_status": "completed",
+  "daemon_command_chain": {
+    "binding_id": "native-command-binding:10b85910de5a17b6f5f5525ff406256eb8e510ffe9da0d6f2afa194a3cc821b2",
+    "binding_status": "table_bound",
+    "command": "cfm post netctrl 51?op=6",
+    "evidence_ids": [
+      "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+      "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+      "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+      "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a"
+    ],
+    "handler_address": "0x00015868",
+    "handler_identity": "bin/time_check@0x00015868",
+    "handler_literal_xrefs": [
+      {
+        "evidence_ids": [
+          "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+          "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b",
+          "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+          "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902"
+        ],
+        "function_identity": "bin/time_check@0x00015868",
+        "instruction_address": "0x00015884",
+        "literal_address": "0x0001f810",
+        "literal_value": "/var/etc/upan",
+        "pic_base_address": "0x00015874",
+        "xref_id": "arm-literal-xref:e913720ab2d52664277d96b1196f5a812b648b24d617e64034e520ae98c0c0c4"
+      },
+      {
+        "evidence_ids": [
+          "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+          "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+          "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+          "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc"
+        ],
+        "function_identity": "bin/time_check@0x00015868",
+        "instruction_address": "0x000158c0",
+        "literal_address": "0x0001fca8",
+        "literal_value": "time_check_daemon_minidlna",
+        "pic_base_address": "0x00015874",
+        "xref_id": "arm-literal-xref:7a3d6c3cb015a307af0f32392b9bb8b9936b1ed60cbf392369a70b9aea9966f9"
+      }
+    ],
+    "process_name": "minidlna",
+    "registration_address": "0x00029388",
+    "table_symbol": "daemon_exe_info"
+  },
+  "daemon_command_chain_evidence": [
+    {
+      "capability": "names_managed_process",
+      "confidence": 1.0,
+      "evidence_id": "evidence:16d382e76c066c84f3cb54960094b4cf6227338f26ee0de5fb993e417029401b",
+      "object_value": "minidlna",
+      "observation_kind": "direct_static",
+      "predicate": "names_managed_process",
+      "producer": "native-symbol-command-table",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 103312,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "09a1a630cbadd1e46126433b7bb11b402e54d0c76cc6f054820feb16641f6741",
+        "locator": "binary:bytes=103304-103312",
+        "span_kind": "binary",
+        "start_byte": 103304,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-command-binding:10b85910de5a17b6f5f5525ff406256eb8e510ffe9da0d6f2afa194a3cc821b2"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:2e2a66176c2e2817b105622f7f88eda8cfb285a80df8ca0820e75630852c1902",
+      "object_value": "bin/time_check@0x00015868",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 55404,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=55400-55404",
+        "span_kind": "binary",
+        "start_byte": 55400,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e913720ab2d52664277d96b1196f5a812b648b24d617e64034e520ae98c0c0c4"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:412b3760591b21efefe39bc177787d970dd5d0dd9a6cd5e4baeae16f5de54b03",
+      "object_value": "/var/etc/upan",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 96285,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "d6af41cc439944d01c7d596aac771f90547c0a4a60ae5a357024f158b00dbde4",
+        "locator": "binary:bytes=96272-96285",
+        "span_kind": "binary",
+        "start_byte": 96272,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e913720ab2d52664277d96b1196f5a812b648b24d617e64034e520ae98c0c0c4"
+    },
+    {
+      "capability": "bounds_candidate_function",
+      "confidence": 0.9,
+      "evidence_id": "evidence:4e7a3ea8f4036b7dd324fc48db40f109dcd2c2f59910648047a5064d623ba6cc",
+      "object_value": "bin/time_check@0x00015868",
+      "observation_kind": "deterministic_derived",
+      "predicate": "bounds_candidate_function",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 55404,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "5167875654557444ed4f841de64c91915f0cb7e09362b8c4285b4325c8573384",
+        "locator": "binary:bytes=55400-55404",
+        "span_kind": "binary",
+        "start_byte": 55400,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:7a3d6c3cb015a307af0f32392b9bb8b9936b1ed60cbf392369a70b9aea9966f9"
+    },
+    {
+      "capability": "resolves_command_table_symbol",
+      "confidence": 1.0,
+      "evidence_id": "evidence:58cd16af7d0dc8db9b9b0fea6d6d08fc334ad98082714a40e700dc84f1779dea",
+      "object_value": "daemon_exe_info",
+      "observation_kind": "deterministic_derived",
+      "predicate": "resolves_command_table_symbol",
+      "producer": "native-symbol-command-table",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 1844,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "e149ddf8b4f8fda5c81f49039e7064a1c8acb25f7b06b3fe8ad78a136f185b26",
+        "locator": "binary:bytes=1828-1844",
+        "span_kind": "binary",
+        "start_byte": 1828,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-command-binding:10b85910de5a17b6f5f5525ff406256eb8e510ffe9da0d6f2afa194a3cc821b2"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:6f6cad3f85e070ae8c608214f2cf0c4aed0e06fd2527367835d7882f793fe421",
+      "object_value": "/var/etc/upan",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 55436,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "f943edab3ad5ad5b149bea97faa62587733a676e3d257fbcd0aa90df1bfd81d8",
+        "locator": "binary:bytes=55428-55436",
+        "span_kind": "binary",
+        "start_byte": 55428,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e913720ab2d52664277d96b1196f5a812b648b24d617e64034e520ae98c0c0c4"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:71f452b987cb11a1c9d08cac875a7d7296ca94801368eb775e63c7aaa12e800d",
+      "object_value": "got@0x0002896c",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 55420,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "fe8b5bcad14ce7b23e35a323f79f5273818483a84e09daddd0b56137b957bd06",
+        "locator": "binary:bytes=55412-55420",
+        "span_kind": "binary",
+        "start_byte": 55412,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:7a3d6c3cb015a307af0f32392b9bb8b9936b1ed60cbf392369a70b9aea9966f9"
+    },
+    {
+      "capability": "references_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:75ab96a7912dfd2f319378d86dabe04283e745a59af5bf1c813d740a3b0efafa",
+      "object_value": "time_check_daemon_minidlna",
+      "observation_kind": "deterministic_derived",
+      "predicate": "references_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 55496,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "f15fb03b556db5cca421c09e5e59213c8cd1d525322fc4facb4ba96d47a39643",
+        "locator": "binary:bytes=55488-55496",
+        "span_kind": "binary",
+        "start_byte": 55488,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:7a3d6c3cb015a307af0f32392b9bb8b9936b1ed60cbf392369a70b9aea9966f9"
+    },
+    {
+      "capability": "binds_command_handler",
+      "confidence": 1.0,
+      "evidence_id": "evidence:8eddb035d176e1f1b4013fb0fffb3eb9be0161923367ee5ceb88ef3edf274b3a",
+      "object_value": "bin/time_check@0x00015868",
+      "observation_kind": "deterministic_derived",
+      "predicate": "binds_command_handler",
+      "producer": "native-symbol-command-table",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 103676,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "2b80dfe042921201466c4be7cd9bb4cda306bb5d722ef55c0d7aa4dd49a0535a",
+        "locator": "binary:bytes=103672-103676",
+        "span_kind": "binary",
+        "start_byte": 103672,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-command-binding:10b85910de5a17b6f5f5525ff406256eb8e510ffe9da0d6f2afa194a3cc821b2"
+    },
+    {
+      "capability": "declares_bound_command",
+      "confidence": 1.0,
+      "evidence_id": "evidence:c10699fd5b01fcbb7d719253117be20f4cae2832b5c79f05bd56b1e6cbe1f86d",
+      "object_value": "cfm post netctrl 51?op=6",
+      "observation_kind": "direct_static",
+      "predicate": "declares_bound_command",
+      "producer": "native-symbol-command-table",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 103440,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "792f9dab6208ab9141a6a2d14656f370cf3f3eb35e99fe628471084eca9fd1c0",
+        "locator": "binary:bytes=103416-103440",
+        "span_kind": "binary",
+        "start_byte": 103416,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "native-command-binding:10b85910de5a17b6f5f5525ff406256eb8e510ffe9da0d6f2afa194a3cc821b2"
+    },
+    {
+      "capability": "mentions_literal",
+      "confidence": 1.0,
+      "evidence_id": "evidence:c143c851ed2236cc0274a91a82b0ad4541addfd5ed2755af4650efee8f8e5e6c",
+      "object_value": "time_check_daemon_minidlna",
+      "observation_kind": "direct_static",
+      "predicate": "mentions_literal",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 97474,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "d0ef29d77fe1e54dda0caccf1c002858108daab5426b4bcc300b7a3570fc98f0",
+        "locator": "binary:bytes=97448-97474",
+        "span_kind": "binary",
+        "start_byte": 97448,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:7a3d6c3cb015a307af0f32392b9bb8b9936b1ed60cbf392369a70b9aea9966f9"
+    },
+    {
+      "capability": "establishes_pic_base",
+      "confidence": 1.0,
+      "evidence_id": "evidence:f6ba3117ba5900da11b7072257edbe985e6d93e8735e5da56c6631a7911fb42b",
+      "object_value": "got@0x0002896c",
+      "observation_kind": "deterministic_derived",
+      "predicate": "establishes_pic_base",
+      "producer": "native-arm-literal-xref",
+      "producer_version": "0.1.0",
+      "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+      "source_span": {
+        "artifact_path": "bin/time_check",
+        "artifact_sha256": "1f874e1dcbb92307cd4acc6c45a123c19520c71f7108b715c39dfa896c8431bc",
+        "end_byte": 55420,
+        "end_column": null,
+        "end_line": null,
+        "excerpt_sha256": "fe8b5bcad14ce7b23e35a323f79f5273818483a84e09daddd0b56137b957bd06",
+        "locator": "binary:bytes=55412-55420",
+        "span_kind": "binary",
+        "start_byte": 55412,
+        "start_column": null,
+        "start_line": null
+      },
+      "subject_ref": "arm-literal-xref:e913720ab2d52664277d96b1196f5a812b648b24d617e64034e520ae98c0c0c4"
+    }
+  ],
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "historical_expectation_entries": [
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "list"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetIPTVCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5836"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "security"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/WifiBasicSet",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45427"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "WANS"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/WizardHandle",
+      "missing_parameters": [
+        "WANS"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6016"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "PPPOEPassword"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/QuickIndex",
+      "missing_parameters": [
+        "PPPOEPassword"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2026-6015"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/WifiWpsStart",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45429"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "rebootTime"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetSysAutoRebbotCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-45428"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "remoteIp"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetRemoteWebCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5847"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/cgi-bin/DownloadCfg.jpg",
+      "missing_parameters": [],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-14286"
+    },
+    {
+      "applicability": "exact_artifact",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetSambaCfg",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22949"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "lanMask"
+      ],
+      "gap_reason": "none",
+      "interface_value": "/goform/AdvSetLanip",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-5839"
+    },
+    {
+      "applicability": "exact_artifact",
+      "expected_parameters": [],
+      "gap_reason": "none",
+      "interface_value": "/goform/SetOnlineDevName",
+      "missing_parameters": [],
+      "status": "observed",
+      "vulnerability_identifier": "CVE-2025-22946"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/exeCommand",
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10443"
+    },
+    {
+      "applicability": "out_of_scope",
+      "expected_parameters": [
+        "cmdinput"
+      ],
+      "gap_reason": "artifact_out_of_scope",
+      "interface_value": "/goform/exeCommand",
+      "missing_parameters": [
+        "cmdinput"
+      ],
+      "status": "not_assessable",
+      "vulnerability_identifier": "CVE-2025-10442"
+    }
+  ],
+  "historical_expectation_summary": {
+    "not_assessable": 5,
+    "observed": 8
+  },
+  "interpretation": {
+    "not_claimed": "the command executed at runtime, minidlna was present, a DLNA goform operation reached the handler, or a vulnerability exists",
+    "still_unresolved": "no exact goform route registration or handler binding connects the DLNA frontend/fixture contract to this supervision chain",
+    "supported": "the daemon_exe_info dynamic-symbol record binds process minidlna and command cfm post netctrl 51?op=6 to executable handler 0x15868; that exact handler function references /var/etc/upan and time_check_daemon_minidlna through proven ARM PIC GOT xrefs"
+  },
+  "mapping_summary": {
+    "bound_handler_literal_xref_count": 2,
+    "candidate_count": 4351,
+    "evidence_count": 11549,
+    "native_command_binding_count": 1,
+    "open_obligation_count": 59,
+    "parameter_count": 688,
+    "potential_hidden_interface_count": 107
+  },
+  "profile_id": "firmatlas.mapping.profile/auto-v9",
+  "sample_role": "primary-vendor-tenda-ac9-daemon-command-chain-iteration",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-12/v1alpha1",
+  "stages": [
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "inventory",
+      "output_count": 1038
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1038,
+      "name": "source_plan",
+      "output_count": 529
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend",
+      "output_count": 119
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 130,
+      "name": "frontend_asset_graph",
+      "output_count": 31
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 451,
+      "name": "parameter_clue",
+      "output_count": 135
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 111,
+      "name": "response_fixture",
+      "output_count": 553
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native_relationship",
+      "output_count": 101
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "native_command_binding",
+      "output_count": 1
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "arm_literal_xref",
+      "output_count": 2
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "web_configuration",
+      "output_count": 5
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "script_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "native",
+      "output_count": 3187
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no selected sources"
+      ],
+      "input_count": 0,
+      "name": "native_ubus_registration",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "name": "arm_pic_callsite",
+      "output_count": 64
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "arm_pic_registrar",
+      "output_count": 187
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 287,
+      "name": "set_difference",
+      "output_count": 112
+    },
+    {
+      "coverage_status": "not_applicable",
+      "diagnostics": [
+        "no ubus operations"
+      ],
+      "input_count": 0,
+      "name": "ubus_backend",
+      "output_count": 0
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "no_eligible_analyzer"
+      ],
+      "input_count": 187,
+      "name": "scheduler",
+      "output_count": 59
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [
+        "open obligations remain but no unattempted eligible analyzer is available"
+      ],
+      "input_count": 529,
+      "name": "catalog",
+      "output_count": 4351
+    }
+  ],
+  "vulnerability_scope_summary": {
+    "category_counts": {
+      "compared_interface": 13,
+      "no_structured_communication": 9,
+      "not_analyzed": 46,
+      "parameter_only": 3
+    },
+    "exact_artifact_expectation_count": 2,
+    "exact_artifact_observed_count": 2,
+    "total_vulnerability_count": 71
+  }
+}

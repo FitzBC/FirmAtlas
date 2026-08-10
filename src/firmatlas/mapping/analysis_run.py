@@ -39,6 +39,15 @@ from .native_relationship import (
     NativeRelationshipPolicy,
     discover_native_relationships,
 )
+from .native_command_binding import (
+    NativeCommandBindingPolicy,
+    discover_native_command_table_bindings,
+)
+from .native_arm_xref import (
+    ArmFunctionTarget,
+    ArmLiteralXrefPolicy,
+    discover_arm_function_literal_xrefs,
+)
 from .native import discover_native_hints
 from .native_deep import (
     ArmPicCallsiteProfile,
@@ -83,7 +92,10 @@ _AUTO_V2_ANALYZERS = _AUTO_V1_ANALYZERS + ("frontend_asset_graph",)
 _AUTO_V5_ANALYZERS = _AUTO_V2_ANALYZERS + ("arm_pic_registrar", "set_difference")
 _AUTO_V6_ANALYZERS = _AUTO_V5_ANALYZERS + ("parameter_clue",)
 _AUTO_V7_ANALYZERS = _AUTO_V6_ANALYZERS + ("response_fixture",)
-_AUTO_ANALYZERS = _AUTO_V7_ANALYZERS + ("native_relationship",)
+_AUTO_V8_ANALYZERS = _AUTO_V7_ANALYZERS + ("native_relationship",)
+_AUTO_ANALYZERS = _AUTO_V8_ANALYZERS + (
+    "native_command_binding", "arm_literal_xref",
+)
 
 
 @dataclass(frozen=True)
@@ -103,7 +115,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v8", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v9", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v8(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v8", _AUTO_V8_ANALYZERS)
 
     @classmethod
     def auto_v7(cls) -> "MappingAnalysisProfile":
@@ -147,7 +163,11 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v8", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v9", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v8(cls) -> "MappingAnalyzerRegistry":
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v8", _AUTO_V8_ANALYZERS)
 
     @classmethod
     def builtin_v7(cls) -> "MappingAnalyzerRegistry":
@@ -201,6 +221,7 @@ class MappingAnalyzerRegistry:
             "native_ubus_registration": discover_native_ubus_registrations,
             "response_fixture": discover_response_fixture,
             "native_relationship": discover_native_relationships,
+            "native_command_binding": discover_native_command_table_bindings,
         }
         if analyzer_name not in self.analyzer_names or analyzer_name not in analyzers:
             raise ValueError("source analyzer is unavailable: {}".format(analyzer_name))
@@ -208,6 +229,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V8 = MappingAnalyzerRegistry.builtin_v8()
 BUILTIN_ANALYZER_REGISTRY_V7 = MappingAnalyzerRegistry.builtin_v7()
 BUILTIN_ANALYZER_REGISTRY_V6 = MappingAnalyzerRegistry.builtin_v6()
 BUILTIN_ANALYZER_REGISTRY_V5 = MappingAnalyzerRegistry.builtin_v5()
@@ -226,6 +248,8 @@ class MappingAnalysisRequest:
     parameter_clue_policy: ParameterCluePolicy = ParameterCluePolicy()
     response_fixture_policy: ResponseFixturePolicy = ResponseFixturePolicy()
     native_relationship_policy: NativeRelationshipPolicy = NativeRelationshipPolicy()
+    native_command_binding_policy: NativeCommandBindingPolicy = NativeCommandBindingPolicy()
+    arm_literal_xref_policy: ArmLiteralXrefPolicy = ArmLiteralXrefPolicy()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "root", Path(self.root))
@@ -293,6 +317,11 @@ def _classify(
         kinds = ["native"] if "native" in enabled else []
         if "native_relationship" in enabled:
             kinds.append("native_relationship")
+        if (
+            "native_command_binding" in enabled
+            and b"daemon_exe_info" in content
+        ):
+            kinds.append("native_command_binding")
         if (
             "native_ubus_registration" in enabled
             and path.startswith("usr/lib/rpcd/")
@@ -445,6 +474,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v6",
                 "firmatlas.mapping.profile/auto-v7",
                 "firmatlas.mapping.profile/auto-v8",
+                "firmatlas.mapping.profile/auto-v9",
             }
         ),
         enable_tenda_get_set_data=(
@@ -452,6 +482,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v6",
                 "firmatlas.mapping.profile/auto-v7",
                 "firmatlas.mapping.profile/auto-v8",
+                "firmatlas.mapping.profile/auto-v9",
             }
         ),
     )
@@ -519,6 +550,13 @@ def analyze_extracted_root(
         for source, content, kinds in selected
         if "native_relationship" in kinds
     )
+    native_command_bindings = tuple(
+        discover_native_command_table_bindings(
+            source, content, policy=request.native_command_binding_policy
+        )
+        for source, content, kinds in selected
+        if "native_command_binding" in kinds
+    )
     web = tuple(
         registry.analyze_source("web_configuration", source, content)
         for source, content, kinds in selected if "web_configuration" in kinds
@@ -536,6 +574,23 @@ def analyze_extracted_root(
         source.canonical_path: (source, content)
         for source, content, _ in selected
     }
+    arm_literal_xrefs = (
+        tuple(
+            discover_arm_function_literal_xrefs(
+                selected_by_path[result.source_path][0],
+                selected_by_path[result.source_path][1],
+                tuple(
+                    ArmFunctionTarget(binding.binding_id, binding.handler_address)
+                    for binding in result.bindings
+                ),
+                policy=request.arm_literal_xref_policy,
+            )
+            for result in native_command_bindings
+            if result.bindings
+        )
+        if "arm_literal_xref" in request.profile.enabled_analyzers
+        else ()
+    )
     native_by_path = {item.source_path: item for item in native}
     native_hints = {
         hint.hint_id: hint for item in native for hint in item.hints
@@ -652,6 +707,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v6",
                     "firmatlas.mapping.profile/auto-v7",
                     "firmatlas.mapping.profile/auto-v8",
+                    "firmatlas.mapping.profile/auto-v9",
                 }
                 else ()
             )
@@ -666,6 +722,7 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v6",
                         "firmatlas.mapping.profile/auto-v7",
                         "firmatlas.mapping.profile/auto-v8",
+                        "firmatlas.mapping.profile/auto-v9",
                     }
                 ),
             )
@@ -699,6 +756,18 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.native_relationship,
             native_relationships,
             "auto:native-relationship",
+        ))
+    if "native_command_binding" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_command_binding,
+            native_command_bindings,
+            "auto:native-command-binding",
+        ))
+    if "arm_literal_xref" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.arm_literal_xref,
+            arm_literal_xrefs,
+            "auto:arm-literal-xref",
         ))
     if "arm_pic_callsite" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -779,6 +848,18 @@ def analyze_extracted_root(
             "native_relationship",
             native_relationships,
             sum(len(item.relationships) for item in native_relationships),
+        ))
+    if "native_command_binding" in request.profile.enabled_analyzers:
+        stages.insert(7, _stage(
+            "native_command_binding",
+            native_command_bindings,
+            sum(len(item.bindings) for item in native_command_bindings),
+        ))
+    if "arm_literal_xref" in request.profile.enabled_analyzers:
+        stages.insert(8, _stage(
+            "arm_literal_xref",
+            arm_literal_xrefs,
+            sum(len(item.xrefs) for item in arm_literal_xrefs),
         ))
     if "native_ubus_registration" in request.profile.enabled_analyzers:
         stages.append(_stage(

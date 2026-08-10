@@ -31,6 +31,9 @@ AC9_R2_10_REPORT = Path(
 AC9_R2_11_REPORT = Path(
     "docs/firmware-mapping/samples/r2-11-vendor-tenda-ac9-native-relationships.json"
 )
+AC9_R2_12_REPORT = Path(
+    "docs/firmware-mapping/samples/r2-12-vendor-tenda-ac9-daemon-command-chain.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1008,10 +1011,14 @@ def build_ac9_dlna_fixture_split_case():
     relationship_report = json.loads(
         AC9_R2_11_REPORT.read_text(encoding="utf-8")
     )
+    command_chain_report = json.loads(
+        AC9_R2_12_REPORT.read_text(encoding="utf-8")
+    )
     atoms = (
         *report["dlna_response_fixture_evidence"],
         *report["dlna_architecture_evidence"],
         *relationship_report["dlna_relationship_evidence"],
+        *command_chain_report["daemon_command_chain_evidence"],
     )
     selected = []
     for atom in atoms:
@@ -1031,6 +1038,10 @@ def build_ac9_dlna_fixture_split_case():
                     "monitors_media_daemon",
             }
             or atom["producer"] == "native-embedded-command-relationship"
+            or atom["producer"] in {
+                "native-symbol-command-table",
+                "native-arm-literal-xref",
+            }
         ):
             selected.append(atom)
     atom_evidence = tuple(
@@ -1043,6 +1054,10 @@ def build_ac9_dlna_fixture_split_case():
                 if atom["producer"] == "response-fixture-producer"
                 else CaseEvidenceKind.NATIVE_RELATIONSHIP
                 if atom["producer"] == "native-embedded-command-relationship"
+                else CaseEvidenceKind.NATIVE_COMMAND_BINDING
+                if atom["producer"] == "native-symbol-command-table"
+                else CaseEvidenceKind.NATIVE_LITERAL_XREF
+                if atom["producer"] == "native-arm-literal-xref"
                 else CaseEvidenceKind.WEB_CONFIGURATION
                 if atom["source_span"]["artifact_path"].startswith("etc_ro/")
                 else CaseEvidenceKind.NATIVE_HINT
@@ -1087,6 +1102,14 @@ def build_ac9_dlna_fixture_split_case():
         if item.kind is CaseEvidenceKind.NATIVE_RELATIONSHIP
     )
     target_resolution_refs = (target_resolution_ref.evidence_ref,)
+    command_binding_refs = tuple(
+        item.evidence_ref for item in evidence
+        if item.kind is CaseEvidenceKind.NATIVE_COMMAND_BINDING
+    )
+    literal_xref_refs = tuple(
+        item.evidence_ref for item in evidence
+        if item.kind is CaseEvidenceKind.NATIVE_LITERAL_XREF
+    )
     return build_research_case(ResearchCaseInput(
         case_key="tenda-ac9-dlna-fixture-daemon-split",
         title="Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -1098,6 +1121,8 @@ def build_ac9_dlna_fixture_split_case():
             "usb_media_mount",
             "embedded_process_ipc_relationships",
             "missing_target_component",
+            "symbol_profiled_command_table",
+            "arm_pic_literal_xref",
         ),
         research_question=(
             "Do bundled DLNA request code and JSON response fixtures prove that "
@@ -1129,12 +1154,20 @@ def build_ac9_dlna_fixture_split_case():
                 (*relationship_refs, *target_resolution_refs),
             ),
             CaseClaim(
+                "claim:dlna-supervision-command-handler",
+                "The daemon_exe_info record binds minidlna and literal topic 51 "
+                "operation 6 to handler 0x15868; that handler references the media "
+                "mount and time_check_daemon_minidlna literals.",
+                (*command_binding_refs, *literal_xref_refs),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
                 "No exact Native registration or handler binding currently connects "
                 "the frontend/fixture contract to a goform execution path.",
                 (
                     *frontend_refs, *fixture_refs, *architecture_refs,
                     *relationship_refs, *target_resolution_refs,
+                    *command_binding_refs, *literal_xref_refs,
                 ),
                 CaseClaimStatus.UNRESOLVED,
             ),
@@ -1161,6 +1194,17 @@ def build_ac9_dlna_fixture_split_case():
                 "Recover embedded process/IPC edges and verify target presence "
                 "without promoting them to executed callsites.",
                 ("claim:dlna-native-relationships", "claim:dlna-handler-owner"),
+                creates_obligations=("obligation:dlna-supervisor-ipc-binding",),
+            ),
+            CaseStage(
+                "stage:dlna-command-handler-xref", 5,
+                "Resolve the daemon command-table callback and prove literals "
+                "referenced by that exact ARM function.",
+                (
+                    "claim:dlna-supervision-command-handler",
+                    "claim:dlna-handler-owner",
+                ),
+                resolves_obligations=("obligation:dlna-supervisor-ipc-binding",),
             ),
         ),
         obligations=(
@@ -1170,24 +1214,34 @@ def build_ac9_dlna_fixture_split_case():
                 "binds_handler",
                 CaseObligationStatus.OPEN,
             ),
+            CaseObligation(
+                "obligation:dlna-supervisor-ipc-binding",
+                "Bind the minidlna supervisor state path to its exact IPC command handler.",
+                "binds_command_handler",
+                CaseObligationStatus.RESOLVED,
+                (*command_binding_refs, *literal_xref_refs),
+            ),
         ),
         counterfactuals=(
             "Treating a response fixture filename as a route table would invent a handler binding.",
             "Treating minidlna monitoring as proof that httpd implements every DLNA UI operation would merge separate process roles.",
             "Discarding the fixture because Native route text is absent would lose recoverable response-field contracts.",
             "Treating an embedded command as an executed callsite would conceal the absent minidlna target component.",
+            "Using data-layout proximity without the dynamic symbol, executable callback pointer, and code xrefs would not prove a handler chain.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
             "Coverage-preservation example where deeper evidence enriches architecture but keeps the central obligation open.",
             "Ablation for frontend-only, fixture-aware, and daemon-architecture-aware mapping.",
             "Missing-component example where an exact process target is named but absent from the analyzed rootfs.",
+            "Temporal obligation example where a deeper adapter closes the supervision chain while the Web handler remains open.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
             "The fixture may be development data and does not establish runtime response values.",
             "No runtime boot, request replay, authentication, vulnerability, or exploitability claim is made.",
-            "The exact topic 51 operation 6 command is not yet tied by a code callsite to the nearby minidlna state strings.",
+            "The proven supervision callback is not tied to any DLNA goform route registration or Web request handler.",
+            "The proven static callback chain does not show that the callback or its embedded command executed at runtime.",
         ),
     ))
 

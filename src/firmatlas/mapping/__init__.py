@@ -84,6 +84,26 @@ from .native_relationship import (
     NativeRelationshipResult,
     discover_native_relationships,
 )
+from .native_arm_xref import (
+    ARM_LITERAL_XREF_SCHEMA_VERSION,
+    ArmFunctionTarget,
+    ArmLiteralAnchor,
+    ArmLiteralXref,
+    ArmLiteralXrefPolicy,
+    ArmLiteralXrefProfile,
+    ArmLiteralXrefResult,
+    discover_arm_literal_xrefs,
+    discover_arm_function_literal_xrefs,
+)
+from .native_command_binding import (
+    NATIVE_COMMAND_BINDING_SCHEMA_VERSION,
+    NativeCommandBinding,
+    NativeCommandBindingPolicy,
+    NativeCommandBindingResult,
+    NativeCommandBindingStatus,
+    NativeCommandTableProfile,
+    discover_native_command_table_bindings,
+)
 from .inventory import (
     INVENTORY_SCHEMA_VERSION,
     InventoryDiagnostic,
@@ -222,6 +242,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V8,
     BUILTIN_ANALYZER_REGISTRY_V7,
     BUILTIN_ANALYZER_REGISTRY_V6,
     BUILTIN_ANALYZER_REGISTRY_V5,
@@ -352,6 +373,22 @@ from .research_case import (
 )
 
 __all__ = (
+    "NATIVE_COMMAND_BINDING_SCHEMA_VERSION",
+    "NativeCommandBinding",
+    "NativeCommandBindingPolicy",
+    "NativeCommandBindingResult",
+    "NativeCommandBindingStatus",
+    "NativeCommandTableProfile",
+    "discover_native_command_table_bindings",
+    "ARM_LITERAL_XREF_SCHEMA_VERSION",
+    "ArmFunctionTarget",
+    "ArmLiteralAnchor",
+    "ArmLiteralXref",
+    "ArmLiteralXrefPolicy",
+    "ArmLiteralXrefProfile",
+    "ArmLiteralXrefResult",
+    "discover_arm_literal_xrefs",
+    "discover_arm_function_literal_xrefs",
     "NATIVE_RELATIONSHIP_SCHEMA_VERSION",
     "NativeRelationship",
     "NativeRelationshipBindingStatus",
@@ -543,6 +580,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V8",
     "BUILTIN_ANALYZER_REGISTRY_V7",
     "BUILTIN_ANALYZER_REGISTRY_V6",
     "BUILTIN_ANALYZER_REGISTRY_V5",

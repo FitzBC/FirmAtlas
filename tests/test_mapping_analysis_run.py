@@ -73,6 +73,8 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "arm_pic_callsite", "arm_pic_registrar", "set_difference",
                 "parameter_clue", "response_fixture", "ubus_backend",
                 "native_relationship",
+                "native_command_binding",
+                "arm_literal_xref",
                 "scheduler", "catalog",
             },
             {stage.stage_name for stage in first.stages},
@@ -213,9 +215,9 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v8", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v9", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v8",
+            "firmatlas.mapping.analyzer-registry/builtin-v9",
             result.analyzer_registry_id,
         )
 
@@ -290,6 +292,41 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             "GetUpnpCfg": "formGetUpnpLists",
             "GetSySLogCfg": "formGetSysLog",
         }, recovered)
+        command_binding = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.NATIVE_COMMAND_BINDING
+        )
+        self.assertEqual(
+            "bin/time_check|minidlna|handler=0x00015868",
+            command_binding.canonical_identity,
+        )
+        self.assertEqual(
+            "cfm post netctrl 51?op=6",
+            dict(command_binding.attributes)["command"],
+        )
+        command_stage = next(
+            item for item in result.stages
+            if item.stage_name == "native_command_binding"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, command_stage.coverage_status)
+        self.assertEqual(1, command_stage.output_count)
+        xref_stage = next(
+            item for item in result.stages
+            if item.stage_name == "arm_literal_xref"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, xref_stage.coverage_status)
+        self.assertEqual(2, xref_stage.output_count)
+        self.assertEqual(
+            {"/var/etc/upan", "time_check_daemon_minidlna"},
+            {
+                dict(item.attributes)["literal_value"]
+                for item in result.catalog.candidates
+                if item.candidate_kind is DiscoveryCandidateKind.ARM_LITERAL_XREF
+                and dict(item.attributes)["function_identity"]
+                == "bin/time_check@0x00015868"
+            },
+        )
 
 
 if __name__ == "__main__":

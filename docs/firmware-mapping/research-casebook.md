@@ -230,6 +230,18 @@ flowchart LR
 
 R2-11 又增加了一层不能被 hindsight 改写的中间状态。通用 Native embedded-command producer 从 `bin/httpd` 恢复 `killall -9 minidlna`，从 `bin/time_check` 恢复 `cfm post netctrl 51?op=6`；后者的 `netctrl` 可解析到 `bin/netctrl`，但 Inventory 中不存在名为 `minidlna` 的制品。这支持两条候选组件边及“目标组件缺失”事实，却仍不证明 topic 51/op 6 与附近 minidlna 状态字符串处于同一调用路径，也不证明任何命令执行。因此案例增加 `stage:dlna-native-relationships` 和 supported 架构 claim，但 handler obligation 继续 open。
 
+R2-12 沿 R2-11 明确留下的 callsite 缺口继续推进。`bin/time_check` 的动态符号
+`daemon_exe_info@0x29388` 指向一个 372 字节记录：进程名位于 `+0`，命令位于
+`+112`，回调指针位于 `+368`。结构化解析将 `minidlna`、
+`cfm post netctrl 51?op=6` 与可执行地址 `0x15868` 绑定；随后 ARM PIC/GOT 指令
+重放在同一候选函数内分别于 `0x15884`、`0x158c0` 证明 `/var/etc/upan` 和
+`time_check_daemon_minidlna` 的精确引用。案例因此新增
+`stage:dlna-command-handler-xref`，并用 12 个独立 EvidenceAtom 关闭
+`obligation:dlna-supervisor-ipc-binding`。这修正了 R2-11 的“附近字符串不足以关联”，
+但没有改写它：新证据来自表布局、可执行 handler 指针和指令级 xref，而不是距离猜测。
+原有 `obligation:dlna-handler-owner` 仍然 open，因为尚无证据把这条监督 IPC 链与三个
+DLNA `/goform` 操作绑定，也没有证明命令运行时执行。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：
