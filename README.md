@@ -136,10 +136,13 @@ make mapping-inventory ROOT=/path/to/extracted-root
 PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
   --artifact-sha256 <original-firmware-sha256> \
   --profile auto \
-  --output mapping-analysis-run.json
+  --output mapping-analysis-run.json \
+  --graph-output communication-graph.json \
+  --graph-focus goform/GetDlnaCfg \
+  --graph-max-hops 4
 ```
 
-该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Frontend Feature Gate、Frontend Invocation Reachability、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。当前默认 `auto-v13` 在冻结的 `auto-v12` 上加入有界前端静态调用可达性，区分顶层声明、可证明调用路径、已声明但未达与未解析状态；结果不等于运行时执行或不可访问。AC9 的 3 条 DLNA feature pivot 全部落在 `GetUSBStatus → formGetUSBStatus@0xa62d0`，没有三条 DLNA 配置 binding；官方 AC18 启用 build 则恢复 `GetDlnaCfg / SetDlnaCfg / expandDlnaFile` 及各自 handler。该家族阳性对照支持 build 裁剪候选，但不会把 AC18 owner 或漏洞状态迁移给 AC9。`auto-v12` 及更早 Profile 继续冻结重放。首要样本最新结果见 [R2-16 前端调用可达性](./docs/firmware-mapping/progress/2026-08-10-r2-16-ac9-dlna-frontend-reachability.md)，功能 pivot 基线见 [R2-15](./docs/firmware-mapping/progress/2026-08-10-r2-15-ac9-ac18-feature-pivot.md)，同硬件 OpenWrt 对照见 [R2-02](./docs/firmware-mapping/samples/r2-02-tenda-ac9-auto-profile.json)。参数线索索引对已验证的前端请求参数执行有界同固件精确 token 检索，显式发布阳性、阴性与覆盖受限结果，但不会把字符串共现冒充数据流。
+该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Frontend Feature Gate、Frontend Invocation Reachability、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。可选 `--graph-output` 会从同一 Catalog 生成确定性的通信架构图 read model；`--graph-focus` 可重复，按精确接口身份进行有界语义跳转，制品归属边不会扩大焦点。当前默认仍为冻结的 `auto-v13`，图谱不是新的分析 Profile，也不会创造运行时或漏洞事实。AC9 的 3 条 DLNA feature pivot 全部落在 `GetUSBStatus → formGetUSBStatus@0xa62d0`，没有三条 DLNA 配置 binding；官方 AC18 启用 build 则恢复 `GetDlnaCfg / SetDlnaCfg / expandDlnaFile` 及各自 handler。该家族阳性对照支持 build 裁剪候选，但不会把 AC18 owner 或漏洞状态迁移给 AC9。首要样本最新结果见 [R2-17 通信架构图](./docs/firmware-mapping/progress/2026-08-10-r2-17-ac9-dlna-communication-graph.md)，前端调用基线见 [R2-16](./docs/firmware-mapping/progress/2026-08-10-r2-16-ac9-dlna-frontend-reachability.md)，功能 pivot 基线见 [R2-15](./docs/firmware-mapping/progress/2026-08-10-r2-15-ac9-ac18-feature-pivot.md)。参数线索索引对已验证的前端请求参数执行有界同固件精确 token 检索，显式发布阳性、阴性与覆盖受限结果，但不会把字符串共现冒充数据流。
 
 历史漏洞接口只能在声明版本与当前制品范围明确后用于测绘差异，不能直接当作固件真值：
 

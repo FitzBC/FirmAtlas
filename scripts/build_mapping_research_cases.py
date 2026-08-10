@@ -50,6 +50,10 @@ AC9_R2_16_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-16-vendor-tenda-ac9-ac18-dlna-reachability.json"
 )
+AC9_R2_17_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-17-vendor-tenda-ac9-ac18-dlna-communication-graph.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1196,6 +1200,23 @@ def build_ac9_dlna_fixture_split_case():
         "controls_frontend_invocation_reachability",
         "frontend-invocation-reachability@0.1.0",
     )
+    graph_report_sha = hashlib.sha256(AC9_R2_17_REPORT.read_bytes()).hexdigest()
+    ac9_graph_ref = CaseEvidenceReference(
+        "coverage:ac9-dlna-communication-graph",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_17_REPORT.as_posix(), graph_report_sha,
+        "json:$.ac9_primary.focused_graph",
+        "projects_artifact_local_communication_architecture",
+        "communication-architecture-graph@v1alpha1",
+    )
+    ac18_graph_ref = CaseEvidenceReference(
+        "coverage:ac18-dlna-communication-graph-control",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_17_REPORT.as_posix(), graph_report_sha,
+        "json:$.ac18_positive_control.focused_graph",
+        "controls_artifact_local_route_handler_projection",
+        "communication-architecture-graph@v1alpha1",
+    )
     evidence = (
         *atom_evidence,
         target_resolution_ref,
@@ -1204,6 +1225,8 @@ def build_ac9_dlna_fixture_split_case():
         family_equivalence_ref,
         ac9_reachability_ref,
         ac18_reachability_ref,
+        ac9_graph_ref,
+        ac18_graph_ref,
     )
     by_capability = {}
     for item in evidence:
@@ -1371,8 +1394,16 @@ def build_ac9_dlna_fixture_split_case():
                 ),
             ),
             CaseClaim(
+                "claim:dlna-communication-graph-projection",
+                "One Catalog-only graph projection preserves AC9's four open "
+                "DLNA route-owner obligations while independently connecting "
+                "three AC18 operations to evidence-backed handlers; refreshDLNA "
+                "remains ownerless in both artifacts.",
+                (ac9_graph_ref.evidence_ref, ac18_graph_ref.evidence_ref),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
-                "No exact Native registration or handler binding currently connects "
+                "In the AC9 artifact, no exact Native registration or handler binding connects "
                 "GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform "
                 "execution path; the adjacent GetUSBStatus binding does not establish "
                 "an alias for those operations.",
@@ -1388,6 +1419,8 @@ def build_ac9_dlna_fixture_split_case():
                     family_equivalence_ref.evidence_ref,
                     ac9_reachability_ref.evidence_ref,
                     ac18_reachability_ref.evidence_ref,
+                    ac9_graph_ref.evidence_ref,
+                    ac18_graph_ref.evidence_ref,
                 ),
                 CaseClaimStatus.UNRESOLVED,
             ),
@@ -1466,6 +1499,16 @@ def build_ac9_dlna_fixture_split_case():
                     "claim:dlna-handler-owner",
                 ),
             ),
+            CaseStage(
+                "stage:dlna-communication-graph-projection", 10,
+                "Project artifact-local interface, parameter, invocation, route, "
+                "handler, coverage, and obligation facts; then close only stale "
+                "obligations covered by exact supported deep bindings.",
+                (
+                    "claim:dlna-communication-graph-projection",
+                    "claim:dlna-handler-owner",
+                ),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1492,6 +1535,7 @@ def build_ac9_dlna_fixture_split_case():
             "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set.",
             "Transferring AC18 handler addresses or vulnerability state to AC9 would confuse a family-level positive control with artifact-local proof.",
             "Treating declared-but-unreached as dead code or runtime inaccessibility would overstate a bounded static call-graph result.",
+            "Hiding a stale open obligation after deeper binding evidence arrives would make the graph contradict its own evidence timeline.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -1503,6 +1547,7 @@ def build_ac9_dlna_fixture_split_case():
             "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation.",
             "Family holdout showing that enabled variants can prioritize symbols and structures without resolving a disabled target build by analogy.",
             "Frontend reachability ablation separating request declaration, bounded active paths, and commented or unreached functions.",
+            "Graph-projection case showing artifact-local owner separation and a late-evidence obligation state transition.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",

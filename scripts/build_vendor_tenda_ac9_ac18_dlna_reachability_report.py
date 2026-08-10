@@ -10,7 +10,9 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V13,
     DiscoveryCandidateKind,
+    MappingAnalysisProfile,
     MappingAnalysisRequest,
     analyze_extracted_root,
 )
@@ -42,7 +44,14 @@ def _sha(path: Path) -> str:
 
 
 def _sample(root: Path, artifact_sha256: str) -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(root, artifact_sha256))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            root,
+            artifact_sha256,
+            profile=MappingAnalysisProfile.auto_v13(),
+        ),
+        registry=BUILTIN_ANALYZER_REGISTRY_V13,
+    )
     evidence = {
         item.evidence_id: item for item in run.catalog.evidence_atoms
     }

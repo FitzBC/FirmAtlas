@@ -19,6 +19,10 @@ from .historical_expectation import (
     compare_historical_expectations,
     load_historical_expectations,
 )
+from .communication_graph import (
+    CommunicationGraphPolicy,
+    project_communication_architecture_graph,
+)
 
 
 def _summary(snapshot: FirmwareMappingSnapshot) -> dict:
@@ -123,6 +127,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     analyze.add_argument(
         "--max-archive-depth", type=int, default=defaults.max_archive_depth
     )
+    graph_defaults = CommunicationGraphPolicy()
+    analyze.add_argument(
+        "--graph-output",
+        help="write a deterministic communication-architecture graph JSON file",
+    )
+    analyze.add_argument(
+        "--graph-focus", action="append", default=[],
+        help="focus graph on an exact candidate canonical identity; repeatable",
+    )
+    analyze.add_argument(
+        "--graph-max-hops", type=int, default=graph_defaults.max_hops,
+    )
+    analyze.add_argument(
+        "--graph-max-nodes", type=int, default=graph_defaults.max_nodes,
+    )
+    analyze.add_argument(
+        "--graph-max-edges", type=int, default=graph_defaults.max_edges,
+    )
     compare_history = subparsers.add_parser(
         "compare-history",
         help="analyze a root and compare its catalog with historical expectations",
@@ -203,11 +225,36 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 }
                 print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
                 return 0
+            if args.graph_focus and not args.graph_output:
+                raise ValueError("graph-focus requires graph-output")
+            graph = None
+            graph_output = None
+            if args.graph_output:
+                graph_output = Path(args.graph_output)
+                if graph_output.resolve() == output.resolve():
+                    raise ValueError("graph-output must differ from output")
+                graph = project_communication_architecture_graph(
+                    run.catalog,
+                    CommunicationGraphPolicy(
+                        max_nodes=args.graph_max_nodes,
+                        max_edges=args.graph_max_edges,
+                        focus_canonical_identities=tuple(args.graph_focus),
+                        max_hops=args.graph_max_hops,
+                    ),
+                )
             output.write_text(
                 json.dumps(run.to_dict(), ensure_ascii=False, indent=2, sort_keys=True)
                 + "\n",
                 encoding="utf-8",
             )
+            if graph is not None and graph_output is not None:
+                graph_output.write_text(
+                    json.dumps(
+                        graph.to_dict(), ensure_ascii=False,
+                        indent=2, sort_keys=True,
+                    ) + "\n",
+                    encoding="utf-8",
+                )
             result = {
                 "schema_version": run.schema_version,
                 "analysis_run_id": run.analysis_run_id,
@@ -221,6 +268,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "open_obligation_count": len(run.catalog.open_obligations),
                 "output": str(output),
             }
+            if graph is not None and graph_output is not None:
+                result.update({
+                    "graph_id": graph.graph_id,
+                    "graph_projection_status": graph.projection_status.value,
+                    "graph_node_count": len(graph.nodes),
+                    "graph_edge_count": len(graph.edges),
+                    "graph_output": str(graph_output),
+                })
         else:
             payload = json.loads(Path(args.path).read_text(encoding="utf-8"))
             snapshot = FirmwareMappingSnapshot.from_dict(payload)

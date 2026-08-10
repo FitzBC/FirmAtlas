@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1 corpus gate 仍为 `partial`；R2-16 AC9/AC18 前端静态调用可达性已进入验证
+> 当前状态：M1 corpus gate 仍为 `partial`；R2-17 Catalog 通信架构图投影已由 AC9 主样本与 AC18 正控验证
 > 最近更新：2026-08-10
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -96,6 +96,7 @@
 | [R2-14 AC9 disabled DLNA feature](./progress/2026-08-10-r2-14-ac9-disabled-dlna-feature.md) | 五段 UI 功能开关、四条残留 DLNA 请求、非后端缺失边界 | feature gate、产品变体或 Frontend-only 归因变化时 |
 | [R2-15 AC9/AC18 feature pivot](./progress/2026-08-10-r2-15-ac9-ac18-feature-pivot.md) | AC9 功能词到已注册 handler 的有界 pivot、官方 AC18 阳性对照、家族证据边界 | feature pivot、家族变体或 DLNA owner 义务变化时 |
 | [R2-16 AC9/AC18 前端调用可达性](./progress/2026-08-10-r2-16-ac9-dlna-frontend-reachability.md) | 请求声明、静态活动路径、未达函数与注释绑定的证据分层 | 前端调用根、调用边、覆盖边界或 DLNA 可达性状态变化时 |
+| [R2-17 AC9/AC18 通信架构图](./progress/2026-08-10-r2-17-ac9-dlna-communication-graph.md) | Catalog-only 图投影、焦点预算、证据/覆盖/义务叠加与 owner 对照 | 图 schema、边引用、焦点规则、义务关闭或 UI 查询合同变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -180,8 +181,9 @@ M1 工作项：
 | M1-24 | 覆盖感知版本通信结构对比 | 已验证 | M1-08/09/23 | immutable release context + candidate/parameter/hidden diff + LuCI RPC + OpenWrt AC9 18.06.7→19.07.8 实证 + Console 对比视图 |
 | M1-25 | LuCI/ubus 后端执行主体与访问图 | 已验证 | M1-08/24 | bounded dynamic template + rpcd exec/native principal + backend binding + ACL grant + AC9 真实回放 + Console 证据链 |
 | M1-26 | Native rpcd/ubus 注册表与 handler 绑定 | 已验证 | M1-25 | 4 个真实 ARM32 plugin + 31 verified binding + 30 registration obligations closed + handler UI |
+| R2-17 | Catalog 通信架构图投影与 AC9 主样本 | 已验证 | R2-01/15/16 | pure read model + 4 view presets + bounded focus + AC9 69-node graph + AC18 owner control |
 
-**下一项建议**：以 AC9 唯一剩余的历史 transport-method gap 为入口建立跨资源 framework-semantics 证据；随后把 expectation diff 串入 ContainerBinwalkWorker、任务持久化、上传接口和通信图 read model，并在 DAP-3520/X5000R 复用版本范围与 selector/parameter 归因合同。
+**下一项建议**：把已验证图投影接入持久化 AnalyzeRun 查询 API 与 Console 图谱视图，再以 AC9 唯一剩余的历史 transport-method gap 建立跨资源 framework-semantics 证据；随后在 DAP-3520/X5000R 复用图 schema、版本范围与 selector/parameter 归因合同。
 
 ## 7. 跨会话无缝工作协议
 

@@ -162,6 +162,13 @@ Frontend Invocation Reachability 回归必须至少包含：被注释事件绑�
 同源 request span 时的 partial coverage。真实 AC9/AC18 DLNA 页面固定四种 operation 状态；
 其中 `refreshDLNA` 必须保持 `declared_but_unreached`，但测试不得把该状态解释成运行时不可达。
 
+Communication Architecture Graph Projection 回归必须验证请求→参数/调用状态、功能开关、
+`request → exact association → route binding → handler`、跨进程关系、ubus principal/ACL、
+response contract、nested dispatch/protection/service assembly、Coverage Ledger、开放义务、
+焦点 artifact 防扩散和预算截断。任意语义边必须引用 Catalog EvidenceAtom 或明确属于无证据的
+governance obligation；旧式未解析 target ref 必须降级 projection 并删除悬空边。真实 AC9/AC18
+DLNA 正控固定 AC9 0 个直接 owner、AC18 3 个直接 owner；历史 CVE 参数只能作为独立 overlay。
+
 MIPS Nested Dispatch 回归必须从公开 Interface 同时验证 transport branch、第二 query segment 的 index/delimiter、multipart parser、payload topicurl、slash suffix、operation table loop 和 exact handler entry。真实 X5000R 固定为 `action=upload → setting/setUploadSetting → set_handle_t@0x0044a124 → 0x0042bf14`。将 segment index 改为 2、清除 upload guard branch、清除表项匹配后的间接调用或篡改持久化 table claim 时，结果必须 partial/rejected，不能由 strings 或表项补偿。
 
 MIPS Request Protection 回归必须从公开 Interface 同时验证路径 gate 的 auth/skip 两类分支、`userloginAuth → checkLoginUser`、`SESSION_ID` cookie、session-table lookup 和拒绝状态写入。真实 X5000R 固定对照 `/advance/config.html → guarded_by_path_gate` 与 `/cgi-bin/cstecgi.cgi → excluded_from_path_gate`；清除 auth call、将 302 改为 200、篡改 cookie key、违反 source digest/预算或反转分类时必须 fail closed。

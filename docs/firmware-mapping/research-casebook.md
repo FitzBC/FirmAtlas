@@ -276,6 +276,17 @@ R2-16 进一步把“脚本里出现请求”拆成静态调用可达性层级�
 的有界调用路径到达，`refreshDLNA` 则保留为已声明但未达并记录注释绑定。案例新增第九阶段；
 这些结果只证明当前静态 token、调用根和调用边覆盖，不证明事件实际触发、网络可达、死代码或漏洞。
 
+R2-17 把此前分散的接口、参数、功能开关、调用状态、响应契约、route binding、handler、
+EvidenceAtom、Coverage Ledger 和 obligation 投影为同一个确定性通信架构图。AC9 主样本的 DLNA
+焦点图为 69 个节点、121 条边：四条请求都可见，但没有直接 DLNA route/handler，四条
+`registers_route` 义务保持开放。AC18 正控为 92 个节点、183 条边：前三条请求分别连接
+`bin/httpd@0x000b0e70 / 0x000b1fdc / 0x000b1984`，`refreshDLNA` 仍没有 owner。第一次回放还暴露
+了一个阶段性错误：registrar 全量枚举提供了深层 binding，但较早 correlation 创建的
+`expandDlnaFile` obligation 仍显示 open。为保持冻结 Catalog 身份，图投影随后增加“exact endpoint
+operation + supported 三段原生证明”的 `satisfies_obligation` 边；原始 Catalog 状态仍可审计，UI
+只把 AC18 制品内已经证实的义务显示为 satisfied，AC9 状态不变。案例新增
+第十阶段，保留这段状态迁移而不把最终成功倒写成从未出现过滞后。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：

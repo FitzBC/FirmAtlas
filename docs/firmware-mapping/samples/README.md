@@ -37,6 +37,7 @@
 - [M1-25 OpenWrt AC9 ubus 后端图](./m1-25-openwrt-ac9-ubus-backend.json)：恢复 53 个去重逻辑操作（含 1 个动态模板），并分别发布 rpcd 执行主体、25 条静态 Lua binding、30 条 Native plugin candidate、72 条 ACL grant 和未决 owner/registration-table 义务；进度说明见 [M1-25 记录](../progress/2026-08-09-m1-25-ubus-backend-graph.md)。
 - [R2-15 AC9/AC18 DLNA feature pivot](./r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json)：以 AC9 为主样本，保存 3 条相邻 USB 状态 pivot、0 条 DLNA 配置 binding，并用官方 AC18 启用 build 的 17 条 DLNA pivot 与 3 条真实 binding 作同家族阳性对照；不迁移 owner 或漏洞状态。
 - [R2-16 AC9/AC18 DLNA frontend reachability](./r2-16-vendor-tenda-ac9-ac18-dlna-reachability.json)：以 AC9 为主样本，逐请求区分顶层声明、有界活动路径与已声明但未达；AC18 仅作同家族正控，静态分类不提升为运行时执行或漏洞结论。
+- [R2-17 AC9/AC18 DLNA communication graph](./r2-17-vendor-tenda-ac9-ac18-dlna-communication-graph.json)：从同一 Catalog 生成证据、覆盖和义务可下钻的焦点图；AC9 69 节点/121 边且 4 条 owner 义务保持开放，AC18 92 节点/183 边并独立确证 3 条 route→handler，`refreshDLNA` 继续为真实阴性。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

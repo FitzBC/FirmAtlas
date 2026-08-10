@@ -209,6 +209,16 @@ R2-16 在请求发现之后增加深 Module
 Profile 的单源 JavaScript token 与已声明 callback 形态处理完成，不等同于页面加载、事件触发、
 请求发送、运行时可达或死代码证明。
 
+R2-17 增加纯投影深 Module
+`project_communication_architecture_graph(catalog, policy)`。其 Interface 只接受一个不可变
+Discovery Catalog 与有界 focus/budget policy，隐藏 candidate/parameter/artifact/component/
+obligation 节点、显式引用边、EvidenceAtom 完整性验证、语义多跳选择和确定性 identity。
+Frontend/Native association 被保留为中间节点，因此 route binding 沿
+`request → exact association → binding → handler` 到达，而不是由 UI 再次按名称匹配。
+`declared_in_artifact` 仅用于展示来源，不参与焦点扩散；旧 producer 的未解析 anchor ref 会
+删除悬空边并把 projection 标为 partial。Graph 同时携带源 Catalog coverage、四个 view preset
+和开放 obligation，但不改变 Catalog 或产生新的固件主张。
+
 M1-05 Web Configuration Producer 的公开 Interface 是 `discover_web_configuration(source_entry, source_bytes, policy)`。当前声明支持 nginx、直接 POSIX shell 的 `nginx`/`spawn-fcgi` 启动形式，以及模板中的 proprietary httpd `Control/Alias/Location/External` 静态块，发布 listener、document root、namespace mapping、auth requirement、service start 和 external handler binding。嵌入 PHP 会先被等长屏蔽而不会执行或作为静态配置；配置事实与 frontend candidate 保持不同身份。`completed` 只表示声明格式和构造执行完成，不表示任意 Web server 配置、模板控制流或运行时可达性均已恢复。
 
 M1-06B Script Backend Producer 的公开 Interface 是 `discover_script_backend(source_entry, source_bytes, policy)`。当前声明支持厂商 ASP 的 `Request_Form/TCWebApi_*`、PHP superglobal 与显式框架 route、PHP-XGI `ACTION_POST/query/queryEnc/set/setEnc`、LuCI `entry/formvalue`、Shell CGI shebang与环境变量。它分别发布 CGI program、显式 route、parameter、selector、configuration access 和 template read；文件路径、扩展名和模板读取不能产生 `registers_route`。PHP-XGI 扫描要求同一源码存在 `$ACTION_POST` dialect anchor，复杂 set 表达式不发明参数身份；组合 LuCI 路径或规范化 HTTP header 使用 `deterministic_derived` 证据，仍保留精确来源 span。

@@ -157,6 +157,13 @@ _Avoid_: 模糊搜索、自由联想、Seed 扩展
 描述执行主体、暴露接口、接口操作、解析与分发位置、状态位置及敏感行为之间可追溯关系的图。
 _Avoid_: 网络拓扑、调用图、接口列表
 
+**通信架构图投影（Communication Architecture Graph Projection）**：
+从一个不可变 Discovery Catalog 确定性生成的 UI/查询 read model；节点与语义边必须引用
+Catalog identity 和既有 EvidenceAtom，Coverage Ledger 与未决义务作为独立 overlay 保留。
+焦点子图只沿语义边扩展，来源制品边不能把同文件内的无关接口带入。投影不重新分析制品，
+也不创建运行时可达、漏洞、跨版本 owner 或新的固件事实。
+_Avoid_: 图数据库真值、字符串关系图、运行时拓扑、UI 推断、漏洞传播图
+
 **固件测绘快照（Firmware Mapping Snapshot）**：
 针对一个固件制品、在固定分析策略和分析器版本下发布的不可变通信架构、接口、参数、证据与覆盖状态集合。
 _Avoid_: Analysis Snapshot、最新扫描、报告文件

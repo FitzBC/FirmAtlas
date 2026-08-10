@@ -109,7 +109,8 @@ _AUTO_V9_ANALYZERS = _AUTO_V8_ANALYZERS + (
 _AUTO_V10_ANALYZERS = _AUTO_V9_ANALYZERS
 _AUTO_V11_ANALYZERS = _AUTO_V10_ANALYZERS + ("frontend_feature_gate",)
 _AUTO_V12_ANALYZERS = _AUTO_V11_ANALYZERS + ("arm_feature_pivot",)
-_AUTO_ANALYZERS = _AUTO_V12_ANALYZERS + ("frontend_reachability",)
+_AUTO_V13_ANALYZERS = _AUTO_V12_ANALYZERS + ("frontend_reachability",)
+_AUTO_ANALYZERS = _AUTO_V13_ANALYZERS
 
 
 @dataclass(frozen=True)
@@ -130,6 +131,10 @@ class MappingAnalysisProfile:
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
         return cls("firmatlas.mapping.profile/auto-v13", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v13(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v13", _AUTO_V13_ANALYZERS)
 
     @classmethod
     def auto_v12(cls) -> "MappingAnalysisProfile":
@@ -194,6 +199,13 @@ class MappingAnalyzerRegistry:
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
         return cls("firmatlas.mapping.analyzer-registry/builtin-v13", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v13(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v13",
+            _AUTO_V13_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v12(cls) -> "MappingAnalyzerRegistry":
@@ -286,6 +298,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V13 = MappingAnalyzerRegistry.builtin_v13()
 BUILTIN_ANALYZER_REGISTRY_V12 = MappingAnalyzerRegistry.builtin_v12()
 BUILTIN_ANALYZER_REGISTRY_V11 = MappingAnalyzerRegistry.builtin_v11()
 BUILTIN_ANALYZER_REGISTRY_V10 = MappingAnalyzerRegistry.builtin_v10()

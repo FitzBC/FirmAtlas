@@ -75,6 +75,18 @@ from .frontend_reachability import (
     FrontendReachabilityResult,
     discover_frontend_invocation_reachability,
 )
+from .communication_graph import (
+    COMMUNICATION_GRAPH_SCHEMA_VERSION,
+    CommunicationArchitectureGraph,
+    CommunicationGraphEdge,
+    CommunicationGraphEdgeKind,
+    CommunicationGraphCoverage,
+    CommunicationGraphNode,
+    CommunicationGraphNodeKind,
+    CommunicationGraphPolicy,
+    CommunicationGraphViewPreset,
+    project_communication_architecture_graph,
+)
 from .parameter_clue import (
     FrontendParameterClueAssessment,
     FrontendParameterClueIndex,
@@ -264,6 +276,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V13,
     BUILTIN_ANALYZER_REGISTRY_V12,
     BUILTIN_ANALYZER_REGISTRY_V11,
     BUILTIN_ANALYZER_REGISTRY_V10,
@@ -503,6 +516,16 @@ __all__ = (
     "FrontendRequestInvocation",
     "FrontendReachabilityResult",
     "discover_frontend_invocation_reachability",
+    "COMMUNICATION_GRAPH_SCHEMA_VERSION",
+    "CommunicationArchitectureGraph",
+    "CommunicationGraphEdge",
+    "CommunicationGraphEdgeKind",
+    "CommunicationGraphCoverage",
+    "CommunicationGraphNode",
+    "CommunicationGraphNodeKind",
+    "CommunicationGraphPolicy",
+    "CommunicationGraphViewPreset",
+    "project_communication_architecture_graph",
     "InventoryPolicy",
     "INVENTORY_SCHEMA_VERSION",
     "InventoryDiagnostic",
@@ -624,6 +647,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V13",
     "BUILTIN_ANALYZER_REGISTRY_V12",
     "BUILTIN_ANALYZER_REGISTRY_V11",
     "BUILTIN_ANALYZER_REGISTRY_V10",

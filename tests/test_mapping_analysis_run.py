@@ -7,6 +7,8 @@ import unittest
 from contextlib import redirect_stdout
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V13,
     CoverageStatus,
     DiscoveryCandidateKind,
     MappingAnalysisProfile,
@@ -20,6 +22,14 @@ from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class MappingAnalysisRunContractTests(unittest.TestCase):
+    def test_current_default_profile_and_registry_have_frozen_v13_aliases(self):
+        self.assertEqual(
+            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v13()
+        )
+        self.assertEqual(
+            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V13
+        )
+
     AC9_ROOT = Path(
         "var/mapping-work/ac9-version-diff/extractions/openwrt-19.07.8/"
         "extractions/firmware.bin.extracted/0/partition_1.bin.extracted/0/squashfs-root"
