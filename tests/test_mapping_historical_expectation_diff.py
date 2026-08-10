@@ -279,6 +279,34 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
             output = Path(directory) / "historical-diff.json"
             graph_output = Path(directory) / "communication-graph.json"
             overlay_output = Path(directory) / "historical-overlay.json"
+            queue_output = Path(directory) / "historical-queue.json"
+            scope = Path(directory) / "scope.json"
+            scope.write_text(json.dumps({"records": [
+                {
+                    "vulnerability_identifier": "CVE-2025-22949",
+                    "semantic_analysis_present": True,
+                    "interface_observation_count": 1,
+                    "parameter_observation_count": 1,
+                },
+                {
+                    "vulnerability_identifier": "CVE-GAP",
+                    "semantic_analysis_present": True,
+                    "interface_observation_count": 0,
+                    "parameter_observation_count": 1,
+                },
+            ]}), encoding="utf-8")
+            clues = Path(directory) / "clues.json"
+            clues.write_text(json.dumps({
+                "schema_version": (
+                    "firmatlas.mapping.historical-semantic-clues/v1alpha1"
+                ),
+                "clues": [{
+                    "vulnerability_identifier": "CVE-GAP",
+                    "description": "The list parameter occurs.",
+                    "parameters": ["occurs"],
+                    "source_refs": ["primary:fixture"],
+                }],
+            }), encoding="utf-8")
             stdout = io.StringIO()
             with redirect_stdout(stdout):
                 exit_code = mapping_main((
@@ -288,6 +316,9 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
                     "--output", str(output),
                     "--graph-output", str(graph_output),
                     "--overlay-output", str(overlay_output),
+                    "--vulnerability-scope", str(scope),
+                    "--semantic-clues", str(clues),
+                    "--coverage-queue-output", str(queue_output),
                     "--profile", "base",
                 ))
             summary = json.loads(stdout.getvalue())
@@ -297,6 +328,9 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
             )
             overlay_document = json.loads(
                 overlay_output.read_text(encoding="utf-8")
+            )
+            queue_document = json.loads(
+                queue_output.read_text(encoding="utf-8")
             )
 
         self.assertEqual(0, exit_code)
@@ -310,6 +344,11 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
         self.assertEqual(summary["overlay_id"], overlay_document["overlay_id"])
         self.assertEqual("observed", overlay_document["entries"][0]["status"])
         self.assertTrue(overlay_document["entries"][0]["graph_node_ids"])
+        self.assertEqual(summary["coverage_queue_id"], queue_document["queue_id"])
+        self.assertEqual(1, queue_document["summary"]["open"])
+        self.assertEqual(
+            "repair_parameter_extraction", queue_document["entries"][0]["action"]
+        )
 
     def test_cli_rejects_vulnerability_scope_without_overlay_before_writing(self):
         with tempfile.TemporaryDirectory() as directory:

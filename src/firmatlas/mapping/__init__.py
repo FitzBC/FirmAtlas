@@ -335,6 +335,16 @@ from .historical_graph_overlay import (
     HistoricalGraphOverlayEntry,
     project_historical_graph_overlay,
 )
+from .historical_coverage_queue import (
+    HISTORICAL_COVERAGE_QUEUE_SCHEMA_VERSION,
+    HistoricalCoverageAction,
+    HistoricalCoverageQueue,
+    HistoricalCoverageQueueEntry,
+    HistoricalEvidenceState,
+    HistoricalSemanticClue,
+    build_historical_coverage_queue,
+    load_historical_semantic_clues,
+)
 from .native_nested_dispatch import (
     MIPS_NESTED_DISPATCH_RESULT_SCHEMA_VERSION,
     MipsNestedDispatchAnchor,
@@ -714,6 +724,14 @@ __all__ = (
     "HistoricalGraphOverlayAudit",
     "HistoricalGraphOverlayEntry",
     "project_historical_graph_overlay",
+    "HISTORICAL_COVERAGE_QUEUE_SCHEMA_VERSION",
+    "HistoricalCoverageAction",
+    "HistoricalCoverageQueue",
+    "HistoricalCoverageQueueEntry",
+    "HistoricalEvidenceState",
+    "HistoricalSemanticClue",
+    "build_historical_coverage_queue",
+    "load_historical_semantic_clues",
     "MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION",
     "MipsHandlerValueFlowDiagnostic",
     "MipsHandlerValueFlowPolicy",

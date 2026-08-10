@@ -23,6 +23,10 @@ from .historical_expectation import (
     load_historical_expectations,
 )
 from .historical_graph_overlay import project_historical_graph_overlay
+from .historical_coverage_queue import (
+    build_historical_coverage_queue,
+    load_historical_semantic_clues,
+)
 from .communication_graph import (
     CommunicationGraphPolicy,
     project_communication_architecture_graph,
@@ -155,7 +159,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     compare_history.add_argument("root")
     compare_history.add_argument("--artifact-sha256", required=True)
-    compare_history.add_argument("--expectations", required=True)
+    compare_history.add_argument(
+        "--expectations", required=True, action="append",
+        help="historical expectations JSON; repeat to add immutable supplements",
+    )
     compare_history.add_argument("--output", required=True)
     compare_history.add_argument(
         "--graph-output",
@@ -168,6 +175,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     compare_history.add_argument(
         "--vulnerability-scope",
         help="optional vulnerability denominator records JSON for audit context",
+    )
+    compare_history.add_argument(
+        "--semantic-clues",
+        help="versioned semantic clues JSON used to classify historical gaps",
+    )
+    compare_history.add_argument(
+        "--coverage-queue-output",
+        help="write the deterministic historical coverage work queue",
     )
     compare_history.add_argument(
         "--profile", choices=("auto", "base"), default="auto",
@@ -196,14 +211,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 raise ValueError(
                     "vulnerability-scope requires overlay-output"
                 )
+            if args.coverage_queue_output and not (
+                args.vulnerability_scope and args.semantic_clues
+            ):
+                raise ValueError(
+                    "coverage-queue-output requires vulnerability-scope and semantic-clues"
+                )
             history_paths = [Path(args.output).resolve()]
             if args.graph_output:
                 history_paths.append(Path(args.graph_output).resolve())
             if args.overlay_output:
                 history_paths.append(Path(args.overlay_output).resolve())
+            if args.coverage_queue_output:
+                history_paths.append(Path(args.coverage_queue_output).resolve())
             if len(history_paths) != len(set(history_paths)):
                 raise ValueError(
-                    "history, graph, and overlay outputs must differ"
+                    "history, graph, overlay, and coverage queue outputs must differ"
                 )
         if args.command == "inventory":
             if args.sample_limit < 0:
@@ -228,12 +251,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ))
             output = Path(args.output)
             if args.command == "compare-history":
-                expectation_document = json.loads(
-                    Path(args.expectations).read_text(encoding="utf-8")
+                expectation_documents = tuple(
+                    json.loads(Path(path).read_text(encoding="utf-8"))
+                    for path in args.expectations
                 )
+                expectations = tuple(
+                    expectation
+                    for document in expectation_documents
+                    for expectation in load_historical_expectations(document)
+                )
+                if len({item.expectation_id for item in expectations}) != len(
+                    expectations
+                ):
+                    raise ValueError("duplicate historical expectation across inputs")
                 diff = compare_historical_expectations(
                     run.catalog,
-                    load_historical_expectations(expectation_document),
+                    expectations,
                 )
                 document = {
                     **diff.to_dict(),
@@ -249,6 +282,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
                 graph = None
                 overlay = None
+                queue = None
+                audit = None
                 if args.graph_output:
                     graph_output = Path(args.graph_output)
                     overlay_output = (
@@ -263,13 +298,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         encoding="utf-8",
                     )
                     if overlay_output:
-                        expectations = load_historical_expectations(
-                            expectation_document
-                        )
                         routes = compare_historical_route_bindings(
                             run.catalog, expectations
                         )
-                        audit = None
                         if args.vulnerability_scope:
                             scope = json.loads(Path(
                                 args.vulnerability_scope
@@ -291,6 +322,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             ) + "\n",
                             encoding="utf-8",
                         )
+                if args.coverage_queue_output:
+                    if audit is None:
+                        raise ValueError("historical audit is required for coverage queue")
+                    clues = load_historical_semantic_clues(json.loads(
+                        Path(args.semantic_clues).read_text(encoding="utf-8")
+                    ))
+                    queue = build_historical_coverage_queue(
+                        audit, clues, run.catalog
+                    )
+                    Path(args.coverage_queue_output).write_text(
+                        json.dumps(
+                            queue.to_dict(), ensure_ascii=False,
+                            indent=2, sort_keys=True,
+                        ) + "\n",
+                        encoding="utf-8",
+                    )
                 result = {
                     "schema_version": diff.schema_version,
                     "report_id": diff.report_id,
@@ -308,6 +355,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     result.update({
                         "overlay_id": overlay.overlay_id,
                         "overlay_output": str(args.overlay_output),
+                    })
+                if queue is not None:
+                    result.update({
+                        "coverage_queue_id": queue.queue_id,
+                        "coverage_queue_output": str(args.coverage_queue_output),
+                        "coverage_queue_summary": queue.summary,
                     })
                 print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
                 return 0

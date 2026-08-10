@@ -1,0 +1,1590 @@
+{
+  "audit_id": "historical-vulnerability-audit:125de1bf1a4ce61144b35b3086269baa897cd1dd2d8ac6913db4ee2549145ee2",
+  "catalog_id": "discovery-catalog:e1b1f16da33f8d9ac0725bb3ae917efb80becc4d7b3d6db9305309126862a14a",
+  "entries": [
+    {
+      "action": "repair_parameter_extraction",
+      "audit_category": "parameter_only",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "primary-source-semantic-extractor"
+      ],
+      "catalog_candidate_ids": [
+        "native-route-binding:3fd5d466dd8ce975fa94c2a987c07d68e74aa4153671e47d5f2d1598e5b02b8a"
+      ],
+      "catalog_route_clues": [
+        "GetDdosDefenceList"
+      ],
+      "configuration_keys": [
+        "security.ddos.map"
+      ],
+      "evidence_state": "source_partial",
+      "handler_names": [
+        "formGetDdosDefenceList"
+      ],
+      "misclassified_parameters": [
+        "security.ddos.map"
+      ],
+      "missing_compound_parameters": [],
+      "observed_parameters": [
+        "security.ddos.map"
+      ],
+      "priority": 95,
+      "reason_codes": [
+        "configuration_key_misclassified_as_request_parameter",
+        "interface_observation_missing"
+      ],
+      "source_refs": [
+        "https://github.com/glkfc/IoT-Vulnerability/blob/2568d62c9bf94ef0ffb14da0f0dc97b933da0481/Tenda/tenda3.md#L4-L74"
+      ],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2026-2191"
+    },
+    {
+      "action": "repair_parameter_extraction",
+      "audit_category": "parameter_only",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "primary-source-semantic-extractor"
+      ],
+      "catalog_candidate_ids": [
+        "native-route-binding:4450bbb9e6c0aa29b0ddd63db6fffb4960f6e288144bad6d9105ce14dbfa0b2b"
+      ],
+      "catalog_route_clues": [
+        "GetSysAutoRebbotCfg"
+      ],
+      "configuration_keys": [
+        "sys.schedulereboot.end_time",
+        "sys.schedulereboot.start_time"
+      ],
+      "evidence_state": "source_partial",
+      "handler_names": [
+        "formGetRebootTimer"
+      ],
+      "misclassified_parameters": [
+        "sys.schedulereboot.start_time"
+      ],
+      "missing_compound_parameters": [
+        "sys.schedulereboot.end_time"
+      ],
+      "observed_parameters": [
+        "sys.schedulereboot.start_time"
+      ],
+      "priority": 95,
+      "reason_codes": [
+        "compound_parameter_member_missing",
+        "configuration_key_misclassified_as_request_parameter",
+        "interface_observation_missing",
+        "source_route_token_without_http_interface"
+      ],
+      "source_refs": [
+        "https://github.com/glkfc/IoT-Vulnerability/blob/2568d62c9bf94ef0ffb14da0f0dc97b933da0481/Tenda/tenda4.md#L10-L69"
+      ],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [
+        "GetSysAutoRebbotCfg"
+      ],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2026-2192"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-28560"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2024-24543"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2024-25746"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2024-25748"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2024-25751"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2024-25753"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2024-25756"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-5900"
+    },
+    {
+      "action": "extract_structured_communication",
+      "audit_category": "no_structured_communication",
+      "candidate_analyzers": [
+        "primary-source-semantic-extractor",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "needs_primary_source",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 50,
+      "reason_codes": [
+        "structured_communication_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-9731"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2017-16923"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2017-16936"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2018-18728"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2020-26728"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25414"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25417"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25418"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25427"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25428"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25429"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25431"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25433"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25434"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25435"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25437"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25438"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25439"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25440"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-25441"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-26278"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-27016"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-27022"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-36273"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-36568"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-36569"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-36570"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2022-36571"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41552"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41553"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41554"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41556"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41559"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41560"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41561"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41562"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2023-41563"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2024-42634"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-29384"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-29385"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-29386"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-29387"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-44872"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-44877"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-45042"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-57638"
+    },
+    {
+      "action": "analyze_semantics",
+      "audit_category": "not_analyzed",
+      "candidate_analyzers": [
+        "rule-semantic-analyzer",
+        "model-semantic-analyzer"
+      ],
+      "catalog_candidate_ids": [],
+      "catalog_route_clues": [],
+      "configuration_keys": [],
+      "evidence_state": "semantic_analysis_missing",
+      "handler_names": [],
+      "misclassified_parameters": [],
+      "missing_compound_parameters": [],
+      "observed_parameters": [],
+      "priority": 30,
+      "reason_codes": [
+        "semantic_analysis_missing"
+      ],
+      "source_refs": [],
+      "source_verified_interfaces": [],
+      "source_verified_parameters": [],
+      "source_verified_route_tokens": [],
+      "status": "open",
+      "suspicious_parameters": [],
+      "vulnerability_identifier": "CVE-2025-57639"
+    }
+  ],
+  "queue_id": "historical-coverage-queue:2b84180a4aaccf9b19d3efca5cf7e5e0c2f67336c84843b00a219782adeb778e",
+  "schema_version": "firmatlas.mapping.historical-coverage-queue/v1alpha1",
+  "summary": {
+    "analyze_semantics": 46,
+    "extract_structured_communication": 9,
+    "open": 57,
+    "repair_parameter_extraction": 2
+  }
+}

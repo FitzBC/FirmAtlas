@@ -1,0 +1,33 @@
+{
+  "schema_version": "firmatlas.mapping.historical-expectations/v1alpha1",
+  "sample": {
+    "vendor": "Tenda",
+    "device_model": "AC9",
+    "artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+    "release_version": "15.03.05.19"
+  },
+  "provenance": {
+    "source_kind": "primary_researcher_disclosure",
+    "source_commit": "5092242e7154712c1cf74bd00d92654557cfe9a6",
+    "source_sha256": "e97ab9b25b99869888c6d5365edfd7421002eddbf9a0a9563239c79804bcf5aa",
+    "version_conflict_preserved": "research report says V1.0 V15.03.05.19(6318); CVE description says V1.0 V15.03.02.19(6318)"
+  },
+  "expectations": [
+    {
+      "vulnerability_identifier": "CVE-2021-42659",
+      "interface_value": "/goform/SetVirtualServerCfg",
+      "method": "POST",
+      "handler_value": "formSetVirtualSer",
+      "parameters": [
+        "list"
+      ],
+      "source_ref": "https://github.com/Lyc-heng/routers/blob/5092242e7154712c1cf74bd00d92654557cfe9a6/routers/stack4.md#L27-L54",
+      "applicability": "exact_artifact",
+      "claimed_versions": [
+        "V1.0 V15.03.05.19(6318)",
+        "V3.0 V15.03.06.42_multi"
+      ],
+      "applicability_basis": "primary report directly names V1.0 V15.03.05.19(6318), matching the selected AC9 15.03.05.19 release; the conflicting CVE V1 build claim remains separately recorded"
+    }
+  ]
+}

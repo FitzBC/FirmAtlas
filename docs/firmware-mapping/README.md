@@ -186,8 +186,10 @@ M1 工作项：
 | R2-17 | Catalog 通信架构图投影与 AC9 主样本 | 已验证 | R2-01/15/16 | pure read model + 4 view presets + bounded focus + AC9 69-node graph + AC18 owner control |
 | R2-18 | 通信图持久化与统一查询 | 已验证 | R2-17 | immutable SQLite graph + source Catalog evidence closure + reopen + 5 AC9 query views + CLI |
 | R2-19 | AC9 产品 HTTP 与 Console 通信图谱 | 已验证 | R2-18 | shared query HTTP Adapter + interface index/focus + 4 presets + evidence/obligation panel + real browser replay |
+| R2-20 | AC9 历史漏洞图谱覆盖层 | 已验证 | R2-17/18/19 | 13 expectations + 71-record denominator + immutable overlay/query + Console history view |
+| R2-21 | AC9 历史漏检优先队列与字段类型 | 已验证 | R2-20 | source-typed clue + repeatable immutable supplements + 14-expectation replay + 57-task queue |
 
-**下一项建议**：以 AC9 唯一剩余的历史 transport-method gap 建立跨资源 framework-semantics 证据，并把历史漏洞 expectation 作为不改变事实图的 overlay；随后在 DAP-3520/X5000R/OpenWrt ubus 复用相同 HTTP/Console 查询合同。
+**下一项建议**：继续以 AC9 为主样本，沿 R2-21 两个 priority-95 configuration sink 实现配置导入 ingress producer：恢复上传/恢复入口、multipart/blob 字段、解析与持久化写入点，再连接 native 配置键读取；找不到入口时发布 `unresolved_configuration_ingress`，不得把配置键写成 HTTP 参数。
 
 ## 7. 跨会话无缝工作协议
 

@@ -1,0 +1,86 @@
+{
+  "schema_version": "firmatlas.mapping.historical-semantic-clues/v1alpha1",
+  "sample": {
+    "vendor": "Tenda",
+    "device_model": "AC9",
+    "artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+    "release_version": "15.03.05.19"
+  },
+  "claim_boundary": {
+    "source_fact_is_not_current_artifact_fact": true,
+    "catalog_route_clue_is_not_historical_interface": true,
+    "configuration_key_is_not_http_parameter": true
+  },
+  "clues": [
+    {
+      "vulnerability_identifier": "CVE-2021-42659",
+      "description": "The legacy semantic result extracted occurs from the phrase 'list parameter occurs'. The primary report directly shows POST /goform/SetVirtualServerCfg with body field list and maps it to formSetVirtualSer.",
+      "parameters": [
+        "occurs"
+      ],
+      "handler_names": [
+        "formSetVirtualSer"
+      ],
+      "source_refs": [
+        "https://github.com/Lyc-heng/routers/blob/5092242e7154712c1cf74bd00d92654557cfe9a6/routers/stack4.md#L27-L54"
+      ],
+      "source_verified_interfaces": [
+        "/goform/SetVirtualServerCfg"
+      ],
+      "source_verified_parameters": [
+        "list"
+      ],
+      "parameter_classifications": [
+        {
+          "name": "list",
+          "role": "request_parameter"
+        }
+      ]
+    },
+    {
+      "vulnerability_identifier": "CVE-2026-2191",
+      "description": "The primary report identifies formGetDdosDefenceList as a configuration-reading sink for security.ddos.map but does not disclose its route or method. A separate GetFirewallCfg to formGetFirewallCfg binding must not be assigned to the primary sink.",
+      "parameters": [
+        "security.ddos.map"
+      ],
+      "handler_names": [
+        "formGetDdosDefenceList"
+      ],
+      "source_refs": [
+        "https://github.com/glkfc/IoT-Vulnerability/blob/2568d62c9bf94ef0ffb14da0f0dc97b933da0481/Tenda/tenda3.md#L4-L74"
+      ],
+      "parameter_classifications": [
+        {
+          "name": "security.ddos.map",
+          "role": "configuration_key"
+        }
+      ]
+    },
+    {
+      "vulnerability_identifier": "CVE-2026-2192",
+      "description": "The source binding token GetSysAutoRebbotCfg maps to formGetRebootTimer, which reads sys.schedulereboot.start_time/sys.schedulereboot.end_time as configuration keys. A full /goform path and HTTP method are not source verified.",
+      "parameters": [
+        "sys.schedulereboot.start_time"
+      ],
+      "handler_names": [
+        "formGetRebootTimer"
+      ],
+      "source_refs": [
+        "https://github.com/glkfc/IoT-Vulnerability/blob/2568d62c9bf94ef0ffb14da0f0dc97b933da0481/Tenda/tenda4.md#L10-L69"
+      ],
+      "source_verified_route_tokens": [
+        "GetSysAutoRebbotCfg"
+      ],
+      "parameter_classifications": [
+        {
+          "name": "sys.schedulereboot.start_time",
+          "role": "configuration_key"
+        },
+        {
+          "name": "sys.schedulereboot.end_time",
+          "role": "configuration_key"
+        }
+      ]
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:e65e0cf5a518efbc55d97281794f80ecdf62f3db76af203442af40256d322a3b",
+      "case_id": "research-case:80cd3516550a97de4b327be6b0034634f9a7961be3eb018e05e441d115aa4d56",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -88,6 +88,24 @@
           "producer": "historical-graph-overlay@v1alpha1"
         },
         {
+          "evidence_ref": "coverage:ac9-historical-coverage-queue",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-21-vendor-tenda-ac9-historical-coverage-queue.json",
+          "source_artifact_sha256": "f284fd35d355afd1d2e229b7e34460d338e58ec7e2a81ac5987433846922d5f5",
+          "locator": "json:$",
+          "capability": "prioritizes_unstructured_historical_communication_gaps",
+          "producer": "historical-coverage-queue@v1alpha1"
+        },
+        {
+          "evidence_ref": "coverage:ac9-historical-expectation-replay-r2-21",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-21-vendor-tenda-ac9-historical-replay.json",
+          "source_artifact_sha256": "a59c9a911bea8483a471a2c2ec43f541c300e70f2310fe154ee58bf3e7ebae42",
+          "locator": "json:$",
+          "capability": "replays_source_verified_expectations_against_current_catalog",
+          "producer": "historical-expectation-diff@v1alpha1"
+        },
+        {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
           "kind": "native_binding",
           "source_path": "bin/httpd",
@@ -118,9 +136,18 @@
         },
         {
           "claim_id": "claim:historical-interface-scope-boundary",
-          "statement": "The exact AC9 artifact observes both exact-artifact historical interface expectations, while cross-version structural matches remain independently labeled out_of_scope and do not assert vulnerability presence.",
+          "statement": "The exact AC9 artifact observes all three exact-artifact historical interface expectations, while cross-version structural matches remain independently labeled out_of_scope and do not assert vulnerability presence.",
           "evidence_refs": [
-            "coverage:ac9-historical-graph-overlay"
+            "coverage:ac9-historical-graph-overlay",
+            "coverage:ac9-historical-expectation-replay-r2-21"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:historical-field-type-boundary",
+          "statement": "Primary-source replay upgrades CVE-2021-42659 to an observed POST interface with body:list, but keeps security.ddos.map and sys.schedulereboot.* as configuration keys behind unresolved ingress rather than promoting them to HTTP parameters.",
+          "evidence_refs": [
+            "coverage:ac9-historical-coverage-queue"
           ],
           "status": "supported"
         },
@@ -212,6 +239,19 @@
           "creates_obligations": [],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:historical-coverage-priority-queue",
+          "order": 6,
+          "interpretation": "Classify the remaining 57 non-compared vulnerability records, repair a false natural-language parameter, separate native configuration keys from HTTP fields, and retain unknown ingress as an explicit obligation.",
+          "claim_ids": [
+            "claim:historical-field-type-boundary"
+          ],
+          "creates_obligations": [
+            "obligation:configuration-ingress"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -224,23 +264,32 @@
             "evidence:93147f41fefb653b38dc9ad0ee3833bd129f16f4a3e7ede8ca2524e9c770ce2e",
             "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5"
           ]
+        },
+        {
+          "obligation_id": "obligation:configuration-ingress",
+          "statement": "Recover the HTTP upload/import path that writes the configuration keys later consumed by the DDoS and reboot handlers.",
+          "required_capability": "binds_configuration_ingress",
+          "status": "open",
+          "closure_evidence_refs": []
         }
       ],
       "counterfactuals": [
         "A firmware-level or path-style merge would incorrectly assign /goform to the observed nginx/FastCGI namespace.",
         "Choosing dhttpd by filename alone would spend deep-analysis effort on the weaker candidate.",
         "Treating a route string and a similar symbol name as a binding would skip the registrar call-site proof.",
-        "Treating a cross-version historical interface match as a current vulnerability would collapse structural observation, version applicability, and exploitability into one unsupported claim."
+        "Treating a cross-version historical interface match as a current vulnerability would collapse structural observation, version applicability, and exploitability into one unsupported claim.",
+        "Treating a native configuration key as an HTTP request parameter would fabricate a direct ingress edge and conceal the missing upload chain."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
         "Ablation case comparing frontend-only, configuration-only, shallow-native, and full evidence fusion.",
         "Worked example for obligation-preserving analysis and false-merge prevention.",
-        "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions."
+        "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions.",
+        "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",
-        "Historical expectation coverage is limited to 13 structured interfaces from a 71-record product-level denominator and is not a vulnerability or exploitability audit of the artifact.",
+        "Historical expectation coverage is limited to 14 structured interfaces from a 71-record product-level denominator and is not a vulnerability or exploitability audit of the artifact.",
         "The dhttpd negative control is bounded by the declared shallow producer and is not proof of total runtime non-participation.",
         "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality."
       ]

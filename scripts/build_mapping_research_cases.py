@@ -66,6 +66,14 @@ AC9_R2_20_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-20-vendor-tenda-ac9-historical-graph-overlay.json"
 )
+AC9_R2_21_QUEUE = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-21-vendor-tenda-ac9-historical-coverage-queue.json"
+)
+AC9_R2_21_REPLAY = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-21-vendor-tenda-ac9-historical-replay.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -80,6 +88,26 @@ def build_ac9_split_web_stack_case():
         "json:$.historical_comparison",
         "compares_historical_expectations_without_fact_promotion",
         "historical-graph-overlay@v1alpha1",
+    )
+    history_queue_sha = hashlib.sha256(AC9_R2_21_QUEUE.read_bytes()).hexdigest()
+    history_queue_ref = CaseEvidenceReference(
+        "coverage:ac9-historical-coverage-queue",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_21_QUEUE.as_posix(),
+        history_queue_sha,
+        "json:$",
+        "prioritizes_unstructured_historical_communication_gaps",
+        "historical-coverage-queue@v1alpha1",
+    )
+    history_replay_sha = hashlib.sha256(AC9_R2_21_REPLAY.read_bytes()).hexdigest()
+    history_replay_ref = CaseEvidenceReference(
+        "coverage:ac9-historical-expectation-replay-r2-21",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_21_REPLAY.as_posix(),
+        history_replay_sha,
+        "json:$",
+        "replays_source_verified_expectations_against_current_catalog",
+        "historical-expectation-diff@v1alpha1",
     )
 
     return build_research_case(ResearchCaseInput(
@@ -161,6 +189,8 @@ def build_ac9_split_web_stack_case():
                 "native-deep-arm-pic-callsite@0.1.0",
             ),
             history_overlay_ref,
+            history_queue_ref,
+            history_replay_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -189,11 +219,22 @@ def build_ac9_split_web_stack_case():
             ),
             CaseClaim(
                 "claim:historical-interface-scope-boundary",
-                "The exact AC9 artifact observes both exact-artifact historical "
+                "The exact AC9 artifact observes all three exact-artifact historical "
                 "interface expectations, while cross-version structural matches "
                 "remain independently labeled out_of_scope and do not assert "
                 "vulnerability presence.",
-                (history_overlay_ref.evidence_ref,),
+                (
+                    history_overlay_ref.evidence_ref,
+                    history_replay_ref.evidence_ref,
+                ),
+            ),
+            CaseClaim(
+                "claim:historical-field-type-boundary",
+                "Primary-source replay upgrades CVE-2021-42659 to an observed "
+                "POST interface with body:list, but keeps security.ddos.map and "
+                "sys.schedulereboot.* as configuration keys behind unresolved "
+                "ingress rather than promoting them to HTTP parameters.",
+                (history_queue_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -258,6 +299,15 @@ def build_ac9_split_web_stack_case():
                 "dimension and leaving firmware facts unchanged.",
                 ("claim:historical-interface-scope-boundary",),
             ),
+            CaseStage(
+                "stage:historical-coverage-priority-queue", 6,
+                "Classify the remaining 57 non-compared vulnerability records, "
+                "repair a false natural-language parameter, separate native "
+                "configuration keys from HTTP fields, and retain unknown ingress "
+                "as an explicit obligation.",
+                ("claim:historical-field-type-boundary",),
+                creates_obligations=("obligation:configuration-ingress",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -270,6 +320,13 @@ def build_ac9_split_web_stack_case():
                     "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 ),
             ),
+            CaseObligation(
+                "obligation:configuration-ingress",
+                "Recover the HTTP upload/import path that writes the configuration "
+                "keys later consumed by the DDoS and reboot handlers.",
+                "binds_configuration_ingress",
+                CaseObligationStatus.OPEN,
+            ),
         ),
         counterfactuals=(
             "A firmware-level or path-style merge would incorrectly assign /goform "
@@ -281,6 +338,8 @@ def build_ac9_split_web_stack_case():
             "Treating a cross-version historical interface match as a current "
             "vulnerability would collapse structural observation, version "
             "applicability, and exploitability into one unsupported claim.",
+            "Treating a native configuration key as an HTTP request parameter "
+            "would fabricate a direct ingress edge and conceal the missing upload chain.",
         ),
         paper_uses=(
             "Motivating case for why communication mapping must precede "
@@ -290,11 +349,13 @@ def build_ac9_split_web_stack_case():
             "Worked example for obligation-preserving analysis and false-merge prevention.",
             "Historical-ground-truth overlay example separating mapper recall "
             "from firmware-version vulnerability conclusions.",
+            "Typed historical-field case showing why request parameters, route "
+            "tokens, configuration keys, and inferred paths need separate states.",
         ),
         limitations=(
             "The native result proves selected static registrations, not runtime "
             "reachability or authentication state.",
-            "Historical expectation coverage is limited to 13 structured "
+            "Historical expectation coverage is limited to 14 structured "
             "interfaces from a 71-record product-level denominator and is not a "
             "vulnerability or exploitability audit of the artifact.",
             "The dhttpd negative control is bounded by the declared shallow producer "

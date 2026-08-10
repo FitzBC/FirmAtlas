@@ -202,6 +202,15 @@ Native-only 的尝试因 `write/exit` 等高频词超过 hit budget，使 covera
 撤回；策略收窄为辅助检索只解释 Frontend-only 后恢复 completed。这说明 coverage gate 不仅保护
 结论，也能暴露“检索范围扩大但信噪比下降”的工程反例。
 
+R2-21 从 71 条漏洞分母中的三条 parameter-only 再次改变了义务解释。原始来源证明
+`CVE-2021-42659` 实际具有完整的 `POST /goform/SetVirtualServerCfg → formSetVirtualSer → list`，
+当前 AC9 Catalog 也逐项观察到；它因此从 parameter-only 进入第 3 条 exact-artifact observed。
+另外两条的 `security.ddos.map` 和 `sys.schedulereboot.*` 则是配置键，不是 HTTP 参数。当前制品虽
+分别证明 `GetDdosDefenceList → formGetDdosDefenceList` 和
+`GetSysAutoRebbotCfg → formGetRebootTimer`，仍不知道外部配置上传怎样写入这些 key。案例新增
+`stage:historical-coverage-priority-queue` 和开放的 `obligation:configuration-ingress`；不能把最终
+native sink 命中倒写成已恢复端到端 HTTP 数据流。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、
