@@ -69,6 +69,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
             {
                 "inventory", "source_plan", "frontend", "frontend_asset_graph",
                 "frontend_feature_gate",
+                "frontend_reachability",
                 "web_configuration",
                 "script_backend", "native", "native_ubus_registration",
                 "arm_pic_callsite", "arm_pic_registrar", "set_difference",
@@ -80,6 +81,19 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "scheduler", "catalog",
             },
             {stage.stage_name for stage in first.stages},
+        )
+        stage_names = tuple(stage.stage_name for stage in first.stages)
+        self.assertLess(
+            stage_names.index("frontend_asset_graph"),
+            stage_names.index("frontend_feature_gate"),
+        )
+        self.assertLess(
+            stage_names.index("frontend_feature_gate"),
+            stage_names.index("frontend_reachability"),
+        )
+        self.assertLess(
+            stage_names.index("frontend_reachability"),
+            stage_names.index("parameter_clue"),
         )
         self.assertEqual(
             SchedulerTermination.FIXED_POINT,
@@ -182,6 +196,68 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         self.assertEqual("CONFIG_DLNA_SERVER", candidate.canonical_identity)
         self.assertEqual("disabled", dict(candidate.attributes)["gate_status"])
 
+    def test_auto_profile_publishes_frontend_invocation_reachability(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "www/js").mkdir(parents=True)
+            (root / "www/js/page.js").write_text(
+                '''function refreshDLNA() {
+  $.post("/goform/refreshDLNA", "action=1", callback);
+}
+// $("#refresh").on("click", refreshDLNA);''',
+                encoding="utf-8",
+            )
+
+            result = analyze_extracted_root(MappingAnalysisRequest(
+                root=root,
+                firmware_artifact_sha256="a" * 64,
+            ))
+
+        stage = next(
+            item for item in result.stages
+            if item.stage_name == "frontend_reachability"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
+        self.assertEqual(1, stage.output_count)
+        candidate = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.FRONTEND_INVOCATION
+        )
+        attributes = dict(candidate.attributes)
+        self.assertEqual("declared_but_unreached", attributes["status"])
+        self.assertEqual("refreshDLNA", attributes["function_name"])
+        self.assertEqual("1", attributes["commented_reference_count"])
+
+    def test_reachability_profile_does_not_require_asset_graph(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "page.js").write_text(
+                '$.post("/goform/Direct", "value=1", callback);',
+                encoding="utf-8",
+            )
+            profile = MappingAnalysisProfile(
+                "firmatlas.mapping.profile/test-reachability-v1",
+                ("frontend", "frontend_reachability"),
+            )
+
+            result = analyze_extracted_root(MappingAnalysisRequest(
+                root=root,
+                firmware_artifact_sha256="f" * 64,
+                profile=profile,
+            ))
+
+        self.assertNotIn(
+            "frontend_asset_graph",
+            {item.stage_name for item in result.stages},
+        )
+        stage = next(
+            item for item in result.stages
+            if item.stage_name == "frontend_reachability"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
+        self.assertEqual(1, stage.output_count)
+
     def test_cli_writes_full_run_and_prints_a_bounded_summary(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "rootfs"
@@ -258,9 +334,9 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v12", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v13", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v12",
+            "firmatlas.mapping.analyzer-registry/builtin-v13",
             result.analyzer_registry_id,
         )
 
@@ -482,6 +558,44 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         self.assertTrue(all(
             item.claim_status.value == "candidate" for item in dlna_pivots
         ))
+        reachability_stage = next(
+            item for item in result.stages
+            if item.stage_name == "frontend_reachability"
+        )
+        self.assertEqual(
+            CoverageStatus.COMPLETED, reachability_stage.coverage_status
+        )
+        self.assertEqual(134, reachability_stage.output_count)
+        dlna_invocations = {
+            item.canonical_identity: dict(item.attributes)
+            for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.FRONTEND_INVOCATION
+            and item.canonical_identity in {
+                "/goform/refreshDLNA",
+                "goform/GetDlnaCfg",
+                "goform/SetDlnaCfg",
+                "goform/expandDlnaFile?",
+            }
+        }
+        self.assertEqual(
+            "declared_but_unreached",
+            dlna_invocations["/goform/refreshDLNA"]["status"],
+        )
+        self.assertEqual(
+            "1",
+            dlna_invocations["/goform/refreshDLNA"][
+                "commented_reference_count"
+            ],
+        )
+        self.assertEqual(
+            "active_call_path",
+            dlna_invocations["goform/expandDlnaFile?"]["status"],
+        )
+        self.assertEqual(
+            '["initEvent","getMoreFolder"]',
+            dlna_invocations["goform/expandDlnaFile?"]["call_path"],
+        )
 
 
 if __name__ == "__main__":

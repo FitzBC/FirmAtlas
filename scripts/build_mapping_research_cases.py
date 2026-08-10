@@ -46,6 +46,10 @@ AC9_R2_15_REPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-15-vendor-tenda-ac9-ac18-dlna-feature-pivot.json"
 )
+AC9_R2_16_REPORT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-16-vendor-tenda-ac9-ac18-dlna-reachability.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -1032,9 +1036,6 @@ def build_ac9_dlna_fixture_split_case():
     feature_gate_report = json.loads(
         AC9_R2_14_REPORT.read_text(encoding="utf-8")
     )
-    family_pivot_report = json.loads(
-        AC9_R2_15_REPORT.read_text(encoding="utf-8")
-    )
     usb_status_dlna_xref_ids = {
         item["xref_id"]
         for item in usb_status_report["usb_status_route_handler_chain"][
@@ -1174,12 +1175,35 @@ def build_ac9_dlna_fixture_split_case():
         "compares_family_variant_assets_and_feature_state",
         "family-variant-report@v1alpha1",
     )
+    reachability_report_sha = hashlib.sha256(
+        AC9_R2_16_REPORT.read_bytes()
+    ).hexdigest()
+    ac9_reachability_ref = CaseEvidenceReference(
+        "coverage:ac9-dlna-frontend-reachability",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_16_REPORT.as_posix(),
+        reachability_report_sha,
+        "json:$.ac9_primary.dlna_operations",
+        "classifies_frontend_invocation_reachability",
+        "frontend-invocation-reachability@0.1.0",
+    )
+    ac18_reachability_ref = CaseEvidenceReference(
+        "coverage:ac18-dlna-frontend-reachability-control",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_16_REPORT.as_posix(),
+        reachability_report_sha,
+        "json:$.ac18_positive_control.dlna_operations",
+        "controls_frontend_invocation_reachability",
+        "frontend-invocation-reachability@0.1.0",
+    )
     evidence = (
         *atom_evidence,
         target_resolution_ref,
         ac9_feature_pivot_ref,
         ac18_positive_control_ref,
         family_equivalence_ref,
+        ac9_reachability_ref,
+        ac18_reachability_ref,
     )
     by_capability = {}
     for item in evidence:
@@ -1261,6 +1285,7 @@ def build_ac9_dlna_fixture_split_case():
             "residual_ui_request",
             "bounded_feature_literal_pivot",
             "family_variant_positive_control",
+            "frontend_static_invocation_reachability",
         ),
         research_question=(
             "Do bundled DLNA request code and JSON response fixtures prove that "
@@ -1334,6 +1359,18 @@ def build_ac9_dlna_fixture_split_case():
                 ),
             ),
             CaseClaim(
+                "claim:dlna-frontend-invocation-reachability",
+                "In both AC9 and the AC18 control, GetDlnaCfg and SetDlnaCfg "
+                "are top-level declarations, expandDlnaFile has a bounded "
+                "initEvent-to-getMoreFolder call path, and refreshDLNA is "
+                "declared but unreached with a commented binding. These are "
+                "static invocation classes, not runtime execution claims.",
+                (
+                    ac9_reachability_ref.evidence_ref,
+                    ac18_reachability_ref.evidence_ref,
+                ),
+            ),
+            CaseClaim(
                 "claim:dlna-handler-owner",
                 "No exact Native registration or handler binding currently connects "
                 "GetDlnaCfg, SetDlnaCfg, refreshDLNA, or expandDlnaFile to a goform "
@@ -1349,6 +1386,8 @@ def build_ac9_dlna_fixture_split_case():
                     ac9_feature_pivot_ref.evidence_ref,
                     ac18_positive_control_ref.evidence_ref,
                     family_equivalence_ref.evidence_ref,
+                    ac9_reachability_ref.evidence_ref,
+                    ac18_reachability_ref.evidence_ref,
                 ),
                 CaseClaimStatus.UNRESOLVED,
             ),
@@ -1418,6 +1457,15 @@ def build_ac9_dlna_fixture_split_case():
                     "claim:dlna-handler-owner",
                 ),
             ),
+            CaseStage(
+                "stage:dlna-frontend-invocation-reachability", 9,
+                "Classify each frontend request declaration against bounded "
+                "static call roots while preserving runtime uncertainty.",
+                (
+                    "claim:dlna-frontend-invocation-reachability",
+                    "claim:dlna-handler-owner",
+                ),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -1443,6 +1491,7 @@ def build_ac9_dlna_fixture_split_case():
             "Treating GetUSBStatus as an alias for four differently named DLNA operations would turn shared state access into a fabricated route binding.",
             "Treating CONFIG_DLNA_SERVER=n alone as proof would miss whether the symbol actually gates this menu target, page, script, and request set.",
             "Transferring AC18 handler addresses or vulnerability state to AC9 would confuse a family-level positive control with artifact-local proof.",
+            "Treating declared-but-unreached as dead code or runtime inaccessibility would overstate a bounded static call-graph result.",
         ),
         paper_uses=(
             "Negative case showing that interface-contract evidence and execution ownership are distinct layers.",
@@ -1453,6 +1502,7 @@ def build_ac9_dlna_fixture_split_case():
             "Compiler-layout case where a shared registrar tail hides one frontend-observed route from a contiguous callsite scanner.",
             "Product-variant case showing how an exact disabled-feature chain explains residual frontend-only operations while preserving the backend-ownership obligation.",
             "Family holdout showing that enabled variants can prioritize symbols and structures without resolving a disabled target build by analogy.",
+            "Frontend reachability ablation separating request declaration, bounded active paths, and commented or unreached functions.",
         ),
         limitations=(
             "Static absence cannot distinguish dead UI, version skew, hashed dispatch, generated registration, or a missing conditional component.",
@@ -1463,6 +1513,7 @@ def build_ac9_dlna_fixture_split_case():
             "The GetUSBStatus handler proves an adjacent dashboard status path, not ownership or aliasing of the separate DLNA configuration operations.",
             "A disabled declared UI path does not prove backend absence, runtime inaccessibility, or behavior in another product/version build.",
             "The AC18 positive control proves only AC18 bindings; the AC9 benchmark remains a repacked rootfs and may omit partitions or conditional components.",
+            "The v1 frontend call graph is intrafile and bounded; dynamic property calls, cross-resource wiring, and runtime event eligibility remain open.",
         ),
     ))
 

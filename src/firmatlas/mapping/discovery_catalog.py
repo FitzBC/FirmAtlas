@@ -12,6 +12,7 @@ from typing import Optional, Tuple
 from .domain import AnalyzerIdentity, CoverageStatus, EvidenceAtom
 from .frontend import FrontendProducerResult
 from .frontend_feature_gate import FrontendFeatureGateResult
+from .frontend_reachability import FrontendReachabilityResult
 from .parameter_clue import FrontendParameterClueIndex
 from .response_fixture import ResponseFixtureResult
 from .native_relationship import NativeRelationshipResult
@@ -43,6 +44,7 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 class DiscoveryProducerKind(str, Enum):
     FRONTEND = "frontend"
     FRONTEND_FEATURE_GATE = "frontend_feature_gate"
+    FRONTEND_REACHABILITY = "frontend_reachability"
     WEB_CONFIGURATION = "web_configuration"
     SCRIPT_BACKEND = "script_backend"
     NATIVE = "native"
@@ -66,6 +68,7 @@ class DiscoveryProducerKind(str, Enum):
 class DiscoveryCandidateKind(str, Enum):
     REQUEST_INTERFACE = "request_interface"
     FRONTEND_FEATURE_GATE = "frontend_feature_gate"
+    FRONTEND_INVOCATION = "frontend_invocation"
     WEB_CONFIGURATION = "web_configuration"
     SCRIPT_SOURCE = "script_source"
     SCRIPT_ROUTE = "script_route"
@@ -128,6 +131,22 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.FRONTEND_FEATURE_GATE,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def frontend_reachability(
+        cls, results: Tuple[FrontendReachabilityResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("frontend-invocation-reachability", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.FRONTEND_REACHABILITY,
             producer,
             scope,
             results,
@@ -494,6 +513,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
     native_service_target_refs = set()
     ubus_backend_target_refs = set()
     arm_feature_pivot_binding_refs = set()
+    frontend_invocation_request_refs = set()
     producer_obligations = []
     for batch in sorted(value.batches, key=lambda x: (x.producer_kind.value, x.scope)):
         statuses = []
@@ -584,6 +604,49 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                                 item.request_endpoints,
                                 separators=(",", ":"),
                             )),
+                        ),
+                    ))
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.FRONTEND_REACHABILITY
+            ):
+                for item in result.invocations:
+                    frontend_invocation_request_refs.add(
+                        item.request_candidate_id
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        item.invocation_id,
+                        DiscoveryCandidateKind.FRONTEND_INVOCATION,
+                        item.endpoint,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        (
+                            (
+                                "request_candidate_ref",
+                                item.request_candidate_id,
+                            ),
+                            ("status", item.status.value),
+                            ("function_name", item.function_name or ""),
+                            ("root_kind", item.root_kind or ""),
+                            (
+                                "call_path",
+                                json.dumps(
+                                    item.call_path, separators=(",", ":")
+                                ),
+                            ),
+                            (
+                                "commented_reference_count",
+                                str(item.commented_reference_count),
+                            ),
+                            (
+                                "interpretation",
+                                "Static executable-token coverage classifies "
+                                "where the request is declared and whether a "
+                                "bounded invocation path was observed; it does "
+                                "not prove runtime execution or inaccessibility.",
+                            ),
                         ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.PARAMETER_CLUE:
@@ -1305,6 +1368,13 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
         for target in arm_feature_pivot_binding_refs
     ):
         raise ValueError("ARM feature pivot references unknown route binding")
+    if any(
+        target not in candidate_ids
+        for target in frontend_invocation_request_refs
+    ):
+        raise ValueError(
+            "frontend invocation references unknown request candidate"
+        )
     if value.scheduler is not None:
         obligations = normalize_scheduler_obligations((
             *value.scheduler.open_obligations,

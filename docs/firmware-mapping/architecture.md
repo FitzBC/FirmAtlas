@@ -201,6 +201,14 @@ M1-12 Research Case Module 的公开 Interface 是 `build_research_case(Research
 
 M1-04 Frontend Producer 当前声明的能力范围是 `R.pageModel`、`R.moduleModel.getSubmitData`、jQuery `getJSON/post/ajax` 与 HTML Form。`completed` 表示这些声明构造已在文件内完整执行，不表示任意动态 JavaScript、框架封装或混淆代码都已恢复。结果保留 exact literal 与 literal prefix 的差别；完全动态 URL 必须在后续 Producer 或模型义务中保持 unknown。
 
+R2-16 在请求发现之后增加深 Module
+`discover_frontend_invocation_reachability(source, content, frontend_result, policy)`。其单一 Interface
+隐藏函数声明/表达式、注释、直接调用、jQuery 事件注册、`R.moduleView.initEvent` 与保守固定点
+传播，输出顶层声明、活动静态调用路径、`declared_but_unreached` 或 `unresolved`。每条活动路径
+必须引用请求证据、函数定义和精确调用边；被注释的绑定只形成解释证据。`completed` 只表示该
+Profile 的单源 JavaScript token 与已声明 callback 形态处理完成，不等同于页面加载、事件触发、
+请求发送、运行时可达或死代码证明。
+
 M1-05 Web Configuration Producer 的公开 Interface 是 `discover_web_configuration(source_entry, source_bytes, policy)`。当前声明支持 nginx、直接 POSIX shell 的 `nginx`/`spawn-fcgi` 启动形式，以及模板中的 proprietary httpd `Control/Alias/Location/External` 静态块，发布 listener、document root、namespace mapping、auth requirement、service start 和 external handler binding。嵌入 PHP 会先被等长屏蔽而不会执行或作为静态配置；配置事实与 frontend candidate 保持不同身份。`completed` 只表示声明格式和构造执行完成，不表示任意 Web server 配置、模板控制流或运行时可达性均已恢复。
 
 M1-06B Script Backend Producer 的公开 Interface 是 `discover_script_backend(source_entry, source_bytes, policy)`。当前声明支持厂商 ASP 的 `Request_Form/TCWebApi_*`、PHP superglobal 与显式框架 route、PHP-XGI `ACTION_POST/query/queryEnc/set/setEnc`、LuCI `entry/formvalue`、Shell CGI shebang与环境变量。它分别发布 CGI program、显式 route、parameter、selector、configuration access 和 template read；文件路径、扩展名和模板读取不能产生 `registers_route`。PHP-XGI 扫描要求同一源码存在 `$ACTION_POST` dialect anchor，复杂 set 表达式不发明参数身份；组合 LuCI 路径或规范化 HTTP header 使用 `deterministic_derived` 证据，仍保留精确来源 span。

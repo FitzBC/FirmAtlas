@@ -156,6 +156,12 @@ MIPS handler value-flow Profile 必须覆盖 local/global GOT callee、GP 的 st
 
 扩展 Frontend Asset Graph 回归必须覆盖 constructor default URL、payload-variable selector、同名变量跨函数隔离、fileUpload payload 门限，以及 multipart URL 的等号型外层 selector / 斜杠型内层 selector。真实 X5000R 固定断言 199→203 operation、3 个 scope gap 全部关闭、差集变为 77/11；不得通过直接修改差集期望值掩盖 Producer 未恢复请求结构。
 
+Frontend Invocation Reachability 回归必须至少包含：被注释事件绑定不形成活动边、顶层直接
+调用、命名事件 callback、`R.moduleView.initEvent → delegate anonymous callback → named call`
+传播、赋值函数表达式、未注册匿名函数、同名函数歧义、方法名与局部函数名冲突，以及缺失
+同源 request span 时的 partial coverage。真实 AC9/AC18 DLNA 页面固定四种 operation 状态；
+其中 `refreshDLNA` 必须保持 `declared_but_unreached`，但测试不得把该状态解释成运行时不可达。
+
 MIPS Nested Dispatch 回归必须从公开 Interface 同时验证 transport branch、第二 query segment 的 index/delimiter、multipart parser、payload topicurl、slash suffix、operation table loop 和 exact handler entry。真实 X5000R 固定为 `action=upload → setting/setUploadSetting → set_handle_t@0x0044a124 → 0x0042bf14`。将 segment index 改为 2、清除 upload guard branch、清除表项匹配后的间接调用或篡改持久化 table claim 时，结果必须 partial/rejected，不能由 strings 或表项补偿。
 
 MIPS Request Protection 回归必须从公开 Interface 同时验证路径 gate 的 auth/skip 两类分支、`userloginAuth → checkLoginUser`、`SESSION_ID` cookie、session-table lookup 和拒绝状态写入。真实 X5000R 固定对照 `/advance/config.html → guarded_by_path_gate` 与 `/cgi-bin/cstecgi.cgi → excluded_from_path_gate`；清除 auth call、将 302 改为 200、篡改 cookie key、违反 source digest/预算或反转分类时必须 fail closed。

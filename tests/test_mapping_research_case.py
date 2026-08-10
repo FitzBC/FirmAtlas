@@ -272,7 +272,7 @@ class ResearchCaseTests(unittest.TestCase):
             [
                 "supported", "supported", "supported", "supported",
                 "supported", "supported", "supported", "supported",
-                "unresolved",
+                "supported", "unresolved",
             ],
             [claim["status"] for claim in case["claims"]],
         )
@@ -320,7 +320,7 @@ class ResearchCaseTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            "stage:dlna-family-variant-positive-control",
+            "stage:dlna-frontend-invocation-reachability",
             case["stages"][-1]["stage_id"],
         )
         family_evidence = {
@@ -335,6 +335,8 @@ class ResearchCaseTests(unittest.TestCase):
                 "coverage:ac9-dlna-feature-pivots",
                 "coverage:ac18-dlna-route-positive-control",
                 "coverage:ac9-ac18-dlna-family-equivalence",
+                "coverage:ac9-dlna-frontend-reachability",
+                "coverage:ac18-dlna-frontend-reachability-control",
             },
             set(family_evidence),
         )

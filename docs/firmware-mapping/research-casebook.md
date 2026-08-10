@@ -271,6 +271,11 @@ R2-15 把相邻状态调查固化为通用 ARM feature pivot，并加入官方 A
 的 family-variant-positive-control claim；“共享模板 + build 裁剪”仍是跨样本解释，不能把
 AC18 地址或漏洞状态迁移成 AC9 事实，核心 owner 义务继续 open。
 
+R2-16 进一步把“脚本里出现请求”拆成静态调用可达性层级。在 AC9 主样本与 AC18 正控中，
+`GetDlnaCfg`、`SetDlnaCfg` 都是顶层声明，`expandDlnaFile` 可沿 `initEvent → getMoreFolder`
+的有界调用路径到达，`refreshDLNA` 则保留为已声明但未达并记录注释绑定。案例新增第九阶段；
+这些结果只证明当前静态 token、调用根和调用边覆盖，不证明事件实际触发、网络可达、死代码或漏洞。
+
 ## 6. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：

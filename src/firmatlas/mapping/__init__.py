@@ -66,6 +66,15 @@ from .frontend_feature_gate import (
     FrontendFeatureGateStatus,
     discover_frontend_feature_gates,
 )
+from .frontend_reachability import (
+    FRONTEND_REACHABILITY_SCHEMA_VERSION,
+    FrontendInvocationStatus,
+    FrontendReachabilityPolicy,
+    FrontendReachabilityDiagnostic,
+    FrontendRequestInvocation,
+    FrontendReachabilityResult,
+    discover_frontend_invocation_reachability,
+)
 from .parameter_clue import (
     FrontendParameterClueAssessment,
     FrontendParameterClueIndex,
@@ -255,6 +264,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V12,
     BUILTIN_ANALYZER_REGISTRY_V11,
     BUILTIN_ANALYZER_REGISTRY_V10,
     BUILTIN_ANALYZER_REGISTRY_V9,
@@ -486,6 +496,13 @@ __all__ = (
     "FrontendFeatureGateResult",
     "FrontendFeatureGateStatus",
     "discover_frontend_feature_gates",
+    "FRONTEND_REACHABILITY_SCHEMA_VERSION",
+    "FrontendInvocationStatus",
+    "FrontendReachabilityPolicy",
+    "FrontendReachabilityDiagnostic",
+    "FrontendRequestInvocation",
+    "FrontendReachabilityResult",
+    "discover_frontend_invocation_reachability",
     "InventoryPolicy",
     "INVENTORY_SCHEMA_VERSION",
     "InventoryDiagnostic",
@@ -607,6 +624,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V12",
     "BUILTIN_ANALYZER_REGISTRY_V11",
     "BUILTIN_ANALYZER_REGISTRY_V10",
     "BUILTIN_ANALYZER_REGISTRY_V9",

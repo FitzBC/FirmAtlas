@@ -10,7 +10,9 @@ import re
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V12,
     DiscoveryCandidateKind,
+    MappingAnalysisProfile,
     MappingAnalysisRequest,
     analyze_extracted_root,
 )
@@ -41,7 +43,14 @@ def _normalized_asset_sha(path: Path) -> str:
 
 
 def _sample(root: Path, artifact_sha256: str) -> tuple[dict, object]:
-    run = analyze_extracted_root(MappingAnalysisRequest(root, artifact_sha256))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            root,
+            artifact_sha256,
+            profile=MappingAnalysisProfile.auto_v12(),
+        ),
+        registry=BUILTIN_ANALYZER_REGISTRY_V12,
+    )
     pivots = sorted(
         (
             {
