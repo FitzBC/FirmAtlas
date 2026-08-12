@@ -20,6 +20,7 @@ from .native_arm_xref import ArmFeaturePivotResult, ArmLiteralXrefResult
 from .native_command_binding import NativeCommandBindingResult
 from .native_cgi_dispatch import ArmCgiDispatchResult
 from .native_cross_elf_call import ArmCrossElfCallResult
+from .native_arm_configuration_blob_flow import ArmConfigurationBlobFlowResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -67,6 +68,7 @@ class DiscoveryProducerKind(str, Enum):
     NATIVE_COMMAND_BINDING = "native_command_binding"
     NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
     NATIVE_CROSS_ELF_CALL = "native_cross_elf_call"
+    NATIVE_CONFIGURATION_BLOB_FLOW = "native_configuration_blob_flow"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -100,6 +102,7 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_COMMAND_BINDING = "native_command_binding"
     NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
     NATIVE_CROSS_ELF_CALL = "native_cross_elf_call"
+    NATIVE_CONFIGURATION_BLOB_FLOW = "native_configuration_blob_flow"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -254,6 +257,22 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.NATIVE_CROSS_ELF_CALL,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def native_configuration_blob_flow(
+        cls, results: Tuple[ArmConfigurationBlobFlowResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-arm-configuration-blob-flow", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_CONFIGURATION_BLOB_FLOW,
             producer,
             scope,
             results,
@@ -1126,6 +1145,38 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("setter_symbol", item.setter_symbol),
                             ("getter_callsite", "0x{:x}".format(item.getter_callsite)),
                             ("setter_callsite", "0x{:x}".format(item.setter_callsite)),
+                        ),
+                    ))
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.NATIVE_CONFIGURATION_BLOB_FLOW
+            ):
+                for item in result.flows:
+                    candidates.append(DiscoveryCandidate(
+                        item.flow_id,
+                        DiscoveryCandidateKind.NATIVE_CONFIGURATION_BLOB_FLOW,
+                        "{}:opcode={}->{}".format(
+                            item.client_symbol, item.request_opcode, item.state_scope
+                        ),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.dispatcher_path,
+                        result.profile,
+                        item.evidence_ids,
+                        (
+                            ("client_path", item.client_path),
+                            ("client_identity", item.client_identity),
+                            ("client_symbol", item.client_symbol),
+                            ("dispatcher_path", item.dispatcher_path),
+                            ("dispatcher_identity", item.dispatcher_identity),
+                            ("request_opcode", str(item.request_opcode)),
+                            ("response_opcode", str(item.response_opcode)),
+                            ("message_size", str(item.message_size)),
+                            ("payload_offset", str(item.payload_offset)),
+                            ("payload_literal", item.payload_literal),
+                            ("decoder_symbol", item.decoder_symbol),
+                            ("state_writer_symbol", item.state_writer_symbol),
+                            ("state_scope", item.state_scope),
+                            ("write_granularity", item.write_granularity),
                         ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_CGI_DISPATCH:

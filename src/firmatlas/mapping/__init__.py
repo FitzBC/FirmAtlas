@@ -147,6 +147,15 @@ from .native_cross_elf_call import (
     ArmCrossElfCallResult,
     discover_arm_cross_elf_calls,
 )
+from .native_arm_configuration_blob_flow import (
+    ARM_CONFIGURATION_BLOB_FLOW_SCHEMA_VERSION,
+    ArmConfigurationBlobArtifact,
+    ArmConfigurationBlobFlow,
+    ArmConfigurationBlobFlowPolicy,
+    ArmConfigurationBlobFlowProfile,
+    ArmConfigurationBlobFlowResult,
+    discover_arm_configuration_blob_flows,
+)
 from .native_command_binding import (
     NATIVE_COMMAND_BINDING_SCHEMA_VERSION,
     NativeCommandBinding,
@@ -305,6 +314,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V16,
     BUILTIN_ANALYZER_REGISTRY_V15,
     BUILTIN_ANALYZER_REGISTRY_V14,
     BUILTIN_ANALYZER_REGISTRY_V13,
@@ -718,6 +728,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V16",
     "BUILTIN_ANALYZER_REGISTRY_V15",
     "BUILTIN_ANALYZER_REGISTRY_V14",
     "BUILTIN_ANALYZER_REGISTRY_V13",

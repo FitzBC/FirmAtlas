@@ -190,6 +190,18 @@ const obligationNode = {
   status: 'open', source_path: 'bin/httpd', evidence_ids: [],
   attributes: [['required_capability', 'binds_handler']] as Array<[string, string]>,
 }
+const configurationFlowNode = {
+  node_id: 'native-configuration-blob-flow:1', node_kind: 'communication_relation',
+  label: 'UploadValue:opcode=14->configuration_partition[0]', status: 'supported',
+  source_path: 'bin/cfmd', evidence_ids: ['evidence:dlna'],
+  attributes: [['request_opcode', '14']] as Array<[string, string]>,
+}
+const configurationStateNode = {
+  node_id: 'configuration-state:1', node_kind: 'state',
+  label: 'configuration_partition[0]', status: 'supported', source_path: '',
+  evidence_ids: ['evidence:dlna'],
+  attributes: [['write_granularity', 'whole_configuration_image']] as Array<[string, string]>,
+}
 
 const historicalOverlay: HistoricalGraphOverlayQueryResult = {
   schema_version: 'firmatlas.mapping.historical-graph-overlay-query-result/v1alpha1',
@@ -341,6 +353,11 @@ it('explores a persisted communication graph from interface to parameter and evi
   fireEvent.click(await screen.findByRole('button', { name: '架构图谱' }))
 
   expect(await screen.findByText('goform/SetDlnaCfg')).toBeInTheDocument()
+  expect(queryGraph).toHaveBeenCalledWith(
+    graphSummary.graph_id,
+    expect.objectContaining({ nodeKinds: ['interface', 'state'] }),
+    expect.any(AbortSignal),
+  )
   expect(screen.getByText('5,674')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: /聚焦接口 goform\/SetDlnaCfg/ }))
   expect(await screen.findByText('dlnaEn')).toBeInTheDocument()
@@ -366,6 +383,43 @@ it('explores a persisted communication graph from interface to parameter and evi
     }),
     expect.any(AbortSignal),
   ))
+})
+
+it('compacts sparse semantic ranks so a focused state flow stays inside the graph viewport', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
+    items: [catalog], total: 1, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
+    items: [candidate], total: 1, limit: 100, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingGraphs').mockResolvedValue({
+    items: [graphSummary], total: 1, limit: 100, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingHistoricalOverlay').mockResolvedValue(historicalOverlay)
+  vi.spyOn(intelligenceApi, 'mappingGraph').mockImplementation(
+    (_graphId, options) => Promise.resolve(options?.nodeKinds?.includes('state')
+      ? graphResult([configurationStateNode])
+      : graphResult([configurationFlowNode, configurationStateNode], [{
+        edge_id: 'edge:writes-state', edge_kind: 'writes_state',
+        source_ref: configurationFlowNode.node_id, target_ref: configurationStateNode.node_id,
+        status: 'supported', origin_ref: configurationFlowNode.node_id,
+        evidence_ids: ['evidence:dlna'], attributes: [],
+      }])),
+  )
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '架构图谱' }))
+  fireEvent.click(await screen.findByRole('button', {
+    name: '聚焦状态 configuration_partition[0]',
+  }))
+
+  const flow = await screen.findByRole('button', {
+    name: '查看图节点 UploadValue:opcode=14->configuration_partition[0]',
+  })
+  const state = screen.getByRole('button', {
+    name: '查看图节点 configuration_partition[0]',
+  })
+  expect(Math.abs(parseInt(flow.style.left) - parseInt(state.style.left))).toBe(200)
 })
 
 it('overlays AC9 historical expectations without turning cross-version presence into a vulnerability fact', async () => {

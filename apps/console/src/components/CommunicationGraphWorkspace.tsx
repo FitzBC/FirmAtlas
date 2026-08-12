@@ -29,6 +29,8 @@ const nodeTone: Record<string, string> = {
   route_binding: 'border-amber-300/30 bg-amber-300/[0.08] text-amber-200',
   obligation: 'border-ember/35 bg-ember/[0.085] text-ember',
   feature_gate: 'border-slate-400/25 bg-slate-400/[0.07] text-slate-300',
+  state: 'border-fuchsia-300/30 bg-fuchsia-300/[0.08] text-fuchsia-200',
+  communication_relation: 'border-signal/30 bg-signal/[0.075] text-signal',
 }
 
 const kindRank: Record<string, number> = {
@@ -37,6 +39,7 @@ const kindRank: Record<string, number> = {
   parameter: 2, parameter_clue: 2, response_contract: 2,
   dispatch: 3, route_binding: 3, backend_binding: 3, feature_gate: 3,
   handler: 4, service_assembly: 4, protection: 4, access_grant: 4,
+  state: 5,
   obligation: 5, association: 5, evidence_candidate: 5,
 }
 
@@ -84,7 +87,7 @@ export function CommunicationGraphWorkspace() {
     setLoading(true)
     void intelligenceApi.mappingGraph(graphId, {
       query: debouncedQuery,
-      nodeKinds: ['interface'],
+      nodeKinds: ['interface', 'state'],
       maxHops: 0,
       maxNodes: 200,
       maxEdges: 1,
@@ -193,11 +196,11 @@ export function CommunicationGraphWorkspace() {
     {error && <div role="alert" className="m-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
     <div className="grid min-h-[650px] xl:grid-cols-[270px_minmax(520px,1fr)_320px]">
       <aside className="border-b border-white/[0.07] p-4 xl:border-b-0 xl:border-r">
-        <div className="grid grid-cols-2 rounded-xl border border-white/[0.07] bg-black/20 p-1"><button type="button" onClick={() => setIndexMode('interfaces')} className={`rounded-lg px-2 py-2 text-[9px] transition ${indexMode === 'interfaces' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600'}`}><Braces size={11} className="mr-1 inline" />接口索引</button><button type="button" onClick={() => setIndexMode('history')} className={`rounded-lg px-2 py-2 text-[9px] transition ${indexMode === 'history' ? 'bg-amber-300/[0.1] text-amber-200' : 'text-slate-600'}`}><History size={11} className="mr-1 inline" />历史漏洞对照</button></div>
-        <label className="search-field mt-4"><Search size={14} /><input aria-label={indexMode === 'interfaces' ? '搜索通信接口' : '搜索历史漏洞'} value={interfaceQuery} onChange={(event) => setInterfaceQuery(event.target.value)} placeholder={indexMode === 'interfaces' ? '路径、操作或命名空间…' : 'CVE、接口、参数或 handler…'} /></label>
+        <div className="grid grid-cols-2 rounded-xl border border-white/[0.07] bg-black/20 p-1"><button type="button" onClick={() => setIndexMode('interfaces')} className={`rounded-lg px-2 py-2 text-[9px] transition ${indexMode === 'interfaces' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600'}`}><Braces size={11} className="mr-1 inline" />结构索引</button><button type="button" onClick={() => setIndexMode('history')} className={`rounded-lg px-2 py-2 text-[9px] transition ${indexMode === 'history' ? 'bg-amber-300/[0.1] text-amber-200' : 'text-slate-600'}`}><History size={11} className="mr-1 inline" />历史漏洞对照</button></div>
+        <label className="search-field mt-4"><Search size={14} /><input aria-label={indexMode === 'interfaces' ? '搜索通信接口或状态' : '搜索历史漏洞'} value={interfaceQuery} onChange={(event) => setInterfaceQuery(event.target.value)} placeholder={indexMode === 'interfaces' ? '接口、操作或状态范围…' : 'CVE、接口、参数或 handler…'} /></label>
         {indexMode === 'interfaces' ? <div className="mt-3 flex items-center justify-between text-[9px] text-slate-700"><span>精确接口焦点</span><span>{interfaceIndex?.selected_node_count ?? 0} / {interfaceIndex?.total_node_count ?? 0}{interfaceIndex?.query_status === 'partial' ? ' · partial' : ''}</span></div> : <div className="mt-3 rounded-xl border border-amber-300/10 bg-amber-300/[0.035] p-3"><div className="flex items-center justify-between text-[9px]"><span className="text-amber-200">历史期望 {historicalOverlay?.total_entry_count ?? 0}</span>{historicalOverlay?.overlay.vulnerability_audit && <span className="font-mono text-slate-400">{historicalOverlay.overlay.vulnerability_audit.total_vulnerability_count}</span>}</div><p className="mt-2 text-[8px] leading-4 text-slate-600">右侧总数是漏洞库分母；图中只链接已有 Catalog 证据。</p></div>}
         <div className="mt-2 max-h-[535px] overflow-y-auto pr-1">
-          {indexMode === 'interfaces' ? <>{loading && !interfaceIndex && <div className="py-10 text-center text-[10px] text-slate-700">正在装载接口索引…</div>}{interfaceIndex?.nodes.map((node) => <button key={node.node_id} type="button" aria-label={`聚焦接口 ${node.label}`} onClick={() => { setSelectedHistory(null); setSelectedInterface(node); setSelectedNodeId(node.node_id) }} className={`group mb-1.5 w-full rounded-xl border p-3 text-left transition ${selectedInterface?.node_id === node.node_id && !selectedHistory ? 'border-cyan/30 bg-cyan/[0.075]' : 'border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]'}`}><div className="flex items-start gap-2.5"><CircleDot size={14} className="mt-0.5 shrink-0 text-cyan" /><div className="min-w-0 flex-1"><div className="break-all font-mono text-[11px] leading-4 text-slate-200">{node.label}</div><div className="mt-1 truncate text-[9px] text-slate-700">{node.source_path}</div></div><ChevronRight size={13} className="mt-1 shrink-0 text-slate-700 transition group-hover:translate-x-0.5" /></div></button>)}{!loading && interfaceIndex?.nodes.length === 0 && <div className="py-10 text-center text-[10px] text-slate-700">没有符合条件的接口</div>}</> : <>{overlayError && <div className="rounded-xl border border-dashed border-white/[0.08] p-4 text-center text-[9px] leading-5 text-slate-600">该图尚未发布历史漏洞覆盖层<br />{overlayError}</div>}{historyEntries.map((entry) => <button key={entry.expectation_id} type="button" aria-label={`查看历史漏洞 ${entry.vulnerability_identifier}`} onClick={() => { setSelectedInterface(null); setSelectedHistory(entry); setPreset('completeness'); setSelectedNodeId(entry.graph_node_ids[0] ?? '') }} className={`group mb-1.5 w-full rounded-xl border p-3 text-left transition ${selectedHistory?.expectation_id === entry.expectation_id ? 'border-amber-300/25 bg-amber-300/[0.065]' : 'border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]'}`}><div className="flex items-center justify-between gap-2"><span className="font-mono text-[10px] text-amber-200">{entry.vulnerability_identifier}</span><HistoryStatus status={entry.status} /></div><div className="mt-2 break-all font-mono text-[9px] leading-4 text-slate-400">{entry.interface_value}</div><div className="mt-2 flex justify-between text-[8px] text-slate-700"><span>{entry.applicability}</span><span>{entry.graph_node_ids.length} graph refs</span></div></button>)}{historicalOverlay && historyEntries.length === 0 && <div className="py-10 text-center text-[10px] text-slate-700">没有符合条件的历史期望</div>}</>}
+          {indexMode === 'interfaces' ? <>{loading && !interfaceIndex && <div className="py-10 text-center text-[10px] text-slate-700">正在装载结构索引…</div>}{interfaceIndex?.nodes.map((node) => <button key={node.node_id} type="button" aria-label={`聚焦${node.node_kind === 'state' ? '状态' : '接口'} ${node.label}`} onClick={() => { setSelectedHistory(null); setSelectedInterface(node); setSelectedNodeId(node.node_id); if (node.node_kind === 'state') setPreset('parameter_state') }} className={`group mb-1.5 w-full rounded-xl border p-3 text-left transition ${selectedInterface?.node_id === node.node_id && !selectedHistory ? 'border-cyan/30 bg-cyan/[0.075]' : 'border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]'}`}><div className="flex items-start gap-2.5"><CircleDot size={14} className={`mt-0.5 shrink-0 ${node.node_kind === 'state' ? 'text-fuchsia-200' : 'text-cyan'}`} /><div className="min-w-0 flex-1"><div className="break-all font-mono text-[11px] leading-4 text-slate-200">{node.label}</div><div className="mt-1 truncate text-[9px] text-slate-700">{node.node_kind} · {node.source_path || 'derived state scope'}</div></div><ChevronRight size={13} className="mt-1 shrink-0 text-slate-700 transition group-hover:translate-x-0.5" /></div></button>)}{!loading && interfaceIndex?.nodes.length === 0 && <div className="py-10 text-center text-[10px] text-slate-700">没有符合条件的接口或状态</div>}</> : <>{overlayError && <div className="rounded-xl border border-dashed border-white/[0.08] p-4 text-center text-[9px] leading-5 text-slate-600">该图尚未发布历史漏洞覆盖层<br />{overlayError}</div>}{historyEntries.map((entry) => <button key={entry.expectation_id} type="button" aria-label={`查看历史漏洞 ${entry.vulnerability_identifier}`} onClick={() => { setSelectedInterface(null); setSelectedHistory(entry); setPreset('completeness'); setSelectedNodeId(entry.graph_node_ids[0] ?? '') }} className={`group mb-1.5 w-full rounded-xl border p-3 text-left transition ${selectedHistory?.expectation_id === entry.expectation_id ? 'border-amber-300/25 bg-amber-300/[0.065]' : 'border-transparent hover:border-white/[0.07] hover:bg-white/[0.025]'}`}><div className="flex items-center justify-between gap-2"><span className="font-mono text-[10px] text-amber-200">{entry.vulnerability_identifier}</span><HistoryStatus status={entry.status} /></div><div className="mt-2 break-all font-mono text-[9px] leading-4 text-slate-400">{entry.interface_value}</div><div className="mt-2 flex justify-between text-[8px] text-slate-700"><span>{entry.applicability}</span><span>{entry.graph_node_ids.length} graph refs</span></div></button>)}{historicalOverlay && historyEntries.length === 0 && <div className="py-10 text-center text-[10px] text-slate-700">没有符合条件的历史期望</div>}</>}
         </div>
       </aside>
       <main className="min-w-0 border-b border-white/[0.07] xl:border-b-0 xl:border-r">
@@ -250,14 +253,14 @@ function layoutNodes(nodes: CommunicationGraphNode[]) {
     grouped.set(rank, [...(grouped.get(rank) ?? []), node])
   })
   const positioned: PositionedNode[] = []
-  let maxRank = 0; let maxRows = 0
-  Array.from(grouped.entries()).sort(([a], [b]) => a - b).forEach(([rank, items]) => {
-    maxRank = Math.max(maxRank, rank); maxRows = Math.max(maxRows, items.length)
+  let maxColumn = 0; let maxRows = 0
+  Array.from(grouped.entries()).sort(([a], [b]) => a - b).forEach(([, items], column) => {
+    maxColumn = Math.max(maxColumn, column); maxRows = Math.max(maxRows, items.length)
     items.sort((a, b) => a.node_id.localeCompare(b.node_id)).forEach((node, row) => {
-      positioned.push({ node, x: 34 + rank * 200, y: 34 + row * 86 })
+      positioned.push({ node, x: 34 + column * 200, y: 34 + row * 86 })
     })
   })
-  return { nodes: positioned, width: Math.max(720, 34 + (maxRank + 1) * 200), height: Math.max(560, 34 + maxRows * 86) }
+  return { nodes: positioned, width: Math.max(720, 34 + (maxColumn + 1) * 200), height: Math.max(560, 34 + maxRows * 86) }
 }
 
 function HistoryStatus({ status }: { status: HistoricalGraphOverlayEntry['status'] }) {

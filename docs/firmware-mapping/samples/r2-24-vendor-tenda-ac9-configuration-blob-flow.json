@@ -1,0 +1,59 @@
+{
+  "analysis_run_id": "mapping-analysis-run:783a8e193569bf74d39737c0002e4e86007381cfb5e4f2d843425d8614dea738",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v16",
+  "catalog_id": "discovery-catalog:c915be6bf414d24d11e5420c13078b3805c30ffe5ae9444a2b9be85030d2f97b",
+  "closed_obligation": "configuration-blob-wildcard-state-write",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "flow": {
+    "candidate_id": "native-configuration-blob-flow:be6795bcb5e95bb42ac5602407fc636af423873d6051f66b9a5f105c5bc39e47",
+    "canonical_identity": "UploadValue:opcode=14->configuration_partition[0]",
+    "client_identity": "lib/libCfm.so@0x0000429c",
+    "client_symbol": "UploadValue",
+    "decoder_symbol": "atoi",
+    "dispatcher_identity": "bin/cfmd@0x0000a504",
+    "evidence_ids": [
+      "evidence:2dbce3cc8ae285dc7d1bef28b66405f8ff881135d38f1d73e8daa9e3f39f9ab9",
+      "evidence:615d6a38891158876db46295c79912ab387aea33ceed80234794dba23ed0eb90",
+      "evidence:8ea06872c5da5de028e735fc95e210f1c1c5c42089dfc5adfff1c8f0994cab05",
+      "evidence:ce7f28ba6c293039032dbe8cad975e955d8616dc35ba5c9537e02e4b4a59de3d",
+      "evidence:f54bdd656dd7c1dba3964c4f9cfcc8e188e17c3cabc84b1b9ec7a2c82b044df4",
+      "evidence:0d820ff5278d02d9ed3a12d90e0e75edc22545428df06ef205164f0c5523ab6d",
+      "evidence:bdd73a2e2f2d7cad6e80f51ba257a78742de02f1bd74215e0cb6df3a1c7d11a9"
+    ],
+    "message_size": 2016,
+    "payload_literal": "0",
+    "payload_offset": 516,
+    "request_opcode": 14,
+    "response_opcode": 15,
+    "state_scope": "configuration_partition[0]",
+    "state_writer_symbol": "RestoreMTD",
+    "write_granularity": "whole_configuration_image"
+  },
+  "graph_id": "communication-graph:92f0cc2df41db397f15553c6fcb1c174cc0876898466e1069e87526f101ff4d3",
+  "graph_projection": {
+    "edge_kind": "writes_state",
+    "state_label": "configuration_partition[0]",
+    "state_node_id": "configuration-state:836d5fbea8b61c64ae75fe61fd74a0f9a6b56fbfef8dd7ef1a25f95bb8f4376f",
+    "state_node_kind": "state"
+  },
+  "not_claimed": [
+    "payload offset 516 is an HTTP request parameter",
+    "the upload format exposes individual configuration keys",
+    "the static state flow executed at runtime",
+    "a historical vulnerability is present or exploitable"
+  ],
+  "profile_id": "firmatlas.mapping.profile/auto-v16",
+  "remaining_obligations": [
+    "recover RestoreMTD implementation and per-key parser, if present",
+    "link whole-image state scope to historical configuration-key sinks",
+    "obtain runtime observation before claiming execution"
+  ],
+  "sample_role": "primary-vendor-tenda-ac9-configuration-blob-state-flow",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-24/v1alpha1",
+  "stage": {
+    "coverage_status": "completed",
+    "diagnostics": [],
+    "input_count": 1,
+    "output_count": 1
+  }
+}

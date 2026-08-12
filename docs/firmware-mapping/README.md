@@ -197,8 +197,9 @@ M1 工作项：
 | R2-21 | AC9 历史漏检优先队列与字段类型 | 已验证 | R2-20 | source-typed clue + repeatable immutable supplements + 14-expectation replay + 57-task queue |
 | R2-22 | AC9 配置上传入口与 CGI 字符串分发 | 已验证 | R2-21 | `POST multipart filename → ARM six-entry string switch → httpd handler` + auto-v14 + graph path + persistence obligation split |
 | R2-23 | AC9 跨 ELF 配置持久化链 | 已验证 | R2-22 | symbol-sized `gCtlCmdArr` + `BL→PLT→DT_NEEDED/export` + `cfm Upload` literal + directed call-chain graph + auto-v15 + 真实页面验收 |
+| R2-24 | AC9 配置镜像 IPC 与整域状态写入 | 已验证 | R2-23 | opcode 14/15 + 2016-byte frame + offset 516 + `atoi→RestoreMTD` + `writes_state` + auto-v16 + 真实页面验收 |
 
-**下一项建议**：继续以 AC9 为主样本恢复上传 blob 的配置键 parser；在 key-level parser 证据出现前只发布 wildcard configuration-state write surface，再连接历史 native configuration-key sink，不得把配置键写成 HTTP 参数。
+**下一项建议**：继续以 AC9 为主样本深入 `RestoreMTD` 实现和其配置镜像格式；在 key-level parser 证据出现前保持 `configuration_partition[0]` 整域状态范围，再连接历史 native configuration-key sink，不得把配置键写成 HTTP 参数。
 
 ## 7. 跨会话无缝工作协议
 

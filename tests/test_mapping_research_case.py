@@ -276,6 +276,21 @@ class ResearchCaseTests(unittest.TestCase):
             "supported",
             claims["claim:historical-interface-scope-boundary"]["status"],
         )
+        self.assertEqual(
+            "supported",
+            claims["claim:configuration-blob-state-write"]["status"],
+        )
+        obligations = {
+            item["obligation_id"]: item for item in case["obligations"]
+        }
+        self.assertEqual(
+            "resolved",
+            obligations["obligation:configuration-blob-state-write"]["status"],
+        )
+        self.assertEqual(
+            "open",
+            obligations["obligation:configuration-key-parser"]["status"],
+        )
 
     def test_ac9_dlna_case_preserves_fixture_daemon_split_as_open(self) -> None:
         corpus = build_research_case_corpus()

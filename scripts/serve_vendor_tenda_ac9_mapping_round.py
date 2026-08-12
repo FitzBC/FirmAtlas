@@ -16,7 +16,7 @@ from http.server import ThreadingHTTPServer
 from build_vendor_tenda_ac9_registrar_inventory_report import ARTIFACT_SHA256, ROOT
 
 
-DATABASE = Path("var/mapping-work/r2-23-local-browser/firmatlas.db")
+DATABASE = Path("var/mapping-work/r2-24-local-browser/firmatlas.db")
 
 
 def main() -> None:

@@ -233,6 +233,15 @@ owner 保持 `unresolved_import_owner`，只用命令 token 连接 `gCtlCmdArr[U
 早期“按路径排序选择同名 export”会错误指向 `bin/pptpctrl` 的反事实失败。机器报告见
 [R2-23](./samples/r2-23-vendor-tenda-ac9-cross-elf-persistence.json)。
 
+R2-24 再次推翻了“`UploadValue` 就是上传 blob parser”的过早命名。它实际构造固定 2016-byte
+消息，写入 opcode `14`，把常量 `0` 复制到 offset `516` 后经 `SendMsg/RecvMsg` 发往 Cfm IPC。
+`cfmd@0xa504` 才是另一进程的 opcode dispatcher：它从相同 offset 取值，调用 `atoi`，再把
+结果交给 `RestoreMTD`，响应 opcode `15`。因此本轮关闭的是整镜像
+`configuration_partition[0]` 状态写入，不是逐配置键 parser。若把 offset `516` 或历史
+`security.ddos.map` 直接命名为 HTTP 参数，会制造跨层错误；机器报告和图谱 `writes_state`
+见 [R2-24](./samples/r2-24-vendor-tenda-ac9-configuration-blob-flow.json)。逐 key 格式和运行时执行
+仍保持开放。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

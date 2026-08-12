@@ -43,6 +43,7 @@ class CommunicationGraphNodeKind(str, Enum):
     FEATURE_PIVOT = "feature_pivot"
     PARAMETER_CLUE = "parameter_clue"
     ASSOCIATION = "association"
+    STATE = "state"
     EVIDENCE_CANDIDATE = "evidence_candidate"
 
 
@@ -71,6 +72,7 @@ class CommunicationGraphEdgeKind(str, Enum):
     ASSOCIATED_WITH = "associated_with"
     SATISFIES_OBLIGATION = "satisfies_obligation"
     CALLS = "calls"
+    WRITES_STATE = "writes_state"
 
 
 @dataclass(frozen=True)
@@ -182,12 +184,13 @@ _VIEW_PRESETS = (
         "parameter_state",
         "Parameter and state",
         (
-            "interface", "parameter", "handler", "evidence_candidate",
-            "parameter_clue", "association",
+            "interface", "parameter", "handler", "communication_relation",
+            "evidence_candidate", "parameter_clue", "association", "state",
         ),
         (
             "accepts_parameter", "has_parameter_clue",
             "has_native_association", "associated_with",
+            "writes_state",
         ),
         "Interface parameters and evidence-backed state or clue candidates.",
     ),
@@ -442,6 +445,8 @@ def _candidate_node_kind(kind: DiscoveryCandidateKind) -> CommunicationGraphNode
         DiscoveryCandidateKind.NATIVE_CGI_DISPATCH:
             CommunicationGraphNodeKind.DISPATCH,
         DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL:
+            CommunicationGraphNodeKind.COMMUNICATION_RELATION,
+        DiscoveryCandidateKind.NATIVE_CONFIGURATION_BLOB_FLOW:
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_REQUEST_PROTECTION:
             CommunicationGraphNodeKind.PROTECTION,
@@ -849,6 +854,43 @@ def project_communication_architecture_graph(
                     ))),
                     "native_cross_elf_call.argument_to_command_binding",
                 ))
+    state_specs = {}
+    for candidate in catalog.candidates:
+        if (
+            candidate.candidate_kind
+            is not DiscoveryCandidateKind.NATIVE_CONFIGURATION_BLOB_FLOW
+        ):
+            continue
+        attributes = dict(candidate.attributes)
+        state_scope = attributes["state_scope"]
+        state_ref = _stable_id("configuration-state", state_scope)
+        state_specs[state_ref] = (
+            state_scope,
+            attributes.get("write_granularity", ""),
+            candidate.evidence_ids,
+        )
+        edges.append(_edge(
+            CommunicationGraphEdgeKind.WRITES_STATE,
+            candidate.candidate_id,
+            state_ref,
+            candidate.claim_status.value,
+            candidate.candidate_id,
+            candidate.evidence_ids,
+            "native_configuration_blob_flow.state_scope",
+        ))
+    nodes.extend(
+        CommunicationGraphNode(
+            state_ref,
+            CommunicationGraphNodeKind.STATE,
+            state_scope,
+            "supported",
+            "",
+            evidence_ids,
+            (("write_granularity", granularity),),
+        )
+        for state_ref, (state_scope, granularity, evidence_ids)
+        in sorted(state_specs.items())
+    )
     for association in catalog.associations:
         edges.append(_edge(
             CommunicationGraphEdgeKind.HAS_NATIVE_ASSOCIATION,

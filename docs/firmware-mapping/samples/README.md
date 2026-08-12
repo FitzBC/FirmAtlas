@@ -44,6 +44,7 @@
 - [R2-21 AC9 historical coverage queue](./r2-21-vendor-tenda-ac9-historical-coverage-queue.json)：对 71 条产品漏洞分母生成 57 条内容寻址开放任务；原始来源已把 CVE-2021-42659 升级为第 3 条 exact-artifact observed，剩余两条 parameter-only 被纠正为 configuration-key sink，并保留当前制品 route clue 与未知 HTTP ingress 的边界。配套输入和回放见 [semantic clues](./r2-21-vendor-tenda-ac9-historical-semantic-clues.json)、[expectation supplement](./r2-21-vendor-tenda-ac9-historical-expectation-supplement.json)和[历史 replay](./r2-21-vendor-tenda-ac9-historical-replay.json)。
 - [R2-22 AC9 configuration ingress](./r2-22-vendor-tenda-ac9-configuration-ingress.json)：`auto-v14` 从 `POST /cgi-bin/UploadCfg`、multipart 字段 `filename` 恢复独立六项 ARM 字符串分发表，并确证 `UploadCfg → bin/httpd@0x3b850`；机器报告另保存 `libtpi → cfm → libCfm` 的跨二进制人工 continuation 与尚待自动化的 persistence obligation。
 - [R2-23 AC9 cross-ELF persistence](./r2-23-vendor-tenda-ac9-cross-elf-persistence.json)：`auto-v15` 自动恢复 `httpd → libtpi:tpi_sys_cfg_upload`、精确 `cfm Upload` literal、`gCtlCmdArr[Upload] → libCfm:UploadValue → SendMsg/RecvMsg`；同名 `doSystemCmd` owner 不唯一时显式未决。
+- [R2-24 AC9 configuration-image state flow](./r2-24-vendor-tenda-ac9-configuration-blob-flow.json)：`auto-v16` 从 `UploadValue` 的 opcode `14`、2016-byte frame、offset `516`、literal `0` 跨进程匹配 `cfmd → atoi → RestoreMTD`，发布整镜像 `configuration_partition[0]` 与 `writes_state`；不创建伪 HTTP 参数。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

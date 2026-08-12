@@ -63,6 +63,11 @@ from .native_cross_elf_call import (
     ArmCrossElfCallPolicy,
     discover_arm_cross_elf_calls,
 )
+from .native_arm_configuration_blob_flow import (
+    ArmConfigurationBlobArtifact,
+    ArmConfigurationBlobFlowPolicy,
+    discover_arm_configuration_blob_flows,
+)
 from .native_arm_xref import (
     ArmFeaturePivotAnchor,
     ArmFunctionTarget,
@@ -126,7 +131,10 @@ _AUTO_V14_ANALYZERS = _AUTO_V13_ANALYZERS + ("native_cgi_dispatch",)
 _AUTO_V15_ANALYZERS = _AUTO_V14_ANALYZERS + (
     "native_pointer_command_binding", "native_cross_elf_call",
 )
-_AUTO_ANALYZERS = _AUTO_V15_ANALYZERS
+_AUTO_V16_ANALYZERS = _AUTO_V15_ANALYZERS + (
+    "native_configuration_blob_flow",
+)
+_AUTO_ANALYZERS = _AUTO_V16_ANALYZERS
 
 
 @dataclass(frozen=True)
@@ -146,7 +154,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v15", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v16", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v16(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v16", _AUTO_V16_ANALYZERS)
 
     @classmethod
     def auto_v15(cls) -> "MappingAnalysisProfile":
@@ -222,7 +234,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v15", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v16", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v16(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v16",
+            _AUTO_V16_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v15(cls) -> "MappingAnalyzerRegistry":
@@ -336,6 +355,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V16 = MappingAnalyzerRegistry.builtin_v16()
 BUILTIN_ANALYZER_REGISTRY_V15 = MappingAnalyzerRegistry.builtin_v15()
 BUILTIN_ANALYZER_REGISTRY_V14 = MappingAnalyzerRegistry.builtin_v14()
 BUILTIN_ANALYZER_REGISTRY_V13 = MappingAnalyzerRegistry.builtin_v13()
@@ -365,6 +385,9 @@ class MappingAnalysisRequest:
     native_command_binding_policy: NativeCommandBindingPolicy = NativeCommandBindingPolicy()
     native_cgi_dispatch_policy: ArmCgiDispatchPolicy = ArmCgiDispatchPolicy()
     native_cross_elf_call_policy: ArmCrossElfCallPolicy = ArmCrossElfCallPolicy()
+    native_configuration_blob_flow_policy: ArmConfigurationBlobFlowPolicy = (
+        ArmConfigurationBlobFlowPolicy()
+    )
     arm_literal_xref_policy: ArmLiteralXrefPolicy = ArmLiteralXrefPolicy()
     frontend_feature_gate_policy: FrontendFeatureGatePolicy = (
         FrontendFeatureGatePolicy()
@@ -457,6 +480,12 @@ def _classify(
             kinds.append("native_pointer_command_binding")
         if "native_cross_elf_call" in enabled and _arm_pic_callsite_applicable(content):
             kinds.append("native_cross_elf_call")
+        if (
+            "native_configuration_blob_flow" in enabled
+            and _arm_pic_callsite_applicable(content)
+            and (b"UploadValue" in content or b"RestoreMTD" in content)
+        ):
+            kinds.append("native_configuration_blob_flow")
         if (
             "native_ubus_registration" in enabled
             and path.startswith("usr/lib/rpcd/")
@@ -693,6 +722,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v13",
                 "firmatlas.mapping.profile/auto-v14",
                 "firmatlas.mapping.profile/auto-v15",
+                "firmatlas.mapping.profile/auto-v16",
             }
         ),
         enable_tenda_get_set_data=(
@@ -707,6 +737,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v13",
                 "firmatlas.mapping.profile/auto-v14",
                 "firmatlas.mapping.profile/auto-v15",
+                "firmatlas.mapping.profile/auto-v16",
             }
         ),
         enable_regex_literals=(
@@ -718,6 +749,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v13",
                 "firmatlas.mapping.profile/auto-v14",
                 "firmatlas.mapping.profile/auto-v15",
+                "firmatlas.mapping.profile/auto-v16",
             }
         ),
     )
@@ -916,6 +948,17 @@ def analyze_extracted_root(
             request.native_cross_elf_call_policy,
         ),
     ) if cross_elf_anchors and cross_elf_artifacts else ()
+    configuration_blob_artifacts = tuple(
+        ArmConfigurationBlobArtifact(source, content)
+        for source, content, kinds in selected
+        if "native_configuration_blob_flow" in kinds
+    )
+    native_configuration_blob_flows = (
+        discover_arm_configuration_blob_flows(
+            configuration_blob_artifacts,
+            policy=request.native_configuration_blob_flow_policy,
+        ),
+    ) if configuration_blob_artifacts else ()
     command_handler_literal_xrefs = (
         tuple(
             discover_arm_function_literal_xrefs(
@@ -1118,6 +1161,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v13",
                     "firmatlas.mapping.profile/auto-v14",
                     "firmatlas.mapping.profile/auto-v15",
+                    "firmatlas.mapping.profile/auto-v16",
                 }
                 else ()
             )
@@ -1139,6 +1183,7 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v13",
                         "firmatlas.mapping.profile/auto-v14",
                         "firmatlas.mapping.profile/auto-v15",
+                        "firmatlas.mapping.profile/auto-v16",
                     },
                     include_fixed_action_dynamic_query=(
                         request.profile.profile_id
@@ -1149,6 +1194,7 @@ def analyze_extracted_root(
                             "firmatlas.mapping.profile/auto-v13",
                             "firmatlas.mapping.profile/auto-v14",
                             "firmatlas.mapping.profile/auto-v15",
+                            "firmatlas.mapping.profile/auto-v16",
                         }
                     ),
                 ),
@@ -1214,6 +1260,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.native_cross_elf_call,
             native_cross_elf_calls,
             "auto:native-cross-elf-call",
+        ))
+    if "native_configuration_blob_flow" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_configuration_blob_flow,
+            native_configuration_blob_flows,
+            "auto:native-configuration-blob-flow",
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -1330,6 +1382,12 @@ def analyze_extracted_root(
             "native_cross_elf_call",
             native_cross_elf_calls,
             sum(len(item.hops) for item in native_cross_elf_calls),
+        ))
+    if "native_configuration_blob_flow" in request.profile.enabled_analyzers:
+        stages.insert(10, _stage(
+            "native_configuration_blob_flow",
+            native_configuration_blob_flows,
+            sum(len(item.flows) for item in native_configuration_blob_flows),
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         stages.insert(8, _stage(

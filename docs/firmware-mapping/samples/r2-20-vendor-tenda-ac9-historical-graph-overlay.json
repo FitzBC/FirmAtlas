@@ -28,7 +28,7 @@
     "production_document_served": true,
     "source_sha256": {
       "apps/console/src/api/client.ts": "913679853899cbc2d91fa219a4ea2ea03d07a3ff3626d3fa5587da685b02c40a",
-      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "c0c9ff79d255295cb72ba46a86a9035cb5614a3d6483fad17a0a072406c10f88",
+      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "24ca75700077d7129e1ebcd31b687ac2ed1839eefde0fe5a60d8f2e7279b85c8",
       "apps/console/src/types.ts": "b485f97405b6ab9e681b804c877053728a321c2f071419e7f0d1c42b555252cf"
     }
   },

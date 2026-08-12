@@ -82,6 +82,10 @@ AC9_R2_23_PERSISTENCE = Path(
     "docs/firmware-mapping/samples/"
     "r2-23-vendor-tenda-ac9-cross-elf-persistence.json"
 )
+AC9_R2_24_CONFIGURATION_BLOB = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-24-vendor-tenda-ac9-configuration-blob-flow.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -136,6 +140,18 @@ def build_ac9_split_web_stack_case():
         "json:$.selected_calls",
         "binds_configuration_persistence",
         "native-arm-cross-elf-call@0.1.0",
+    )
+    configuration_blob_sha = hashlib.sha256(
+        AC9_R2_24_CONFIGURATION_BLOB.read_bytes()
+    ).hexdigest()
+    configuration_blob_ref = CaseEvidenceReference(
+        "coverage:ac9-configuration-blob-state-flow-r2-24",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_24_CONFIGURATION_BLOB.as_posix(),
+        configuration_blob_sha,
+        "json:$.flow",
+        "binds_whole_configuration_image_state_write",
+        "native-arm-configuration-blob-flow@0.1.0",
     )
 
     return build_research_case(ResearchCaseInput(
@@ -221,6 +237,7 @@ def build_ac9_split_web_stack_case():
             history_replay_ref,
             ingress_ref,
             persistence_ref,
+            configuration_blob_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -281,6 +298,15 @@ def build_ac9_split_web_stack_case():
                 "doSystemCmd call preserves literal cfm Upload but leaves its "
                 "ambiguous implementation owner unresolved.",
                 (persistence_ref.evidence_ref,),
+            ),
+            CaseClaim(
+                "claim:configuration-blob-state-write",
+                "The UploadValue IPC client frames request opcode 14 with a "
+                "2016-byte message and selector literal 0 at payload offset 516; "
+                "cfmd dispatches that opcode, decodes the selector with atoi, and "
+                "calls RestoreMTD for configuration_partition[0]. This is a "
+                "whole-image state write, not an HTTP parameter or key parser.",
+                (configuration_blob_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -371,8 +397,21 @@ def build_ac9_split_web_stack_case():
                 "and connect the symbol-sized command table to Cfm IPC without "
                 "inventing an owner for an ambiguous same-name export.",
                 ("claim:configuration-persistence-chain",),
-                creates_obligations=("obligation:configuration-key-parser",),
+                creates_obligations=(
+                    "obligation:configuration-blob-state-write",
+                    "obligation:configuration-key-parser",
+                ),
                 resolves_obligations=("obligation:configuration-persistence-link",),
+            ),
+            CaseStage(
+                "stage:configuration-blob-state-write", 9,
+                "Follow the framed IPC request into the daemon dispatcher and "
+                "require the decoder and state-writer call before projecting a "
+                "whole-image configuration state edge.",
+                ("claim:configuration-blob-state-write",),
+                resolves_obligations=(
+                    "obligation:configuration-blob-state-write",
+                ),
             ),
         ),
         obligations=(
@@ -403,6 +442,14 @@ def build_ac9_split_web_stack_case():
                 (persistence_ref.evidence_ref,),
             ),
             CaseObligation(
+                "obligation:configuration-blob-state-write",
+                "Resolve the Cfm IPC opcode that persists an uploaded "
+                "configuration blob and identify its state scope.",
+                "binds_whole_configuration_image_state_write",
+                CaseObligationStatus.RESOLVED,
+                (configuration_blob_ref.evidence_ref,),
+            ),
+            CaseObligation(
                 "obligation:configuration-key-parser",
                 "Recover the uploaded blob parser and key-level persistence flow; "
                 "until then retain a wildcard configuration-state write surface.",
@@ -424,6 +471,9 @@ def build_ac9_split_web_stack_case():
             "would fabricate a direct ingress edge and conceal the missing upload chain.",
             "Assuming every /cgi-bin operation uses websFormDefine would miss the "
             "independent UploadCfg/DownloadCfg string-switch dispatcher.",
+            "Treating UploadValue as the uploaded-blob parser would miss the "
+            "opcode-14 daemon dispatch and fabricate key-level semantics from a "
+            "whole-configuration-image write.",
         ),
         paper_uses=(
             "Motivating case for why communication mapping must precede "
@@ -437,6 +487,8 @@ def build_ac9_split_web_stack_case():
             "tokens, configuration keys, and inferred paths need separate states.",
             "Architecture-split case where a second dispatcher family changes an "
             "obligation from unknown ingress to known owner plus open persistence.",
+            "Whole-image state-flow case showing why IPC framing, daemon dispatch, "
+            "and key-level parsing must remain separate evidence layers.",
         ),
         limitations=(
             "The native result proves selected static registrations, not runtime "

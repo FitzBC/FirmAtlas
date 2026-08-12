@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:56e3cd9553e44f5236a3814c0b4301e663e8323f13793eafb091a76332357669",
+      "case_id": "research-case:7f4662105261039876cdc3c100f5f2c9bd3b4236a0eb50b4e112d1fdeb5a1275",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -82,7 +82,7 @@
           "evidence_ref": "coverage:ac9-historical-graph-overlay",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-20-vendor-tenda-ac9-historical-graph-overlay.json",
-          "source_artifact_sha256": "03d2a3cf075c56614cff23722019b6ec5553fc97b1ceb891991154b10dfa63e2",
+          "source_artifact_sha256": "63875bfc54e45bf9baa1e6f127868c54d3992dd47b2c4340b9de5f4c429da39e",
           "locator": "json:$.historical_comparison",
           "capability": "compares_historical_expectations_without_fact_promotion",
           "producer": "historical-graph-overlay@v1alpha1"
@@ -122,6 +122,15 @@
           "locator": "json:$.selected_calls",
           "capability": "binds_configuration_persistence",
           "producer": "native-arm-cross-elf-call@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-configuration-blob-state-flow-r2-24",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-24-vendor-tenda-ac9-configuration-blob-flow.json",
+          "source_artifact_sha256": "9865d8084d7acfd8796a525d7cd555e0ffe228cf87cd8f49bb8869b91cd12113",
+          "locator": "json:$.flow",
+          "capability": "binds_whole_configuration_image_state_write",
+          "producer": "native-arm-configuration-blob-flow@0.1.0"
         },
         {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
@@ -182,6 +191,14 @@
           "statement": "Verified ARM PLT calls and dynamic exports connect UploadCfg's handler to tpi_sys_cfg_upload, while gCtlCmdArr binds command Upload to UploadValue and its SendMsg/RecvMsg IPC pair. The doSystemCmd call preserves literal cfm Upload but leaves its ambiguous implementation owner unresolved.",
           "evidence_refs": [
             "coverage:ac9-cross-elf-persistence-r2-23"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:configuration-blob-state-write",
+          "statement": "The UploadValue IPC client frames request opcode 14 with a 2016-byte message and selector literal 0 at payload offset 516; cfmd dispatches that opcode, decodes the selector with atoi, and calls RestoreMTD for configuration_partition[0]. This is a whole-image state write, not an HTTP parameter or key parser.",
+          "evidence_refs": [
+            "coverage:ac9-configuration-blob-state-flow-r2-24"
           ],
           "status": "supported"
         },
@@ -310,10 +327,24 @@
             "claim:configuration-persistence-chain"
           ],
           "creates_obligations": [
+            "obligation:configuration-blob-state-write",
             "obligation:configuration-key-parser"
           ],
           "resolves_obligations": [
             "obligation:configuration-persistence-link"
+          ],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-blob-state-write",
+          "order": 9,
+          "interpretation": "Follow the framed IPC request into the daemon dispatcher and require the decoder and state-writer call before projecting a whole-image configuration state edge.",
+          "claim_ids": [
+            "claim:configuration-blob-state-write"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [
+            "obligation:configuration-blob-state-write"
           ],
           "rejects_obligations": []
         }
@@ -348,6 +379,15 @@
           ]
         },
         {
+          "obligation_id": "obligation:configuration-blob-state-write",
+          "statement": "Resolve the Cfm IPC opcode that persists an uploaded configuration blob and identify its state scope.",
+          "required_capability": "binds_whole_configuration_image_state_write",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "coverage:ac9-configuration-blob-state-flow-r2-24"
+          ]
+        },
+        {
           "obligation_id": "obligation:configuration-key-parser",
           "statement": "Recover the uploaded blob parser and key-level persistence flow; until then retain a wildcard configuration-state write surface.",
           "required_capability": "binds_configuration_key_parser",
@@ -361,7 +401,8 @@
         "Treating a route string and a similar symbol name as a binding would skip the registrar call-site proof.",
         "Treating a cross-version historical interface match as a current vulnerability would collapse structural observation, version applicability, and exploitability into one unsupported claim.",
         "Treating a native configuration key as an HTTP request parameter would fabricate a direct ingress edge and conceal the missing upload chain.",
-        "Assuming every /cgi-bin operation uses websFormDefine would miss the independent UploadCfg/DownloadCfg string-switch dispatcher."
+        "Assuming every /cgi-bin operation uses websFormDefine would miss the independent UploadCfg/DownloadCfg string-switch dispatcher.",
+        "Treating UploadValue as the uploaded-blob parser would miss the opcode-14 daemon dispatch and fabricate key-level semantics from a whole-configuration-image write."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
@@ -369,7 +410,8 @@
         "Worked example for obligation-preserving analysis and false-merge prevention.",
         "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions.",
         "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states.",
-        "Architecture-split case where a second dispatcher family changes an obligation from unknown ingress to known owner plus open persistence."
+        "Architecture-split case where a second dispatcher family changes an obligation from unknown ingress to known owner plus open persistence.",
+        "Whole-image state-flow case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",
@@ -1342,7 +1384,7 @@
       ]
     },
     {
-      "case_id": "research-case:c82ee7673eba8e13c7ce600b0bda4735c9be1484efff981424733bfaf773e8f0",
+      "case_id": "research-case:f8af8264c6929ac8f1d8fff56052261f6edf681327df8257ec7eebbc827f7236",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -2054,7 +2096,7 @@
           "evidence_ref": "coverage:ac9-dlna-http-console-graph",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-19-vendor-tenda-ac9-http-console-graph.json",
-          "source_artifact_sha256": "c04276257d3f08ebec2bddd11d7b872c3e7edfb002302469b0f9c793528c63a7",
+          "source_artifact_sha256": "0d7aec8ffde03572bc9fbd8329793f0f769ee26d732d80fc03ea164b58b331e4",
           "locator": "json:$.http_acceptance",
           "capability": "replays_product_graph_query_with_evidence",
           "producer": "communication-graph-http-console@v1alpha1"

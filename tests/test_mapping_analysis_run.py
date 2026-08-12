@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 
 from firmatlas.mapping import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V16,
     BUILTIN_ANALYZER_REGISTRY_V15,
     BUILTIN_ANALYZER_REGISTRY_V14,
     BUILTIN_ANALYZER_REGISTRY_V13,
@@ -26,18 +27,18 @@ from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class MappingAnalysisRunContractTests(unittest.TestCase):
-    def test_current_default_profile_and_registry_have_frozen_v15_aliases(self):
+    def test_current_default_profile_and_registry_have_frozen_v16_aliases(self):
         self.assertEqual(
-            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v15()
+            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v16()
         )
         self.assertEqual(
-            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V15
+            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V16
         )
         self.assertNotEqual(
-            MappingAnalysisProfile.auto_v15(), MappingAnalysisProfile.auto_v14()
+            MappingAnalysisProfile.auto_v16(), MappingAnalysisProfile.auto_v15()
         )
         self.assertNotEqual(
-            BUILTIN_ANALYZER_REGISTRY_V15, BUILTIN_ANALYZER_REGISTRY_V14
+            BUILTIN_ANALYZER_REGISTRY_V16, BUILTIN_ANALYZER_REGISTRY_V15
         )
 
     AC9_ROOT = Path(
@@ -99,6 +100,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "native_cgi_dispatch",
                 "native_pointer_command_binding",
                 "native_cross_elf_call",
+                "native_configuration_blob_flow",
                 "arm_literal_xref",
                 "arm_feature_pivot",
                 "scheduler", "catalog",
@@ -357,9 +359,9 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v15", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v16", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v15",
+            "firmatlas.mapping.analyzer-registry/builtin-v16",
             result.analyzer_registry_id,
         )
 
@@ -495,6 +497,23 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
              cross_calls["UploadValue"].candidate_id),
             call_edges,
         )
+        blob_flow = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.NATIVE_CONFIGURATION_BLOB_FLOW
+        )
+        blob_attributes = dict(blob_flow.attributes)
+        self.assertEqual("14", blob_attributes["request_opcode"])
+        self.assertEqual("RestoreMTD", blob_attributes["state_writer_symbol"])
+        self.assertEqual(
+            "configuration_partition[0]", blob_attributes["state_scope"]
+        )
+        blob_stage = next(
+            item for item in result.stages
+            if item.stage_name == "native_configuration_blob_flow"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, blob_stage.coverage_status)
+        self.assertEqual(1, blob_stage.output_count)
         feature_gate_stage = next(
             item for item in result.stages
             if item.stage_name == "frontend_feature_gate"
