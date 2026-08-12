@@ -72,6 +72,9 @@ UploadValue@libCfm:0x429c
 - 本轮限定为 firmware mapping 研究与其图谱展示，按仓库 research exception 不执行 SSH
   部署；本地验收后提交并推送。
 
+Git 检查点：`2de178c685b0b568fc32ce248a98f7e75707612e`（首次提交；随后仅补充本轮交接
+元数据并 amend，最终 revision 见该轮 Git 历史）。
+
 ## 反思、反事实与边界
 
 - 最重要的修正是模块边界：`UploadValue` 是 IPC client，不是 parser；真实 dispatcher owner
