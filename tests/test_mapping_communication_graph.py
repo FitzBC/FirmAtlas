@@ -491,6 +491,18 @@ submitConfig();'''
             },
             {item.preset_id for item in graph.view_presets},
         )
+        communication_components = next(
+            item for item in graph.view_presets
+            if item.preset_id == "communication_components"
+        )
+        self.assertTrue(
+            {"interface", "dispatch", "handler", "communication_relation"}
+            <= set(communication_components.node_kinds)
+        )
+        self.assertTrue(
+            {"dispatched_by", "binds_handler", "calls"}
+            <= set(communication_components.edge_kinds)
+        )
 
     def test_projects_logical_rpc_backend_principal_access_and_response_contract(self):
         request = DiscoveryCandidate(

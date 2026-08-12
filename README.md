@@ -143,7 +143,7 @@ PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
   --graph-max-hops 4
 ```
 
-该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Frontend Feature Gate、Frontend Invocation Reachability、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。可选 `--graph-output` 会从同一 Catalog 生成确定性的通信架构图 read model；`--graph-focus` 可重复，按精确接口身份进行有界语义跳转，制品归属边不会扩大焦点。当前默认冻结为 `auto-v14`：它在 `auto-v13` 基础上加入 ARM CGI string-switch dispatcher，并把 AC9 `POST /cgi-bin/UploadCfg → httpd@0x3b850` 表示为 request→dispatch→handler；图谱本身仍不是推理器，也不会创造运行时或漏洞事实。AC9 的 3 条 DLNA feature pivot 全部落在 `GetUSBStatus → formGetUSBStatus@0xa62d0`，没有三条 DLNA 配置 binding；官方 AC18 启用 build 则恢复 `GetDlnaCfg / SetDlnaCfg / expandDlnaFile` 及各自 handler。该家族阳性对照支持 build 裁剪候选，但不会把 AC18 owner 或漏洞状态迁移给 AC9。首要样本最新结果见 [R2-22 配置入口](./docs/firmware-mapping/progress/2026-08-11-r2-22-ac9-configuration-ingress.md)与 [R2-17 通信架构图](./docs/firmware-mapping/progress/2026-08-10-r2-17-ac9-dlna-communication-graph.md)。参数线索索引对已验证的前端请求参数执行有界同固件精确 token 检索，显式发布阳性、阴性与覆盖受限结果，但不会把字符串共现冒充数据流。
+该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Frontend Feature Gate、Frontend Invocation Reachability、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的 ARM PIC、Native ubus 等确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。可选 `--graph-output` 会从同一 Catalog 生成确定性的通信架构图 read model；`--graph-focus` 可重复，按精确接口身份进行有界语义跳转，制品归属边不会扩大焦点。当前默认冻结为 `auto-v15`：它在 `auto-v14` 基础上加入 symbol-sized command table 与 ARM `BL → PLT relocation → DT_NEEDED/export` 跨 ELF 调用链，把 AC9 `POST /cgi-bin/UploadCfg → httpd → libtpi → cfm Upload → libCfm SendMsg/RecvMsg` 表示为证据闭合图；同名 export 不唯一时 owner 保持未决。图谱本身仍不是推理器，也不会创造运行时或漏洞事实。AC9 的 3 条 DLNA feature pivot 全部落在 `GetUSBStatus → formGetUSBStatus@0xa62d0`，没有三条 DLNA 配置 binding；官方 AC18 启用 build 则恢复 `GetDlnaCfg / SetDlnaCfg / expandDlnaFile` 及各自 handler。该家族阳性对照支持 build 裁剪候选，但不会把 AC18 owner 或漏洞状态迁移给 AC9。首要样本最新结果见 [R2-23 跨 ELF 配置链](./docs/firmware-mapping/progress/2026-08-12-r2-23-ac9-cross-elf-persistence.md)与 [R2-22 配置入口](./docs/firmware-mapping/progress/2026-08-11-r2-22-ac9-configuration-ingress.md)。参数线索索引对已验证的前端请求参数执行有界同固件精确 token 检索，显式发布阳性、阴性与覆盖受限结果，但不会把字符串共现冒充数据流。
 
 将 AnalyzeRun 与图发布到本地 SQLite，并用与后续 HTTP/Console 相同的语义查询：
 
@@ -167,6 +167,8 @@ PYTHONPATH=src python3 -m firmatlas.cli mapping query-graph \
 精确节点焦点切换接口结构、参数与状态、通信组件、完整性与义务四种视图；节点侧栏展示属性、
 相邻语义关系与源 Catalog EvidenceAtom。AC9 真实 HTTP/浏览器回放见
 [R2-19 HTTP 与 Console 图谱](./docs/firmware-mapping/progress/2026-08-11-r2-19-ac9-http-console-graph.md)。
+此后每轮通信测绘实现都必须在最终代码上启动本地服务，并从真实页面完成导航、焦点查询、视图
+切换、证据下钻和浏览器 Console 检查；页面验收后的代码变化会触发服务重启与完整交互重放。
 
 历史漏洞接口只能在声明版本与当前制品范围明确后用于测绘差异，不能直接当作固件真值：
 

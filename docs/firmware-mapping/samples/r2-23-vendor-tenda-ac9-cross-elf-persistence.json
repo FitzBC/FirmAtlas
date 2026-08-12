@@ -1,0 +1,247 @@
+{
+  "analysis_run_id": "mapping-analysis-run:71d15c0ba4ba32c54975143d3e92d3abd760123d9534c11289bd62ea2311f27e",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v15",
+  "anchors": {
+    "upload_command_ref": "native-command-binding:2924457b3d1342b4516075b30f9e017e99724556603fc073de84a3da217bc08d",
+    "upload_dispatch_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+  },
+  "call_edge_count": 512,
+  "catalog_id": "discovery-catalog:08c599782236221ac171a7c7edad6eb82098b535885aabb94893f6e0450280d0",
+  "closed_obligation": "configuration-persistence-link",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "graph_id": "communication-graph:46aa9a6bb630b913524bc81efe259d28600daccc4c8f98571fa0a23d259e9635",
+  "not_claimed": [
+    "doSystemCmd is owned by an arbitrary same-name export",
+    "the static call chain executed at runtime",
+    "every uploaded configuration key is parsed or persisted",
+    "a vulnerability is present or exploitable"
+  ],
+  "profile_id": "firmatlas.mapping.profile/auto-v15",
+  "remaining_obligations": [
+    "prove command process launch/runtime reachability",
+    "recover uploaded configuration key parser or retain wildcard state write",
+    "link wildcard state write to historical configuration-key sinks"
+  ],
+  "sample_role": "primary-vendor-tenda-ac9-cross-elf-persistence",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-23/v1alpha1",
+  "selected_calls": [
+    {
+      "argument_literals": [],
+      "callsite_address": "0x00009e64",
+      "candidate_id": "native-cross-elf-call:87d2e645734bc5d241952aaa95dce0c8897aa18ff08d2fff328cd6c7ba82eaf9",
+      "evidence_ids": [
+        "evidence:37d177e16a2d31d63af61b5dfe311dc3dcaa31361fbf4fd1304ac6cb5bacd40c",
+        "evidence:37ffc8c63c9013288dc339f84bdc963cc48b0bd0a2ec134514f7ecb414ab5927"
+      ],
+      "imported_symbol": "UploadValue",
+      "origin_refs": [
+        "native-command-binding:2924457b3d1342b4516075b30f9e017e99724556603fc073de84a3da217bc08d"
+      ],
+      "source_function_identity": "bin/cfm@0x00009e20",
+      "target_function_identity": "lib/libCfm.so@0x0000429c",
+      "target_resolution_status": "resolved_export"
+    },
+    {
+      "argument_literals": [],
+      "callsite_address": "0x0003ba38",
+      "candidate_id": "native-cross-elf-call:3a5b02023d9f5fb9c03e6e7d2f10c678ac8966887460d0f81f8c2749c3ea83dc",
+      "evidence_ids": [
+        "evidence:6edfcb01b9bd19a45d0e9f87af97d70892147a875625baccd27d7d17b6eeaaf6",
+        "evidence:57539d05db6e025138182efbf5bd838b3c7932799620b075bbac50a9f4e2be19"
+      ],
+      "imported_symbol": "tpi_upfile_handle",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "bin/httpd@0x0003b850",
+      "target_function_identity": "lib/libtpi.so@0x00009e80",
+      "target_resolution_status": "resolved_export"
+    },
+    {
+      "argument_literals": [],
+      "callsite_address": "0x00003b68",
+      "candidate_id": "native-cross-elf-call:d36bc6191304d4d68d0244167e9c42740aa04f1f3612e6d8385d252de02458b0",
+      "evidence_ids": [
+        "evidence:e22ae4912ce4447c8e385c14b1a0c710fd544f6115be23ae44576195b16de10d",
+        "evidence:e6f868f09349f174f7a8916fcad75a574923d96d01557071c7a9730887cb84c1"
+      ],
+      "imported_symbol": "SendMsg",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libCfm.so@0x00003a38",
+      "target_function_identity": "lib/libCfm.so@0x00003578",
+      "target_resolution_status": "resolved_export"
+    },
+    {
+      "argument_literals": [],
+      "callsite_address": "0x00003bac",
+      "candidate_id": "native-cross-elf-call:d3a529386bec86f037f34afeb2b838c481edcd9a162ee9ca9d792991ac2814f2",
+      "evidence_ids": [
+        "evidence:2c574a2b86ab648734b9a6471248c6261d572009a27c9db5aec190fc6839ef2d",
+        "evidence:889f47f2a53cf719df879a2399cc5b3fb4a4fd6bdc8a91c7addf2ca53b06b722"
+      ],
+      "imported_symbol": "RecvMsg",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libCfm.so@0x00003a38",
+      "target_function_identity": "lib/libCfm.so@0x000035ac",
+      "target_resolution_status": "resolved_export"
+    },
+    {
+      "argument_literals": [],
+      "callsite_address": "0x00004334",
+      "candidate_id": "native-cross-elf-call:8311e226fcced7dd5c1ebccdf7135f150424f6afb8729df12184325fcd07689e",
+      "evidence_ids": [
+        "evidence:b7f6780248b95cbb35c54efafef7781adb1edc7af5f37e2cf6b8148f04d2b585",
+        "evidence:f1409d6e0908529c0a298039db34392360f0f9e476d61b6b353ba19a6d6c5cd8"
+      ],
+      "imported_symbol": "SendMsg",
+      "origin_refs": [
+        "native-command-binding:2924457b3d1342b4516075b30f9e017e99724556603fc073de84a3da217bc08d"
+      ],
+      "source_function_identity": "lib/libCfm.so@0x0000429c",
+      "target_function_identity": "lib/libCfm.so@0x00003578",
+      "target_resolution_status": "resolved_export"
+    },
+    {
+      "argument_literals": [],
+      "callsite_address": "0x00004374",
+      "candidate_id": "native-cross-elf-call:4a0588c90f012bb32314149a5c887da3113350d2078a5af378e769e66c106d55",
+      "evidence_ids": [
+        "evidence:91ea8bc535fdf4f513f510e5cb9d1ea80299036abec30931b8d70ff7350766bd",
+        "evidence:aecb80f5d7962d7df1d3b2ffc3f2d1e77859d21a18bbb407e10149c5c38038f8"
+      ],
+      "imported_symbol": "RecvMsg",
+      "origin_refs": [
+        "native-command-binding:2924457b3d1342b4516075b30f9e017e99724556603fc073de84a3da217bc08d"
+      ],
+      "source_function_identity": "lib/libCfm.so@0x0000429c",
+      "target_function_identity": "lib/libCfm.so@0x000035ac",
+      "target_resolution_status": "resolved_export"
+    },
+    {
+      "argument_literals": [
+        "et robowr 0x00 0x12 0x155"
+      ],
+      "callsite_address": "0x00008e88",
+      "candidate_id": "native-cross-elf-call:40207d1c699ecd6ca42e8fe66be5a01027b29bbacd340fb256fc1c0bff531d52",
+      "evidence_ids": [
+        "evidence:15481d1358f93c225f86a20c95c33ff346a9beffe82c743923725011d196ac10",
+        "evidence:0aacd50d04dfe89a311b5865d11a114e3f4ba136a62665a7d5f7652fd2135bba"
+      ],
+      "imported_symbol": "doSystemCmd",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libtpi.so@0x00008e6c",
+      "target_function_identity": "",
+      "target_resolution_status": "unresolved_import_owner"
+    },
+    {
+      "argument_literals": [
+        "cfm Restore"
+      ],
+      "callsite_address": "0x00008e98",
+      "candidate_id": "native-cross-elf-call:7549e510a5bd353c448bcfbd470a4a5cda3fe181d396b8c4cd58485f495c2178",
+      "evidence_ids": [
+        "evidence:598e5d47f7ab0671078af55389bd105a3076ac14b65f6eacce0f137768a262be",
+        "evidence:65d6c79200c256562291a92d063a0323f6a0a9c75f1dbf07c34e9e0c31cf1066"
+      ],
+      "imported_symbol": "doSystemCmd",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libtpi.so@0x00008e6c",
+      "target_function_identity": "",
+      "target_resolution_status": "unresolved_import_owner"
+    },
+    {
+      "argument_literals": [
+        "upgrade &"
+      ],
+      "callsite_address": "0x00009944",
+      "candidate_id": "native-cross-elf-call:760fc698146cb6b4a0882891d5c41dfc05ac62d7f43575a671480dbf759afe6e",
+      "evidence_ids": [
+        "evidence:6b17a5b71f709b42030b8d6ecbfb06e043f9cf16b9f3d3cb4a3e9e19774e6885",
+        "evidence:7fc93029cbe759db78c089af8672b0dc18255910e03c6a2e9a24bec1e24dd7a7"
+      ],
+      "imported_symbol": "doSystemCmd",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libtpi.so@0x00009818",
+      "target_function_identity": "",
+      "target_resolution_status": "unresolved_import_owner"
+    },
+    {
+      "argument_literals": [
+        "rm /var/image"
+      ],
+      "callsite_address": "0x0000995c",
+      "candidate_id": "native-cross-elf-call:38585f6f15e8e2e0e1b877e75558fb753e405ea40ed6ab179b96844b08e985be",
+      "evidence_ids": [
+        "evidence:8142d3942351a1c169d9ab019c1029cef629ea685dc64e636e2db204877f64c0",
+        "evidence:0adbe0c8d1ab1120fa2cb0e23f6e7b71426d5a9b3015c7ac352edfd2d1b032f4"
+      ],
+      "imported_symbol": "doSystemCmd",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libtpi.so@0x00009818",
+      "target_function_identity": "",
+      "target_resolution_status": "unresolved_import_owner"
+    },
+    {
+      "argument_literals": [
+        "cfm Upload"
+      ],
+      "callsite_address": "0x00009d68",
+      "candidate_id": "native-cross-elf-call:4a771bbd7dde5f07e1c0e530c131f471dccddcaf1ec09096e10f00008c5689ca",
+      "evidence_ids": [
+        "evidence:420d8cc27bca15e4560016ea1797f45bb58fe1f36ac0e29867d3b44aa1fd5731",
+        "evidence:8d99da897b771859aa9d7d93b45730cb5a826332b8c1d1713dcc2db51bbc1aea"
+      ],
+      "imported_symbol": "doSystemCmd",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libtpi.so@0x00009c5c",
+      "target_function_identity": "",
+      "target_resolution_status": "unresolved_import_owner"
+    },
+    {
+      "argument_literals": [],
+      "callsite_address": "0x00009ef4",
+      "candidate_id": "native-cross-elf-call:b960a84fd4a67e5be1c4bb812e0b83478350538a17b28a95d6dffac0297b0233",
+      "evidence_ids": [
+        "evidence:e50de9ad457f70189fabbeff33ada9a596047f0693d638a24e41ede83d98c7af",
+        "evidence:178a00cef22e744a6a5b94e00895b321f07350d803bd41f9aa3783678689daf1"
+      ],
+      "imported_symbol": "tpi_sys_cfg_upload",
+      "origin_refs": [
+        "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      ],
+      "source_function_identity": "lib/libtpi.so@0x00009e80",
+      "target_function_identity": "lib/libtpi.so@0x00009c5c",
+      "target_resolution_status": "resolved_export"
+    }
+  ],
+  "stages": [
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "output_count": 381,
+      "stage_name": "native_cross_elf_call"
+    },
+    {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 1,
+      "output_count": 15,
+      "stage_name": "native_pointer_command_binding"
+    }
+  ]
+}

@@ -3,11 +3,13 @@ import json
 from contextlib import redirect_stdout
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 import tempfile
 import unittest
 
 from firmatlas.mapping import (
     CommunicationGraphQuery,
+    CommunicationGraphEdgeKind,
     CoverageStatus,
     CommunicationGraphConflictError,
     DiscoveryCatalogRepository,
@@ -22,9 +24,35 @@ from firmatlas.mapping import (
 )
 from tests.test_mapping_catalog_repository import _catalog
 from firmatlas.cli import main as firmatlas_main
+from firmatlas.mapping.repository import _reachable_graph_neighbors
 
 
 class CommunicationGraphRepositoryContractTests(unittest.TestCase):
+    def test_call_edges_expand_forward_without_merging_other_callers(self):
+        edges = (
+            SimpleNamespace(
+                edge_kind=CommunicationGraphEdgeKind.CALLS,
+                source_ref="caller:a", target_ref="callee:shared",
+            ),
+            SimpleNamespace(
+                edge_kind=CommunicationGraphEdgeKind.CALLS,
+                source_ref="caller:b", target_ref="callee:shared",
+            ),
+            SimpleNamespace(
+                edge_kind=CommunicationGraphEdgeKind.BINDS_HANDLER,
+                source_ref="dispatch:a", target_ref="caller:a",
+            ),
+        )
+
+        self.assertEqual(
+            {"callee:shared", "dispatch:a"},
+            _reachable_graph_neighbors({"caller:a"}, edges),
+        )
+        self.assertEqual(
+            set(),
+            _reachable_graph_neighbors({"callee:shared"}, edges),
+        )
+
     def setUp(self):
         self.repository = DiscoveryCatalogRepository(":memory:")
         self.catalog = _catalog()

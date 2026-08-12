@@ -70,6 +70,7 @@ class CommunicationGraphEdgeKind(str, Enum):
     HAS_NATIVE_ASSOCIATION = "has_native_association"
     ASSOCIATED_WITH = "associated_with"
     SATISFIES_OBLIGATION = "satisfies_obligation"
+    CALLS = "calls"
 
 
 @dataclass(frozen=True)
@@ -160,17 +161,20 @@ _VIEW_PRESETS = (
         "communication_components",
         "Communication components",
         (
-            "artifact", "component", "communication_relation",
+            "artifact", "interface", "invocation", "component",
+            "communication_relation", "dispatch",
             "route_binding", "handler", "evidence_candidate",
             "service_assembly", "runtime_principal", "backend_binding",
             "feature_pivot", "literal_xref", "association",
         ),
         (
+            "has_invocation_state", "dispatched_by",
             "initiates_relationship", "targets_component",
             "has_route_binding", "binds_handler", "assembled_by",
             "has_backend_binding", "executed_by", "has_literal_xref",
             "has_feature_pivot", "pivots_to_route_binding",
             "has_native_association", "associated_with",
+            "calls",
         ),
         "Cross-artifact and cross-process communication relationships.",
     ),
@@ -437,6 +441,8 @@ def _candidate_node_kind(kind: DiscoveryCandidateKind) -> CommunicationGraphNode
             CommunicationGraphNodeKind.DISPATCH,
         DiscoveryCandidateKind.NATIVE_CGI_DISPATCH:
             CommunicationGraphNodeKind.DISPATCH,
+        DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL:
+            CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_REQUEST_PROTECTION:
             CommunicationGraphNodeKind.PROTECTION,
         DiscoveryCandidateKind.NATIVE_SERVICE_ASSEMBLY:
@@ -782,6 +788,67 @@ def project_communication_architecture_graph(
                 candidate.evidence_ids,
                 "parameter_clue_assessment.target_ref",
             ))
+    for candidate in catalog.candidates:
+        if candidate.candidate_kind is not DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL:
+            continue
+        attributes = dict(candidate.attributes)
+        source_function_identity = attributes["source_function_identity"]
+        parent_calls = tuple(
+            item for item in catalog.candidates
+            if (
+                item.candidate_kind is DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL
+                and dict(item.attributes)["target_function_identity"]
+                == source_function_identity
+            )
+        )
+        for parent in parent_calls:
+            edges.append(_edge(
+                CommunicationGraphEdgeKind.CALLS,
+                parent.candidate_id,
+                candidate.candidate_id,
+                candidate.claim_status.value,
+                candidate.candidate_id,
+                tuple(dict.fromkeys((*parent.evidence_ids, *candidate.evidence_ids))),
+                "native_cross_elf_call.function_chain",
+            ))
+        for origin_ref in json.loads(attributes["origin_refs"]):
+            if origin_ref not in candidate_by_id:
+                continue
+            origin_attributes = dict(candidate_by_id[origin_ref].attributes)
+            if (
+                origin_attributes.get("handler_identity")
+                != source_function_identity
+            ):
+                continue
+            edges.append(_edge(
+                CommunicationGraphEdgeKind.CALLS,
+                origin_ref,
+                candidate.candidate_id,
+                candidate.claim_status.value,
+                candidate.candidate_id,
+                candidate.evidence_ids,
+                "native_cross_elf_call.origin_refs",
+            ))
+        argument_literals = set(json.loads(attributes["argument_literals"]))
+        for binding in catalog.candidates:
+            if binding.candidate_kind is not DiscoveryCandidateKind.NATIVE_COMMAND_BINDING:
+                continue
+            command = dict(binding.attributes).get("command", "")
+            if command and any(
+                literal.split()[-1:] == [command]
+                for literal in argument_literals
+            ):
+                edges.append(_edge(
+                    CommunicationGraphEdgeKind.CALLS,
+                    candidate.candidate_id,
+                    binding.candidate_id,
+                    "supported",
+                    candidate.candidate_id,
+                    tuple(dict.fromkeys((
+                        *candidate.evidence_ids, *binding.evidence_ids,
+                    ))),
+                    "native_cross_elf_call.argument_to_command_binding",
+                ))
     for association in catalog.associations:
         edges.append(_edge(
             CommunicationGraphEdgeKind.HAS_NATIVE_ASSOCIATION,

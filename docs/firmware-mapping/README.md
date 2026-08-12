@@ -99,6 +99,7 @@
 | [R2-17 AC9/AC18 通信架构图](./progress/2026-08-10-r2-17-ac9-dlna-communication-graph.md) | Catalog-only 图投影、焦点预算、证据/覆盖/义务叠加与 owner 对照 | 图 schema、边引用、焦点规则、义务关闭或 UI 查询合同变化时 |
 | [R2-18 AC9 持久化图查询](./progress/2026-08-11-r2-18-ac9-persisted-graph-query.md) | SQLite 不可变发布、统一 preset/focus/evidence 查询、重开与 CLI | 图存储 schema、查询语义、证据闭包、预算或产品 Adapter 变化时 |
 | [R2-19 AC9 HTTP/Console 图谱](./progress/2026-08-11-r2-19-ac9-http-console-graph.md) | 共享查询 HTTP Adapter、接口焦点、四视图、证据/义务侧栏与真实浏览器回放 | HTTP 参数、图谱交互、响应式布局或 evidence overlay 变化时 |
+| [R2-23 AC9 跨 ELF 配置链](./progress/2026-08-12-r2-23-ac9-cross-elf-persistence.md) | `UploadCfg` 从 httpd、libtpi、cfm 命令表到 libCfm IPC 的证据链 | PLT/export、命令表、调用链或配置持久化义务变化时 |
 | [代表性样本基线](./samples/README.md) | 平台类别分布、样本角色、缺口和每轮验证流程 | 样本、类别或数据角色改变时 |
 | [历史漏洞知识研究构想](../research-idea-historical-firmware-vulnerability-knowledge.md) | 上层历史案例、漏洞关联与 PoC 研究方向 | 研究方向演进时 |
 
@@ -121,6 +122,12 @@ flowchart LR
 ```
 
 系统先完整记录可见制品范围，再用前端、后端、配置和二进制证据生产器生成第一批证据原子。线索调度器根据证据能力和分析预算选择下一步，不以某个 seed 切出唯一局部范围。分析结束意味着工作队列达到固定点或预算边界，并不意味着所有未知均已解决。
+
+每轮实现的产品验收固定包含：最终代码下启动真实本地 HTTP 服务，检查健康与本轮焦点 API，
+再从 Console 页面实际进入“通信测绘”，完成图选择、检索/聚焦、视图切换、证据下钻及浏览器
+Console 错误检查。若验收后代码或前端产物变化，必须重启服务并重放交互；单元测试、静态快照或
+直接读取 SQLite 都不能替代页面验收。进度文档应记录服务命令、焦点、可见结果、Console 结果与
+截图位置，使后续会话可以复现而不是依赖当前浏览器状态。
 
 ## 5. 里程碑总览
 
@@ -189,8 +196,9 @@ M1 工作项：
 | R2-20 | AC9 历史漏洞图谱覆盖层 | 已验证 | R2-17/18/19 | 13 expectations + 71-record denominator + immutable overlay/query + Console history view |
 | R2-21 | AC9 历史漏检优先队列与字段类型 | 已验证 | R2-20 | source-typed clue + repeatable immutable supplements + 14-expectation replay + 57-task queue |
 | R2-22 | AC9 配置上传入口与 CGI 字符串分发 | 已验证 | R2-21 | `POST multipart filename → ARM six-entry string switch → httpd handler` + auto-v14 + graph path + persistence obligation split |
+| R2-23 | AC9 跨 ELF 配置持久化链 | 已验证 | R2-22 | symbol-sized `gCtlCmdArr` + `BL→PLT→DT_NEEDED/export` + `cfm Upload` literal + directed call-chain graph + auto-v15 + 真实页面验收 |
 
-**下一项建议**：继续以 AC9 为主样本，把 R2-22 已人工重放的 `httpd → libtpi:tpi_sys_cfg_upload → cfm Upload → libCfm:UploadValue` 固化为通用跨 ELF PLT/call-chain producer；配置上传先建模为 wildcard state-write surface，再连接 native configuration-key sink。缺少 key 级 parser 证明时不得发布精确 key flow，更不得把配置键写成 HTTP 参数。
+**下一项建议**：继续以 AC9 为主样本恢复上传 blob 的配置键 parser；在 key-level parser 证据出现前只发布 wildcard configuration-state write surface，再连接历史 native configuration-key sink，不得把配置键写成 HTTP 参数。
 
 ## 7. 跨会话无缝工作协议
 

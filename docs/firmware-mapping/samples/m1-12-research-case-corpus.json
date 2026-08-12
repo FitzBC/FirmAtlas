@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:3d6c7e0441aeb25e3c397ba95fa425b7b39ad44fbafccb746c2088f438c58e92",
+      "case_id": "research-case:56e3cd9553e44f5236a3814c0b4301e663e8323f13793eafb091a76332357669",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -82,7 +82,7 @@
           "evidence_ref": "coverage:ac9-historical-graph-overlay",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-20-vendor-tenda-ac9-historical-graph-overlay.json",
-          "source_artifact_sha256": "6b86bb559df2388e6acdac32ca9bf5974a54ad8b738f8839ecc9017f83a9e15e",
+          "source_artifact_sha256": "03d2a3cf075c56614cff23722019b6ec5553fc97b1ceb891991154b10dfa63e2",
           "locator": "json:$.historical_comparison",
           "capability": "compares_historical_expectations_without_fact_promotion",
           "producer": "historical-graph-overlay@v1alpha1"
@@ -109,10 +109,19 @@
           "evidence_ref": "coverage:ac9-configuration-ingress-r2-22",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-22-vendor-tenda-ac9-configuration-ingress.json",
-          "source_artifact_sha256": "6f8e66039c60e2cce553a39ebc7c5530d8216d88f72b85a52027c5f3fa2fd565",
+          "source_artifact_sha256": "3c117982bbdfd3166fdc25f5a634237af3002dbebf9b5126d85e2d5a40393135",
           "locator": "json:$.automated_chain",
           "capability": "binds_configuration_ingress",
           "producer": "native-arm-cgi-string-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-cross-elf-persistence-r2-23",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-23-vendor-tenda-ac9-cross-elf-persistence.json",
+          "source_artifact_sha256": "0215beefc4b27f6808d327b86be97065ac3680e2f4753aac21e327b37fca53cc",
+          "locator": "json:$.selected_calls",
+          "capability": "binds_configuration_persistence",
+          "producer": "native-arm-cross-elf-call@0.1.0"
         },
         {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
@@ -165,6 +174,14 @@
           "statement": "POST /cgi-bin/UploadCfg carries multipart form field filename; an independent ARM string-switch dispatcher at 0x3a9a0 binds UploadCfg to bin/httpd@0x3b850 with a six-entry family proof.",
           "evidence_refs": [
             "coverage:ac9-configuration-ingress-r2-22"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:configuration-persistence-chain",
+          "statement": "Verified ARM PLT calls and dynamic exports connect UploadCfg's handler to tpi_sys_cfg_upload, while gCtlCmdArr binds command Upload to UploadValue and its SendMsg/RecvMsg IPC pair. The doSystemCmd call preserves literal cfm Upload but leaves its ambiguous implementation owner unresolved.",
+          "evidence_refs": [
+            "coverage:ac9-cross-elf-persistence-r2-23"
           ],
           "status": "supported"
         },
@@ -284,6 +301,21 @@
             "obligation:configuration-ingress"
           ],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-cross-elf-persistence",
+          "order": 8,
+          "interpretation": "Resolve verified PLT imports only through current or dependency-qualified exports, recover the exact cfm Upload call argument, and connect the symbol-sized command table to Cfm IPC without inventing an owner for an ambiguous same-name export.",
+          "claim_ids": [
+            "claim:configuration-persistence-chain"
+          ],
+          "creates_obligations": [
+            "obligation:configuration-key-parser"
+          ],
+          "resolves_obligations": [
+            "obligation:configuration-persistence-link"
+          ],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -310,6 +342,15 @@
           "obligation_id": "obligation:configuration-persistence-link",
           "statement": "Automate the handler-to-libtpi-to-cfm IPC chain and model the uploaded configuration as a wildcard state-write surface.",
           "required_capability": "binds_configuration_persistence",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "coverage:ac9-cross-elf-persistence-r2-23"
+          ]
+        },
+        {
+          "obligation_id": "obligation:configuration-key-parser",
+          "statement": "Recover the uploaded blob parser and key-level persistence flow; until then retain a wildcard configuration-state write surface.",
+          "required_capability": "binds_configuration_key_parser",
           "status": "open",
           "closure_evidence_refs": []
         }
@@ -1301,7 +1342,7 @@
       ]
     },
     {
-      "case_id": "research-case:aae03b93e87ed0e3cda8e0238a65df6c4a3461cdfbfb20907265cdee8f32ab21",
+      "case_id": "research-case:c82ee7673eba8e13c7ce600b0bda4735c9be1484efff981424733bfaf773e8f0",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -2013,7 +2054,7 @@
           "evidence_ref": "coverage:ac9-dlna-http-console-graph",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-19-vendor-tenda-ac9-http-console-graph.json",
-          "source_artifact_sha256": "faaabafc83a6ac2a5d55949a15a1936ac731b3cc57fb66265aea8f5648490609",
+          "source_artifact_sha256": "c04276257d3f08ebec2bddd11d7b872c3e7edfb002302469b0f9c793528c63a7",
           "locator": "json:$.http_acceptance",
           "capability": "replays_product_graph_query_with_evidence",
           "producer": "communication-graph-http-console@v1alpha1"

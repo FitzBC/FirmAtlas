@@ -138,6 +138,15 @@ from .native_cgi_dispatch import (
     ArmCgiDispatchResult,
     discover_arm_cgi_string_dispatch,
 )
+from .native_cross_elf_call import (
+    NATIVE_CROSS_ELF_CALL_SCHEMA_VERSION,
+    ArmCrossElfArtifact,
+    ArmCrossElfCallAnchor,
+    ArmCrossElfCallHop,
+    ArmCrossElfCallPolicy,
+    ArmCrossElfCallResult,
+    discover_arm_cross_elf_calls,
+)
 from .native_command_binding import (
     NATIVE_COMMAND_BINDING_SCHEMA_VERSION,
     NativeCommandBinding,
@@ -145,7 +154,9 @@ from .native_command_binding import (
     NativeCommandBindingResult,
     NativeCommandBindingStatus,
     NativeCommandTableProfile,
+    NativePointerCommandTableProfile,
     discover_native_command_table_bindings,
+    discover_native_pointer_command_table_bindings,
 )
 from .inventory import (
     INVENTORY_SCHEMA_VERSION,
@@ -294,6 +305,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V15,
     BUILTIN_ANALYZER_REGISTRY_V14,
     BUILTIN_ANALYZER_REGISTRY_V13,
     BUILTIN_ANALYZER_REGISTRY_V12,
@@ -455,7 +467,9 @@ __all__ = (
     "NativeCommandBindingResult",
     "NativeCommandBindingStatus",
     "NativeCommandTableProfile",
+    "NativePointerCommandTableProfile",
     "discover_native_command_table_bindings",
+    "discover_native_pointer_command_table_bindings",
     "ARM_LITERAL_XREF_SCHEMA_VERSION",
     "ARM_FEATURE_PIVOT_SCHEMA_VERSION",
     "ArmFeaturePivot",
@@ -476,6 +490,13 @@ __all__ = (
     "ArmCgiDispatchProfile",
     "ArmCgiDispatchResult",
     "discover_arm_cgi_string_dispatch",
+    "NATIVE_CROSS_ELF_CALL_SCHEMA_VERSION",
+    "ArmCrossElfArtifact",
+    "ArmCrossElfCallAnchor",
+    "ArmCrossElfCallHop",
+    "ArmCrossElfCallPolicy",
+    "ArmCrossElfCallResult",
+    "discover_arm_cross_elf_calls",
     "discover_arm_function_literal_xrefs",
     "NATIVE_RELATIONSHIP_SCHEMA_VERSION",
     "NativeRelationship",
@@ -697,6 +718,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V15",
     "BUILTIN_ANALYZER_REGISTRY_V14",
     "BUILTIN_ANALYZER_REGISTRY_V13",
     "BUILTIN_ANALYZER_REGISTRY_V12",

@@ -19,6 +19,7 @@ from .native_relationship import NativeRelationshipResult
 from .native_arm_xref import ArmFeaturePivotResult, ArmLiteralXrefResult
 from .native_command_binding import NativeCommandBindingResult
 from .native_cgi_dispatch import ArmCgiDispatchResult
+from .native_cross_elf_call import ArmCrossElfCallResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -65,6 +66,7 @@ class DiscoveryProducerKind(str, Enum):
     ARM_FEATURE_PIVOT = "arm_feature_pivot"
     NATIVE_COMMAND_BINDING = "native_command_binding"
     NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
+    NATIVE_CROSS_ELF_CALL = "native_cross_elf_call"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -97,6 +99,7 @@ class DiscoveryCandidateKind(str, Enum):
     ARM_FEATURE_PIVOT = "arm_feature_pivot"
     NATIVE_COMMAND_BINDING = "native_command_binding"
     NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
+    NATIVE_CROSS_ELF_CALL = "native_cross_elf_call"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -235,6 +238,22 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.NATIVE_CGI_DISPATCH,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def native_cross_elf_call(
+        cls, results: Tuple[ArmCrossElfCallResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-arm-cross-elf-call", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_CROSS_ELF_CALL,
             producer,
             scope,
             results,
@@ -1172,6 +1191,43 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                                 item.handler_address
                             )),
                             ("dispatch_ref", item.binding_id),
+                        ),
+                    ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE_CROSS_ELF_CALL:
+                for item in result.hops:
+                    candidates.append(DiscoveryCandidate(
+                        item.hop_id,
+                        DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL,
+                        "{}|{}|{}".format(
+                            item.source_function_identity,
+                            item.imported_symbol,
+                            item.target_function_identity or "owner-unresolved",
+                        ),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.source_path,
+                        result.schema_version,
+                        item.evidence_ids,
+                        (
+                            ("origin_refs", json.dumps(
+                                list(item.origin_refs), separators=(",", ":")
+                            )),
+                            ("source_function_identity", item.source_function_identity),
+                            ("source_function_address", "0x{:08x}".format(
+                                item.source_function_address
+                            )),
+                            ("callsite_address", "0x{:08x}".format(
+                                item.callsite_address
+                            )),
+                            ("imported_symbol", item.imported_symbol),
+                            ("target_path", item.target_path),
+                            ("target_function_identity", item.target_function_identity),
+                            ("target_function_address", "0x{:08x}".format(
+                                item.target_function_address
+                            )),
+                            ("target_resolution_status", item.target_resolution_status),
+                            ("argument_literals", json.dumps(
+                                list(item.argument_literals), separators=(",", ":")
+                            )),
                         ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_NESTED_DISPATCH:

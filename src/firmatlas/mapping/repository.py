@@ -118,6 +118,20 @@ def _encoded(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 
 
+def _reachable_graph_neighbors(frontier: set, edges: tuple) -> set:
+    """Expand a query frontier without reversing directed call semantics."""
+    reached = set()
+    for edge in edges:
+        if edge.source_ref in frontier:
+            reached.add(edge.target_ref)
+        if (
+            edge.edge_kind is not CommunicationGraphEdgeKind.CALLS
+            and edge.target_ref in frontier
+        ):
+            reached.add(edge.source_ref)
+    return reached
+
+
 def _search_text(value: str) -> str:
     expanded = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", value)
     return " ".join(re.findall(r"[a-z0-9]+", expanded.casefold()))
@@ -790,18 +804,9 @@ class DiscoveryCatalogRepository:
             frontier = set(seeds)
             if focus_requested:
                 for distance in range(1, query.max_hops + 1):
-                    reached = set()
-                    for edge in allowed_edges:
-                        if (
-                            edge.source_ref in frontier
-                            and edge.target_ref not in distances
-                        ):
-                            reached.add(edge.target_ref)
-                        if (
-                            edge.target_ref in frontier
-                            and edge.source_ref not in distances
-                        ):
-                            reached.add(edge.source_ref)
+                    reached = _reachable_graph_neighbors(
+                        frontier, allowed_edges
+                    ) - distances.keys()
                     if not reached:
                         break
                     distances.update(

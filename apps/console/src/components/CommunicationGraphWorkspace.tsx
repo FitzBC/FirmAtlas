@@ -131,9 +131,11 @@ export function CommunicationGraphWorkspace() {
     void intelligenceApi.mappingGraph(graphId, {
       preset,
       focusNodeIds,
-      maxHops: preset === 'completeness' ? 4 : 3,
-      maxNodes: 160,
-      maxEdges: 320,
+      maxHops: preset === 'communication_components' ? 8 : (
+        preset === 'completeness' ? 4 : 3
+      ),
+      maxNodes: preset === 'communication_components' ? 240 : 160,
+      maxEdges: preset === 'communication_components' ? 480 : 320,
     }, controller.signal).then((next) => {
       setResult(next)
       setSelectedNodeId((current) => next.nodes.some(

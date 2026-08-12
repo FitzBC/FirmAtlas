@@ -5,7 +5,7 @@
     "catalog_coverage_status": "completed",
     "catalog_id": "discovery-catalog:e1b1f16da33f8d9ac0725bb3ae917efb80becc4d7b3d6db9305309126862a14a",
     "edge_count": 7212,
-    "graph_id": "communication-graph:451023b0a6422c343920f7756360aaa564e995498afdc56a53d07265c71ca7d1",
+    "graph_id": "communication-graph:15050fd4a63917119af0ffa4ce0f154841e47b72de24104d0c7b128208b1afaf",
     "graph_projection_status": "completed",
     "node_count": 5674,
     "profile_id": "firmatlas.mapping.profile/auto-v13"
@@ -25,7 +25,7 @@
     "production_document_served": true,
     "source_sha256": {
       "apps/console/src/api/client.ts": "913679853899cbc2d91fa219a4ea2ea03d07a3ff3626d3fa5587da685b02c40a",
-      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "dedfa4360a29da4c023ab5c43e792334e60b38ad31fa65d6f910ffd629d32544",
+      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "c0c9ff79d255295cb72ba46a86a9035cb5614a3d6483fad17a0a072406c10f88",
       "apps/console/src/components/MappingCatalogWorkspace.tsx": "ad2def1e6707d107a5794646b772993197dc15c4711af42eb75fe3face9ed559",
       "apps/console/src/types.ts": "b485f97405b6ab9e681b804c877053728a321c2f071419e7f0d1c42b555252cf"
     }
@@ -39,7 +39,7 @@
         "goform/SetDlnaCfg",
         "goform/expandDlnaFile?"
       ],
-      "query_id": "communication-graph-query:44574430afa9b5f5b603fd4484aaa4ce4760da0395158b286afd3757927c6232"
+      "query_id": "communication-graph-query:251b2e05037ab296318f9eef2e05c207c11f88db2a8a139a5ce222181770f62d"
     },
     "focused_interface_structure": {
       "dlnaEn_evidence": [
@@ -67,7 +67,7 @@
         "registers_route",
         "registers_route"
       ],
-      "query_id": "communication-graph-query:5ddb0754f35905688ef04e9dfb0276fa440f8efff2ab38b865bfe26e6270a0f1",
+      "query_id": "communication-graph-query:d636f92a99313937bc5b5c26f00694f29b3e2b95f90c6f9680bd1bb64a1a0932",
       "query_status": "completed"
     },
     "health": {
@@ -82,7 +82,7 @@
         "dlnaEn",
         "scanList"
       ],
-      "query_id": "communication-graph-query:3ca7b5baf214833541528d42ff65656c5a02cbeadb3f554d7ea264a67aef3064"
+      "query_id": "communication-graph-query:85a91a584c06df95ed1d00443bd49bf2f2f3483b8ba1a25710e8e34e73d9ed60"
     }
   },
   "sample_role": "tenda-ac9-primary",

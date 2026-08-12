@@ -223,6 +223,16 @@ R2-22 沿义务回到 `system_backup.html`，先恢复精确的
 但它尚未成为自动 Producer，也不能把任意配置键提升为 HTTP 参数。机器证据和精确边界见
 [R2-22 报告](./samples/r2-22-vendor-tenda-ac9-configuration-ingress.json)。
 
+R2-23 把人工 continuation 改为两个可组合的确定性事实族。`gCtlCmdArr` 的动态符号尺寸与
+四指针 entry layout 恢复 15 个命令，其中 `Upload → bin/cfm@0x9e20`；跨 ELF producer 从
+已绑定 handler 出发验证 ARM `BL`、PLT relocation、import symbol 与当前/`DT_NEEDED`
+限定的 export，得到 `httpd → tpi_upfile_handle → tpi_sys_cfg_upload` 和
+`UploadValue → SendMsg/RecvMsg`。`doSystemCmd@0x9d68` 的 PIC/GOT 参数明确为
+`cfm Upload`，但同固件有多个同名 export 且 `libtpi.so` 没有唯一 dependency owner，因此
+owner 保持 `unresolved_import_owner`，只用命令 token 连接 `gCtlCmdArr[Upload]`。这避免了
+早期“按路径排序选择同名 export”会错误指向 `bin/pptpctrl` 的反事实失败。机器报告见
+[R2-23](./samples/r2-23-vendor-tenda-ac9-cross-elf-persistence.json)。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

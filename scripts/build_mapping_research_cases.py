@@ -78,6 +78,10 @@ AC9_R2_22_INGRESS = Path(
     "docs/firmware-mapping/samples/"
     "r2-22-vendor-tenda-ac9-configuration-ingress.json"
 )
+AC9_R2_23_PERSISTENCE = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-23-vendor-tenda-ac9-cross-elf-persistence.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -122,6 +126,16 @@ def build_ac9_split_web_stack_case():
         "json:$.automated_chain",
         "binds_configuration_ingress",
         "native-arm-cgi-string-dispatch@0.1.0",
+    )
+    persistence_sha = hashlib.sha256(AC9_R2_23_PERSISTENCE.read_bytes()).hexdigest()
+    persistence_ref = CaseEvidenceReference(
+        "coverage:ac9-cross-elf-persistence-r2-23",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_23_PERSISTENCE.as_posix(),
+        persistence_sha,
+        "json:$.selected_calls",
+        "binds_configuration_persistence",
+        "native-arm-cross-elf-call@0.1.0",
     )
 
     return build_research_case(ResearchCaseInput(
@@ -206,6 +220,7 @@ def build_ac9_split_web_stack_case():
             history_queue_ref,
             history_replay_ref,
             ingress_ref,
+            persistence_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -257,6 +272,15 @@ def build_ac9_split_web_stack_case():
                 "an independent ARM string-switch dispatcher at 0x3a9a0 binds "
                 "UploadCfg to bin/httpd@0x3b850 with a six-entry family proof.",
                 (ingress_ref.evidence_ref,),
+            ),
+            CaseClaim(
+                "claim:configuration-persistence-chain",
+                "Verified ARM PLT calls and dynamic exports connect UploadCfg's "
+                "handler to tpi_sys_cfg_upload, while gCtlCmdArr binds command "
+                "Upload to UploadValue and its SendMsg/RecvMsg IPC pair. The "
+                "doSystemCmd call preserves literal cfm Upload but leaves its "
+                "ambiguous implementation owner unresolved.",
+                (persistence_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -340,6 +364,16 @@ def build_ac9_split_web_stack_case():
                 creates_obligations=("obligation:configuration-persistence-link",),
                 resolves_obligations=("obligation:configuration-ingress",),
             ),
+            CaseStage(
+                "stage:configuration-cross-elf-persistence", 8,
+                "Resolve verified PLT imports only through current or dependency-"
+                "qualified exports, recover the exact cfm Upload call argument, "
+                "and connect the symbol-sized command table to Cfm IPC without "
+                "inventing an owner for an ambiguous same-name export.",
+                ("claim:configuration-persistence-chain",),
+                creates_obligations=("obligation:configuration-key-parser",),
+                resolves_obligations=("obligation:configuration-persistence-link",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -365,6 +399,14 @@ def build_ac9_split_web_stack_case():
                 "Automate the handler-to-libtpi-to-cfm IPC chain and model the "
                 "uploaded configuration as a wildcard state-write surface.",
                 "binds_configuration_persistence",
+                CaseObligationStatus.RESOLVED,
+                (persistence_ref.evidence_ref,),
+            ),
+            CaseObligation(
+                "obligation:configuration-key-parser",
+                "Recover the uploaded blob parser and key-level persistence flow; "
+                "until then retain a wildcard configuration-state write surface.",
+                "binds_configuration_key_parser",
                 CaseObligationStatus.OPEN,
             ),
         ),

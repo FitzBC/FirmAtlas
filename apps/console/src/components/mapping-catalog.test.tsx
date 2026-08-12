@@ -357,7 +357,13 @@ it('explores a persisted communication graph from interface to parameter and evi
   fireEvent.click(screen.getByRole('button', { name: '通信组件' }))
   await waitFor(() => expect(queryGraph).toHaveBeenLastCalledWith(
     graphSummary.graph_id,
-    expect.objectContaining({ preset: 'communication_components', focusNodeIds: [interfaceNode.node_id] }),
+    expect.objectContaining({
+      preset: 'communication_components',
+      focusNodeIds: [interfaceNode.node_id],
+      maxHops: 8,
+      maxNodes: 240,
+      maxEdges: 480,
+    }),
     expect.any(AbortSignal),
   ))
 })

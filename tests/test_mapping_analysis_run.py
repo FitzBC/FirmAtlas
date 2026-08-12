@@ -8,9 +8,11 @@ from contextlib import redirect_stdout
 
 from firmatlas.mapping import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V15,
     BUILTIN_ANALYZER_REGISTRY_V14,
     BUILTIN_ANALYZER_REGISTRY_V13,
     CoverageStatus,
+    CommunicationGraphEdgeKind,
     DiscoveryCandidateKind,
     MappingAnalysisProfile,
     MappingAnalysisRequest,
@@ -18,23 +20,24 @@ from firmatlas.mapping import (
     SchedulerTermination,
     analyze_extracted_root,
     build_potential_hidden_interface_index,
+    project_communication_architecture_graph,
 )
 from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class MappingAnalysisRunContractTests(unittest.TestCase):
-    def test_current_default_profile_and_registry_have_frozen_v14_aliases(self):
+    def test_current_default_profile_and_registry_have_frozen_v15_aliases(self):
         self.assertEqual(
-            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v14()
+            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v15()
         )
         self.assertEqual(
-            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V14
+            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V15
         )
         self.assertNotEqual(
-            MappingAnalysisProfile.auto_v14(), MappingAnalysisProfile.auto_v13()
+            MappingAnalysisProfile.auto_v15(), MappingAnalysisProfile.auto_v14()
         )
         self.assertNotEqual(
-            BUILTIN_ANALYZER_REGISTRY_V14, BUILTIN_ANALYZER_REGISTRY_V13
+            BUILTIN_ANALYZER_REGISTRY_V15, BUILTIN_ANALYZER_REGISTRY_V14
         )
 
     AC9_ROOT = Path(
@@ -94,6 +97,8 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "native_relationship",
                 "native_command_binding",
                 "native_cgi_dispatch",
+                "native_pointer_command_binding",
+                "native_cross_elf_call",
                 "arm_literal_xref",
                 "arm_feature_pivot",
                 "scheduler", "catalog",
@@ -352,9 +357,9 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v14", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v15", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v14",
+            "firmatlas.mapping.analyzer-registry/builtin-v15",
             result.analyzer_registry_id,
         )
 
@@ -434,6 +439,62 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, cgi_stage.coverage_status)
         self.assertGreaterEqual(cgi_stage.output_count, 1)
+        expected_callsite = {
+            "tpi_upfile_handle": "0x0003ba38",
+            "tpi_sys_cfg_upload": "0x00009ef4",
+            "doSystemCmd": "0x00009d68",
+            "UploadValue": "0x00009e64",
+            "SendMsg": "0x00004334",
+            "RecvMsg": "0x00004374",
+        }
+        cross_calls = {
+            attributes["imported_symbol"]: item
+            for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL
+            if (attributes := dict(item.attributes)).get("imported_symbol")
+            in expected_callsite
+            and attributes.get("callsite_address")
+            == expected_callsite[attributes["imported_symbol"]]
+        }
+        self.assertEqual(
+            {
+                "tpi_upfile_handle", "tpi_sys_cfg_upload", "doSystemCmd",
+                "UploadValue", "SendMsg", "RecvMsg",
+            },
+            set(cross_calls),
+        )
+        self.assertEqual(
+            '["cfm Upload"]',
+            dict(cross_calls["doSystemCmd"].attributes)["argument_literals"],
+        )
+        upload_command = next(
+            item for item in result.catalog.candidates
+            if item.candidate_kind
+            is DiscoveryCandidateKind.NATIVE_COMMAND_BINDING
+            and dict(item.attributes).get("command") == "Upload"
+        )
+        graph = project_communication_architecture_graph(result.catalog)
+        call_edges = {
+            (edge.source_ref, edge.target_ref)
+            for edge in graph.edges
+            if edge.edge_kind is CommunicationGraphEdgeKind.CALLS
+        }
+        self.assertIn(
+            (cross_calls["tpi_upfile_handle"].candidate_id,
+             cross_calls["tpi_sys_cfg_upload"].candidate_id),
+            call_edges,
+        )
+        self.assertIn(
+            (cross_calls["doSystemCmd"].candidate_id,
+             upload_command.candidate_id),
+            call_edges,
+        )
+        self.assertIn(
+            (upload_command.candidate_id,
+             cross_calls["UploadValue"].candidate_id),
+            call_edges,
+        )
         feature_gate_stage = next(
             item for item in result.stages
             if item.stage_name == "frontend_feature_gate"

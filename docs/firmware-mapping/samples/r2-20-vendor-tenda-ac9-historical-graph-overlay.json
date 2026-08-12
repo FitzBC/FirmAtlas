@@ -6,10 +6,10 @@
     "catalog_id": "discovery-catalog:e1b1f16da33f8d9ac0725bb3ae917efb80becc4d7b3d6db9305309126862a14a",
     "expectation_diff_id": "historical-expectation-diff:bd29c387726065bb15d0d60115b928ad6640322e8a1f685fe86a41eb7e6bc91f",
     "graph_edge_count": 7212,
-    "graph_id": "communication-graph:451023b0a6422c343920f7756360aaa564e995498afdc56a53d07265c71ca7d1",
+    "graph_id": "communication-graph:15050fd4a63917119af0ffa4ce0f154841e47b72de24104d0c7b128208b1afaf",
     "graph_node_count": 5674,
     "graph_projection_status": "completed",
-    "overlay_id": "historical-graph-overlay:b549a5351a7a3ea7d9642299e99599652fca040af627c1fba541616b0cb1c944",
+    "overlay_id": "historical-graph-overlay:e7f8cf3c9aca3cc9ee7815dd8eb93cb48c6627e26792220da11b04d57bf34393",
     "profile_id": "firmatlas.mapping.profile/auto-v13",
     "route_binding_report_id": "historical-route-binding:763463e385a2dfa412afbd15881dd80ff8d4bf6025a54e28ffdcb796e7d88ec3",
     "vulnerability_audit_id": "historical-vulnerability-audit:174bdd4fcaee593b0d3daa0b8a7057a0fa3274dab87aff817427911f42cd2e33"
@@ -28,7 +28,7 @@
     "production_document_served": true,
     "source_sha256": {
       "apps/console/src/api/client.ts": "913679853899cbc2d91fa219a4ea2ea03d07a3ff3626d3fa5587da685b02c40a",
-      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "dedfa4360a29da4c023ab5c43e792334e60b38ad31fa65d6f910ffd629d32544",
+      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "c0c9ff79d255295cb72ba46a86a9035cb5614a3d6483fad17a0a072406c10f88",
       "apps/console/src/types.ts": "b485f97405b6ab9e681b804c877053728a321c2f071419e7f0d1c42b555252cf"
     }
   },
@@ -413,20 +413,20 @@
     },
     "not_assessable_count": 5,
     "publication": {
-      "content_sha256": "57c7d217ebc5018d27b7505fa270b592d4183333187a461c26049e21c8f55aa0",
+      "content_sha256": "ed21add739c74fc19976b0bc2b3dd6a04a3d70febe673420dfea5e6a16697537",
       "created": true,
-      "overlay_id": "historical-graph-overlay:b549a5351a7a3ea7d9642299e99599652fca040af627c1fba541616b0cb1c944"
+      "overlay_id": "historical-graph-overlay:e7f8cf3c9aca3cc9ee7815dd8eb93cb48c6627e26792220da11b04d57bf34393"
     },
     "query_ids": {
-      "all": "historical-graph-overlay-query:be9b7459f174c47d690404b70ce2fc596e71be7384e58444a139be2e1ee87b82",
-      "cross_version": "historical-graph-overlay-query:32341d8a217dda5183151f87695ed25b260f37e6f46d19108858a8f3d563fb6f",
-      "exact_observed": "historical-graph-overlay-query:bcb2dfd9ba8d101fb31747f6b31efc74834e495474877ef86060ac047ff0bafb",
-      "not_assessable": "historical-graph-overlay-query:154c304fa1c903a7383213ad36fa5ab6ec1281822bbc71f49cac2d871929556e"
+      "all": "historical-graph-overlay-query:f8216dcaf5f5d57a0663258e4e6c81213c52042118c3f0e842f4b2959cbf69eb",
+      "cross_version": "historical-graph-overlay-query:850c5d3645fa2be125b17c3185615bed07303961b41cd3378f2658d3fb416c27",
+      "exact_observed": "historical-graph-overlay-query:510c3c890707f4ec069467d63944cb26a22ee8881922b931278eea73540f4683",
+      "not_assessable": "historical-graph-overlay-query:2679a5b2e931622dc7ba0f10b774b5eb3b223e29d6263ce3337270e39e6ceccc"
     },
     "repeated_publication": {
-      "content_sha256": "57c7d217ebc5018d27b7505fa270b592d4183333187a461c26049e21c8f55aa0",
+      "content_sha256": "ed21add739c74fc19976b0bc2b3dd6a04a3d70febe673420dfea5e6a16697537",
       "created": false,
-      "overlay_id": "historical-graph-overlay:b549a5351a7a3ea7d9642299e99599652fca040af627c1fba541616b0cb1c944"
+      "overlay_id": "historical-graph-overlay:e7f8cf3c9aca3cc9ee7815dd8eb93cb48c6627e26792220da11b04d57bf34393"
     }
   },
   "sample_role": "tenda-ac9-primary",

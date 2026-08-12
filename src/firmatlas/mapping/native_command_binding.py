@@ -72,6 +72,28 @@ class NativeCommandTableProfile:
 
 
 @dataclass(frozen=True)
+class NativePointerCommandTableProfile:
+    name: str = "pointer-command-table-arm32/v1"
+    symbol_names: Tuple[str, ...] = ("gCtlCmdArr",)
+    entry_size: int = 16
+    arity_offset: int = 0
+    command_pointer_offset: int = 4
+    handler_pointer_offset: int = 8
+    help_pointer_offset: int = 12
+
+    def __post_init__(self) -> None:
+        if not self.name.strip() or not self.symbol_names or self.entry_size <= 0:
+            raise ValueError("pointer command-table profile requires identity")
+        if len(self.symbol_names) != len(set(self.symbol_names)):
+            raise ValueError("pointer command-table symbols must be unique")
+        if max(
+            self.arity_offset, self.command_pointer_offset,
+            self.handler_pointer_offset, self.help_pointer_offset,
+        ) + 4 > self.entry_size:
+            raise ValueError("pointer command-table fields exceed the entry")
+
+
+@dataclass(frozen=True)
 class NativeCommandBindingPolicy:
     max_source_bytes: int = 64 * 1024 * 1024
     max_bindings: int = 10_000
@@ -318,6 +340,174 @@ def discover_native_command_table_bindings(
     )
     return NativeCommandBindingResult(
         source.canonical_path, status, len(content), _PRODUCER, profile.name,
+        tuple(bindings), tuple(sorted(atoms, key=lambda item: item.evidence_id)),
+        tuple(sorted(set(diagnostics))),
+    )
+
+
+def discover_native_pointer_command_table_bindings(
+    source: SourceArtifactEntry,
+    content: bytes,
+    profile: NativePointerCommandTableProfile = NativePointerCommandTableProfile(),
+    policy: NativeCommandBindingPolicy = NativeCommandBindingPolicy(),
+) -> NativeCommandBindingResult:
+    """Bind a symbol-sized ARM32 table of command/help pointers to handlers."""
+    if source.kind not in _CONTENT_KINDS:
+        return _empty(source, profile, CoverageStatus.UNSUPPORTED, "unsupported_source_kind")
+    if source.content_sha256 is None or len(content) != source.size \
+            or hashlib.sha256(content).hexdigest() != source.content_sha256:
+        return _empty(source, profile, CoverageStatus.FAILED, "source_mismatch")
+    if len(content) > policy.max_source_bytes:
+        return _empty(source, profile, CoverageStatus.SKIPPED_BY_POLICY, "source_budget_exceeded")
+    try:
+        elf = _parse_elf(content)
+        if elf.pointer_size != 4 or elf.machine != _ARM_MACHINE:
+            return _empty(
+                source, profile, CoverageStatus.UNSUPPORTED,
+                "unsupported_architecture", len(content),
+            )
+        symbols = tuple(
+            symbol
+            for table in _read_dynamic_symbols(elf, content).values()
+            for symbol in table
+            if symbol.name in profile.symbol_names
+        )
+    except TypeError:
+        return _empty(source, profile, CoverageStatus.UNSUPPORTED, "unsupported_binary_format")
+    except (ValueError, struct.error) as exc:
+        return _empty(
+            source, profile, CoverageStatus.FAILED,
+            "malformed_elf:{}".format(exc), len(content),
+        )
+    if not symbols:
+        return _empty(
+            source, profile, CoverageStatus.NOT_APPLICABLE,
+            "profiled_symbol_not_found", len(content),
+        )
+    allocated = tuple(
+        section for section in elf.sections
+        if section.flags & _ALLOC and section.section_type != 8
+    )
+    executable = tuple(
+        section for section in allocated
+        if section.flags & (_ALLOC | _EXEC) == (_ALLOC | _EXEC)
+    )
+
+    def pointer_offset(address: int) -> int:
+        section = next(
+            (item for item in allocated if item.address <= address < item.address + item.size),
+            None,
+        )
+        if section is None:
+            raise ValueError("pointer target is outside allocated file sections")
+        return section.offset + address - section.address
+
+    def text(address: int, maximum: int = 512) -> Tuple[str, int]:
+        offset = pointer_offset(address)
+        end = content.find(b"\x00", offset, min(len(content), offset + maximum + 1))
+        if end <= offset or any(byte < 0x20 or byte > 0x7E for byte in content[offset:end]):
+            raise ValueError("pointer command-table text is invalid")
+        return content[offset:end].decode("ascii"), offset
+
+    bindings = []
+    atoms = []
+    diagnostics = []
+    limited = False
+    for symbol in sorted(symbols, key=lambda item: (item.address, item.name)):
+        section = _section_by_index(elf, symbol.section_index)
+        if (
+            section is None or section.section_type == 8
+            or not section.flags & _ALLOC or section.flags & _EXEC
+            or symbol.address < section.address
+            or symbol.address + symbol.size > section.address + section.size
+            or symbol.size == 0 or symbol.size % profile.entry_size != 0
+        ):
+            diagnostics.append("profiled_symbol_layout_invalid")
+            continue
+        base = section.offset + symbol.address - section.address
+        for index in range(symbol.size // profile.entry_size):
+            if len(bindings) >= policy.max_bindings:
+                diagnostics.append("binding_budget_exhausted")
+                limited = True
+                break
+            entry_address = symbol.address + index * profile.entry_size
+            entry_offset = base + index * profile.entry_size
+            arity, command_address, handler_address, help_address = struct.unpack_from(
+                elf.endian_prefix + "IIII", content, entry_offset
+            )
+            try:
+                command, command_offset = text(command_address)
+                help_text, help_offset = text(help_address)
+            except ValueError:
+                diagnostics.append("entry_text_invalid")
+                continue
+            if not 1 <= arity <= 64 or not _contains_address(
+                executable, handler_address, _ALLOC | _EXEC
+            ):
+                diagnostics.append("entry_layout_invalid")
+                continue
+            binding_id = _identity(
+                source.canonical_path, symbol.name, entry_address, command
+            )
+            handler_identity = "{}@0x{:08x}".format(
+                source.canonical_path, handler_address
+            )
+            symbol_atom = capture_evidence(
+                source, content,
+                SpanSelection(SpanKind.BINARY, symbol.source_offset,
+                              symbol.source_offset + symbol.entry_size),
+                EvidenceClaim(
+                    binding_id, "resolves_command_table_symbol", symbol.name,
+                    ObservationKind.DETERMINISTIC_DERIVED,
+                    "resolves_command_table_symbol", 1.0,
+                ), _PRODUCER,
+            )
+            command_atom = capture_evidence(
+                source, content,
+                SpanSelection(SpanKind.BINARY, command_offset,
+                              command_offset + len(command)),
+                EvidenceClaim(
+                    binding_id, "declares_bound_command", command,
+                    ObservationKind.DIRECT_STATIC,
+                    "declares_bound_command", 1.0,
+                ), _PRODUCER,
+            )
+            help_atom = capture_evidence(
+                source, content,
+                SpanSelection(SpanKind.BINARY, help_offset,
+                              help_offset + len(help_text)),
+                EvidenceClaim(
+                    binding_id, "declares_command_help", help_text,
+                    ObservationKind.DIRECT_STATIC,
+                    "declares_command_help", 1.0,
+                ), _PRODUCER,
+            )
+            pointer = entry_offset + profile.handler_pointer_offset
+            handler_atom = capture_evidence(
+                source, content, SpanSelection(SpanKind.BINARY, pointer, pointer + 4),
+                EvidenceClaim(
+                    binding_id, "binds_command_handler", handler_identity,
+                    ObservationKind.DETERMINISTIC_DERIVED,
+                    "binds_command_handler", 1.0,
+                ), _PRODUCER,
+            )
+            evidence_ids = tuple(item.evidence_id for item in (
+                symbol_atom, command_atom, help_atom, handler_atom
+            ))
+            atoms.extend((symbol_atom, command_atom, help_atom, handler_atom))
+            bindings.append(NativeCommandBinding(
+                binding_id, symbol.name, entry_address, "", command,
+                handler_address, handler_identity,
+                NativeCommandBindingStatus.TABLE_BOUND,
+                "elf.{}:{}[{}]".format(profile.name, symbol.name, index),
+                evidence_ids,
+            ))
+        if limited:
+            break
+    return NativeCommandBindingResult(
+        source.canonical_path,
+        CoverageStatus.PARTIAL if diagnostics else CoverageStatus.COMPLETED,
+        len(content), _PRODUCER, profile.name,
         tuple(bindings), tuple(sorted(atoms, key=lambda item: item.evidence_id)),
         tuple(sorted(set(diagnostics))),
     )
