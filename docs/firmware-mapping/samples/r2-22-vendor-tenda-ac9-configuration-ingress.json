@@ -1,0 +1,324 @@
+{
+  "analysis_run_id": "mapping-analysis-run:ee24bf5afe771663436e686188742503ecc95c7d7883d7ddc45dd913a948a530",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v14",
+  "automated_chain": {
+    "comparison_target_address": "0x0000eeec",
+    "dispatch_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36",
+    "dispatch_token": "UploadCfg",
+    "dispatcher_entry_count": 6,
+    "dispatcher_identity": "bin/httpd@0x0003a9a0",
+    "evidence": [
+      {
+        "capability": "dispatches_cgi_token",
+        "confidence": 1.0,
+        "evidence_id": "evidence:05cc9d8b44afbb8f69c18cfbd6eb6e2d441311e131bbee36cba03cbcdf8f671b",
+        "object_value": "UploadCfg",
+        "observation_kind": "deterministic_derived",
+        "predicate": "dispatches_cgi_token",
+        "producer": "native-arm-cgi-string-dispatch",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "bin/httpd",
+          "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "end_byte": 207388,
+          "end_column": null,
+          "end_line": null,
+          "excerpt_sha256": "987e8a1e3796333d775156ade2318bfb250810c4c95c4fffd97a8db8b06a3a34",
+          "locator": "binary:bytes=207352-207388",
+          "span_kind": "binary",
+          "start_byte": 207352,
+          "start_column": null,
+          "start_line": null
+        },
+        "subject_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      },
+      {
+        "capability": "binds_handler",
+        "confidence": 1.0,
+        "evidence_id": "evidence:6f9a3032c828531299aa06a5597e921b8da2bacc467d670f6e2baa85c00e874e",
+        "object_value": "bin/httpd@0x0003b850",
+        "observation_kind": "deterministic_derived",
+        "predicate": "binds_handler",
+        "producer": "native-arm-cgi-string-dispatch",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "bin/httpd",
+          "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "end_byte": 207404,
+          "end_column": null,
+          "end_line": null,
+          "excerpt_sha256": "a47a343fd5bd5d73f5d4e60e9733753f7cc692d3fc3997367cedb646f3f92b4d",
+          "locator": "binary:bytes=207400-207404",
+          "span_kind": "binary",
+          "start_byte": 207400,
+          "start_column": null,
+          "start_line": null
+        },
+        "subject_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      },
+      {
+        "capability": "serializes_parameter",
+        "confidence": 1.0,
+        "evidence_id": "evidence:7971c47fafbbac3c3d19e140048196724f4edcffb6ff7f2e27dadf046a174b1e",
+        "object_value": "filename",
+        "observation_kind": "direct_static",
+        "predicate": "serializes",
+        "producer": "frontend-request-producer",
+        "producer_version": "0.4.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/system_backup.html",
+          "artifact_sha256": "b641b13c5b9338aeb6dfac9a9e94997ca4f68255c8260c884a30134aced9a662",
+          "end_byte": 1330,
+          "end_column": 100,
+          "end_line": 28,
+          "excerpt_sha256": "f974a07ea4988c92d27cf645c46bc533075d4dd5a8059c03fe460a4aa9d4dd5a",
+          "locator": "text_utf8:bytes=1322-1330;lines=28:92-28:100",
+          "span_kind": "text_utf8",
+          "start_byte": 1322,
+          "start_column": 92,
+          "start_line": 28
+        },
+        "subject_ref": "frontend-parameter:94e43a8006cd2fd8184fbc3c2492ba05c7e142bb4000ae2e9d545b2aa33bc7b9"
+      },
+      {
+        "capability": "establishes_pic_base",
+        "confidence": 1.0,
+        "evidence_id": "evidence:afa89e444b25cb03c7344c8cbb4cc2f3ed2834abd0ae45e04426ffdc5c71a9a2",
+        "object_value": ".got",
+        "observation_kind": "deterministic_derived",
+        "predicate": "establishes_pic_base",
+        "producer": "native-arm-cgi-string-dispatch",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "bin/httpd",
+          "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "end_byte": 207284,
+          "end_column": null,
+          "end_line": null,
+          "excerpt_sha256": "a38373bc3b7a075bbffb4aa34225e9a0a0ae98bf4e9ee318bdfe7c1f5675e48e",
+          "locator": "binary:bytes=207276-207284",
+          "span_kind": "binary",
+          "start_byte": 207276,
+          "start_column": null,
+          "start_line": null
+        },
+        "subject_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      },
+      {
+        "capability": "constructs_request",
+        "confidence": 1.0,
+        "evidence_id": "evidence:c3898812780420a94098abcb20f24466e502a2298034c0aed2ed09f927e60f64",
+        "object_value": "/cgi-bin/UploadCfg",
+        "observation_kind": "direct_static",
+        "predicate": "constructs_request",
+        "producer": "frontend-request-producer",
+        "producer_version": "0.4.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "webroot_ro/system_backup.html",
+          "artifact_sha256": "b641b13c5b9338aeb6dfac9a9e94997ca4f68255c8260c884a30134aced9a662",
+          "end_byte": 559,
+          "end_column": 72,
+          "end_line": 15,
+          "excerpt_sha256": "119a48fda8a9dc94c9bb8b60c52b8c913c7f845abffb2c673091ecede28dc0b5",
+          "locator": "text_utf8:bytes=541-559;lines=15:54-15:72",
+          "span_kind": "text_utf8",
+          "start_byte": 541,
+          "start_column": 54,
+          "start_line": 15
+        },
+        "subject_ref": "frontend-request:06e184fa1a7b6b1fa848d161ce161c544168a23315d8fcdc0541e3ef3f8f58e1"
+      },
+      {
+        "capability": "matches_interface_suffix",
+        "confidence": 1.0,
+        "evidence_id": "evidence:d4df2258dee22a3d22a203466dfe14999e559fb73830f6caecefe30a42306286",
+        "object_value": "/cgi-bin/UploadCfg",
+        "observation_kind": "deterministic_derived",
+        "predicate": "matches_interface_suffix",
+        "producer": "native-arm-cgi-string-dispatch",
+        "producer_version": "0.1.0",
+        "schema_version": "firmatlas.mapping.evidence/v1alpha1",
+        "source_span": {
+          "artifact_path": "bin/httpd",
+          "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+          "end_byte": 869833,
+          "end_column": null,
+          "end_line": null,
+          "excerpt_sha256": "1cefa4762d039a085bf5c17306bedddbf5b305587da5046cb94c0945410abf42",
+          "locator": "binary:bytes=869824-869833",
+          "span_kind": "binary",
+          "start_byte": 869824,
+          "start_column": null,
+          "start_line": null
+        },
+        "subject_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      }
+    ],
+    "graph_edges": [
+      {
+        "attributes": [
+          [
+            "projection_basis",
+            "native_cgi_dispatch.target_ref"
+          ]
+        ],
+        "edge_id": "communication-edge:2fa757f55cae609011aff80c9682b5b20457c9203fd05c172a361afd7d2ae46d",
+        "edge_kind": "dispatched_by",
+        "evidence_ids": [
+          "evidence:d4df2258dee22a3d22a203466dfe14999e559fb73830f6caecefe30a42306286",
+          "evidence:afa89e444b25cb03c7344c8cbb4cc2f3ed2834abd0ae45e04426ffdc5c71a9a2",
+          "evidence:05cc9d8b44afbb8f69c18cfbd6eb6e2d441311e131bbee36cba03cbcdf8f671b",
+          "evidence:6f9a3032c828531299aa06a5597e921b8da2bacc467d670f6e2baa85c00e874e"
+        ],
+        "origin_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36",
+        "source_ref": "frontend-request:06e184fa1a7b6b1fa848d161ce161c544168a23315d8fcdc0541e3ef3f8f58e1",
+        "status": "supported",
+        "target_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36"
+      },
+      {
+        "attributes": [
+          [
+            "projection_basis",
+            "native_cgi_dispatch.handler_ref"
+          ]
+        ],
+        "edge_id": "communication-edge:d219b3e966d28d551363dda1a5d44accf7320ecd39bec88aa6e9e0a437c80127",
+        "edge_kind": "binds_handler",
+        "evidence_ids": [
+          "evidence:d4df2258dee22a3d22a203466dfe14999e559fb73830f6caecefe30a42306286",
+          "evidence:afa89e444b25cb03c7344c8cbb4cc2f3ed2834abd0ae45e04426ffdc5c71a9a2",
+          "evidence:05cc9d8b44afbb8f69c18cfbd6eb6e2d441311e131bbee36cba03cbcdf8f671b",
+          "evidence:6f9a3032c828531299aa06a5597e921b8da2bacc467d670f6e2baa85c00e874e"
+        ],
+        "origin_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36",
+        "source_ref": "native-cgi-dispatch:1db50caa5295a6dcb80901445f1d521958074e6026572b64603c3c9f4daebf36",
+        "status": "supported",
+        "target_ref": "native-handler:c60f79531bbadba8f8eff597f59348d41f5c1767ba7c159d611f157cc60be209"
+      }
+    ],
+    "handler_identity": "bin/httpd@0x0003b850",
+    "handler_ref": "native-handler:c60f79531bbadba8f8eff597f59348d41f5c1767ba7c159d611f157cc60be209",
+    "interface_path": "/cgi-bin/UploadCfg",
+    "method": "POST",
+    "multipart_parameter": "filename",
+    "parameter_namespace": "form",
+    "request_ref": "frontend-request:06e184fa1a7b6b1fa848d161ce161c544168a23315d8fcdc0541e3ef3f8f58e1"
+  },
+  "catalog_id": "discovery-catalog:53a3fd295b2b48f351fc8d3fd62b19c024b2e1d555c3c905041ade4a07b63d47",
+  "coverage_status": "completed",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "manual_cross_binary_continuation": [
+    {
+      "artifact_path": "bin/httpd",
+      "artifact_sha256": "2fd5c92e15f8c9c0b45047c77af080539237d7b99a9b35fe43dc2a9d5a57702b",
+      "claim": "UploadCfg handler calls libtpi tpi_upfile_handle with mode 1",
+      "file_offset": 211512,
+      "instruction_bytes_hex": "864fffeb",
+      "virtual_address": "0x0003ba38"
+    },
+    {
+      "artifact_path": "lib/libtpi.so",
+      "artifact_sha256": "afd61cc5a6e2bd79e913d773d86fbd95b58a33f04e976b3c837827e5aa80c5ac",
+      "claim": "tpi_upfile_handle mode 1 calls tpi_sys_cfg_upload",
+      "file_offset": 40692,
+      "instruction_bytes_hex": "d2f8ffeb",
+      "virtual_address": "0x00009ef4"
+    },
+    {
+      "artifact_path": "lib/libtpi.so",
+      "artifact_sha256": "afd61cc5a6e2bd79e913d773d86fbd95b58a33f04e976b3c837827e5aa80c5ac",
+      "claim": "public configuration upload target",
+      "file_offset": 326592,
+      "length": 20,
+      "literal": "/webroot/default.cfg"
+    },
+    {
+      "artifact_path": "lib/libtpi.so",
+      "artifact_sha256": "afd61cc5a6e2bd79e913d773d86fbd95b58a33f04e976b3c837827e5aa80c5ac",
+      "claim": "URL configuration upload target",
+      "file_offset": 326620,
+      "length": 24,
+      "literal": "/webroot/default_url.cfg"
+    },
+    {
+      "artifact_path": "lib/libtpi.so",
+      "artifact_sha256": "afd61cc5a6e2bd79e913d773d86fbd95b58a33f04e976b3c837827e5aa80c5ac",
+      "claim": "uploaded blob split boundary",
+      "file_offset": 326472,
+      "length": 28,
+      "literal": "##the public configure end##"
+    },
+    {
+      "artifact_path": "lib/libtpi.so",
+      "artifact_sha256": "afd61cc5a6e2bd79e913d773d86fbd95b58a33f04e976b3c837827e5aa80c5ac",
+      "claim": "configuration service command",
+      "file_offset": 326648,
+      "length": 10,
+      "literal": "cfm Upload"
+    },
+    {
+      "artifact_path": "lib/libtpi.so",
+      "artifact_sha256": "afd61cc5a6e2bd79e913d773d86fbd95b58a33f04e976b3c837827e5aa80c5ac",
+      "claim": "tpi_sys_cfg_upload invokes doSystemCmd for cfm Upload",
+      "file_offset": 40296,
+      "instruction_bytes_hex": "84f8ffeb",
+      "virtual_address": "0x00009d68"
+    },
+    {
+      "artifact_path": "bin/cfm",
+      "artifact_sha256": "913e1a916cf2fd54772f1cd56932bdc6cbd25b0df7307c9a2cb2fe26b3b688f5",
+      "claim": "Upload command handler calls libCfm UploadValue",
+      "file_offset": 7780,
+      "instruction_bytes_hex": "63fcffeb",
+      "virtual_address": "0x00009e64"
+    },
+    {
+      "artifact_path": "lib/libCfm.so",
+      "artifact_sha256": "163f8d4a470116288385bee4d65009db1a393773567d08decd91f72b9b195d09",
+      "claim": "UploadValue sends a framed configuration message over Cfm IPC",
+      "file_offset": 17204,
+      "instruction_bytes_hex": "52faffeb",
+      "virtual_address": "0x00004334"
+    },
+    {
+      "artifact_path": "lib/libCfm.so",
+      "artifact_sha256": "163f8d4a470116288385bee4d65009db1a393773567d08decd91f72b9b195d09",
+      "claim": "UploadValue receives the Cfm IPC response",
+      "file_offset": 17268,
+      "instruction_bytes_hex": "bafaffeb",
+      "virtual_address": "0x00004374"
+    }
+  ],
+  "native_cgi_dispatch_stage": {
+    "coverage_status": "completed",
+    "diagnostics": [],
+    "input_count": 1,
+    "output_count": 4
+  },
+  "not_claimed": [
+    "an uploaded file was accepted at runtime",
+    "every uploaded key is valid or persisted",
+    "security.ddos.map or sys.schedulereboot fields are HTTP parameters",
+    "a vulnerability is present or exploitable"
+  ],
+  "obligation_state": {
+    "closed_by_auto_v14": [
+      "frontend multipart upload ingress",
+      "CGI string-switch dispatcher ownership",
+      "direct native handler binding"
+    ],
+    "open_for_next_producer": [
+      "automate handler-to-tpi-to-cfm cross-binary call chain",
+      "model uploaded configuration as a wildcard state-write surface",
+      "link historical configuration-key sinks without relabeling them as HTTP parameters"
+    ]
+  },
+  "profile_id": "firmatlas.mapping.profile/auto-v14",
+  "sample_role": "primary-vendor-tenda-ac9-configuration-ingress-iteration",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-22/v1alpha1"
+}

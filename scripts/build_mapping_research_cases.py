@@ -74,6 +74,10 @@ AC9_R2_21_REPLAY = Path(
     "docs/firmware-mapping/samples/"
     "r2-21-vendor-tenda-ac9-historical-replay.json"
 )
+AC9_R2_22_INGRESS = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-22-vendor-tenda-ac9-configuration-ingress.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -108,6 +112,16 @@ def build_ac9_split_web_stack_case():
         "json:$",
         "replays_source_verified_expectations_against_current_catalog",
         "historical-expectation-diff@v1alpha1",
+    )
+    ingress_sha = hashlib.sha256(AC9_R2_22_INGRESS.read_bytes()).hexdigest()
+    ingress_ref = CaseEvidenceReference(
+        "coverage:ac9-configuration-ingress-r2-22",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_22_INGRESS.as_posix(),
+        ingress_sha,
+        "json:$.automated_chain",
+        "binds_configuration_ingress",
+        "native-arm-cgi-string-dispatch@0.1.0",
     )
 
     return build_research_case(ResearchCaseInput(
@@ -191,6 +205,7 @@ def build_ac9_split_web_stack_case():
             history_overlay_ref,
             history_queue_ref,
             history_replay_ref,
+            ingress_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -235,6 +250,13 @@ def build_ac9_split_web_stack_case():
                 "sys.schedulereboot.* as configuration keys behind unresolved "
                 "ingress rather than promoting them to HTTP parameters.",
                 (history_queue_ref.evidence_ref,),
+            ),
+            CaseClaim(
+                "claim:configuration-upload-cgi-owner",
+                "POST /cgi-bin/UploadCfg carries multipart form field filename; "
+                "an independent ARM string-switch dispatcher at 0x3a9a0 binds "
+                "UploadCfg to bin/httpd@0x3b850 with a six-entry family proof.",
+                (ingress_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -308,6 +330,16 @@ def build_ac9_split_web_stack_case():
                 ("claim:historical-field-type-boundary",),
                 creates_obligations=("obligation:configuration-ingress",),
             ),
+            CaseStage(
+                "stage:configuration-upload-cgi-dispatch", 7,
+                "Reject the ordinary websForm registrar hypothesis, validate the "
+                "separate CGI token switch, and bind the multipart request to its "
+                "direct native handler without promoting configuration keys to "
+                "HTTP fields.",
+                ("claim:configuration-upload-cgi-owner",),
+                creates_obligations=("obligation:configuration-persistence-link",),
+                resolves_obligations=("obligation:configuration-ingress",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -325,6 +357,14 @@ def build_ac9_split_web_stack_case():
                 "Recover the HTTP upload/import path that writes the configuration "
                 "keys later consumed by the DDoS and reboot handlers.",
                 "binds_configuration_ingress",
+                CaseObligationStatus.RESOLVED,
+                (ingress_ref.evidence_ref,),
+            ),
+            CaseObligation(
+                "obligation:configuration-persistence-link",
+                "Automate the handler-to-libtpi-to-cfm IPC chain and model the "
+                "uploaded configuration as a wildcard state-write surface.",
+                "binds_configuration_persistence",
                 CaseObligationStatus.OPEN,
             ),
         ),
@@ -340,6 +380,8 @@ def build_ac9_split_web_stack_case():
             "applicability, and exploitability into one unsupported claim.",
             "Treating a native configuration key as an HTTP request parameter "
             "would fabricate a direct ingress edge and conceal the missing upload chain.",
+            "Assuming every /cgi-bin operation uses websFormDefine would miss the "
+            "independent UploadCfg/DownloadCfg string-switch dispatcher.",
         ),
         paper_uses=(
             "Motivating case for why communication mapping must precede "
@@ -351,6 +393,8 @@ def build_ac9_split_web_stack_case():
             "from firmware-version vulnerability conclusions.",
             "Typed historical-field case showing why request parameters, route "
             "tokens, configuration keys, and inferred paths need separate states.",
+            "Architecture-split case where a second dispatcher family changes an "
+            "obligation from unknown ingress to known owner plus open persistence.",
         ),
         limitations=(
             "The native result proves selected static registrations, not runtime "

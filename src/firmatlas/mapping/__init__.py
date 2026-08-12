@@ -129,6 +129,15 @@ from .native_arm_xref import (
     discover_arm_feature_pivots,
     discover_arm_function_literal_xrefs,
 )
+from .native_cgi_dispatch import (
+    ARM_CGI_DISPATCH_SCHEMA_VERSION,
+    ArmCgiDispatchAnchor,
+    ArmCgiDispatchBinding,
+    ArmCgiDispatchPolicy,
+    ArmCgiDispatchProfile,
+    ArmCgiDispatchResult,
+    discover_arm_cgi_string_dispatch,
+)
 from .native_command_binding import (
     NATIVE_COMMAND_BINDING_SCHEMA_VERSION,
     NativeCommandBinding,
@@ -285,6 +294,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V14,
     BUILTIN_ANALYZER_REGISTRY_V13,
     BUILTIN_ANALYZER_REGISTRY_V12,
     BUILTIN_ANALYZER_REGISTRY_V11,
@@ -459,6 +469,13 @@ __all__ = (
     "ArmLiteralXrefResult",
     "discover_arm_literal_xrefs",
     "discover_arm_feature_pivots",
+    "ARM_CGI_DISPATCH_SCHEMA_VERSION",
+    "ArmCgiDispatchAnchor",
+    "ArmCgiDispatchBinding",
+    "ArmCgiDispatchPolicy",
+    "ArmCgiDispatchProfile",
+    "ArmCgiDispatchResult",
+    "discover_arm_cgi_string_dispatch",
     "discover_arm_function_literal_xrefs",
     "NATIVE_RELATIONSHIP_SCHEMA_VERSION",
     "NativeRelationship",
@@ -680,6 +697,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V14",
     "BUILTIN_ANALYZER_REGISTRY_V13",
     "BUILTIN_ANALYZER_REGISTRY_V12",
     "BUILTIN_ANALYZER_REGISTRY_V11",

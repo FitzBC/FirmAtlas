@@ -51,6 +51,11 @@ from .native_command_binding import (
     NativeCommandBindingPolicy,
     discover_native_command_table_bindings,
 )
+from .native_cgi_dispatch import (
+    ArmCgiDispatchAnchor,
+    ArmCgiDispatchPolicy,
+    discover_arm_cgi_string_dispatch,
+)
 from .native_arm_xref import (
     ArmFeaturePivotAnchor,
     ArmFunctionTarget,
@@ -110,7 +115,8 @@ _AUTO_V10_ANALYZERS = _AUTO_V9_ANALYZERS
 _AUTO_V11_ANALYZERS = _AUTO_V10_ANALYZERS + ("frontend_feature_gate",)
 _AUTO_V12_ANALYZERS = _AUTO_V11_ANALYZERS + ("arm_feature_pivot",)
 _AUTO_V13_ANALYZERS = _AUTO_V12_ANALYZERS + ("frontend_reachability",)
-_AUTO_ANALYZERS = _AUTO_V13_ANALYZERS
+_AUTO_V14_ANALYZERS = _AUTO_V13_ANALYZERS + ("native_cgi_dispatch",)
+_AUTO_ANALYZERS = _AUTO_V14_ANALYZERS
 
 
 @dataclass(frozen=True)
@@ -130,7 +136,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v13", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v14", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v14(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v14", _AUTO_V14_ANALYZERS)
 
     @classmethod
     def auto_v13(cls) -> "MappingAnalysisProfile":
@@ -198,7 +208,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v13", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v14", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v14(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v14",
+            _AUTO_V14_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v13(cls) -> "MappingAnalyzerRegistry":
@@ -298,6 +315,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V14 = MappingAnalyzerRegistry.builtin_v14()
 BUILTIN_ANALYZER_REGISTRY_V13 = MappingAnalyzerRegistry.builtin_v13()
 BUILTIN_ANALYZER_REGISTRY_V12 = MappingAnalyzerRegistry.builtin_v12()
 BUILTIN_ANALYZER_REGISTRY_V11 = MappingAnalyzerRegistry.builtin_v11()
@@ -323,6 +341,7 @@ class MappingAnalysisRequest:
     response_fixture_policy: ResponseFixturePolicy = ResponseFixturePolicy()
     native_relationship_policy: NativeRelationshipPolicy = NativeRelationshipPolicy()
     native_command_binding_policy: NativeCommandBindingPolicy = NativeCommandBindingPolicy()
+    native_cgi_dispatch_policy: ArmCgiDispatchPolicy = ArmCgiDispatchPolicy()
     arm_literal_xref_policy: ArmLiteralXrefPolicy = ArmLiteralXrefPolicy()
     frontend_feature_gate_policy: FrontendFeatureGatePolicy = (
         FrontendFeatureGatePolicy()
@@ -398,6 +417,12 @@ def _classify(
         if "native_relationship" in enabled:
             kinds.append("native_relationship")
         if (
+            "native_cgi_dispatch" in enabled
+            and _arm_pic_callsite_applicable(content)
+            and b"/cgi-bin/" in content
+        ):
+            kinds.append("native_cgi_dispatch")
+        if (
             "native_command_binding" in enabled
             and b"daemon_exe_info" in content
         ):
@@ -465,7 +490,7 @@ def _stage(name: str, results: tuple, output_count: int) -> MappingAnalysisStage
         else CoverageStatus.PARTIAL
     )
     diagnostics = tuple(sorted({
-        diagnostic.code
+        diagnostic.code if hasattr(diagnostic, "code") else str(diagnostic)
         for result in results
         for diagnostic in result.diagnostics
     }))
@@ -636,6 +661,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v11",
                 "firmatlas.mapping.profile/auto-v12",
                 "firmatlas.mapping.profile/auto-v13",
+                "firmatlas.mapping.profile/auto-v14",
             }
         ),
         enable_tenda_get_set_data=(
@@ -648,6 +674,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v11",
                 "firmatlas.mapping.profile/auto-v12",
                 "firmatlas.mapping.profile/auto-v13",
+                "firmatlas.mapping.profile/auto-v14",
             }
         ),
         enable_regex_literals=(
@@ -657,6 +684,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v11",
                 "firmatlas.mapping.profile/auto-v12",
                 "firmatlas.mapping.profile/auto-v13",
+                "firmatlas.mapping.profile/auto-v14",
             }
         ),
     )
@@ -783,6 +811,42 @@ def analyze_extracted_root(
         source.canonical_path: (source, content)
         for source, content, _ in selected
     }
+    cgi_anchors = tuple(sorted({
+        ArmCgiDispatchAnchor(
+            item.candidate_id,
+            (
+                item.endpoint.split("?", 1)[0]
+                if item.endpoint.startswith("/")
+                else "/" + item.endpoint.split("?", 1)[0]
+            ),
+        )
+        for result in frontend
+        for item in result.candidates
+        if "/cgi-bin/" in (
+            item.endpoint.split("?", 1)[0]
+            if item.endpoint.startswith("/")
+            else "/" + item.endpoint.split("?", 1)[0]
+        )
+    }, key=lambda item: (item.target_ref, item.interface_path)))
+    native_cgi_dispatch = tuple(
+        discover_arm_cgi_string_dispatch(
+            source,
+            content,
+            tuple(
+                anchor for anchor in cgi_anchors
+                if anchor.dispatch_token.encode("utf-8") in content
+            ),
+            policy=request.native_cgi_dispatch_policy,
+        )
+        for source, content, kinds in selected
+        if (
+            "native_cgi_dispatch" in kinds
+            and any(
+                anchor.dispatch_token.encode("utf-8") in content
+                for anchor in cgi_anchors
+            )
+        )
+    )
     command_handler_literal_xrefs = (
         tuple(
             discover_arm_function_literal_xrefs(
@@ -983,6 +1047,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v11",
                     "firmatlas.mapping.profile/auto-v12",
                     "firmatlas.mapping.profile/auto-v13",
+                    "firmatlas.mapping.profile/auto-v14",
                 }
                 else ()
             )
@@ -1002,6 +1067,7 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v11",
                         "firmatlas.mapping.profile/auto-v12",
                         "firmatlas.mapping.profile/auto-v13",
+                        "firmatlas.mapping.profile/auto-v14",
                     },
                     include_fixed_action_dynamic_query=(
                         request.profile.profile_id
@@ -1010,6 +1076,7 @@ def analyze_extracted_root(
                             "firmatlas.mapping.profile/auto-v11",
                             "firmatlas.mapping.profile/auto-v12",
                             "firmatlas.mapping.profile/auto-v13",
+                            "firmatlas.mapping.profile/auto-v14",
                         }
                     ),
                 ),
@@ -1063,6 +1130,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.native_command_binding,
             native_command_bindings,
             "auto:native-command-binding",
+        ))
+    if "native_cgi_dispatch" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_cgi_dispatch,
+            native_cgi_dispatch,
+            "auto:native-cgi-dispatch",
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -1161,6 +1234,12 @@ def analyze_extracted_root(
             "native_command_binding",
             native_command_bindings,
             sum(len(item.bindings) for item in native_command_bindings),
+        ))
+    if "native_cgi_dispatch" in request.profile.enabled_analyzers:
+        stages.insert(8, _stage(
+            "native_cgi_dispatch",
+            native_cgi_dispatch,
+            sum(len(item.bindings) for item in native_cgi_dispatch),
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         stages.insert(8, _stage(

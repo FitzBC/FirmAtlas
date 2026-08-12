@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 
 from firmatlas.mapping import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V14,
     BUILTIN_ANALYZER_REGISTRY_V13,
     CoverageStatus,
     DiscoveryCandidateKind,
@@ -22,12 +23,18 @@ from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class MappingAnalysisRunContractTests(unittest.TestCase):
-    def test_current_default_profile_and_registry_have_frozen_v13_aliases(self):
+    def test_current_default_profile_and_registry_have_frozen_v14_aliases(self):
         self.assertEqual(
-            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v13()
+            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v14()
         )
         self.assertEqual(
-            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V13
+            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V14
+        )
+        self.assertNotEqual(
+            MappingAnalysisProfile.auto_v14(), MappingAnalysisProfile.auto_v13()
+        )
+        self.assertNotEqual(
+            BUILTIN_ANALYZER_REGISTRY_V14, BUILTIN_ANALYZER_REGISTRY_V13
         )
 
     AC9_ROOT = Path(
@@ -86,6 +93,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "parameter_clue", "response_fixture", "ubus_backend",
                 "native_relationship",
                 "native_command_binding",
+                "native_cgi_dispatch",
                 "arm_literal_xref",
                 "arm_feature_pivot",
                 "scheduler", "catalog",
@@ -344,9 +352,9 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v13", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v14", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v13",
+            "firmatlas.mapping.analyzer-registry/builtin-v14",
             result.analyzer_registry_id,
         )
 
@@ -401,6 +409,31 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
             "formGetUSBStatus",
             dict(usb_status_handler.attributes)["handler_symbol"],
         )
+        upload_dispatch = next(
+            item for item in result.catalog.candidates
+            if (
+                item.candidate_kind
+                is DiscoveryCandidateKind.NATIVE_CGI_DISPATCH
+                and item.canonical_identity == "UploadCfg"
+            )
+        )
+        self.assertEqual(
+            "/cgi-bin/UploadCfg",
+            dict(upload_dispatch.attributes)["interface_path"],
+        )
+        self.assertEqual(
+            "bin/httpd@0x0003b850",
+            dict(upload_dispatch.attributes)["handler_identity"],
+        )
+        self.assertEqual(
+            "6", dict(upload_dispatch.attributes)["dispatcher_entry_count"]
+        )
+        cgi_stage = next(
+            item for item in result.stages
+            if item.stage_name == "native_cgi_dispatch"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, cgi_stage.coverage_status)
+        self.assertGreaterEqual(cgi_stage.output_count, 1)
         feature_gate_stage = next(
             item for item in result.stages
             if item.stage_name == "frontend_feature_gate"

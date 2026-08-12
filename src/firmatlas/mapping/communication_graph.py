@@ -435,6 +435,8 @@ def _candidate_node_kind(kind: DiscoveryCandidateKind) -> CommunicationGraphNode
             CommunicationGraphNodeKind.RESPONSE_CONTRACT,
         DiscoveryCandidateKind.NATIVE_NESTED_DISPATCH:
             CommunicationGraphNodeKind.DISPATCH,
+        DiscoveryCandidateKind.NATIVE_CGI_DISPATCH:
+            CommunicationGraphNodeKind.DISPATCH,
         DiscoveryCandidateKind.NATIVE_REQUEST_PROTECTION:
             CommunicationGraphNodeKind.PROTECTION,
         DiscoveryCandidateKind.NATIVE_SERVICE_ASSEMBLY:
@@ -705,10 +707,24 @@ def project_communication_architecture_graph(
                     candidate.evidence_ids,
                     "response_fixture.frontend_request_refs",
                 ))
+        elif candidate.candidate_kind is DiscoveryCandidateKind.NATIVE_CGI_DISPATCH:
+            edges.append(_edge(
+                CommunicationGraphEdgeKind.BINDS_HANDLER,
+                candidate.candidate_id,
+                attributes["handler_ref"],
+                candidate.claim_status.value,
+                candidate.candidate_id,
+                candidate.evidence_ids,
+                "native_cgi_dispatch.handler_ref",
+            ))
     target_ref_edges = {
         DiscoveryCandidateKind.NATIVE_NESTED_DISPATCH: (
             CommunicationGraphEdgeKind.DISPATCHED_BY,
             "native_nested_dispatch.target_ref",
+        ),
+        DiscoveryCandidateKind.NATIVE_CGI_DISPATCH: (
+            CommunicationGraphEdgeKind.DISPATCHED_BY,
+            "native_cgi_dispatch.target_ref",
         ),
         DiscoveryCandidateKind.NATIVE_REQUEST_PROTECTION: (
             CommunicationGraphEdgeKind.PROTECTED_BY,

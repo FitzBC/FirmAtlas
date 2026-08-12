@@ -188,8 +188,9 @@ M1 工作项：
 | R2-19 | AC9 产品 HTTP 与 Console 通信图谱 | 已验证 | R2-18 | shared query HTTP Adapter + interface index/focus + 4 presets + evidence/obligation panel + real browser replay |
 | R2-20 | AC9 历史漏洞图谱覆盖层 | 已验证 | R2-17/18/19 | 13 expectations + 71-record denominator + immutable overlay/query + Console history view |
 | R2-21 | AC9 历史漏检优先队列与字段类型 | 已验证 | R2-20 | source-typed clue + repeatable immutable supplements + 14-expectation replay + 57-task queue |
+| R2-22 | AC9 配置上传入口与 CGI 字符串分发 | 已验证 | R2-21 | `POST multipart filename → ARM six-entry string switch → httpd handler` + auto-v14 + graph path + persistence obligation split |
 
-**下一项建议**：继续以 AC9 为主样本，沿 R2-21 两个 priority-95 configuration sink 实现配置导入 ingress producer：恢复上传/恢复入口、multipart/blob 字段、解析与持久化写入点，再连接 native 配置键读取；找不到入口时发布 `unresolved_configuration_ingress`，不得把配置键写成 HTTP 参数。
+**下一项建议**：继续以 AC9 为主样本，把 R2-22 已人工重放的 `httpd → libtpi:tpi_sys_cfg_upload → cfm Upload → libCfm:UploadValue` 固化为通用跨 ELF PLT/call-chain producer；配置上传先建模为 wildcard state-write surface，再连接 native configuration-key sink。缺少 key 级 parser 证明时不得发布精确 key flow，更不得把配置键写成 HTTP 参数。
 
 ## 7. 跨会话无缝工作协议
 

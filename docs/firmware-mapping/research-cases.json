@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:80cd3516550a97de4b327be6b0034634f9a7961be3eb018e05e441d115aa4d56",
+      "case_id": "research-case:3d6c7e0441aeb25e3c397ba95fa425b7b39ad44fbafccb746c2088f438c58e92",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -106,6 +106,15 @@
           "producer": "historical-expectation-diff@v1alpha1"
         },
         {
+          "evidence_ref": "coverage:ac9-configuration-ingress-r2-22",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-22-vendor-tenda-ac9-configuration-ingress.json",
+          "source_artifact_sha256": "6f8e66039c60e2cce553a39ebc7c5530d8216d88f72b85a52027c5f3fa2fd565",
+          "locator": "json:$.automated_chain",
+          "capability": "binds_configuration_ingress",
+          "producer": "native-arm-cgi-string-dispatch@0.1.0"
+        },
+        {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
           "kind": "native_binding",
           "source_path": "bin/httpd",
@@ -148,6 +157,14 @@
           "statement": "Primary-source replay upgrades CVE-2021-42659 to an observed POST interface with body:list, but keeps security.ddos.map and sys.schedulereboot.* as configuration keys behind unresolved ingress rather than promoting them to HTTP parameters.",
           "evidence_refs": [
             "coverage:ac9-historical-coverage-queue"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:configuration-upload-cgi-owner",
+          "statement": "POST /cgi-bin/UploadCfg carries multipart form field filename; an independent ARM string-switch dispatcher at 0x3a9a0 binds UploadCfg to bin/httpd@0x3b850 with a six-entry family proof.",
+          "evidence_refs": [
+            "coverage:ac9-configuration-ingress-r2-22"
           ],
           "status": "supported"
         },
@@ -252,6 +269,21 @@
           ],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-upload-cgi-dispatch",
+          "order": 7,
+          "interpretation": "Reject the ordinary websForm registrar hypothesis, validate the separate CGI token switch, and bind the multipart request to its direct native handler without promoting configuration keys to HTTP fields.",
+          "claim_ids": [
+            "claim:configuration-upload-cgi-owner"
+          ],
+          "creates_obligations": [
+            "obligation:configuration-persistence-link"
+          ],
+          "resolves_obligations": [
+            "obligation:configuration-ingress"
+          ],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -269,6 +301,15 @@
           "obligation_id": "obligation:configuration-ingress",
           "statement": "Recover the HTTP upload/import path that writes the configuration keys later consumed by the DDoS and reboot handlers.",
           "required_capability": "binds_configuration_ingress",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "coverage:ac9-configuration-ingress-r2-22"
+          ]
+        },
+        {
+          "obligation_id": "obligation:configuration-persistence-link",
+          "statement": "Automate the handler-to-libtpi-to-cfm IPC chain and model the uploaded configuration as a wildcard state-write surface.",
+          "required_capability": "binds_configuration_persistence",
           "status": "open",
           "closure_evidence_refs": []
         }
@@ -278,14 +319,16 @@
         "Choosing dhttpd by filename alone would spend deep-analysis effort on the weaker candidate.",
         "Treating a route string and a similar symbol name as a binding would skip the registrar call-site proof.",
         "Treating a cross-version historical interface match as a current vulnerability would collapse structural observation, version applicability, and exploitability into one unsupported claim.",
-        "Treating a native configuration key as an HTTP request parameter would fabricate a direct ingress edge and conceal the missing upload chain."
+        "Treating a native configuration key as an HTTP request parameter would fabricate a direct ingress edge and conceal the missing upload chain.",
+        "Assuming every /cgi-bin operation uses websFormDefine would miss the independent UploadCfg/DownloadCfg string-switch dispatcher."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
         "Ablation case comparing frontend-only, configuration-only, shallow-native, and full evidence fusion.",
         "Worked example for obligation-preserving analysis and false-merge prevention.",
         "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions.",
-        "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states."
+        "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states.",
+        "Architecture-split case where a second dispatcher family changes an obligation from unknown ingress to known owner plus open persistence."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",

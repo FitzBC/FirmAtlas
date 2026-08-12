@@ -211,6 +211,18 @@ R2-21 从 71 条漏洞分母中的三条 parameter-only 再次改变了义务解
 `stage:historical-coverage-priority-queue` 和开放的 `obligation:configuration-ingress`；不能把最终
 native sink 命中倒写成已恢复端到端 HTTP 数据流。
 
+R2-22 沿义务回到 `system_backup.html`，先恢复精确的
+`POST /cgi-bin/UploadCfg`、`multipart/form-data` 与表单字段 `filename`。最初假设它也由
+`websFormDefine` 绑定，但完整 registrar 枚举没有 `UploadCfg`；继续检查 `httpd` 才发现另一套
+六项 ARM 字符串分发表：`0x3a9a0` 中 token 长度、共同 `strncmp` 目标、零值分支和直接 `BL`
+共同证明 `UploadCfg → bin/httpd@0x3b850`，`DownloadCfg` 则落到 `0x3c0ac`。`auto-v14`
+将这套 dispatcher 独立建模为 `request → dispatch → handler`，不伪装成普通 route registrar。
+原 `obligation:configuration-ingress` 因此关闭，同时拆出更窄的
+`obligation:configuration-persistence-link`：人工指令审计已沿
+`httpd → libtpi:tpi_sys_cfg_upload → cfm Upload → libCfm:UploadValue` 观察到跨制品延续，
+但它尚未成为自动 Producer，也不能把任意配置键提升为 HTTP 参数。机器证据和精确边界见
+[R2-22 报告](./samples/r2-22-vendor-tenda-ac9-configuration-ingress.json)。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

@@ -18,6 +18,7 @@ from .response_fixture import ResponseFixtureResult
 from .native_relationship import NativeRelationshipResult
 from .native_arm_xref import ArmFeaturePivotResult, ArmLiteralXrefResult
 from .native_command_binding import NativeCommandBindingResult
+from .native_cgi_dispatch import ArmCgiDispatchResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -63,6 +64,7 @@ class DiscoveryProducerKind(str, Enum):
     ARM_LITERAL_XREF = "arm_literal_xref"
     ARM_FEATURE_PIVOT = "arm_feature_pivot"
     NATIVE_COMMAND_BINDING = "native_command_binding"
+    NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -94,6 +96,7 @@ class DiscoveryCandidateKind(str, Enum):
     ARM_LITERAL_XREF = "arm_literal_xref"
     ARM_FEATURE_PIVOT = "arm_feature_pivot"
     NATIVE_COMMAND_BINDING = "native_command_binding"
+    NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -220,6 +223,22 @@ class DiscoveryProducerBatch:
             if results else AnalyzerIdentity("native-symbol-command-table", "0.1.0")
         )
         return cls(DiscoveryProducerKind.NATIVE_COMMAND_BINDING, producer, scope, results)
+
+    @classmethod
+    def native_cgi_dispatch(
+        cls, results: Tuple[ArmCgiDispatchResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-arm-cgi-string-dispatch", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_CGI_DISPATCH,
+            producer,
+            scope,
+            results,
+        )
 
     @classmethod
     def web_configuration(
@@ -511,6 +530,7 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
     native_nested_target_refs = set()
     native_protection_target_refs = set()
     native_service_target_refs = set()
+    native_cgi_target_refs = set()
     ubus_backend_target_refs = set()
     arm_feature_pivot_binding_refs = set()
     frontend_invocation_request_refs = set()
@@ -1089,6 +1109,71 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("setter_callsite", "0x{:x}".format(item.setter_callsite)),
                         ),
                     ))
+            elif batch.producer_kind is DiscoveryProducerKind.NATIVE_CGI_DISPATCH:
+                for item in result.bindings:
+                    native_cgi_target_refs.add(item.target_ref)
+                    handler_id = _stable_id(
+                        "native-handler",
+                        result.source_path,
+                        item.handler_identity,
+                        item.binding_id,
+                    )
+                    common_attributes = (
+                        ("target_ref", item.target_ref),
+                        ("interface_path", item.interface_path),
+                        ("dispatch_token", item.dispatch_token),
+                        ("dispatcher_identity", "{}@0x{:08x}".format(
+                            result.source_path, item.dispatcher_address
+                        )),
+                        ("dispatcher_address", "0x{:08x}".format(
+                            item.dispatcher_address
+                        )),
+                        ("dispatcher_entry_count", str(
+                            item.dispatcher_entry_count
+                        )),
+                        ("comparison_address", "0x{:08x}".format(
+                            item.comparison_address
+                        )),
+                        ("comparison_target_address", "0x{:08x}".format(
+                            item.comparison_target_address
+                        )),
+                        ("handler_identity", item.handler_identity),
+                        ("handler_address", "0x{:08x}".format(
+                            item.handler_address
+                        )),
+                        ("handler_ref", handler_id),
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        item.binding_id,
+                        DiscoveryCandidateKind.NATIVE_CGI_DISPATCH,
+                        item.dispatch_token,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        item.source_construct,
+                        item.evidence_ids,
+                        common_attributes,
+                    ))
+                    handler_evidence = tuple(
+                        evidence_id for evidence_id in item.evidence_ids
+                        if evidence[evidence_id].capability == "binds_handler"
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        handler_id,
+                        DiscoveryCandidateKind.NATIVE_HANDLER,
+                        item.handler_identity,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        item.source_construct,
+                        handler_evidence,
+                        (
+                            ("target_ref", item.target_ref),
+                            ("route_token", item.dispatch_token),
+                            ("handler_address", "0x{:08x}".format(
+                                item.handler_address
+                            )),
+                            ("dispatch_ref", item.binding_id),
+                        ),
+                    ))
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_NESTED_DISPATCH:
                 for item in result.paths:
                     native_nested_target_refs.add(item.target_ref)
@@ -1361,6 +1446,8 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
         raise ValueError("native request protection references unknown catalog candidate")
     if any(target not in candidate_ids for target in native_service_target_refs):
         raise ValueError("native service assembly references unknown catalog candidate")
+    if any(target not in candidate_ids for target in native_cgi_target_refs):
+        raise ValueError("native CGI dispatch references unknown catalog candidate")
     if any(target not in candidate_ids for target in ubus_backend_target_refs):
         raise ValueError("ubus backend result references unknown catalog candidate")
     if any(
