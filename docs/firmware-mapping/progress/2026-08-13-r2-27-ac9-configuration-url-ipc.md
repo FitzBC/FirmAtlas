@@ -89,4 +89,5 @@ SHA-256 `a5301e62b9576a40973a8d20387e0dd9b6eaa8bc2f6d5f9327d23550725269b2`。
   `reload_url_mib` activation 仍开放。下一轮应恢复该 selector 的 transport/route ownership，
   并在安全隔离环境取得动态上传/loader 证据；在此之前不得补造 `/goform` 路径或 method。
 
-Git revision：本轮功能提交完成后回填；随后仅允许追加交接元数据。
+Git revision：`a94e6ad70fe924bd346e704a470dcab806fb6739`（功能、测试、机器报告与本轮
+验收记录）；随后 revision 仅追加该检查点和推送交接元数据。
