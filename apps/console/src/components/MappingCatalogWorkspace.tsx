@@ -18,6 +18,8 @@ const kinds = [
   ['script_route', '脚本路由'], ['native_hint', '原生提示'],
   ['native_route_binding', 'Native 绑定'], ['native_handler', 'Native Handler'],
   ['native_parameter_state_flow', '参数状态流'],
+  ['native_configuration_url_ipc_flow', 'URL IPC'],
+  ['native_configuration_url_consumer', 'URL 状态消费者'],
   ['runtime_principal', '运行时主体'],
   ['ubus_backend_binding', 'ubus 后端绑定'],
   ['ubus_access_grant', 'ubus 访问策略'],
@@ -335,12 +337,17 @@ function CandidateRow({ candidate, active, onClick }: { candidate: MappingCandid
 
 function CandidateEvidence({ detail }: { detail: MappingCandidateDetail }) {
   const item = detail.candidate
+  const attributes = Object.fromEntries(item.attributes)
+  const isUrlIpc = item.candidate_kind === 'native_configuration_url_ipc_flow'
+  const isUrlConsumer = item.candidate_kind === 'native_configuration_url_consumer'
   const title = item.candidate_kind === 'candidate_association'
     ? '跨层候选关联'
     : item.canonical_identity
   return <article className="detail-enter max-h-[640px] overflow-y-auto p-5 sm:p-6">
     <div className="eyebrow"><FileCode2 size={12} /> Evidence detail</div><h2 className="mt-3 break-all font-mono text-lg font-semibold text-white">{title}</h2><p className="mt-2 break-all text-xs text-slate-600">{item.source_path} · {item.source_construct}</p>
     {item.candidate_kind === 'candidate_association' && <p className="mt-2 break-all font-mono text-[9px] leading-4 text-slate-700">{item.canonical_identity}</p>}
+    {isUrlIpc && <div className="mt-4 rounded-xl border border-cyan/20 bg-cyan/[0.045] p-3"><div className="text-[10px] font-semibold text-cyan">URL 配置 IPC</div><p className="mt-1 font-mono text-[10px] leading-5 text-slate-400">{attributes.channel_path} · {attributes.message_size} bytes · opcode@0 · key/path@{attributes.key_offset || '—'} · value@{attributes.value_offset || '—'}</p><p className="mt-1 text-[10px] text-slate-600">{attributes.operation} · request {attributes.request_opcode} · response {attributes.response_opcodes} · {attributes.access_mode}_state</p></div>}
+    {isUrlConsumer && <div className="mt-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-3"><div className="text-[10px] font-semibold text-amber-200">按调用点绑定状态域</div><p className="mt-1 text-[10px] leading-5 text-slate-500">这里只展示经 URL client 调用绑定的 key template；同前缀的 rule.* / flag 属主 CFM，name 仍未绑定，不能按前缀合并。</p></div>}
     <div className="mt-5 grid grid-cols-3 gap-2">{[['参数', detail.parameters.length], ['关联', detail.associations.length + detail.related_candidates.length], ['未决', detail.open_obligations.length]].map(([label, value]) => <div key={label} className="rounded-xl border border-white/[0.06] bg-black/20 p-3"><div className="text-[9px] text-slate-600">{label}</div><div className="mt-1 text-lg font-semibold text-slate-200">{value}</div></div>)}</div>
     <EvidenceSection title="架构与分析属性">{item.attributes.length ? <div className="grid gap-2 sm:grid-cols-2">{item.attributes.map(([key, value]) => <div key={`${key}:${value}`} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"><div className="text-[9px] uppercase tracking-[0.08em] text-slate-600">{key.replaceAll('_', ' ')}</div><div className="mt-1 break-all font-mono text-[10px] leading-5 text-cyan">{value}</div></div>)}</div> : <Muted />}</EvidenceSection>
     <EvidenceSection title="参数与操作选择器">{detail.parameters.length ? detail.parameters.map((parameter) => <div key={parameter.parameter_id} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"><div className="font-mono text-xs text-cyan">{parameter.name}</div><div className="mt-1 text-[10px] text-slate-600">{parameter.namespace}{parameter.is_operation_selector ? ' · operation selector' : ''}{parameter.literal_value ? ` · ${parameter.literal_value}` : ''}</div></div>) : <Muted />}</EvidenceSection>

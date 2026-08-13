@@ -73,6 +73,9 @@ class CommunicationGraphEdgeKind(str, Enum):
     SATISFIES_OBLIGATION = "satisfies_obligation"
     CALLS = "calls"
     WRITES_STATE = "writes_state"
+    READS_STATE = "reads_state"
+    DELETES_STATE = "deletes_state"
+    PERSISTS_STATE = "persists_state"
     IMPORTS_STATE = "imports_state"
 
 
@@ -186,12 +189,13 @@ _VIEW_PRESETS = (
         "Parameter and state",
         (
             "interface", "parameter", "handler", "communication_relation",
-            "evidence_candidate", "parameter_clue", "association", "state",
+            "component", "evidence_candidate", "parameter_clue", "association",
+            "state",
         ),
         (
             "accepts_parameter", "has_parameter_clue",
             "has_native_association", "associated_with",
-            "writes_state",
+            "reads_state", "writes_state", "deletes_state", "persists_state",
         ),
         "Interface parameters and evidence-backed state or clue candidates.",
     ),
@@ -219,12 +223,33 @@ def _view_presets(catalog: DiscoveryCatalog) -> Tuple[CommunicationGraphViewPres
         is DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW
         for item in catalog.candidates
     )
-    if not has_configuration_import:
+    has_url_ipc = any(
+        item.candidate_kind in {
+            DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_IPC_FLOW,
+            DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_CONSUMER,
+        }
+        for item in catalog.candidates
+    )
+    if not has_configuration_import and not has_url_ipc:
         return _VIEW_PRESETS
     return tuple(
         replace(
             item,
-            edge_kinds=(*item.edge_kinds, CommunicationGraphEdgeKind.IMPORTS_STATE.value),
+            edge_kinds=tuple(dict.fromkeys((
+                *item.edge_kinds,
+                *(
+                    (CommunicationGraphEdgeKind.IMPORTS_STATE.value,)
+                    if has_configuration_import else ()
+                ),
+                *(
+                    (
+                        CommunicationGraphEdgeKind.READS_STATE.value,
+                        CommunicationGraphEdgeKind.WRITES_STATE.value,
+                        CommunicationGraphEdgeKind.DELETES_STATE.value,
+                        CommunicationGraphEdgeKind.PERSISTS_STATE.value,
+                    ) if has_url_ipc else ()
+                ),
+            ))),
         )
         if item.preset_id in {"parameter_state", "completeness"}
         else item
@@ -477,6 +502,10 @@ def _candidate_node_kind(kind: DiscoveryCandidateKind) -> CommunicationGraphNode
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW:
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
+        DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_IPC_FLOW:
+            CommunicationGraphNodeKind.COMMUNICATION_RELATION,
+        DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_CONSUMER:
+            CommunicationGraphNodeKind.COMPONENT,
         DiscoveryCandidateKind.NATIVE_REQUEST_PROTECTION:
             CommunicationGraphNodeKind.PROTECTION,
         DiscoveryCandidateKind.NATIVE_SERVICE_ASSEMBLY:
@@ -959,6 +988,61 @@ def project_communication_architecture_graph(
             candidate.evidence_ids,
             "native_configuration_url_document_flow.state_scope",
         ))
+    for candidate in catalog.candidates:
+        if (
+            candidate.candidate_kind
+            is DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_IPC_FLOW
+        ):
+            attributes = dict(candidate.attributes)
+            state_scope = attributes["state_scope"]
+            state_ref = _stable_id("configuration-state", state_scope)
+            state_specs[state_ref] = (
+                state_scope,
+                "key_value_entry",
+                candidate.evidence_ids,
+            )
+            kind = {
+                "read": CommunicationGraphEdgeKind.READS_STATE,
+                "write": CommunicationGraphEdgeKind.WRITES_STATE,
+                "delete": CommunicationGraphEdgeKind.DELETES_STATE,
+                "persist": CommunicationGraphEdgeKind.PERSISTS_STATE,
+            }[attributes["access_mode"]]
+            edges.append(_edge(
+                kind,
+                candidate.candidate_id,
+                state_ref,
+                candidate.claim_status.value,
+                candidate.candidate_id,
+                candidate.evidence_ids,
+                "native_configuration_url_ipc_flow.state_scope",
+            ))
+        elif (
+            candidate.candidate_kind
+            is DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_CONSUMER
+        ):
+            attributes = dict(candidate.attributes)
+            for state_scope, mode in json.loads(attributes["state_accesses"]):
+                state_ref = _stable_id("configuration-state", state_scope)
+                state_specs[state_ref] = (
+                    state_scope,
+                    "key_template",
+                    candidate.evidence_ids,
+                )
+                kind = {
+                    "read": CommunicationGraphEdgeKind.READS_STATE,
+                    "write": CommunicationGraphEdgeKind.WRITES_STATE,
+                    "delete": CommunicationGraphEdgeKind.DELETES_STATE,
+                    "persist": CommunicationGraphEdgeKind.PERSISTS_STATE,
+                }[mode]
+                edges.append(_edge(
+                    kind,
+                    candidate.candidate_id,
+                    state_ref,
+                    candidate.claim_status.value,
+                    candidate.candidate_id,
+                    candidate.evidence_ids,
+                    "native_configuration_url_consumer.state_accesses",
+                ))
     nodes.extend(
         CommunicationGraphNode(
             state_ref,

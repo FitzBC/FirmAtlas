@@ -63,6 +63,21 @@ const detail: MappingCandidateDetail = {
   evidence_atoms: [{ evidence_id: 'ev:1', predicate: 'constructs', object_value: candidate.canonical_identity, capability: 'constructs_request', source_span: { artifact_path: candidate.source_path, locator: 'text:1' } }],
   coverage: [{ scope: 'webroot/**/*.js', producer_kind: 'frontend', producer: 'frontend-request-producer', status: 'completed' }],
 }
+const urlIpcCandidate: MappingCandidate = {
+  ...candidate,
+  candidate_id: 'url-ipc:set', candidate_kind: 'native_configuration_url_ipc_flow',
+  canonical_identity: 'SetUrlValue:opcode=30->cfm/url_mib/*', claim_status: 'supported',
+  source_path: 'bin/cfmd', source_construct: 'arm32-cfm-url-ipc/v1',
+  attributes: [
+    ['operation', 'set'], ['channel_path', '/var/cfm_socket'], ['message_size', '2016'],
+    ['request_opcode', '30'], ['response_opcodes', '[31]'], ['key_offset', '4'],
+    ['value_offset', '516'], ['access_mode', 'write'],
+  ], parameter_count: 0,
+}
+const urlIpcDetail: MappingCandidateDetail = {
+  ...detail, candidate: urlIpcCandidate, parameters: [], related_candidates: [],
+  open_obligations: [],
+}
 const hiddenPage: PotentialHiddenInterfacePage = {
   items: [{
     interface_id: 'potential-hidden-interface:1', catalog_id: catalog.catalog_id,
@@ -274,6 +289,19 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   expect(screen.getByText('read · unauthenticated')).toBeInTheDocument()
   expect(screen.getByText('未决分析义务')).toBeInTheDocument()
   expect(screen.getByText('resolve_ubus_runtime_owner')).toBeInTheDocument()
+})
+
+it('renders URL IPC framing as a first-class communication detail', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({ items: [urlIpcCandidate], total: 1, limit: 100, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingCandidate').mockResolvedValue(urlIpcDetail)
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: `查看候选 ${urlIpcCandidate.canonical_identity}` }))
+
+  expect(await screen.findByText('URL 配置 IPC')).toBeInTheDocument()
+  expect(screen.getByText('/var/cfm_socket · 2016 bytes · opcode@0 · key/path@4 · value@516')).toBeInTheDocument()
+  expect(screen.getByText('set · request 30 · response [31] · write_state')).toBeInTheDocument()
 })
 
 it('shows potential hidden interfaces as a coverage-gated cross-firmware view', async () => {

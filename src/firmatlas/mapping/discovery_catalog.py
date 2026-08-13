@@ -27,6 +27,9 @@ from .native_arm_configuration_text_import_flow import (
 from .native_arm_configuration_url_document_flow import (
     ArmConfigurationUrlDocumentFlowResult,
 )
+from .native_arm_configuration_url_ipc_flow import (
+    ArmConfigurationUrlIpcFlowResult,
+)
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -81,6 +84,7 @@ class DiscoveryProducerKind(str, Enum):
     NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW = (
         "native_configuration_url_document_flow"
     )
+    NATIVE_CONFIGURATION_URL_IPC_FLOW = "native_configuration_url_ipc_flow"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -121,6 +125,8 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW = (
         "native_configuration_url_document_flow"
     )
+    NATIVE_CONFIGURATION_URL_IPC_FLOW = "native_configuration_url_ipc_flow"
+    NATIVE_CONFIGURATION_URL_CONSUMER = "native_configuration_url_consumer"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -327,6 +333,22 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def native_configuration_url_ipc_flow(
+        cls, results: Tuple[ArmConfigurationUrlIpcFlowResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-arm-configuration-url-ipc-flow", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_CONFIGURATION_URL_IPC_FLOW,
             producer,
             scope,
             results,
@@ -1307,6 +1329,65 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                         ),
                     ))
                 producer_obligations.extend(result.open_obligations)
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.NATIVE_CONFIGURATION_URL_IPC_FLOW
+            ):
+                call_counts_by_symbol = {}
+                for path, symbol, count in result.client_call_counts:
+                    call_counts_by_symbol.setdefault(symbol, []).append((path, count))
+                for item in result.operations:
+                    candidates.append(DiscoveryCandidate(
+                        item.operation_id,
+                        DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_IPC_FLOW,
+                        "{}:opcode={}->{}".format(
+                            item.client_symbol, item.request_opcode, item.state_scope
+                        ),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.dispatcher_path,
+                        result.profile,
+                        item.evidence_ids,
+                        (
+                            ("operation", item.operation),
+                            ("client_path", item.client_path),
+                            ("client_identity", item.client_identity),
+                            ("client_symbol", item.client_symbol),
+                            ("request_opcode", str(item.request_opcode)),
+                            ("response_opcodes", json.dumps(item.response_opcodes)),
+                            ("message_size", str(item.message_size)),
+                            ("key_offset", "" if item.key_offset is None else str(item.key_offset)),
+                            ("value_offset", "" if item.value_offset is None else str(item.value_offset)),
+                            ("dispatcher_path", item.dispatcher_path),
+                            ("dispatcher_identity", item.dispatcher_identity),
+                            ("server_wrapper_symbol", item.server_wrapper_symbol),
+                            ("store_primitive_symbol", item.store_primitive_symbol),
+                            ("state_scope", item.state_scope),
+                            ("access_mode", item.access_mode),
+                            ("client_call_counts", json.dumps(
+                                sorted(call_counts_by_symbol.get(item.client_symbol, ()))
+                            )),
+                        ),
+                    ))
+                for item in result.consumers:
+                    candidates.append(DiscoveryCandidate(
+                        item.consumer_id,
+                        DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_CONSUMER,
+                        "{}->{}".format(
+                            item.function_identity,
+                            ",".join(item.state_key_templates),
+                        ),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.source_path,
+                        result.profile,
+                        item.evidence_ids,
+                        (
+                            ("function_identity", item.function_identity),
+                            ("client_symbols", json.dumps(item.client_symbols)),
+                            ("state_key_templates", json.dumps(item.state_key_templates)),
+                            ("state_accesses", json.dumps(item.state_accesses)),
+                            ("access_modes", json.dumps(item.access_modes)),
+                        ),
+                    ))
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_CGI_DISPATCH:
                 for item in result.bindings:
                     native_cgi_target_refs.add(item.target_ref)

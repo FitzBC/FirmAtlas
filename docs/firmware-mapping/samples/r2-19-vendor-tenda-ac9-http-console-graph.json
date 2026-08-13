@@ -26,7 +26,7 @@
     "source_sha256": {
       "apps/console/src/api/client.ts": "913679853899cbc2d91fa219a4ea2ea03d07a3ff3626d3fa5587da685b02c40a",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "4378e8abdbc0dbcafe9874ddb61d8a7adcb537f35b3b338b9fd48e1a7a7eed1b",
-      "apps/console/src/components/MappingCatalogWorkspace.tsx": "ad2def1e6707d107a5794646b772993197dc15c4711af42eb75fe3face9ed559",
+      "apps/console/src/components/MappingCatalogWorkspace.tsx": "b476cefc19f868f8c824b4f33120f3b018d704392ade1ad38e141dfe9518147e",
       "apps/console/src/types.ts": "b485f97405b6ab9e681b804c877053728a321c2f071419e7f0d1c42b555252cf"
     }
   },

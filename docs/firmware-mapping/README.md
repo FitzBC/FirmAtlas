@@ -200,8 +200,9 @@ M1 工作项：
 | R2-24 | AC9 配置镜像 IPC 与整域状态写入 | 已验证 | R2-23 | opcode 14/15 + 2016-byte frame + offset 516 + `atoi→RestoreMTD` + `writes_state` + auto-v16 + 真实页面验收 |
 | R2-25 | AC9 配置文本导入与配置键状态修正 | 已验证 | R2-24 | upload split + `default_mib` + key/value parser + 1013 unique states + `imports_state` + auto-v17 + 真实页面验收；R2-24 whole-image 解释已被否定 |
 | R2-26 | AC9 独立 URL 配置文档消费者 | 已验证 | R2-25 | `load_url_mib → parser@0x766c → cfm/url_mib/*` + candidate state scope + missing-document partial coverage + activation obligation + auto-v18；517 Python、23 Console、production build 与本地页面交互通过；[记录](./progress/2026-08-13-r2-26-ac9-configuration-url-document.md) |
+| R2-27 | AC9 URL 日常 IPC 与跨状态域消费者 | 已验证 | R2-26 | `/var/cfm_socket` 2016-byte frame + 5 opcode operations + cfmd wrapper/store primitive + 5 httpd consumers + per-callsite `urlgroup.*` store split + auto-v19；521 Python、24 Console、production build 与两轮真实页面验收通过；[记录](./progress/2026-08-13-r2-27-ac9-configuration-url-ipc.md) |
 
-**下一项建议**：取得真实 AC9 配置备份的第二段或动态观测一次上传，验证是否存在间接/重启触发的 `load_url_mib(1)`；在此之前保持 URL 状态范围为 candidate、声明键数为 0，并继续把配置键与 HTTP 参数分层。
+**下一项建议**：沿 `UploadWebsite` selector 恢复其外层 HTTP transport/route binding，并取得动态上传证据验证是否存在间接 `load_url_mib` 激活；继续保持 URL IPC 字段、HTTP 参数、主 MIB 状态与 URL MIB 状态分层。
 
 ## 7. 跨会话无缝工作协议
 

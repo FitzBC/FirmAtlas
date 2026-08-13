@@ -43,7 +43,8 @@ writer 与 consumer 两端均有静态证据，但全固件调用扫描没有恢
 - 该“writer/consumer 独立成立、激活边未恢复”的阶段变化已追加到 research case 时间线，保留反事实失败模式与论文用途。
 
 机器报告：[r2-26-vendor-tenda-ac9-configuration-url-document.json](../samples/r2-26-vendor-tenda-ac9-configuration-url-document.json)，SHA-256：
-`36dc10a9db723d33ef6105b46948d3a0dadbf5a00d320e85c08270294da4b72c`。
+R2-27 图谱状态边 schema 演进后用冻结的 `auto-v18/builtin-v18` 重放；分析事实不变，更新后的
+SHA-256 为 `8fabd079b89101511c54a6391c31a754cd248a53b900b70096bca0e6a98eed71`。
 
 ## 4. TDD、回归与确定性
 

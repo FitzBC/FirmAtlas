@@ -29,7 +29,7 @@
     "state_writer_symbol": "RestoreMTD",
     "write_granularity": "whole_configuration_image"
   },
-  "graph_id": "communication-graph:92f0cc2df41db397f15553c6fcb1c174cc0876898466e1069e87526f101ff4d3",
+  "graph_id": "communication-graph:e10c346f8076907a44e66b79ac10aedf2e65fc50c522af95d0b0c17a77c861ef",
   "graph_projection": {
     "edge_kind": "writes_state",
     "state_label": "configuration_partition[0]",

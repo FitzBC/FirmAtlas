@@ -8,9 +8,11 @@ import json
 from pathlib import Path
 
 from firmatlas.mapping import (
+    BUILTIN_ANALYZER_REGISTRY_V18,
     CommunicationGraphEdgeKind,
     CommunicationGraphNodeKind,
     DiscoveryCandidateKind,
+    MappingAnalysisProfile,
     MappingAnalysisRequest,
     analyze_extracted_root,
     project_communication_architecture_graph,
@@ -24,7 +26,12 @@ except ModuleNotFoundError:
 
 
 def build() -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(ROOT, ARTIFACT_SHA256))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v18()
+        ),
+        BUILTIN_ANALYZER_REGISTRY_V18,
+    )
     graph = project_communication_architecture_graph(run.catalog)
     candidate = next(
         item for item in run.catalog.candidates

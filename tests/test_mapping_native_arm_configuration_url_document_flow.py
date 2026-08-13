@@ -116,7 +116,7 @@ class ArmConfigurationUrlDocumentFlowContractTests(unittest.TestCase):
 
     def test_auto_v18_adds_url_document_flow_and_v17_stays_frozen(self):
         self.assertEqual(
-            "firmatlas.mapping.profile/auto-v18", MappingAnalysisProfile.auto().profile_id
+            "firmatlas.mapping.profile/auto-v19", MappingAnalysisProfile.auto().profile_id
         )
         self.assertIn(
             "native_configuration_url_document_flow",
@@ -133,7 +133,7 @@ class ArmConfigurationUrlDocumentFlowContractTests(unittest.TestCase):
 
         run = analyze_extracted_root(MappingAnalysisRequest(ROOT, "a" * 64))
 
-        self.assertEqual("firmatlas.mapping.profile/auto-v18", run.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v19", run.profile_id)
         candidate = next(
             item for item in run.catalog.candidates
             if item.candidate_kind

@@ -264,6 +264,20 @@ consumer 均存在，但执行边缺失”的反事实，适合作为负向完�
 案例；机器记录见
 [R2-26](./samples/r2-26-vendor-tenda-ac9-configuration-url-document.json)。
 
+R2-27 闭合了日常 URL 业务 IPC，但没有用它替代独立的 document activation 义务。`libCfm`
+的 Get/Set/Unset/Commit/Show client 通过 `/var/cfm_socket` 发送 2016-byte frame，`cfmd@0xa504`
+按 32/30/36/34/38 分发到 URL wrapper 与 `url_mib_*`/`save_url_mib`。逐 callsite 深入又修正了
+R2-26 的前缀级概括：`urlgroup.list*` 与 `urlgroup.class*` 走 URL store，而同一函数中的
+`urlgroup.rule.*`、`urlgroup.flag` 走主 `GetValue/UnSetValue/CommitCfm`；`urlgroup.name` 仍只是一条
+parser 线索。这个阶段说明“共同前缀、共同进程、共同函数”仍不足以绑定状态域。`reload_url_mib`
+依然没有外部 caller，故 activation obligation 保持 open。机器记录见
+[R2-27](./samples/r2-27-vendor-tenda-ac9-configuration-url-ipc.json)。
+
+页面验收保留了另一个反事实阶段：首轮具体 key template 焦点只有 1 node / 0 edge，并非底层
+证据缺失，而是参数/状态 preset 漏掉 consumer 的 `component` node kind。若只验证 API 或只看
+全局图计数，会把一个用户不可见的关系误报为已交付。补入 node kind 后二次验收为 4 nodes /
+3 edges（read/write/delete），因此本案例也用于展示“投影正确性不等于可视化查询正确性”。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

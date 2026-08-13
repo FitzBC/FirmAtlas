@@ -51,7 +51,7 @@
     "upload_identity": "lib/libtpi.so@0x00009c5c",
     "write_granularity": "key_value_document"
   },
-  "graph_id": "communication-graph:b60085d0e9158469848cc54793e9cfd1bf723f81b3045dd9d1f13c0ef568e354",
+  "graph_id": "communication-graph:57554c114c607b2be9b284df601f9349dc106fc3c080d37fd3b2342701d98a77",
   "historical_configuration_keys": [
     {
       "classification": "configuration_state_key",

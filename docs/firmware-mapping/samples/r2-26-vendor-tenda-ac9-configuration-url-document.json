@@ -27,7 +27,7 @@
     "write_granularity": "key_value_document",
     "writer_identity": "lib/libtpi.so@0x00009c5c"
   },
-  "graph_id": "communication-graph:1fc89b5d7c65b4abbd246a77f1623edd0efd197b728edd17aec059e7f3c2c757",
+  "graph_id": "communication-graph:e3db080e99d7b523e1dac43ae49889398cc6860227484059904d9ad2f6787140",
   "graph_projection": {
     "import_edge_id": "communication-edge:b2508d184a016760939df974200c86c8a70225998089b34abe8aa026b1dffccc",
     "import_edge_status": "candidate",

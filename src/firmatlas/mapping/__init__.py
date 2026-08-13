@@ -174,6 +174,16 @@ from .native_arm_configuration_url_document_flow import (
     ArmConfigurationUrlDocumentFlowResult,
     discover_arm_configuration_url_document_flows,
 )
+from .native_arm_configuration_url_ipc_flow import (
+    ARM_CONFIGURATION_URL_IPC_FLOW_SCHEMA_VERSION,
+    ArmConfigurationUrlConsumer,
+    ArmConfigurationUrlIpcArtifact,
+    ArmConfigurationUrlIpcFlowResult,
+    ArmConfigurationUrlIpcOperation,
+    ArmConfigurationUrlIpcPolicy,
+    ArmConfigurationUrlIpcProfile,
+    discover_arm_configuration_url_ipc_flows,
+)
 from .native_command_binding import (
     NATIVE_COMMAND_BINDING_SCHEMA_VERSION,
     NativeCommandBinding,
@@ -332,6 +342,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V19,
     BUILTIN_ANALYZER_REGISTRY_V18,
     BUILTIN_ANALYZER_REGISTRY_V17,
     BUILTIN_ANALYZER_REGISTRY_V16,
@@ -491,6 +502,14 @@ from .research_case import (
 )
 
 __all__ = (
+    "ARM_CONFIGURATION_URL_IPC_FLOW_SCHEMA_VERSION",
+    "ArmConfigurationUrlConsumer",
+    "ArmConfigurationUrlIpcArtifact",
+    "ArmConfigurationUrlIpcFlowResult",
+    "ArmConfigurationUrlIpcOperation",
+    "ArmConfigurationUrlIpcPolicy",
+    "ArmConfigurationUrlIpcProfile",
+    "discover_arm_configuration_url_ipc_flows",
     "ARM_CONFIGURATION_URL_DOCUMENT_FLOW_SCHEMA_VERSION",
     "ArmConfigurationUrlDocumentArtifact",
     "ArmConfigurationUrlDocumentFlow",
@@ -755,6 +774,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V19",
     "BUILTIN_ANALYZER_REGISTRY_V18",
     "BUILTIN_ANALYZER_REGISTRY_V17",
     "BUILTIN_ANALYZER_REGISTRY_V16",

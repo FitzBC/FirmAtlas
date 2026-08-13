@@ -78,6 +78,11 @@ from .native_arm_configuration_url_document_flow import (
     ArmConfigurationUrlDocumentFlowPolicy,
     discover_arm_configuration_url_document_flows,
 )
+from .native_arm_configuration_url_ipc_flow import (
+    ArmConfigurationUrlIpcArtifact,
+    ArmConfigurationUrlIpcPolicy,
+    discover_arm_configuration_url_ipc_flows,
+)
 from .native_arm_xref import (
     ArmFeaturePivotAnchor,
     ArmFunctionTarget,
@@ -150,7 +155,10 @@ _AUTO_V17_ANALYZERS = _AUTO_V15_ANALYZERS + (
 _AUTO_V18_ANALYZERS = _AUTO_V17_ANALYZERS + (
     "native_configuration_url_document_flow",
 )
-_AUTO_ANALYZERS = _AUTO_V18_ANALYZERS
+_AUTO_V19_ANALYZERS = _AUTO_V18_ANALYZERS + (
+    "native_configuration_url_ipc_flow",
+)
+_AUTO_ANALYZERS = _AUTO_V19_ANALYZERS
 
 
 @dataclass(frozen=True)
@@ -170,7 +178,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v18", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v19", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v19(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v19", _AUTO_V19_ANALYZERS)
 
     @classmethod
     def auto_v18(cls) -> "MappingAnalysisProfile":
@@ -258,7 +270,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v18", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v19", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v19(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v19",
+            _AUTO_V19_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v18(cls) -> "MappingAnalyzerRegistry":
@@ -393,6 +412,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V19 = MappingAnalyzerRegistry.builtin_v19()
 BUILTIN_ANALYZER_REGISTRY_V18 = MappingAnalyzerRegistry.builtin_v18()
 BUILTIN_ANALYZER_REGISTRY_V17 = MappingAnalyzerRegistry.builtin_v17()
 BUILTIN_ANALYZER_REGISTRY_V16 = MappingAnalyzerRegistry.builtin_v16()
@@ -433,6 +453,9 @@ class MappingAnalysisRequest:
     )
     native_configuration_url_document_policy: ArmConfigurationUrlDocumentFlowPolicy = (
         ArmConfigurationUrlDocumentFlowPolicy()
+    )
+    native_configuration_url_ipc_policy: ArmConfigurationUrlIpcPolicy = (
+        ArmConfigurationUrlIpcPolicy()
     )
     arm_literal_xref_policy: ArmLiteralXrefPolicy = ArmLiteralXrefPolicy()
     frontend_feature_gate_policy: FrontendFeatureGatePolicy = (
@@ -552,6 +575,16 @@ def _classify(
             )
         ):
             kinds.append("native_configuration_url_document_flow")
+        if (
+            "native_configuration_url_ipc_flow" in enabled
+            and _arm_pic_callsite_applicable(content)
+            and (
+                b"GetUrlValue" in content
+                or b"GetCfmUrlValue" in content
+                or b"urlgroup." in content
+            )
+        ):
+            kinds.append("native_configuration_url_ipc_flow")
         if (
             "native_ubus_registration" in enabled
             and path.startswith("usr/lib/rpcd/")
@@ -799,6 +832,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v16",
                 "firmatlas.mapping.profile/auto-v17",
                 "firmatlas.mapping.profile/auto-v18",
+                "firmatlas.mapping.profile/auto-v19",
             }
         ),
         enable_tenda_get_set_data=(
@@ -816,6 +850,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v16",
                 "firmatlas.mapping.profile/auto-v17",
                 "firmatlas.mapping.profile/auto-v18",
+                "firmatlas.mapping.profile/auto-v19",
             }
         ),
         enable_regex_literals=(
@@ -830,6 +865,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v16",
                 "firmatlas.mapping.profile/auto-v17",
                 "firmatlas.mapping.profile/auto-v18",
+                "firmatlas.mapping.profile/auto-v19",
             }
         ),
     )
@@ -1061,6 +1097,17 @@ def analyze_extracted_root(
             policy=request.native_configuration_url_document_policy,
         ),
     ) if configuration_url_document_artifacts else ()
+    configuration_url_ipc_artifacts = tuple(
+        ArmConfigurationUrlIpcArtifact(source, content)
+        for source, content, kinds in selected
+        if "native_configuration_url_ipc_flow" in kinds
+    )
+    native_configuration_url_ipc_flows = (
+        discover_arm_configuration_url_ipc_flows(
+            configuration_url_ipc_artifacts,
+            policy=request.native_configuration_url_ipc_policy,
+        ),
+    ) if configuration_url_ipc_artifacts else ()
     command_handler_literal_xrefs = (
         tuple(
             discover_arm_function_literal_xrefs(
@@ -1266,6 +1313,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v16",
                     "firmatlas.mapping.profile/auto-v17",
                     "firmatlas.mapping.profile/auto-v18",
+                    "firmatlas.mapping.profile/auto-v19",
                 }
                 else ()
             )
@@ -1290,6 +1338,7 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v16",
                         "firmatlas.mapping.profile/auto-v17",
                         "firmatlas.mapping.profile/auto-v18",
+                        "firmatlas.mapping.profile/auto-v19",
                     },
                     include_fixed_action_dynamic_query=(
                         request.profile.profile_id
@@ -1303,6 +1352,7 @@ def analyze_extracted_root(
                             "firmatlas.mapping.profile/auto-v16",
                             "firmatlas.mapping.profile/auto-v17",
                             "firmatlas.mapping.profile/auto-v18",
+                            "firmatlas.mapping.profile/auto-v19",
                         }
                     ),
                 ),
@@ -1397,6 +1447,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.native_configuration_url_document_flow,
             native_configuration_url_document_flows,
             "auto:native-configuration-url-document-flow",
+        ))
+    if "native_configuration_url_ipc_flow" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_configuration_url_ipc_flow,
+            native_configuration_url_ipc_flows,
+            "auto:native-configuration-url-ipc-flow",
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -1537,6 +1593,15 @@ def analyze_extracted_root(
             "native_configuration_url_document_flow",
             native_configuration_url_document_flows,
             sum(len(item.flows) for item in native_configuration_url_document_flows),
+        ))
+    if "native_configuration_url_ipc_flow" in request.profile.enabled_analyzers:
+        stages.insert(12, _stage(
+            "native_configuration_url_ipc_flow",
+            native_configuration_url_ipc_flows,
+            sum(
+                len(item.operations) + len(item.consumers)
+                for item in native_configuration_url_ipc_flows
+            ),
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         stages.insert(8, _stage(

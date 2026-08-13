@@ -64,7 +64,9 @@ flowchart LR
 - 新 Producer、Catalog、Graph、fail-closed 与 profile 冻结合同：4 passed；真实冷启动用例约 139.70 秒。
 - Research case 时间线与义务迁移：14 passed。
 - AnalysisRun/Graph 定向回归：19 passed；旧 R2-24 报告通过显式 `auto_v16()` 保持精确重放。
-- 两个独立进程生成 R2-25 报告逐字节一致；最终报告 SHA-256：`504bcdf5d16dc61a5d28682865b1268bdb61f8f6c40f2a8ea8142f5050512db2`。
+- R2-27 图谱状态边与 parameter/state preset schema 演进后用冻结的 `auto-v17/builtin-v17`
+  重放；分析事实不变，更新后的报告 SHA-256：
+  `313b196341e2f180d4c815b12160bcc1332ceff5ac60ec9e652be5b1cccd9768`。
 - 完整 Python：512 passed（642.81 秒）；Console：9 files / 23 tests passed；TypeScript check 与 production Vite build 通过（1801 modules，主 JS 396.77 kB / gzip 109.71 kB）。
 
 ## 6. 页面验收门

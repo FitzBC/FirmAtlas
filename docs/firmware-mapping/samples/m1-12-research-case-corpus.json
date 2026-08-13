@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:2ebe2c7df3cbe409ab92db6b572c60fce5f3e48d759b9c345168fc7e0b7eb3a4",
+      "case_id": "research-case:99e91dff8fe8e4688166e2665538e0d57ad26f31e41ef9f5c03a901d4dc3fafb",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -82,7 +82,7 @@
           "evidence_ref": "coverage:ac9-historical-graph-overlay",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-20-vendor-tenda-ac9-historical-graph-overlay.json",
-          "source_artifact_sha256": "63875bfc54e45bf9baa1e6f127868c54d3992dd47b2c4340b9de5f4c429da39e",
+          "source_artifact_sha256": "3b6f3dfaab9b0c8f6e7d95173b6f64fabb660a1de499f6a6575df4174e34c7b9",
           "locator": "json:$.historical_comparison",
           "capability": "compares_historical_expectations_without_fact_promotion",
           "producer": "historical-graph-overlay@v1alpha1"
@@ -127,7 +127,7 @@
           "evidence_ref": "coverage:ac9-configuration-blob-state-flow-r2-24",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-24-vendor-tenda-ac9-configuration-blob-flow.json",
-          "source_artifact_sha256": "9865d8084d7acfd8796a525d7cd555e0ffe228cf87cd8f49bb8869b91cd12113",
+          "source_artifact_sha256": "f6a53930365d946f6ece3c3c98bf4874d884087b90c8c23db20ef8a4b3b142b6",
           "locator": "json:$.flow",
           "capability": "binds_whole_configuration_image_state_write",
           "producer": "native-arm-configuration-blob-flow@0.1.0"
@@ -136,7 +136,7 @@
           "evidence_ref": "coverage:ac9-configuration-text-import-r2-25",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-25-vendor-tenda-ac9-configuration-text-import.json",
-          "source_artifact_sha256": "504bcdf5d16dc61a5d28682865b1268bdb61f8f6c40f2a8ea8142f5050512db2",
+          "source_artifact_sha256": "313b196341e2f180d4c815b12160bcc1332ceff5ac60ec9e652be5b1cccd9768",
           "locator": "json:$.flow",
           "capability": "binds_configuration_key_parser",
           "producer": "native-arm-configuration-text-import-flow@0.1.0"
@@ -145,10 +145,19 @@
           "evidence_ref": "coverage:ac9-configuration-url-document-r2-26",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-26-vendor-tenda-ac9-configuration-url-document.json",
-          "source_artifact_sha256": "36dc10a9db723d33ef6105b46948d3a0dadbf5a00d320e85c08270294da4b72c",
+          "source_artifact_sha256": "8fabd079b89101511c54a6391c31a754cd248a53b900b70096bca0e6a98eed71",
           "locator": "json:$.flow",
           "capability": "maps_configuration_url_document_consumer",
           "producer": "native-arm-configuration-url-document-flow@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-configuration-url-ipc-r2-27",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-27-vendor-tenda-ac9-configuration-url-ipc.json",
+          "source_artifact_sha256": "a5301e62b9576a40973a8d20387e0dd9b6eaa8bc2f6d5f9327d23550725269b2",
+          "locator": "json:$.operations",
+          "capability": "maps_configuration_url_ipc_and_store_split",
+          "producer": "native-arm-configuration-url-ipc-flow@0.1.0"
         },
         {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
@@ -235,6 +244,14 @@
             "coverage:ac9-configuration-url-document-r2-26"
           ],
           "status": "unresolved"
+        },
+        {
+          "claim_id": "claim:configuration-url-ipc-store-split",
+          "statement": "Five 2016-byte URL IPC operations connect libCfm clients through cfmd to cfm/url_mib/*, while per-callsite evidence proves that urlgroup.list*/class* use the URL store but rule.*/flag use the primary CFM store. The daily IPC is supported without closing the independent document-loader activation obligation.",
+          "evidence_refs": [
+            "coverage:ac9-configuration-url-ipc-r2-27"
+          ],
+          "status": "supported"
         },
         {
           "claim_id": "claim:namespace-divergence",
@@ -406,6 +423,17 @@
           ],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-url-ipc-store-split",
+          "order": 12,
+          "interpretation": "Close the daily URL IPC operation set, then bind each key template to its actual store callsite. Correct the earlier prefix-level URL-store grouping while leaving document-loader activation open.",
+          "claim_ids": [
+            "claim:configuration-url-ipc-store-split"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -472,7 +500,8 @@
         "Assuming every /cgi-bin operation uses websFormDefine would miss the independent UploadCfg/DownloadCfg string-switch dispatcher.",
         "Treating UploadValue as the uploaded-blob parser would miss the opcode-14 daemon dispatch and fabricate key-level semantics from a whole-configuration-image write.",
         "Treating the function name RestoreMTD and selector literal 0 as proof of raw partition zero would preserve the R2-24 error even after the implementation proves a default_mib text-document import.",
-        "Treating the mere presence of a secondary writer and latent loader as a call edge would invent upload execution and copy 1013 primary MIB keys into an independent URL store with no source document."
+        "Treating the mere presence of a secondary writer and latent loader as a call edge would invent upload execution and copy 1013 primary MIB keys into an independent URL store with no source document.",
+        "Grouping every urlgroup.* literal by prefix would move rule.* and flag from the primary CFM store into the URL store despite their GetValue/UnSetValue/CommitCfm callsites."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
@@ -482,7 +511,8 @@
         "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states.",
         "Architecture-split case where a second dispatcher family changes an obligation from unknown ingress to known owner plus open persistence.",
         "Self-correction case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers.",
-        "Negative activation case showing how a mapper can publish both halves of a state pipeline while preserving the missing execution edge."
+        "Negative activation case showing how a mapper can publish both halves of a state pipeline while preserving the missing execution edge.",
+        "Per-callsite storage-split case showing why common prefixes, process ownership, and function co-location do not prove one state domain."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",
@@ -1456,7 +1486,7 @@
       ]
     },
     {
-      "case_id": "research-case:f8af8264c6929ac8f1d8fff56052261f6edf681327df8257ec7eebbc827f7236",
+      "case_id": "research-case:c8d39ae31c65b51090442ef2b732111533b52843d8b0b6054c071070790c59d7",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -2168,7 +2198,7 @@
           "evidence_ref": "coverage:ac9-dlna-http-console-graph",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-19-vendor-tenda-ac9-http-console-graph.json",
-          "source_artifact_sha256": "0d7aec8ffde03572bc9fbd8329793f0f769ee26d732d80fc03ea164b58b331e4",
+          "source_artifact_sha256": "628ff492679223fe0c5adb2e83c31549f897268b3106c18363d70adeb171bcd9",
           "locator": "json:$.http_acceptance",
           "capability": "replays_product_graph_query_with_evidence",
           "producer": "communication-graph-http-console@v1alpha1"

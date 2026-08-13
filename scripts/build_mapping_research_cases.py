@@ -94,6 +94,10 @@ AC9_R2_26_CONFIGURATION_URL_DOCUMENT = Path(
     "docs/firmware-mapping/samples/"
     "r2-26-vendor-tenda-ac9-configuration-url-document.json"
 )
+AC9_R2_27_CONFIGURATION_URL_IPC = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-27-vendor-tenda-ac9-configuration-url-ipc.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -185,6 +189,18 @@ def build_ac9_split_web_stack_case():
         "maps_configuration_url_document_consumer",
         "native-arm-configuration-url-document-flow@0.1.0",
     )
+    configuration_url_ipc_sha = hashlib.sha256(
+        AC9_R2_27_CONFIGURATION_URL_IPC.read_bytes()
+    ).hexdigest()
+    configuration_url_ipc_ref = CaseEvidenceReference(
+        "coverage:ac9-configuration-url-ipc-r2-27",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_27_CONFIGURATION_URL_IPC.as_posix(),
+        configuration_url_ipc_sha,
+        "json:$.operations",
+        "maps_configuration_url_ipc_and_store_split",
+        "native-arm-configuration-url-ipc-flow@0.1.0",
+    )
 
     return build_research_case(ResearchCaseInput(
         case_key="tenda-ac9-split-web-stack-goform-ownership",
@@ -272,6 +288,7 @@ def build_ac9_split_web_stack_case():
             configuration_blob_ref,
             configuration_text_import_ref,
             configuration_url_document_ref,
+            configuration_url_ipc_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -364,6 +381,15 @@ def build_ac9_split_web_stack_case():
                 "with zero declared keys and an open activation obligation.",
                 (configuration_url_document_ref.evidence_ref,),
                 CaseClaimStatus.UNRESOLVED,
+            ),
+            CaseClaim(
+                "claim:configuration-url-ipc-store-split",
+                "Five 2016-byte URL IPC operations connect libCfm clients through "
+                "cfmd to cfm/url_mib/*, while per-callsite evidence proves that "
+                "urlgroup.list*/class* use the URL store but rule.*/flag use the "
+                "primary CFM store. The daily IPC is supported without closing "
+                "the independent document-loader activation obligation.",
+                (configuration_url_ipc_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -488,6 +514,14 @@ def build_ac9_split_web_stack_case():
                 ("claim:configuration-url-document-latent-consumer",),
                 creates_obligations=("obligation:configuration-url-activation",),
             ),
+            CaseStage(
+                "stage:configuration-url-ipc-store-split", 12,
+                "Close the daily URL IPC operation set, then bind each key "
+                "template to its actual store callsite. Correct the earlier "
+                "prefix-level URL-store grouping while leaving document-loader "
+                "activation open.",
+                ("claim:configuration-url-ipc-store-split",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -564,6 +598,9 @@ def build_ac9_split_web_stack_case():
             "Treating the mere presence of a secondary writer and latent loader as "
             "a call edge would invent upload execution and copy 1013 primary MIB "
             "keys into an independent URL store with no source document.",
+            "Grouping every urlgroup.* literal by prefix would move rule.* and "
+            "flag from the primary CFM store into the URL store despite their "
+            "GetValue/UnSetValue/CommitCfm callsites.",
         ),
         paper_uses=(
             "Motivating case for why communication mapping must precede "
@@ -581,6 +618,8 @@ def build_ac9_split_web_stack_case():
             "key-level parsing must remain separate evidence layers.",
             "Negative activation case showing how a mapper can publish both halves "
             "of a state pipeline while preserving the missing execution edge.",
+            "Per-callsite storage-split case showing why common prefixes, process "
+            "ownership, and function co-location do not prove one state domain.",
         ),
         limitations=(
             "The native result proves selected static registrations, not runtime "

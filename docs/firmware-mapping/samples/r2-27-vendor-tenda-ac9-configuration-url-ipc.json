@@ -1,0 +1,295 @@
+{
+  "activation_obligation": {
+    "daily_ipc_does_not_resolve_document_import": true,
+    "required_capability": "binds_configuration_url_loader_activation",
+    "status": "open"
+  },
+  "analysis_run_id": "mapping-analysis-run:4d519344e77064113bacaae2cef4d864553f5463eafa21a10bf6235f6075282e",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v19",
+  "catalog_id": "discovery-catalog:434f24417c6dfdc7a9385a7018cc1010c52e27016353f0be76e49556a30ba1f0",
+  "channel": {
+    "layout": {
+      "key_or_path": 4,
+      "opcode": 0,
+      "value": 516
+    },
+    "message_size": 2016,
+    "path": "/var/cfm_socket"
+  },
+  "consumers": [
+    {
+      "access_modes": "[\"read\"]",
+      "candidate_id": "native-configuration-url-consumer:2fb59ddca34c4feedc2e98a7b8eaf3cc61259b9bc5d7cb7df1ce9ee6939f0e7b",
+      "canonical_identity": "bin/httpd@0x0003d6c0->urlgroup.class%d.list%d,urlgroup.class%d.listnum,urlgroup.class%d.sysnum,urlgroup.list%d,urlgroup.sysnum",
+      "claim_status": "supported",
+      "client_symbols": "[\"GetUrlValue\"]",
+      "evidence_ids": [
+        "evidence:919ce7c7a72fe486f1666e17899bf5b59f0cb86b63f36b7b29b761e749ea622a",
+        "evidence:ac6e5a116753279eaacd312a94adabd1285d7c68e9ff41cb6a8dad8514bb9757",
+        "evidence:a67ef2fd73b77a1d91a12e2a8ad434872eea2505e0617a8961efa7a3aa44b035",
+        "evidence:b0e57e3b21d417d9304703eb046bed0f483cd0ea914074b386978f30a924be9e",
+        "evidence:546693c5e3b2d101219635fdd2812c342a8dfc6a788e92fc95739a79b4da7852",
+        "evidence:56608c8d6a75b25f468c752d7a65bb1be538508d38b980df97e2d52b3109df71"
+      ],
+      "function_identity": "bin/httpd@0x0003d6c0",
+      "state_accesses": "[[\"urlgroup.class%d.list%d\", \"read\"], [\"urlgroup.class%d.listnum\", \"read\"], [\"urlgroup.class%d.sysnum\", \"read\"], [\"urlgroup.list%d\", \"read\"], [\"urlgroup.sysnum\", \"read\"]]",
+      "state_key_templates": "[\"urlgroup.class%d.list%d\", \"urlgroup.class%d.listnum\", \"urlgroup.class%d.sysnum\", \"urlgroup.list%d\", \"urlgroup.sysnum\"]"
+    },
+    {
+      "access_modes": "[\"read\"]",
+      "candidate_id": "native-configuration-url-consumer:6fd2440fb754ece402846b9c7ea976fad4865e42241ada06a00718d1b4aa3d6d",
+      "canonical_identity": "bin/httpd@0x0003de7c->urlgroup.list%d",
+      "claim_status": "supported",
+      "client_symbols": "[\"GetUrlValue\"]",
+      "evidence_ids": [
+        "evidence:63ce3e6e06b23f25bc079de47971b52d7d7ee46b3826dc3c32d601cfdeb7e021",
+        "evidence:f8a94f993125997f34942a997dd0291e698243f7b4d58d90b673053b0e383b24"
+      ],
+      "function_identity": "bin/httpd@0x0003de7c",
+      "state_accesses": "[[\"urlgroup.list%d\", \"read\"]]",
+      "state_key_templates": "[\"urlgroup.list%d\"]"
+    },
+    {
+      "access_modes": "[\"read\", \"write\"]",
+      "candidate_id": "native-configuration-url-consumer:f9e1bf71357339601b65f16111e544df12a7a3e0b555eae1b00139397f5a4034",
+      "canonical_identity": "bin/httpd@0x0003df54->urlgroup.list%d,urlgroup.listnum,urlgroup.sysnum",
+      "claim_status": "supported",
+      "client_symbols": "[\"GetUrlValue\", \"SetUrlValue\"]",
+      "evidence_ids": [
+        "evidence:a7c7bb7fcac357c731e98fd52c978326d2e866912e4988f391798c1d912fd549",
+        "evidence:0c66664865d9a23f8088a9013c79407ad3ae01563952f70ba6261ffe4d6fd9b8",
+        "evidence:32a8a0b420740a4eaff201b9abd9cf7fe4e71c933ab061a1709fed7194f424c5",
+        "evidence:e6f0941c381126a3fc076cbd2624f320093368b3536de95bc31e1b0b6d99cb3e"
+      ],
+      "function_identity": "bin/httpd@0x0003df54",
+      "state_accesses": "[[\"urlgroup.list%d\", \"write\"], [\"urlgroup.listnum\", \"read\"], [\"urlgroup.listnum\", \"write\"], [\"urlgroup.sysnum\", \"read\"]]",
+      "state_key_templates": "[\"urlgroup.list%d\", \"urlgroup.listnum\", \"urlgroup.sysnum\"]"
+    },
+    {
+      "access_modes": "[\"delete\", \"read\", \"write\"]",
+      "candidate_id": "native-configuration-url-consumer:c49c4a855e456d3fa1e478c8de836d38419d395eaf66513195cd034548385f04",
+      "canonical_identity": "bin/httpd@0x0003e0d4->urlgroup.class%d.list%d,urlgroup.class%d.listnum,urlgroup.class%d.sysnum,urlgroup.list%d,urlgroup.listnum,urlgroup.sysnum",
+      "claim_status": "supported",
+      "client_symbols": "[\"GetUrlValue\", \"SetUrlValue\", \"UnSetUrlValue\"]",
+      "evidence_ids": [
+        "evidence:60c153b8fae0170bef85d3ea03fe471cf1c19ea2e0a60ffd23bf3388ba8310e0",
+        "evidence:10ef6853d7148bca27c7a5103e60e829e57ef39d1eb9cb213eceb4e140fcac93",
+        "evidence:eb451dacefba18b37ededc84bf82e3caf72f1b395fa4eb7967518fab7cbe5846",
+        "evidence:01e6e50ae1713aa5274f5043350cee63ec0353947b1a91eb62c9dbc733ae2abe",
+        "evidence:7d1d99e568c596ac559a871812c4224143db2f93960f1b4800dd1529058aba04",
+        "evidence:b9e6e7cf1d54c5f62944e3d1b86cb851d40105a4e515080e4e4eb75b12e9e57c",
+        "evidence:7d2074d84ac933f0265a0002201d136e2557fa6b66b243d42620235b44d3b99a"
+      ],
+      "function_identity": "bin/httpd@0x0003e0d4",
+      "state_accesses": "[[\"urlgroup.class%d.list%d\", \"delete\"], [\"urlgroup.class%d.listnum\", \"read\"], [\"urlgroup.class%d.sysnum\", \"read\"], [\"urlgroup.list%d\", \"delete\"], [\"urlgroup.listnum\", \"read\"], [\"urlgroup.listnum\", \"write\"], [\"urlgroup.sysnum\", \"read\"]]",
+      "state_key_templates": "[\"urlgroup.class%d.list%d\", \"urlgroup.class%d.listnum\", \"urlgroup.class%d.sysnum\", \"urlgroup.list%d\", \"urlgroup.listnum\", \"urlgroup.sysnum\"]"
+    },
+    {
+      "access_modes": "[\"read\", \"write\"]",
+      "candidate_id": "native-configuration-url-consumer:f6e520f108854db3f2eeb5068b14c3d7430a59bf09cf5bff2326af7c87ec72c9",
+      "canonical_identity": "bin/httpd@0x0003e564->urlgroup.class%d.list%d,urlgroup.class%d.listnum",
+      "claim_status": "supported",
+      "client_symbols": "[\"CommitUrlCfm\", \"GetUrlValue\", \"SetUrlValue\"]",
+      "evidence_ids": [
+        "evidence:e082f064f15e7f7c9cc14b748a3c477f14e82c00c03bbb0d0478ee32db9f3580",
+        "evidence:ba4fa3cd22c16fec82f4e6c92f8b32d40dd3b79bddb6bd2986d111a247950735",
+        "evidence:58e86a50949168f703b696af4b0d4791b658dcb0d1c4325c1a2b668c837656e3"
+      ],
+      "function_identity": "bin/httpd@0x0003e564",
+      "state_accesses": "[[\"urlgroup.class%d.list%d\", \"write\"], [\"urlgroup.class%d.listnum\", \"read\"]]",
+      "state_key_templates": "[\"urlgroup.class%d.list%d\", \"urlgroup.class%d.listnum\"]"
+    }
+  ],
+  "cross_store_boundary": {
+    "excluded_from_url_store": [
+      "urlgroup.rule.list%d",
+      "urlgroup.rule.listnum",
+      "urlgroup.flag",
+      "urlgroup.name"
+    ],
+    "observed_primary_store_exact_keys": [
+      "urlgroup.rule.list1",
+      "urlgroup.rule.listnum"
+    ],
+    "reason": "rule.* and flag call primary GetValue/UnSetValue/CommitCfm; name has no per-callsite URL-store binding",
+    "url_store_templates": [
+      "urlgroup.class%d.list%d",
+      "urlgroup.class%d.listnum",
+      "urlgroup.class%d.sysnum",
+      "urlgroup.list%d",
+      "urlgroup.listnum",
+      "urlgroup.sysnum"
+    ]
+  },
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "graph_id": "communication-graph:ab88b632cc4d34d4b3f94fdbb7794e9b00629531799c78f8a16850c06757741a",
+  "graph_projection": {
+    "state_labels": [
+      "cfm/url_mib/*",
+      "urlgroup.class%d.list%d",
+      "urlgroup.class%d.listnum",
+      "urlgroup.class%d.sysnum",
+      "urlgroup.list%d",
+      "urlgroup.listnum",
+      "urlgroup.sysnum"
+    ],
+    "url_scope_edge_kinds": [
+      "deletes_state",
+      "persists_state",
+      "reads_state",
+      "writes_state"
+    ]
+  },
+  "not_claimed": [
+    "the UploadWebsite selector is a complete HTTP path or method",
+    "URL IPC key templates are declarations from default_url.cfg",
+    "daily URL IPC activates load_url_mib or reload_url_mib",
+    "runtime execution, vulnerability presence, or exploitability"
+  ],
+  "operations": [
+    {
+      "access_mode": "persist",
+      "candidate_id": "native-configuration-url-ipc-flow:e36eb1800e3cfbb196037df7683e120c7b86c99920f507b904549d658376946b",
+      "canonical_identity": "CommitUrlCfm:opcode=34->cfm/url_mib/*",
+      "claim_status": "supported",
+      "client_call_counts": "[[\"bin/cfm\", 1], [\"bin/httpd\", 1]]",
+      "client_identity": "lib/libCfm.so@0x00003788",
+      "client_path": "lib/libCfm.so",
+      "client_symbol": "CommitUrlCfm",
+      "dispatcher_identity": "bin/cfmd@0x0000a504",
+      "dispatcher_path": "bin/cfmd",
+      "evidence_ids": [
+        "evidence:371c002f56af959f260a11ff58ccab8c031a140b65c11d0a8caea13f97af4a79",
+        "evidence:bf5d8baf84e9280c06b03e7b26aff6b68e84b6f89f66e1a7f1f800d7a9a490ac",
+        "evidence:96b4322afa6131858c51f797ef81c894d74ea3d494989c54a4de57667ccb3cca",
+        "evidence:eb67f9ceaafd8e19c796ea6f42aa1dcbd4e5cb870f774c7fd3d48f7333eb4be2"
+      ],
+      "key_offset": "",
+      "message_size": "2016",
+      "operation": "commit",
+      "request_opcode": "34",
+      "response_opcodes": "[16, 35]",
+      "server_wrapper_symbol": "SaveCfmUrl2Flash",
+      "state_scope": "cfm/url_mib/*",
+      "store_primitive_symbol": "save_url_mib",
+      "value_offset": ""
+    },
+    {
+      "access_mode": "read",
+      "candidate_id": "native-configuration-url-ipc-flow:fadf3e056556e7ef7d204ad25c67d8c4a7c2f2b791d2d9d1e300d2803ec69d4e",
+      "canonical_identity": "GetUrlValue:opcode=32->cfm/url_mib/*",
+      "claim_status": "supported",
+      "client_call_counts": "[[\"bin/cfm\", 1], [\"bin/httpd\", 16]]",
+      "client_identity": "lib/libCfm.so@0x00004820",
+      "client_path": "lib/libCfm.so",
+      "client_symbol": "GetUrlValue",
+      "dispatcher_identity": "bin/cfmd@0x0000a504",
+      "dispatcher_path": "bin/cfmd",
+      "evidence_ids": [
+        "evidence:27350c40e6714758b2cc91f13ba710279cbe2e2f496467a1a56268e2a064558f",
+        "evidence:200ad94fc690b9541c6b8887d54e30f802c73f4309a7911334e34d6f04972454",
+        "evidence:4e0a3e01903767df4c1a2e3b5d50c017c73270bbfe88fe6a90598a2138d1e3fa",
+        "evidence:5e28bd9ac2d0083bca36f65a2ce89114d45826634fdc9cfb615bae144707bc3a"
+      ],
+      "key_offset": "4",
+      "message_size": "2016",
+      "operation": "get",
+      "request_opcode": "32",
+      "response_opcodes": "[33]",
+      "server_wrapper_symbol": "GetCfmUrlValue",
+      "state_scope": "cfm/url_mib/*",
+      "store_primitive_symbol": "url_mib_get_value",
+      "value_offset": "516"
+    },
+    {
+      "access_mode": "write",
+      "candidate_id": "native-configuration-url-ipc-flow:1a3bb400210ac7c58ea9ee00ea7fd4233b87810a19c66b8e6c32a4e4ac8fda2e",
+      "canonical_identity": "SetUrlValue:opcode=30->cfm/url_mib/*",
+      "claim_status": "supported",
+      "client_call_counts": "[[\"bin/cfm\", 1], [\"bin/httpd\", 6]]",
+      "client_identity": "lib/libCfm.so@0x00004a80",
+      "client_path": "lib/libCfm.so",
+      "client_symbol": "SetUrlValue",
+      "dispatcher_identity": "bin/cfmd@0x0000a504",
+      "dispatcher_path": "bin/cfmd",
+      "evidence_ids": [
+        "evidence:3582970b8af693641f258617d4e2e46e1ae47ce8e715b9f1a118dca09c951cd7",
+        "evidence:80525cca3d2bf448cc4176b0f3924b346936f394d20d5ff78d724258465c7439",
+        "evidence:44235ea13a11b1f147a99f031f64f5a64610f975343987d37eef7b726a090d04",
+        "evidence:d5443cacec6187224c06a712a583fd8eb14d77baae3d40f3fe8ecd276826fa85"
+      ],
+      "key_offset": "4",
+      "message_size": "2016",
+      "operation": "set",
+      "request_opcode": "30",
+      "response_opcodes": "[31]",
+      "server_wrapper_symbol": "SetCfmUrlValue",
+      "state_scope": "cfm/url_mib/*",
+      "store_primitive_symbol": "url_mib_set_value",
+      "value_offset": "516"
+    },
+    {
+      "access_mode": "read",
+      "candidate_id": "native-configuration-url-ipc-flow:5ce4656c2a4502540aa71411d6b2842288cb763daa4160b195b46b16b23e13f5",
+      "canonical_identity": "ShowUrlValue:opcode=38->cfm/url_mib/*",
+      "claim_status": "supported",
+      "client_call_counts": "[[\"bin/cfm\", 1]]",
+      "client_identity": "lib/libCfm.so@0x00004de0",
+      "client_path": "lib/libCfm.so",
+      "client_symbol": "ShowUrlValue",
+      "dispatcher_identity": "bin/cfmd@0x0000a504",
+      "dispatcher_path": "bin/cfmd",
+      "evidence_ids": [
+        "evidence:471095247a9e5e19c7580be128ec92e4967b6ee01d61af43fec8cd11859f708b",
+        "evidence:362e941d0abf91d39ceac8f97efbb9d7bac6eca1356a1bbb611bd93d97db80a8",
+        "evidence:e7e50ed7de92006608decc72372e4e24065dc8c68b4047dfd7408801e844810a",
+        "evidence:308f5de9649d489efaf2995a099333527c78b3d2171dcba27e5fb2412a660d38"
+      ],
+      "key_offset": "4",
+      "message_size": "2016",
+      "operation": "show",
+      "request_opcode": "38",
+      "response_opcodes": "[39]",
+      "server_wrapper_symbol": "ShowCfmUrlValue",
+      "state_scope": "cfm/url_mib/*",
+      "store_primitive_symbol": "url_mib_list",
+      "value_offset": ""
+    },
+    {
+      "access_mode": "delete",
+      "candidate_id": "native-configuration-url-ipc-flow:33bb7dd6ec111f39708c14c028e42cdecfd04924d041b08ce45f1966a48152bf",
+      "canonical_identity": "UnSetUrlValue:opcode=36->cfm/url_mib/*",
+      "claim_status": "supported",
+      "client_call_counts": "[[\"bin/cfm\", 1], [\"bin/httpd\", 2]]",
+      "client_identity": "lib/libCfm.so@0x00004c54",
+      "client_path": "lib/libCfm.so",
+      "client_symbol": "UnSetUrlValue",
+      "dispatcher_identity": "bin/cfmd@0x0000a504",
+      "dispatcher_path": "bin/cfmd",
+      "evidence_ids": [
+        "evidence:ac18e2d3ebf9fa20778a5c5ab416f2690b0707db33e7fc9b0762d50f0f8e824e",
+        "evidence:e6f2d330e74c5aaf7777a0aba58c9f511e13027125034744087fff150409f689",
+        "evidence:c956e0c77c9608acb1afd90f63c7ecf39835c285c532160ac5af970456182e71",
+        "evidence:c52273ddccaa2de1d83bbd31a7a71330ea33473df6d0175c5d6c81ecb9d844c6"
+      ],
+      "key_offset": "4",
+      "message_size": "2016",
+      "operation": "unset",
+      "request_opcode": "36",
+      "response_opcodes": "[37]",
+      "server_wrapper_symbol": "UnSetCfmUrlValue",
+      "state_scope": "cfm/url_mib/*",
+      "store_primitive_symbol": "url_mib_unset_value",
+      "value_offset": ""
+    }
+  ],
+  "profile_id": "firmatlas.mapping.profile/auto-v19",
+  "sample_role": "primary-vendor-tenda-ac9-url-store-ipc-and-consumers",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-27/v1alpha1",
+  "stage": {
+    "coverage_status": "completed",
+    "diagnostics": [],
+    "input_count": 1,
+    "output_count": 10
+  }
+}
