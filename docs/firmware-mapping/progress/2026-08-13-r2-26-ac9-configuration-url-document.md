@@ -77,6 +77,6 @@ writer 与 consumer 两端均有静态证据，但全固件调用扫描没有恢
 
 ## 7. Git 与部署
 
-- Git revision：提交后回填；
-- GitHub push：提交后通过已配置的 SSH 公私钥推送并复核远端 revision；
+- Git revision：`52aab30f70f89bda9edc1159a1d817e63389c71b`；
+- GitHub push：通过已配置的 SSH 公私钥推送 `main`，远端 revision 在文档检查点提交后复核；
 - SSH：不适用（仅 mapping 代码、测试与研究文档，且用户明确暂不远程部署）。
