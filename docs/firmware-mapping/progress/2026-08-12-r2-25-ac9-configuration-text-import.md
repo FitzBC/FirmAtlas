@@ -92,6 +92,6 @@ flowchart LR
 
 ## 8. Git 与部署
 
-- Git revision：待本轮提交后补充；
-- GitHub push：待本轮提交后补充；
+- Git revision：`b17aa0f8f7ce3ecfe79de15e4f6b0e777f5a8ed9`；
+- GitHub push：已通过配置好的 GitHub SSH 公私钥对推送 `main`，远端 refs/heads/main 精确复核为上述 revision；
 - SSH：不适用（仅 mapping 代码、测试与研究文档，且用户明确暂不远程部署）。
