@@ -165,6 +165,15 @@ from .native_arm_configuration_text_import_flow import (
     ArmConfigurationTextImportFlowResult,
     discover_arm_configuration_text_import_flows,
 )
+from .native_arm_configuration_url_document_flow import (
+    ARM_CONFIGURATION_URL_DOCUMENT_FLOW_SCHEMA_VERSION,
+    ArmConfigurationUrlDocumentArtifact,
+    ArmConfigurationUrlDocumentFlow,
+    ArmConfigurationUrlDocumentFlowPolicy,
+    ArmConfigurationUrlDocumentProfile,
+    ArmConfigurationUrlDocumentFlowResult,
+    discover_arm_configuration_url_document_flows,
+)
 from .native_command_binding import (
     NATIVE_COMMAND_BINDING_SCHEMA_VERSION,
     NativeCommandBinding,
@@ -323,6 +332,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V18,
     BUILTIN_ANALYZER_REGISTRY_V17,
     BUILTIN_ANALYZER_REGISTRY_V16,
     BUILTIN_ANALYZER_REGISTRY_V15,
@@ -481,6 +491,13 @@ from .research_case import (
 )
 
 __all__ = (
+    "ARM_CONFIGURATION_URL_DOCUMENT_FLOW_SCHEMA_VERSION",
+    "ArmConfigurationUrlDocumentArtifact",
+    "ArmConfigurationUrlDocumentFlow",
+    "ArmConfigurationUrlDocumentFlowPolicy",
+    "ArmConfigurationUrlDocumentProfile",
+    "ArmConfigurationUrlDocumentFlowResult",
+    "discover_arm_configuration_url_document_flows",
     "NATIVE_COMMAND_BINDING_SCHEMA_VERSION",
     "NativeCommandBinding",
     "NativeCommandBindingPolicy",
@@ -738,6 +755,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V18",
     "BUILTIN_ANALYZER_REGISTRY_V17",
     "BUILTIN_ANALYZER_REGISTRY_V16",
     "BUILTIN_ANALYZER_REGISTRY_V15",

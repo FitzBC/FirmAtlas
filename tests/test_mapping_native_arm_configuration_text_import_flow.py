@@ -141,7 +141,7 @@ class ArmConfigurationTextImportFlowContractTests(unittest.TestCase):
             self.skipTest("external Tenda AC9 corpus is not available")
 
         self.assertEqual(
-            "firmatlas.mapping.profile/auto-v17", MappingAnalysisProfile.auto().profile_id
+            "firmatlas.mapping.profile/auto-v18", MappingAnalysisProfile.auto().profile_id
         )
         self.assertIn(
             "native_configuration_blob_flow",

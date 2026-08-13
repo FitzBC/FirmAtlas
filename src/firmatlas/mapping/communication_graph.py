@@ -215,6 +215,8 @@ def _view_presets(catalog: DiscoveryCatalog) -> Tuple[CommunicationGraphViewPres
     has_configuration_import = any(
         item.candidate_kind
         is DiscoveryCandidateKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW
+        or item.candidate_kind
+        is DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW
         for item in catalog.candidates
     )
     if not has_configuration_import:
@@ -472,6 +474,8 @@ def _candidate_node_kind(kind: DiscoveryCandidateKind) -> CommunicationGraphNode
         DiscoveryCandidateKind.NATIVE_CONFIGURATION_BLOB_FLOW:
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW:
+            CommunicationGraphNodeKind.COMMUNICATION_RELATION,
+        DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW:
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_REQUEST_PROTECTION:
             CommunicationGraphNodeKind.PROTECTION,
@@ -932,6 +936,29 @@ def project_communication_architecture_graph(
                 tuple(dict.fromkeys((*candidate.evidence_ids, *evidence_ids))),
                 "native_configuration_text_import_flow.declared_keys",
             ))
+    for candidate in catalog.candidates:
+        if (
+            candidate.candidate_kind
+            is not DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW
+        ):
+            continue
+        attributes = dict(candidate.attributes)
+        state_scope = attributes["state_scope"]
+        state_ref = _stable_id("configuration-state", state_scope)
+        state_specs[state_ref] = (
+            state_scope,
+            attributes.get("write_granularity", ""),
+            candidate.evidence_ids,
+        )
+        edges.append(_edge(
+            CommunicationGraphEdgeKind.IMPORTS_STATE,
+            candidate.candidate_id,
+            state_ref,
+            candidate.claim_status.value,
+            candidate.candidate_id,
+            candidate.evidence_ids,
+            "native_configuration_url_document_flow.state_scope",
+        ))
     nodes.extend(
         CommunicationGraphNode(
             state_ref,

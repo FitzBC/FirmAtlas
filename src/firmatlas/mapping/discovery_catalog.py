@@ -24,6 +24,9 @@ from .native_arm_configuration_blob_flow import ArmConfigurationBlobFlowResult
 from .native_arm_configuration_text_import_flow import (
     ArmConfigurationTextImportFlowResult,
 )
+from .native_arm_configuration_url_document_flow import (
+    ArmConfigurationUrlDocumentFlowResult,
+)
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -75,6 +78,9 @@ class DiscoveryProducerKind(str, Enum):
     NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW = (
         "native_configuration_text_import_flow"
     )
+    NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW = (
+        "native_configuration_url_document_flow"
+    )
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -111,6 +117,9 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_CONFIGURATION_BLOB_FLOW = "native_configuration_blob_flow"
     NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW = (
         "native_configuration_text_import_flow"
+    )
+    NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW = (
+        "native_configuration_url_document_flow"
     )
 
 
@@ -300,6 +309,24 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def native_configuration_url_document_flow(
+        cls, results: Tuple[ArmConfigurationUrlDocumentFlowResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity(
+                "native-arm-configuration-url-document-flow", "0.1.0"
+            )
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW,
             producer,
             scope,
             results,
@@ -1253,6 +1280,33 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             )),
                         ),
                     ))
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW
+            ):
+                for item in result.flows:
+                    candidates.append(DiscoveryCandidate(
+                        item.flow_id,
+                        DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_DOCUMENT_FLOW,
+                        "{}->{}".format(item.runtime_path, item.state_scope),
+                        DiscoveryClaimStatus.CANDIDATE,
+                        item.loader_path,
+                        result.profile,
+                        item.evidence_ids,
+                        (
+                            ("writer_path", item.writer_path),
+                            ("writer_identity", item.writer_identity),
+                            ("runtime_path", item.runtime_path),
+                            ("loader_path", item.loader_path),
+                            ("loader_identity", item.loader_identity),
+                            ("parser_identity", item.parser_identity),
+                            ("reload_identity", item.reload_identity),
+                            ("state_scope", item.state_scope),
+                            ("write_granularity", item.write_granularity),
+                            ("activation_status", item.activation_status),
+                        ),
+                    ))
+                producer_obligations.extend(result.open_obligations)
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_CGI_DISPATCH:
                 for item in result.bindings:
                     native_cgi_target_refs.add(item.target_ref)

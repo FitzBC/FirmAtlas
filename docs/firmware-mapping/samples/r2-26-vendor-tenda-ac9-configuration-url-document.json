@@ -1,0 +1,68 @@
+{
+  "analysis_run_id": "mapping-analysis-run:214919e389f248f61ebb6136a0d27fcc6f5a536857ddf3f5e5042501e63074c2",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v18",
+  "catalog_id": "discovery-catalog:7e74f3848ee980400a92a9a40a506cec389ab9dbe90c52d48a261bf41317cf60",
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "flow": {
+    "activation_status": "unresolved",
+    "candidate_id": "native-configuration-url-document-flow:8b10978ee429bdecf13d1ca495c8aaf3deec3bde5dc992e5ee736ba537ea3ca9",
+    "canonical_identity": "/webroot/default_url.cfg->cfm/url_mib/*",
+    "claim_status": "candidate",
+    "declared_key_count": 0,
+    "evidence_ids": [
+      "evidence:de12664033b7ad524fbffcaf99dc5dc0c1cc0627de14ffd9aabf8396f8d9d6a1",
+      "evidence:ee580ca81b9ed8360922c12df9a3cb557e403a95d2894d1d7be489a86ddbf7f0",
+      "evidence:d432f5961b56f14d370a49bf751600711d19f4a5b5544319fda609ac8d6ab6a4",
+      "evidence:cf4137f3ea5d6c7e1c5acbf9185b81a95b53deb9451f21e20fd46c56b830227e",
+      "evidence:6c701dfcc75a816e0d0e888576ac36f6cec065b7872511f79f89c15df898e029",
+      "evidence:65c6759d39fab0c8279cb04bb2402e467d0cdf678eb115b0d0b0c8daf191de93",
+      "evidence:51a029e8685503efe50a7d5502d64b0f0a4dedb46dac40b33b4d0dd5a7afc4ff",
+      "evidence:5be1a6e3f2f32f394c08a51c922553df404ccb900a48d8e377df289ffb71add1"
+    ],
+    "loader_identity": "lib/libCfm.so@0x00008d0c",
+    "parser_identity": "lib/libCfm.so@0x0000766c",
+    "reload_identity": "lib/libCfm.so@0x00008e08",
+    "runtime_path": "/webroot/default_url.cfg",
+    "state_scope": "cfm/url_mib/*",
+    "write_granularity": "key_value_document",
+    "writer_identity": "lib/libtpi.so@0x00009c5c"
+  },
+  "graph_id": "communication-graph:1fc89b5d7c65b4abbd246a77f1623edd0efd197b728edd17aec059e7f3c2c757",
+  "graph_projection": {
+    "import_edge_id": "communication-edge:b2508d184a016760939df974200c86c8a70225998089b34abe8aa026b1dffccc",
+    "import_edge_status": "candidate",
+    "obligation_node_id": "configuration-url-document-obligation:1d95bdd53dc5a2adeb5c54b970e1a3506d06c7da46455cfa13bc4fa443e58393",
+    "obligation_node_status": "open",
+    "state_label": "cfm/url_mib/*",
+    "state_node_id": "configuration-state:332856aa475e8c5242d30044f9e5b7934f425b893d5e29b9e367bf16be349f8c"
+  },
+  "negative_evidence": {
+    "declared_keys_known": false,
+    "reload_url_mib_importer_or_callsite_count": 0,
+    "static_default_url_document_present": false,
+    "writer_to_loader_activation_proven": false
+  },
+  "not_claimed": [
+    "cfm Upload executes load_url_mib or reload_url_mib",
+    "the primary default.cfg key set belongs to cfm/url_mib/*",
+    "known urlgroup.* consumers prove uploaded document declarations",
+    "runtime execution, vulnerability presence, or exploitability"
+  ],
+  "open_obligation": {
+    "obligation_id": "configuration-url-document-obligation:1d95bdd53dc5a2adeb5c54b970e1a3506d06c7da46455cfa13bc4fa443e58393",
+    "priority": 90,
+    "reason": "The writer and consumer are independently proven, but no static trigger from the upload/restore path to load_url_mib or reload_url_mib was recovered.",
+    "required_capability": "binds_configuration_url_loader_activation"
+  },
+  "profile_id": "firmatlas.mapping.profile/auto-v18",
+  "sample_role": "primary-vendor-tenda-ac9-latent-url-document-consumer",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-26/v1alpha1",
+  "stage": {
+    "coverage_status": "partial",
+    "diagnostics": [
+      "url_document_content_missing"
+    ],
+    "input_count": 1,
+    "output_count": 1
+  }
+}

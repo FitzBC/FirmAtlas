@@ -11,6 +11,8 @@ from firmatlas.mapping import (
     CommunicationGraphEdgeKind,
     CommunicationGraphNodeKind,
     DiscoveryCandidateKind,
+    BUILTIN_ANALYZER_REGISTRY_V17,
+    MappingAnalysisProfile,
     MappingAnalysisRequest,
     analyze_extracted_root,
     project_communication_architecture_graph,
@@ -36,7 +38,12 @@ HISTORICAL_KEYS = (
 
 
 def build() -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(ROOT, ARTIFACT_SHA256))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v17()
+        ),
+        registry=BUILTIN_ANALYZER_REGISTRY_V17,
+    )
     graph = project_communication_architecture_graph(run.catalog)
     candidate = next(
         item for item in run.catalog.candidates

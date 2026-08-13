@@ -46,6 +46,7 @@
 - [R2-23 AC9 cross-ELF persistence](./r2-23-vendor-tenda-ac9-cross-elf-persistence.json)：`auto-v15` 自动恢复 `httpd → libtpi:tpi_sys_cfg_upload`、精确 `cfm Upload` literal、`gCtlCmdArr[Upload] → libCfm:UploadValue → SendMsg/RecvMsg`；同名 `doSystemCmd` owner 不唯一时显式未决。
 - [R2-24 AC9 configuration-image state flow](./r2-24-vendor-tenda-ac9-configuration-blob-flow.json)：`auto-v16` 从 `UploadValue` 的 opcode `14`、2016-byte frame、offset `516`、literal `0` 跨进程匹配 `cfmd → atoi → RestoreMTD`，发布整镜像 `configuration_partition[0]` 与 `writes_state`；不创建伪 HTTP 参数。
 - [R2-25 AC9 configuration text import correction](./r2-25-vendor-tenda-ac9-configuration-text-import.json)：`auto-v17` 深入 `RestoreMTD` 实现并回溯上传 writer，证明 `/webroot/default.cfg` 的 `key=value → hash_insert` 导入，发布 1013 个唯一 configuration-state 节点及 `imports_state`；明确否定 R2-24 的 whole-image granularity，同时保留其冻结回放。
+- [R2-26 AC9 latent URL-document consumer](./r2-26-vendor-tenda-ac9-configuration-url-document.json)：`auto-v18` 证明 `/webroot/default_url.cfg → load_url_mib@0x8d0c → parser@0x766c → cfm/url_mib/*` 是独立配置域；因 rootfs 无第二文档且上传激活边未找到，保留 partial coverage、candidate `imports_state`、0 个声明键及开放义务。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

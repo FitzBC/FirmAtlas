@@ -9,8 +9,10 @@ from pathlib import Path
 
 from firmatlas.mapping import (
     CommunicationGraphEdgeKind,
+    BUILTIN_ANALYZER_REGISTRY_V15,
     DiscoveryCandidateKind,
     MappingAnalysisRequest,
+    MappingAnalysisProfile,
     analyze_extracted_root,
     project_communication_architecture_graph,
 )
@@ -24,7 +26,12 @@ _SYMBOLS = {
 
 
 def build() -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(ROOT, ARTIFACT_SHA256))
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v15()
+        ),
+        registry=BUILTIN_ANALYZER_REGISTRY_V15,
+    )
     graph = project_communication_architecture_graph(run.catalog)
     upload_dispatch = next(
         item for item in run.catalog.candidates

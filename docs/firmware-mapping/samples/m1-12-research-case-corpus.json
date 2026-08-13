@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:8f18eecc63ba53e3af02356b2161af3455a1bc77b073ca587e77cbef1189827d",
+      "case_id": "research-case:2ebe2c7df3cbe409ab92db6b572c60fce5f3e48d759b9c345168fc7e0b7eb3a4",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -142,6 +142,15 @@
           "producer": "native-arm-configuration-text-import-flow@0.1.0"
         },
         {
+          "evidence_ref": "coverage:ac9-configuration-url-document-r2-26",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-26-vendor-tenda-ac9-configuration-url-document.json",
+          "source_artifact_sha256": "36dc10a9db723d33ef6105b46948d3a0dadbf5a00d320e85c08270294da4b72c",
+          "locator": "json:$.flow",
+          "capability": "maps_configuration_url_document_consumer",
+          "producer": "native-arm-configuration-url-document-flow@0.1.0"
+        },
+        {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
           "kind": "native_binding",
           "source_path": "bin/httpd",
@@ -218,6 +227,14 @@
             "coverage:ac9-configuration-text-import-r2-25"
           ],
           "status": "supported"
+        },
+        {
+          "claim_id": "claim:configuration-url-document-latent-consumer",
+          "statement": "The secondary document has a distinct load_url_mib parser and cfm/url_mib/* hash store, but the current artifact has no static default_url.cfg content and no verified activation edge from cfm Upload or RestoreMTD. The flow therefore remains candidate with zero declared keys and an open activation obligation.",
+          "evidence_refs": [
+            "coverage:ac9-configuration-url-document-r2-26"
+          ],
+          "status": "unresolved"
         },
         {
           "claim_id": "claim:namespace-divergence",
@@ -376,6 +393,19 @@
             "obligation:configuration-key-parser"
           ],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-url-document-consumer",
+          "order": 11,
+          "interpretation": "Split the secondary URL document from the primary MIB, prove its independent parser and state scope, and retain the missing upload-to-loader activation as an explicit obligation instead of fabricating a deterministic call edge.",
+          "claim_ids": [
+            "claim:configuration-url-document-latent-consumer"
+          ],
+          "creates_obligations": [
+            "obligation:configuration-url-activation"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -424,6 +454,13 @@
           "closure_evidence_refs": [
             "coverage:ac9-configuration-text-import-r2-25"
           ]
+        },
+        {
+          "obligation_id": "obligation:configuration-url-activation",
+          "statement": "Bind or reject the runtime trigger from configuration upload to load_url_mib/reload_url_mib and obtain the secondary document before publishing exact URL-store key declarations.",
+          "required_capability": "binds_configuration_url_loader_activation",
+          "status": "open",
+          "closure_evidence_refs": []
         }
       ],
       "counterfactuals": [
@@ -434,7 +471,8 @@
         "Treating a native configuration key as an HTTP request parameter would fabricate a direct ingress edge and conceal the missing upload chain.",
         "Assuming every /cgi-bin operation uses websFormDefine would miss the independent UploadCfg/DownloadCfg string-switch dispatcher.",
         "Treating UploadValue as the uploaded-blob parser would miss the opcode-14 daemon dispatch and fabricate key-level semantics from a whole-configuration-image write.",
-        "Treating the function name RestoreMTD and selector literal 0 as proof of raw partition zero would preserve the R2-24 error even after the implementation proves a default_mib text-document import."
+        "Treating the function name RestoreMTD and selector literal 0 as proof of raw partition zero would preserve the R2-24 error even after the implementation proves a default_mib text-document import.",
+        "Treating the mere presence of a secondary writer and latent loader as a call edge would invent upload execution and copy 1013 primary MIB keys into an independent URL store with no source document."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
@@ -443,13 +481,15 @@
         "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions.",
         "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states.",
         "Architecture-split case where a second dispatcher family changes an obligation from unknown ingress to known owner plus open persistence.",
-        "Self-correction case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers."
+        "Self-correction case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers.",
+        "Negative activation case showing how a mapper can publish both halves of a state pipeline while preserving the missing execution edge."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",
         "Historical expectation coverage is limited to 14 structured interfaces from a 71-record product-level denominator and is not a vulnerability or exploitability audit of the artifact.",
         "The dhttpd negative control is bounded by the declared shallow producer and is not proof of total runtime non-participation.",
-        "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality."
+        "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality.",
+        "The shipped rootfs contains no default_url.cfg content, and static analysis cannot determine whether an indirect or runtime-only trigger invokes the latent loader."
       ]
     },
     {

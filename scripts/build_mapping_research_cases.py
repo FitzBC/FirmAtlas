@@ -90,6 +90,10 @@ AC9_R2_25_CONFIGURATION_TEXT_IMPORT = Path(
     "docs/firmware-mapping/samples/"
     "r2-25-vendor-tenda-ac9-configuration-text-import.json"
 )
+AC9_R2_26_CONFIGURATION_URL_DOCUMENT = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-26-vendor-tenda-ac9-configuration-url-document.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -168,6 +172,18 @@ def build_ac9_split_web_stack_case():
         "json:$.flow",
         "binds_configuration_key_parser",
         "native-arm-configuration-text-import-flow@0.1.0",
+    )
+    configuration_url_document_sha = hashlib.sha256(
+        AC9_R2_26_CONFIGURATION_URL_DOCUMENT.read_bytes()
+    ).hexdigest()
+    configuration_url_document_ref = CaseEvidenceReference(
+        "coverage:ac9-configuration-url-document-r2-26",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_26_CONFIGURATION_URL_DOCUMENT.as_posix(),
+        configuration_url_document_sha,
+        "json:$.flow",
+        "maps_configuration_url_document_consumer",
+        "native-arm-configuration-url-document-flow@0.1.0",
     )
 
     return build_research_case(ResearchCaseInput(
@@ -255,6 +271,7 @@ def build_ac9_split_web_stack_case():
             persistence_ref,
             configuration_blob_ref,
             configuration_text_import_ref,
+            configuration_url_document_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -337,6 +354,16 @@ def build_ac9_split_web_stack_case():
                 "security.ddos.map plus sys.schedulereboot.* as configuration "
                 "state keys, never as HTTP parameters.",
                 (configuration_text_import_ref.evidence_ref,),
+            ),
+            CaseClaim(
+                "claim:configuration-url-document-latent-consumer",
+                "The secondary document has a distinct load_url_mib parser and "
+                "cfm/url_mib/* hash store, but the current artifact has no static "
+                "default_url.cfg content and no verified activation edge from "
+                "cfm Upload or RestoreMTD. The flow therefore remains candidate "
+                "with zero declared keys and an open activation obligation.",
+                (configuration_url_document_ref.evidence_ref,),
+                CaseClaimStatus.UNRESOLVED,
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -452,6 +479,15 @@ def build_ac9_split_web_stack_case():
                     "obligation:configuration-key-parser",
                 ),
             ),
+            CaseStage(
+                "stage:configuration-url-document-consumer", 11,
+                "Split the secondary URL document from the primary MIB, prove its "
+                "independent parser and state scope, and retain the missing upload-"
+                "to-loader activation as an explicit obligation instead of "
+                "fabricating a deterministic call edge.",
+                ("claim:configuration-url-document-latent-consumer",),
+                creates_obligations=("obligation:configuration-url-activation",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -496,6 +532,14 @@ def build_ac9_split_web_stack_case():
                 CaseObligationStatus.RESOLVED,
                 (configuration_text_import_ref.evidence_ref,),
             ),
+            CaseObligation(
+                "obligation:configuration-url-activation",
+                "Bind or reject the runtime trigger from configuration upload to "
+                "load_url_mib/reload_url_mib and obtain the secondary document "
+                "before publishing exact URL-store key declarations.",
+                "binds_configuration_url_loader_activation",
+                CaseObligationStatus.OPEN,
+            ),
         ),
         counterfactuals=(
             "A firmware-level or path-style merge would incorrectly assign /goform "
@@ -517,6 +561,9 @@ def build_ac9_split_web_stack_case():
             "Treating the function name RestoreMTD and selector literal 0 as proof "
             "of raw partition zero would preserve the R2-24 error even after the "
             "implementation proves a default_mib text-document import.",
+            "Treating the mere presence of a secondary writer and latent loader as "
+            "a call edge would invent upload execution and copy 1013 primary MIB "
+            "keys into an independent URL store with no source document.",
         ),
         paper_uses=(
             "Motivating case for why communication mapping must precede "
@@ -532,6 +579,8 @@ def build_ac9_split_web_stack_case():
             "obligation from unknown ingress to known owner plus open persistence.",
             "Self-correction case showing why IPC framing, daemon dispatch, and "
             "key-level parsing must remain separate evidence layers.",
+            "Negative activation case showing how a mapper can publish both halves "
+            "of a state pipeline while preserving the missing execution edge.",
         ),
         limitations=(
             "The native result proves selected static registrations, not runtime "
@@ -543,6 +592,9 @@ def build_ac9_split_web_stack_case():
             "and is not proof of total runtime non-participation.",
             "One firmware case motivates and illustrates the method but cannot "
             "establish cross-vendor generality.",
+            "The shipped rootfs contains no default_url.cfg content, and static "
+            "analysis cannot determine whether an indirect or runtime-only trigger "
+            "invokes the latent loader.",
         ),
     ))
 

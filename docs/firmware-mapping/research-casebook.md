@@ -255,6 +255,15 @@ R2-25 又用更深实现证据推翻了 R2-24 的 granularity，而没有删除�
 并由本阶段取代；冻结的 `auto-v16` 仍可重放当时结果。机器记录见
 [R2-25](./samples/r2-25-vendor-tenda-ac9-configuration-text-import.json)。
 
+R2-26 继续追踪同时写出的 `/webroot/default_url.cfg`，证明它不是主 MIB 的别名：
+`load_url_mib@0x8d0c` 进入独立 parser `0x766c`，最终写入 URL 专用 hash 与
+`cfm/url_mib/*`。但全固件静态扫描没有找到 `cfm Upload`、opcode 14 或 `RestoreMTD` 到该
+loader 的调用边，rootfs 也没有静态第二文档。因此 `auto-v18` 只发布 candidate 状态范围、
+0 个已声明键和开放激活义务，不继承主 MIB 的 1013 个键。这个阶段保留了“writer 与 latent
+consumer 均存在，但执行边缺失”的反事实，适合作为负向完整性和 obligation-preserving graph
+案例；机器记录见
+[R2-26](./samples/r2-26-vendor-tenda-ac9-configuration-url-document.json)。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

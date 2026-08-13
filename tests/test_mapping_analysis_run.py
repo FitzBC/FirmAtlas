@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 
 from firmatlas.mapping import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V18,
     BUILTIN_ANALYZER_REGISTRY_V17,
     BUILTIN_ANALYZER_REGISTRY_V16,
     BUILTIN_ANALYZER_REGISTRY_V15,
@@ -28,18 +29,18 @@ from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class MappingAnalysisRunContractTests(unittest.TestCase):
-    def test_current_default_profile_and_registry_have_frozen_v17_aliases(self):
+    def test_current_default_profile_and_registry_have_frozen_v18_aliases(self):
         self.assertEqual(
-            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v17()
+            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v18()
         )
         self.assertEqual(
-            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V17
+            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V18
         )
         self.assertNotEqual(
-            MappingAnalysisProfile.auto_v17(), MappingAnalysisProfile.auto_v16()
+            MappingAnalysisProfile.auto_v18(), MappingAnalysisProfile.auto_v17()
         )
         self.assertNotEqual(
-            BUILTIN_ANALYZER_REGISTRY_V17, BUILTIN_ANALYZER_REGISTRY_V16
+            BUILTIN_ANALYZER_REGISTRY_V18, BUILTIN_ANALYZER_REGISTRY_V17
         )
 
     AC9_ROOT = Path(
@@ -102,6 +103,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "native_pointer_command_binding",
                 "native_cross_elf_call",
                 "native_configuration_text_import_flow",
+                "native_configuration_url_document_flow",
                 "arm_literal_xref",
                 "arm_feature_pivot",
                 "scheduler", "catalog",
@@ -360,9 +362,9 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v17", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v18", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v17",
+            "firmatlas.mapping.analyzer-registry/builtin-v18",
             result.analyzer_registry_id,
         )
 
