@@ -277,8 +277,12 @@ class ResearchCaseTests(unittest.TestCase):
             claims["claim:historical-interface-scope-boundary"]["status"],
         )
         self.assertEqual(
-            "supported",
+            "unresolved",
             claims["claim:configuration-blob-state-write"]["status"],
+        )
+        self.assertEqual(
+            "supported",
+            claims["claim:configuration-text-import-correction"]["status"],
         )
         obligations = {
             item["obligation_id"]: item for item in case["obligations"]
@@ -288,7 +292,7 @@ class ResearchCaseTests(unittest.TestCase):
             obligations["obligation:configuration-blob-state-write"]["status"],
         )
         self.assertEqual(
-            "open",
+            "resolved",
             obligations["obligation:configuration-key-parser"]["status"],
         )
 

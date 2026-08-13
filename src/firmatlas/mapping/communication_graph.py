@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from enum import Enum
 import hashlib
 import json
@@ -73,6 +73,7 @@ class CommunicationGraphEdgeKind(str, Enum):
     SATISFIES_OBLIGATION = "satisfies_obligation"
     CALLS = "calls"
     WRITES_STATE = "writes_state"
+    IMPORTS_STATE = "imports_state"
 
 
 @dataclass(frozen=True)
@@ -200,11 +201,33 @@ _VIEW_PRESETS = (
         tuple(item.value for item in CommunicationGraphNodeKind),
         tuple(
             item.value for item in CommunicationGraphEdgeKind
-            if item is not CommunicationGraphEdgeKind.DECLARED_IN_ARTIFACT
+            if item not in {
+                CommunicationGraphEdgeKind.DECLARED_IN_ARTIFACT,
+                CommunicationGraphEdgeKind.IMPORTS_STATE,
+            }
         ),
         "Observed structure overlaid with coverage and unresolved obligations.",
     ),
 )
+
+
+def _view_presets(catalog: DiscoveryCatalog) -> Tuple[CommunicationGraphViewPreset, ...]:
+    has_configuration_import = any(
+        item.candidate_kind
+        is DiscoveryCandidateKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW
+        for item in catalog.candidates
+    )
+    if not has_configuration_import:
+        return _VIEW_PRESETS
+    return tuple(
+        replace(
+            item,
+            edge_kinds=(*item.edge_kinds, CommunicationGraphEdgeKind.IMPORTS_STATE.value),
+        )
+        if item.preset_id in {"parameter_state", "completeness"}
+        else item
+        for item in _VIEW_PRESETS
+    )
 
 
 @dataclass(frozen=True)
@@ -447,6 +470,8 @@ def _candidate_node_kind(kind: DiscoveryCandidateKind) -> CommunicationGraphNode
         DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL:
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_CONFIGURATION_BLOB_FLOW:
+            CommunicationGraphNodeKind.COMMUNICATION_RELATION,
+        DiscoveryCandidateKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW:
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_REQUEST_PROTECTION:
             CommunicationGraphNodeKind.PROTECTION,
@@ -878,6 +903,35 @@ def project_communication_architecture_graph(
             candidate.evidence_ids,
             "native_configuration_blob_flow.state_scope",
         ))
+    for candidate in catalog.candidates:
+        if (
+            candidate.candidate_kind
+            is not DiscoveryCandidateKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW
+        ):
+            continue
+        attributes = dict(candidate.attributes)
+        declared_keys = json.loads(attributes["declared_keys"])
+        key_evidence_pairs = json.loads(attributes["key_evidence"])
+        evidence_by_key = {}
+        for key, evidence_id in key_evidence_pairs:
+            evidence_by_key.setdefault(key, []).append(evidence_id)
+        for key in sorted(set(declared_keys)):
+            state_ref = _stable_id("configuration-state", key)
+            evidence_ids = tuple(evidence_by_key.get(key, ()))
+            state_specs[state_ref] = (
+                key,
+                "key_value_entry",
+                evidence_ids,
+            )
+            edges.append(_edge(
+                CommunicationGraphEdgeKind.IMPORTS_STATE,
+                candidate.candidate_id,
+                state_ref,
+                candidate.claim_status.value,
+                candidate.candidate_id,
+                tuple(dict.fromkeys((*candidate.evidence_ids, *evidence_ids))),
+                "native_configuration_text_import_flow.declared_keys",
+            ))
     nodes.extend(
         CommunicationGraphNode(
             state_ref,
@@ -1162,6 +1216,7 @@ def project_communication_architecture_graph(
         )
         for item in catalog.coverage
     )
+    view_presets = _view_presets(catalog)
     identity = {
         "schema_version": COMMUNICATION_GRAPH_SCHEMA_VERSION,
         "source_catalog_id": catalog.catalog_id,
@@ -1170,7 +1225,7 @@ def project_communication_architecture_graph(
         "nodes": [asdict(item) for item in selected_nodes],
         "edges": [asdict(item) for item in selected_edges],
         "coverage": [asdict(item) for item in graph_coverage],
-        "view_presets": [asdict(item) for item in _VIEW_PRESETS],
+        "view_presets": [asdict(item) for item in view_presets],
         "diagnostics": diagnostics,
     }
     graph_id = "communication-graph:{}".format(hashlib.sha256(
@@ -1190,6 +1245,6 @@ def project_communication_architecture_graph(
         selected_nodes,
         selected_edges,
         graph_coverage,
-        _VIEW_PRESETS,
+        view_presets,
         tuple(diagnostics),
     )

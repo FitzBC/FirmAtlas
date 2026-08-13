@@ -131,14 +131,15 @@ export function CommunicationGraphWorkspace() {
     if (!graphId || focusNodeIds.length === 0) { setResult(null); return }
     const controller = new AbortController()
     setLoading(true)
+    const stateFocused = selectedInterface?.node_kind === 'state'
     void intelligenceApi.mappingGraph(graphId, {
       preset,
       focusNodeIds,
-      maxHops: preset === 'communication_components' ? 8 : (
+      maxHops: stateFocused ? 1 : preset === 'communication_components' ? 8 : (
         preset === 'completeness' ? 4 : 3
       ),
-      maxNodes: preset === 'communication_components' ? 240 : 160,
-      maxEdges: preset === 'communication_components' ? 480 : 320,
+      maxNodes: stateFocused ? 32 : preset === 'communication_components' ? 240 : 160,
+      maxEdges: stateFocused ? 64 : preset === 'communication_components' ? 480 : 320,
     }, controller.signal).then((next) => {
       setResult(next)
       setSelectedNodeId((current) => next.nodes.some(

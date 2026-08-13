@@ -242,6 +242,19 @@ R2-24 再次推翻了“`UploadValue` 就是上传 blob parser”的过早命名
 见 [R2-24](./samples/r2-24-vendor-tenda-ac9-configuration-blob-flow.json)。逐 key 格式和运行时执行
 仍保持开放。
 
+R2-25 又用更深实现证据推翻了 R2-24 的 granularity，而没有删除当时的分析阶段。
+`libtpi:tpi_sys_cfg_upload@0x9c5c` 以 `##the public configure end##` 分割上传文本，分别写入
+`/webroot/default.cfg` 与 `/webroot/default_url.cfg`，随后执行 `cfm Upload`。`RestoreMTD@0x588c`
+没有直接调用 `write/ioctl/mtd`；它选择 `default_mib`，经 `InitDefaultCfm → load_mib` 打开
+`/webroot/default.cfg`，内部 parser 使用 `strtok`、`strchr('=')`、`strdup` 与 `hash_insert`
+导入配置键。启动脚本把 `webroot_ro/*` 复制到运行时 `/webroot/`，因此源制品中的
+`webroot_ro/default.cfg` 提供可重放的键声明证据。当前 `auto-v17` 发布 1015 条有序声明、
+1013 个唯一 configuration-state 节点与 `imports_state` 边；`security.ddos.map` 及
+`sys.schedulereboot.*` 被证明是配置状态键，但仍不是 HTTP 参数。R2-24 的 IPC framing 事实继续
+有效，`configuration_partition[0]` 与 `whole_configuration_image` 则被标记为 provisional inference
+并由本阶段取代；冻结的 `auto-v16` 仍可重放当时结果。机器记录见
+[R2-25](./samples/r2-25-vendor-tenda-ac9-configuration-text-import.json)。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

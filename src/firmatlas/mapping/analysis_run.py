@@ -68,6 +68,11 @@ from .native_arm_configuration_blob_flow import (
     ArmConfigurationBlobFlowPolicy,
     discover_arm_configuration_blob_flows,
 )
+from .native_arm_configuration_text_import_flow import (
+    ArmConfigurationTextImportArtifact,
+    ArmConfigurationTextImportPolicy,
+    discover_arm_configuration_text_import_flows,
+)
 from .native_arm_xref import (
     ArmFeaturePivotAnchor,
     ArmFunctionTarget,
@@ -134,7 +139,10 @@ _AUTO_V15_ANALYZERS = _AUTO_V14_ANALYZERS + (
 _AUTO_V16_ANALYZERS = _AUTO_V15_ANALYZERS + (
     "native_configuration_blob_flow",
 )
-_AUTO_ANALYZERS = _AUTO_V16_ANALYZERS
+_AUTO_V17_ANALYZERS = _AUTO_V15_ANALYZERS + (
+    "native_configuration_text_import_flow",
+)
+_AUTO_ANALYZERS = _AUTO_V17_ANALYZERS
 
 
 @dataclass(frozen=True)
@@ -154,7 +162,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v16", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v17", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v17(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v17", _AUTO_V17_ANALYZERS)
 
     @classmethod
     def auto_v16(cls) -> "MappingAnalysisProfile":
@@ -234,7 +246,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v16", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v17", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v17(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v17",
+            _AUTO_V17_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v16(cls) -> "MappingAnalyzerRegistry":
@@ -355,6 +374,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V17 = MappingAnalyzerRegistry.builtin_v17()
 BUILTIN_ANALYZER_REGISTRY_V16 = MappingAnalyzerRegistry.builtin_v16()
 BUILTIN_ANALYZER_REGISTRY_V15 = MappingAnalyzerRegistry.builtin_v15()
 BUILTIN_ANALYZER_REGISTRY_V14 = MappingAnalyzerRegistry.builtin_v14()
@@ -387,6 +407,9 @@ class MappingAnalysisRequest:
     native_cross_elf_call_policy: ArmCrossElfCallPolicy = ArmCrossElfCallPolicy()
     native_configuration_blob_flow_policy: ArmConfigurationBlobFlowPolicy = (
         ArmConfigurationBlobFlowPolicy()
+    )
+    native_configuration_text_import_policy: ArmConfigurationTextImportPolicy = (
+        ArmConfigurationTextImportPolicy()
     )
     arm_literal_xref_policy: ArmLiteralXrefPolicy = ArmLiteralXrefPolicy()
     frontend_feature_gate_policy: FrontendFeatureGatePolicy = (
@@ -487,6 +510,16 @@ def _classify(
         ):
             kinds.append("native_configuration_blob_flow")
         if (
+            "native_configuration_text_import_flow" in enabled
+            and _arm_pic_callsite_applicable(content)
+            and (
+                b"tpi_sys_cfg_upload" in content
+                or b"RestoreMTD" in content
+                or b"UploadValue" in content
+            )
+        ):
+            kinds.append("native_configuration_text_import_flow")
+        if (
             "native_ubus_registration" in enabled
             and path.startswith("usr/lib/rpcd/")
             and content.find(b"rpc_plugin") >= 0
@@ -502,6 +535,14 @@ def _classify(
     except UnicodeDecodeError:
         text = None
     kinds = []
+    if (
+        "native_configuration_text_import_flow" in enabled
+        and (
+            path.endswith("webroot_ro/default.cfg")
+            or path.endswith("etc_ro/init.d/rcS")
+        )
+    ):
+        kinds.append("native_configuration_text_import_flow")
     if "frontend" in enabled and suffix in _FRONTEND_SUFFIXES:
         kinds.append("frontend")
     if "script_backend" in enabled and suffix in _SCRIPT_SUFFIXES:
@@ -723,6 +764,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v14",
                 "firmatlas.mapping.profile/auto-v15",
                 "firmatlas.mapping.profile/auto-v16",
+                "firmatlas.mapping.profile/auto-v17",
             }
         ),
         enable_tenda_get_set_data=(
@@ -738,6 +780,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v14",
                 "firmatlas.mapping.profile/auto-v15",
                 "firmatlas.mapping.profile/auto-v16",
+                "firmatlas.mapping.profile/auto-v17",
             }
         ),
         enable_regex_literals=(
@@ -750,6 +793,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v14",
                 "firmatlas.mapping.profile/auto-v15",
                 "firmatlas.mapping.profile/auto-v16",
+                "firmatlas.mapping.profile/auto-v17",
             }
         ),
     )
@@ -959,6 +1003,17 @@ def analyze_extracted_root(
             policy=request.native_configuration_blob_flow_policy,
         ),
     ) if configuration_blob_artifacts else ()
+    configuration_text_import_artifacts = tuple(
+        ArmConfigurationTextImportArtifact(source, content)
+        for source, content, kinds in selected
+        if "native_configuration_text_import_flow" in kinds
+    )
+    native_configuration_text_import_flows = (
+        discover_arm_configuration_text_import_flows(
+            configuration_text_import_artifacts,
+            policy=request.native_configuration_text_import_policy,
+        ),
+    ) if configuration_text_import_artifacts else ()
     command_handler_literal_xrefs = (
         tuple(
             discover_arm_function_literal_xrefs(
@@ -1162,6 +1217,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v14",
                     "firmatlas.mapping.profile/auto-v15",
                     "firmatlas.mapping.profile/auto-v16",
+                    "firmatlas.mapping.profile/auto-v17",
                 }
                 else ()
             )
@@ -1184,6 +1240,7 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v14",
                         "firmatlas.mapping.profile/auto-v15",
                         "firmatlas.mapping.profile/auto-v16",
+                        "firmatlas.mapping.profile/auto-v17",
                     },
                     include_fixed_action_dynamic_query=(
                         request.profile.profile_id
@@ -1195,6 +1252,7 @@ def analyze_extracted_root(
                             "firmatlas.mapping.profile/auto-v14",
                             "firmatlas.mapping.profile/auto-v15",
                             "firmatlas.mapping.profile/auto-v16",
+                            "firmatlas.mapping.profile/auto-v17",
                         }
                     ),
                 ),
@@ -1266,6 +1324,15 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.native_configuration_blob_flow,
             native_configuration_blob_flows,
             "auto:native-configuration-blob-flow",
+        ))
+    if (
+        "native_configuration_text_import_flow"
+        in request.profile.enabled_analyzers
+    ):
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_configuration_text_import_flow,
+            native_configuration_text_import_flows,
+            "auto:native-configuration-text-import-flow",
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -1388,6 +1455,15 @@ def analyze_extracted_root(
             "native_configuration_blob_flow",
             native_configuration_blob_flows,
             sum(len(item.flows) for item in native_configuration_blob_flows),
+        ))
+    if (
+        "native_configuration_text_import_flow"
+        in request.profile.enabled_analyzers
+    ):
+        stages.insert(10, _stage(
+            "native_configuration_text_import_flow",
+            native_configuration_text_import_flows,
+            sum(len(item.flows) for item in native_configuration_text_import_flows),
         ))
     if "arm_literal_xref" in request.profile.enabled_analyzers:
         stages.insert(8, _stage(

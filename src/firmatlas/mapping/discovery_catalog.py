@@ -21,6 +21,9 @@ from .native_command_binding import NativeCommandBindingResult
 from .native_cgi_dispatch import ArmCgiDispatchResult
 from .native_cross_elf_call import ArmCrossElfCallResult
 from .native_arm_configuration_blob_flow import ArmConfigurationBlobFlowResult
+from .native_arm_configuration_text_import_flow import (
+    ArmConfigurationTextImportFlowResult,
+)
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -69,6 +72,9 @@ class DiscoveryProducerKind(str, Enum):
     NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
     NATIVE_CROSS_ELF_CALL = "native_cross_elf_call"
     NATIVE_CONFIGURATION_BLOB_FLOW = "native_configuration_blob_flow"
+    NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW = (
+        "native_configuration_text_import_flow"
+    )
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -103,6 +109,9 @@ class DiscoveryCandidateKind(str, Enum):
     NATIVE_CGI_DISPATCH = "native_cgi_dispatch"
     NATIVE_CROSS_ELF_CALL = "native_cross_elf_call"
     NATIVE_CONFIGURATION_BLOB_FLOW = "native_configuration_blob_flow"
+    NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW = (
+        "native_configuration_text_import_flow"
+    )
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -273,6 +282,24 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.NATIVE_CONFIGURATION_BLOB_FLOW,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def native_configuration_text_import_flow(
+        cls, results: Tuple[ArmConfigurationTextImportFlowResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity(
+                "native-arm-configuration-text-import-flow", "0.1.0"
+            )
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW,
             producer,
             scope,
             results,
@@ -1177,6 +1204,53 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("state_writer_symbol", item.state_writer_symbol),
                             ("state_scope", item.state_scope),
                             ("write_granularity", item.write_granularity),
+                        ),
+                    ))
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW
+            ):
+                for item in result.flows:
+                    architecture_evidence = tuple(
+                        evidence_id for evidence_id in item.evidence_ids
+                        if evidence[evidence_id].capability
+                        != "declares_configuration_state_key"
+                    )
+                    candidates.append(DiscoveryCandidate(
+                        item.flow_id,
+                        DiscoveryCandidateKind.NATIVE_CONFIGURATION_TEXT_IMPORT_FLOW,
+                        "{}->{}".format(item.import_command, item.state_scope),
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.restore_path,
+                        result.profile,
+                        architecture_evidence,
+                        (
+                            ("upload_path", item.upload_path),
+                            ("upload_identity", item.upload_identity),
+                            ("restore_path", item.restore_path),
+                            ("restore_identity", item.restore_identity),
+                            ("ipc_client_identity", item.ipc_client_identity),
+                            ("ipc_dispatcher_identity", item.ipc_dispatcher_identity),
+                            ("request_opcode", str(item.request_opcode)),
+                            ("payload_literal", item.payload_literal),
+                            ("parser_identity", item.parser_identity),
+                            ("primary_runtime_path", item.primary_runtime_path),
+                            ("secondary_runtime_path", item.secondary_runtime_path),
+                            ("source_document_path", item.source_document_path),
+                            ("section_delimiter", item.section_delimiter),
+                            ("import_command", item.import_command),
+                            ("state_scope", item.state_scope),
+                            ("write_granularity", item.write_granularity),
+                            ("declared_key_count", str(len(item.declared_keys))),
+                            ("unique_declared_key_count", str(len(set(item.declared_keys)))),
+                            ("declared_keys", json.dumps(
+                                item.declared_keys, ensure_ascii=False,
+                                separators=(",", ":"),
+                            )),
+                            ("key_evidence", json.dumps(
+                                item.key_evidence, ensure_ascii=False,
+                                separators=(",", ":"),
+                            )),
                         ),
                     ))
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_CGI_DISPATCH:

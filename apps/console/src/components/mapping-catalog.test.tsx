@@ -413,6 +413,17 @@ it('compacts sparse semantic ranks so a focused state flow stays inside the grap
     name: '聚焦状态 configuration_partition[0]',
   }))
 
+  await waitFor(() => expect(intelligenceApi.mappingGraph).toHaveBeenLastCalledWith(
+    graphSummary.graph_id,
+    expect.objectContaining({
+      focusNodeIds: [configurationStateNode.node_id],
+      maxHops: 1,
+      maxNodes: 32,
+      maxEdges: 64,
+    }),
+    expect.any(AbortSignal),
+  ))
+
   const flow = await screen.findByRole('button', {
     name: '查看图节点 UploadValue:opcode=14->configuration_partition[0]',
   })

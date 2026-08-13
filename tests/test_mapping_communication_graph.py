@@ -780,7 +780,10 @@ submitConfig();'''
         self.assertLessEqual(
             {
                 item.value for item in CommunicationGraphEdgeKind
-                if item is not CommunicationGraphEdgeKind.DECLARED_IN_ARTIFACT
+                if item not in {
+                    CommunicationGraphEdgeKind.DECLARED_IN_ARTIFACT,
+                    CommunicationGraphEdgeKind.IMPORTS_STATE,
+                }
             },
             preset_edge_kinds,
         )

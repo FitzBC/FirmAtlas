@@ -1,0 +1,160 @@
+{
+  "analysis_run_id": "mapping-analysis-run:7e8a61ba4fe997f6cf4156e275402303c2591803771dd87e66d4eb8b3ac81235",
+  "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v17",
+  "catalog_id": "discovery-catalog:72555e20074529345cd9000d3b1468e59f8c39919e785979d34583ffcd546063",
+  "corrects_r2_24": {
+    "current_interpretation": "selector 0 chooses the default_mib restore path; uploaded text is split into configuration documents and imported key by key",
+    "current_profile": "firmatlas.mapping.profile/auto-v17",
+    "frozen_replay_profile": "firmatlas.mapping.profile/auto-v16",
+    "latest_graph_contains_configuration_partition_0": false,
+    "previous_interpretation": "selector 0 was treated as configuration_partition[0] and RestoreMTD as a whole_configuration_image write"
+  },
+  "firmware_artifact_sha256": "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296",
+  "flow": {
+    "candidate_id": "native-configuration-text-import-flow:ec111ba230a2355e42e9c965b135a7b6a34276e894ba5853e2bcab114f975e41",
+    "canonical_identity": "cfm Upload->cfm/default_mib/*",
+    "declared_key_count": 1015,
+    "evidence_ids": [
+      "evidence:0d820ff5278d02d9ed3a12d90e0e75edc22545428df06ef205164f0c5523ab6d",
+      "evidence:2dbce3cc8ae285dc7d1bef28b66405f8ff881135d38f1d73e8daa9e3f39f9ab9",
+      "evidence:615d6a38891158876db46295c79912ab387aea33ceed80234794dba23ed0eb90",
+      "evidence:8ea06872c5da5de028e735fc95e210f1c1c5c42089dfc5adfff1c8f0994cab05",
+      "evidence:bdd73a2e2f2d7cad6e80f51ba257a78742de02f1bd74215e0cb6df3a1c7d11a9",
+      "evidence:ce7f28ba6c293039032dbe8cad975e955d8616dc35ba5c9537e02e4b4a59de3d",
+      "evidence:f54bdd656dd7c1dba3964c4f9cfcc8e188e17c3cabc84b1b9ec7a2c82b044df4",
+      "evidence:05cb18c17613ddd4244715d6c03729f99d809c9cf7968241f22e6108bc1e5774",
+      "evidence:e94cdbc7d363d089a0c02981a96e51636a598de214c20db45b2608da677cd075",
+      "evidence:e255de3fb3941c502c572bc7135901dcc5337dc191e86bd89a82bea9edb319ae",
+      "evidence:06eee9ff0d0949aaadffcc46689216a533886dec01bb67252525a9c1f41fe3b7",
+      "evidence:b0199f1781f08bf3ce8a401035c646f4d95bf6278324f32194842dcdc44a6fee",
+      "evidence:c22a617547f1d46e2ae865ff4aab2c847139f1d19ca5fbdd27776283ace2435a",
+      "evidence:6302860ff982b0bc74c1e086e8382c7df1782bd9e7d630f4f4161c205fc3916e",
+      "evidence:8bedd60dbcfbeacaaa41576f638618f725ad8df208966a20b230e0354620af24",
+      "evidence:0b8be263c9d544dad37939a4708fbb5e8bedcb76f3d75fee7da05a1675ad8291",
+      "evidence:cc4d4fc7648b9677475ecda78ef5286175d61c6635a8fc87d3c752ff0228361d",
+      "evidence:08d3b456e23328bc5e5551569bcd4d557547a1eaf757674c6a4fd5bd11f605e3",
+      "evidence:4bb910af3fd09c22bf4b8b413f321f89e1ae5b1aee473a6dc15d8e2d82921112"
+    ],
+    "import_command": "cfm Upload",
+    "ipc_client_identity": "lib/libCfm.so@0x0000429c",
+    "ipc_dispatcher_identity": "bin/cfmd@0x0000a504",
+    "parser_identity": "lib/libCfm.so@0x00007314",
+    "payload_literal": "0",
+    "primary_runtime_path": "/webroot/default.cfg",
+    "request_opcode": 14,
+    "restore_identity": "lib/libCfm.so@0x0000588c",
+    "secondary_runtime_path": "/webroot/default_url.cfg",
+    "section_delimiter": "##the public configure end##",
+    "source_document_path": "webroot_ro/default.cfg",
+    "state_scope": "cfm/default_mib/*",
+    "unique_declared_key_count": 1013,
+    "upload_identity": "lib/libtpi.so@0x00009c5c",
+    "write_granularity": "key_value_document"
+  },
+  "graph_id": "communication-graph:b60085d0e9158469848cc54793e9cfd1bf723f81b3045dd9d1f13c0ef568e354",
+  "historical_configuration_keys": [
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:61d267fdd454bc3de6a8b6599a76c0ca215c453e0dfe8b219ddf59f61ad1ec37",
+      "key": "security.ddos.map",
+      "state_evidence_ids": [
+        "evidence:a959196c8519e524a1c843b856dd06d239cfe9c449c475b537fc1efd3f230028"
+      ],
+      "state_node_id": "configuration-state:f96214f52e3782b7881b9e0e8c348e17a2094bfb09c905d2e2e3b420de8709d2"
+    },
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:a694892c6de97504b470947777093af34786f087d2eb69abd1ead6e817b8b138",
+      "key": "sys.schedulereboot.enable",
+      "state_evidence_ids": [
+        "evidence:024d188fcd005d04469e59d71ecc7cf5b83a76d7644b124c73658aa07ccab7a3"
+      ],
+      "state_node_id": "configuration-state:bc5701ce2577eedc46489e99e2aebb570d5d29034354f21cb23096d1eb7284dd"
+    },
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:b19383be97956bf65f576915015ea983356d1d68119da2155c1e0f36d8f95330",
+      "key": "sys.schedulereboot.end_time",
+      "state_evidence_ids": [
+        "evidence:1b4ebf08687dc729f7fde9593a3f7820e9b7379dddf48b455dca7f7a01ec9b4f"
+      ],
+      "state_node_id": "configuration-state:1251e656f5ad21beb9b09e2d66fe94573a3b03243d96bbaa155e7f862eb93689"
+    },
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:4553df7a2970c224bb1c8e79a347d042241bdedb6ef80c446b125abe4c27aeb1",
+      "key": "sys.schedulereboot.interval",
+      "state_evidence_ids": [
+        "evidence:2a4ee2854d7c5721aaedd9c3c4983ad59e50fab25245fe65d665838e53ab6193"
+      ],
+      "state_node_id": "configuration-state:80ea5389853214c4ce357f09e1cfdcb75ea8372a1d8046ca2adf0221dc28659f"
+    },
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:bea32473b0a8ab8a4599a84bfaf9d856bbe49cbabdba7ac8b3e61d52d01660c7",
+      "key": "sys.schedulereboot.max_speed",
+      "state_evidence_ids": [
+        "evidence:838109ba61472c633da8e8e1de86075f790ba049dadeabffb3b7195b8c524dbc"
+      ],
+      "state_node_id": "configuration-state:629636c1328b59ef2296a8de54f8b5ef02d9864108026733deab3c3384bfb01e"
+    },
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:4807e39749d5d7cb324d8e1930b074ce240627731f79b3c822eba7b199e61af0",
+      "key": "sys.schedulereboot.start_time",
+      "state_evidence_ids": [
+        "evidence:7b77933d9fe1375489ec1e7900904d18f7211f33b7ecd0ae768fe56f10d87b7e"
+      ],
+      "state_node_id": "configuration-state:8b34047b10db40e6ace2830c29c2164fe91763ce33f724db17cd5315065d488f"
+    },
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:827c90f376cc04a490770587419d8a47a7508a51f61f06becabf6b5e6ef92497",
+      "key": "sys.schedulereboot.type",
+      "state_evidence_ids": [
+        "evidence:9228c98286676043d0bf275f721807c3734494acdfe9ff085b175ebf61a86a0c"
+      ],
+      "state_node_id": "configuration-state:1fb932057c54fa4f36a4b662ca95cbc55d0e091289ef38656b9fb10dde2f76de"
+    },
+    {
+      "classification": "configuration_state_key",
+      "http_parameter": false,
+      "import_edge_id": "communication-edge:89246eb4a12fa6b68c54170a4deb890e9aeb33255820713af96084bc68bb486f",
+      "key": "sys.schedulereboot.wday",
+      "state_evidence_ids": [
+        "evidence:ac018187a8c0dc4c8d2646592f07844217537d0099988d978810b66e4b2463df"
+      ],
+      "state_node_id": "configuration-state:cd9af7cccbc3194056f9388d90bf88be8b42f3b574b0f810417fdc68fa414981"
+    }
+  ],
+  "not_claimed": [
+    "configuration keys are HTTP request parameters",
+    "all default values are active at runtime",
+    "a historical vulnerability is present or exploitable"
+  ],
+  "profile_id": "firmatlas.mapping.profile/auto-v17",
+  "remaining_obligations": [
+    "observe one configuration import at runtime before claiming execution",
+    "recover the distinct default_url.cfg parser and consumers",
+    "bind individual configuration keys to every downstream runtime read"
+  ],
+  "resolved_obligations": [
+    "configuration-key-parser",
+    "historical-configuration-key-state-classification"
+  ],
+  "sample_role": "primary-vendor-tenda-ac9-configuration-text-import",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-25/v1alpha1",
+  "stage": {
+    "coverage_status": "completed",
+    "diagnostics": [],
+    "input_count": 1,
+    "output_count": 1
+  }
+}

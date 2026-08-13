@@ -45,6 +45,7 @@
 - [R2-22 AC9 configuration ingress](./r2-22-vendor-tenda-ac9-configuration-ingress.json)：`auto-v14` 从 `POST /cgi-bin/UploadCfg`、multipart 字段 `filename` 恢复独立六项 ARM 字符串分发表，并确证 `UploadCfg → bin/httpd@0x3b850`；机器报告另保存 `libtpi → cfm → libCfm` 的跨二进制人工 continuation 与尚待自动化的 persistence obligation。
 - [R2-23 AC9 cross-ELF persistence](./r2-23-vendor-tenda-ac9-cross-elf-persistence.json)：`auto-v15` 自动恢复 `httpd → libtpi:tpi_sys_cfg_upload`、精确 `cfm Upload` literal、`gCtlCmdArr[Upload] → libCfm:UploadValue → SendMsg/RecvMsg`；同名 `doSystemCmd` owner 不唯一时显式未决。
 - [R2-24 AC9 configuration-image state flow](./r2-24-vendor-tenda-ac9-configuration-blob-flow.json)：`auto-v16` 从 `UploadValue` 的 opcode `14`、2016-byte frame、offset `516`、literal `0` 跨进程匹配 `cfmd → atoi → RestoreMTD`，发布整镜像 `configuration_partition[0]` 与 `writes_state`；不创建伪 HTTP 参数。
+- [R2-25 AC9 configuration text import correction](./r2-25-vendor-tenda-ac9-configuration-text-import.json)：`auto-v17` 深入 `RestoreMTD` 实现并回溯上传 writer，证明 `/webroot/default.cfg` 的 `key=value → hash_insert` 导入，发布 1013 个唯一 configuration-state 节点及 `imports_state`；明确否定 R2-24 的 whole-image granularity，同时保留其冻结回放。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

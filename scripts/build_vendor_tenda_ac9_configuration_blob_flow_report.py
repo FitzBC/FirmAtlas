@@ -10,6 +10,8 @@ from pathlib import Path
 from firmatlas.mapping import (
     CommunicationGraphEdgeKind,
     DiscoveryCandidateKind,
+    MappingAnalysisProfile,
+    BUILTIN_ANALYZER_REGISTRY_V16,
     MappingAnalysisRequest,
     analyze_extracted_root,
     project_communication_architecture_graph,
@@ -24,7 +26,14 @@ except ModuleNotFoundError:  # imported as scripts.* by contract tests
 
 
 def build() -> dict:
-    run = analyze_extracted_root(MappingAnalysisRequest(ROOT, ARTIFACT_SHA256))
+    # R2-24 is a frozen historical replay.  Current auto-v17 intentionally
+    # supersedes this interpretation with a configuration text-import flow.
+    run = analyze_extracted_root(
+        MappingAnalysisRequest(
+            ROOT, ARTIFACT_SHA256, profile=MappingAnalysisProfile.auto_v16()
+        ),
+        BUILTIN_ANALYZER_REGISTRY_V16,
+    )
     graph = project_communication_architecture_graph(run.catalog)
     candidate = next(
         item for item in run.catalog.candidates

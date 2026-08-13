@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:7f4662105261039876cdc3c100f5f2c9bd3b4236a0eb50b4e112d1fdeb5a1275",
+      "case_id": "research-case:8f18eecc63ba53e3af02356b2161af3455a1bc77b073ca587e77cbef1189827d",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -133,6 +133,15 @@
           "producer": "native-arm-configuration-blob-flow@0.1.0"
         },
         {
+          "evidence_ref": "coverage:ac9-configuration-text-import-r2-25",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-25-vendor-tenda-ac9-configuration-text-import.json",
+          "source_artifact_sha256": "504bcdf5d16dc61a5d28682865b1268bdb61f8f6c40f2a8ea8142f5050512db2",
+          "locator": "json:$.flow",
+          "capability": "binds_configuration_key_parser",
+          "producer": "native-arm-configuration-text-import-flow@0.1.0"
+        },
+        {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
           "kind": "native_binding",
           "source_path": "bin/httpd",
@@ -196,9 +205,17 @@
         },
         {
           "claim_id": "claim:configuration-blob-state-write",
-          "statement": "The UploadValue IPC client frames request opcode 14 with a 2016-byte message and selector literal 0 at payload offset 516; cfmd dispatches that opcode, decodes the selector with atoi, and calls RestoreMTD for configuration_partition[0]. This is a whole-image state write, not an HTTP parameter or key parser.",
+          "statement": "The UploadValue IPC client frames request opcode 14 with a 2016-byte message and selector literal 0 at payload offset 516; cfmd dispatches that opcode, decodes the selector with atoi, and calls RestoreMTD. At R2-24, selector 0 was provisionally interpreted as configuration_partition[0] and a whole-image write; later implementation evidence rejects that granularity.",
           "evidence_refs": [
             "coverage:ac9-configuration-blob-state-flow-r2-24"
+          ],
+          "status": "unresolved"
+        },
+        {
+          "claim_id": "claim:configuration-text-import-correction",
+          "statement": "libtpi splits uploaded text into /webroot/default.cfg and /webroot/default_url.cfg before cfm Upload. libCfm then selects default_mib, reloads /webroot/default.cfg, tokenizes newline and key=value entries, and inserts keys into its hash store. This supersedes the R2-24 whole-image interpretation and proves security.ddos.map plus sys.schedulereboot.* as configuration state keys, never as HTTP parameters.",
+          "evidence_refs": [
+            "coverage:ac9-configuration-text-import-r2-25"
           ],
           "status": "supported"
         },
@@ -338,13 +355,25 @@
         {
           "stage_id": "stage:configuration-blob-state-write",
           "order": 9,
-          "interpretation": "Follow the framed IPC request into the daemon dispatcher and require the decoder and state-writer call before projecting a whole-image configuration state edge.",
+          "interpretation": "Follow the framed IPC request into the daemon dispatcher and require the decoder and RestoreMTD call. Preserve the then-current whole-image interpretation as provisional, not hindsight truth.",
           "claim_ids": [
             "claim:configuration-blob-state-write"
           ],
           "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-text-import-correction",
+          "order": 10,
+          "interpretation": "Inspect RestoreMTD's implementation owner and the upstream upload writer. Replace the partition-shaped inference with the verified default_mib key/value parser, publish exact configuration states, and retain the old auto-v16 replay only as analysis history.",
+          "claim_ids": [
+            "claim:configuration-text-import-correction"
+          ],
+          "creates_obligations": [],
           "resolves_obligations": [
-            "obligation:configuration-blob-state-write"
+            "obligation:configuration-blob-state-write",
+            "obligation:configuration-key-parser"
           ],
           "rejects_obligations": []
         }
@@ -380,19 +409,21 @@
         },
         {
           "obligation_id": "obligation:configuration-blob-state-write",
-          "statement": "Resolve the Cfm IPC opcode that persists an uploaded configuration blob and identify its state scope.",
-          "required_capability": "binds_whole_configuration_image_state_write",
+          "statement": "Resolve the Cfm IPC opcode that persists an uploaded configuration document and identify its actual state scope.",
+          "required_capability": "binds_configuration_state_scope",
           "status": "resolved",
           "closure_evidence_refs": [
-            "coverage:ac9-configuration-blob-state-flow-r2-24"
+            "coverage:ac9-configuration-text-import-r2-25"
           ]
         },
         {
           "obligation_id": "obligation:configuration-key-parser",
           "statement": "Recover the uploaded blob parser and key-level persistence flow; until then retain a wildcard configuration-state write surface.",
           "required_capability": "binds_configuration_key_parser",
-          "status": "open",
-          "closure_evidence_refs": []
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "coverage:ac9-configuration-text-import-r2-25"
+          ]
         }
       ],
       "counterfactuals": [
@@ -402,7 +433,8 @@
         "Treating a cross-version historical interface match as a current vulnerability would collapse structural observation, version applicability, and exploitability into one unsupported claim.",
         "Treating a native configuration key as an HTTP request parameter would fabricate a direct ingress edge and conceal the missing upload chain.",
         "Assuming every /cgi-bin operation uses websFormDefine would miss the independent UploadCfg/DownloadCfg string-switch dispatcher.",
-        "Treating UploadValue as the uploaded-blob parser would miss the opcode-14 daemon dispatch and fabricate key-level semantics from a whole-configuration-image write."
+        "Treating UploadValue as the uploaded-blob parser would miss the opcode-14 daemon dispatch and fabricate key-level semantics from a whole-configuration-image write.",
+        "Treating the function name RestoreMTD and selector literal 0 as proof of raw partition zero would preserve the R2-24 error even after the implementation proves a default_mib text-document import."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
@@ -411,7 +443,7 @@
         "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions.",
         "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states.",
         "Architecture-split case where a second dispatcher family changes an obligation from unknown ingress to known owner plus open persistence.",
-        "Whole-image state-flow case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers."
+        "Self-correction case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",
