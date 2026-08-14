@@ -30,6 +30,7 @@ from .native_arm_configuration_url_document_flow import (
 from .native_arm_configuration_url_ipc_flow import (
     ArmConfigurationUrlIpcFlowResult,
 )
+from .native_arm_cgi_selector_dispatch import ArmCgiSelectorDispatchResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
@@ -85,6 +86,7 @@ class DiscoveryProducerKind(str, Enum):
         "native_configuration_url_document_flow"
     )
     NATIVE_CONFIGURATION_URL_IPC_FLOW = "native_configuration_url_ipc_flow"
+    NATIVE_CGI_SELECTOR_DISPATCH = "native_cgi_selector_dispatch"
 
 
 class DiscoveryCandidateKind(str, Enum):
@@ -127,6 +129,7 @@ class DiscoveryCandidateKind(str, Enum):
     )
     NATIVE_CONFIGURATION_URL_IPC_FLOW = "native_configuration_url_ipc_flow"
     NATIVE_CONFIGURATION_URL_CONSUMER = "native_configuration_url_consumer"
+    NATIVE_CGI_SELECTOR = "native_cgi_selector"
 
 
 class DiscoveryClaimStatus(str, Enum):
@@ -265,6 +268,22 @@ class DiscoveryProducerBatch:
         )
         return cls(
             DiscoveryProducerKind.NATIVE_CGI_DISPATCH,
+            producer,
+            scope,
+            results,
+        )
+
+    @classmethod
+    def native_cgi_selector_dispatch(
+        cls, results: Tuple[ArmCgiSelectorDispatchResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-arm-cgi-selector-dispatch", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_CGI_SELECTOR_DISPATCH,
             producer,
             scope,
             results,
@@ -1388,6 +1407,46 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("access_modes", json.dumps(item.access_modes)),
                         ),
                     ))
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.NATIVE_CGI_SELECTOR_DISPATCH
+            ):
+                for item in result.selectors:
+                    candidates.append(DiscoveryCandidate(
+                        item.selector_id,
+                        DiscoveryCandidateKind.NATIVE_CGI_SELECTOR,
+                        item.interface_path,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        item.source_path,
+                        result.profile,
+                        item.evidence_ids,
+                        (
+                            ("transport_namespace", item.transport_namespace),
+                            ("namespace_registration_address", "0x{:08x}".format(
+                                item.namespace_registration_address
+                            )),
+                            ("namespace_registrar_address", "0x{:08x}".format(
+                                item.namespace_registrar_address
+                            )),
+                            ("owner_identity", item.owner_identity),
+                            ("dispatcher_identity", item.dispatcher_identity),
+                            ("selector", item.selector),
+                            ("comparison_width", str(item.comparison_width)),
+                            ("comparison_address", "0x{:08x}".format(
+                                item.comparison_address
+                            )),
+                            ("handler_address", "0x{:08x}".format(
+                                item.handler_address
+                            )),
+                            ("handler_identity", item.handler_identity),
+                            ("interface_path", item.interface_path),
+                            ("interface_path_status", item.interface_path_status),
+                            ("method", item.method),
+                            ("method_status", item.method_status),
+                            ("loader_activation_status", item.loader_activation_status),
+                        ),
+                    ))
+                producer_obligations.extend(result.open_obligations)
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_CGI_DISPATCH:
                 for item in result.bindings:
                     native_cgi_target_refs.add(item.target_ref)

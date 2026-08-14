@@ -78,6 +78,27 @@ const urlIpcDetail: MappingCandidateDetail = {
   ...detail, candidate: urlIpcCandidate, parameters: [], related_candidates: [],
   open_obligations: [],
 }
+const cgiSelectorCandidate: MappingCandidate = {
+  ...candidate,
+  candidate_id: 'cgi-selector:upload-website', candidate_kind: 'native_cgi_selector',
+  canonical_identity: '/cgi-bin/UploadWebsite', claim_status: 'supported',
+  source_path: 'bin/httpd', source_construct: 'arm32-cgi-transport-selector-inventory/v1',
+  attributes: [
+    ['interface_path', '/cgi-bin/UploadWebsite'],
+    ['interface_path_status', 'deterministic_derived'],
+    ['selector', 'UploadWebsite'], ['comparison_width', '13'],
+    ['handler_address', '0x0003e564'], ['method_status', 'unresolved'],
+  ], parameter_count: 0,
+}
+const cgiSelectorDetail: MappingCandidateDetail = {
+  ...detail, candidate: cgiSelectorCandidate, parameters: [], related_candidates: [],
+  open_obligations: [{
+    obligation_id: 'obligation:cgi-method', target_ref: cgiSelectorCandidate.candidate_id,
+    status: 'open', reason: 'No selector-specific method guard was observed.',
+    required_capability: 'binds_cgi_selector_http_method', priority: 80,
+    candidate_analyzers: [],
+  }],
+}
 const hiddenPage: PotentialHiddenInterfacePage = {
   items: [{
     interface_id: 'potential-hidden-interface:1', catalog_id: catalog.catalog_id,
@@ -195,6 +216,12 @@ const interfaceNode = {
   status: 'supported', source_path: 'webroot_ro/js/dlna.js',
   evidence_ids: ['evidence:dlna'], attributes: [['canonical_identity', 'goform/SetDlnaCfg']] as Array<[string, string]>,
 }
+const cgiDispatchNode = {
+  node_id: 'native-cgi-selector:upload-website', node_kind: 'dispatch',
+  label: '/cgi-bin/UploadWebsite', status: 'supported', source_path: 'bin/httpd',
+  evidence_ids: ['evidence:dlna'],
+  attributes: [['handler_identity', 'bin/httpd@0x0003e564']] as Array<[string, string]>,
+}
 const parameterNode = {
   node_id: 'parameter:dlna-en', node_kind: 'parameter', label: 'dlnaEn',
   status: 'observed', source_path: 'webroot_ro/js/dlna.js',
@@ -304,6 +331,25 @@ it('renders URL IPC framing as a first-class communication detail', async () => 
   expect(screen.getByText('set · request 30 · response [31] · write_state')).toBeInTheDocument()
 })
 
+it('explains deterministic CGI path composition without inventing a method', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
+  const query = vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({ items: [cgiSelectorCandidate], total: 1, limit: 100, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingCandidate').mockResolvedValue(cgiSelectorDetail)
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: 'CGI 组合路由' }))
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(
+    catalog.catalog_id, expect.objectContaining({ kind: 'native_cgi_selector' }), expect.any(AbortSignal),
+  ))
+  fireEvent.click(screen.getByRole('button', { name: `查看候选 ${cgiSelectorCandidate.canonical_identity}` }))
+
+  expect(await screen.findByText('CGI 组合式路由')).toBeInTheDocument()
+  expect(screen.getAllByText('/cgi-bin/UploadWebsite').length).toBeGreaterThan(0)
+  expect(screen.getByText(/不是完整 URL 字面量/)).toBeInTheDocument()
+  expect(screen.getByText(/不会根据上传 body 猜测 POST/)).toBeInTheDocument()
+  expect(screen.getByText('binds_cgi_selector_http_method')).toBeInTheDocument()
+})
+
 it('shows potential hidden interfaces as a coverage-gated cross-firmware view', async () => {
   vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
     items: [catalog], total: 1, limit: 50, offset: 0,
@@ -383,7 +429,7 @@ it('explores a persisted communication graph from interface to parameter and evi
   expect(await screen.findByText('goform/SetDlnaCfg')).toBeInTheDocument()
   expect(queryGraph).toHaveBeenCalledWith(
     graphSummary.graph_id,
-    expect.objectContaining({ nodeKinds: ['interface', 'state'] }),
+    expect.objectContaining({ nodeKinds: ['interface', 'dispatch', 'state'] }),
     expect.any(AbortSignal),
   )
   expect(screen.getByText('5,674')).toBeInTheDocument()
@@ -411,6 +457,30 @@ it('explores a persisted communication graph from interface to parameter and evi
     }),
     expect.any(AbortSignal),
   ))
+})
+
+it('keeps derived CGI dispatch routes searchable in the graph structure index', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({ items: [candidate], total: 1, limit: 100, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingGraphs').mockResolvedValue({ items: [graphSummary], total: 1, limit: 100, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingHistoricalOverlay').mockResolvedValue(historicalOverlay)
+  const queryGraph = vi.spyOn(intelligenceApi, 'mappingGraph').mockImplementation(
+    (_graphId, options) => Promise.resolve(options?.query === 'UploadWebsite'
+      ? graphResult([cgiDispatchNode]) : graphResult([interfaceNode])),
+  )
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '架构图谱' }))
+  fireEvent.change(screen.getByRole('textbox', { name: '搜索通信接口或状态' }), {
+    target: { value: 'UploadWebsite' },
+  })
+
+  expect(await screen.findByRole('button', { name: '聚焦分发 /cgi-bin/UploadWebsite' })).toBeInTheDocument()
+  expect(queryGraph).toHaveBeenLastCalledWith(
+    graphSummary.graph_id,
+    expect.objectContaining({ query: 'UploadWebsite', nodeKinds: ['interface', 'dispatch', 'state'] }),
+    expect.any(AbortSignal),
+  )
 })
 
 it('compacts sparse semantic ranks so a focused state flow stays inside the graph viewport', async () => {

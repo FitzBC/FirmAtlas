@@ -57,6 +57,11 @@ from .native_cgi_dispatch import (
     ArmCgiDispatchPolicy,
     discover_arm_cgi_string_dispatch,
 )
+from .native_arm_cgi_selector_dispatch import (
+    ArmCgiSelectorArtifact,
+    ArmCgiSelectorPolicy,
+    discover_arm_cgi_selector_dispatches,
+)
 from .native_cross_elf_call import (
     ArmCrossElfArtifact,
     ArmCrossElfCallAnchor,
@@ -158,7 +163,10 @@ _AUTO_V18_ANALYZERS = _AUTO_V17_ANALYZERS + (
 _AUTO_V19_ANALYZERS = _AUTO_V18_ANALYZERS + (
     "native_configuration_url_ipc_flow",
 )
-_AUTO_ANALYZERS = _AUTO_V19_ANALYZERS
+_AUTO_V20_ANALYZERS = _AUTO_V19_ANALYZERS + (
+    "native_cgi_selector_dispatch",
+)
+_AUTO_ANALYZERS = _AUTO_V20_ANALYZERS
 
 
 @dataclass(frozen=True)
@@ -178,7 +186,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v19", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v20", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v20(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v20", _AUTO_V20_ANALYZERS)
 
     @classmethod
     def auto_v19(cls) -> "MappingAnalysisProfile":
@@ -270,7 +282,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v19", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v20", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v20(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v20",
+            _AUTO_V20_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v19(cls) -> "MappingAnalyzerRegistry":
@@ -412,6 +431,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V20 = MappingAnalyzerRegistry.builtin_v20()
 BUILTIN_ANALYZER_REGISTRY_V19 = MappingAnalyzerRegistry.builtin_v19()
 BUILTIN_ANALYZER_REGISTRY_V18 = MappingAnalyzerRegistry.builtin_v18()
 BUILTIN_ANALYZER_REGISTRY_V17 = MappingAnalyzerRegistry.builtin_v17()
@@ -444,6 +464,7 @@ class MappingAnalysisRequest:
     native_relationship_policy: NativeRelationshipPolicy = NativeRelationshipPolicy()
     native_command_binding_policy: NativeCommandBindingPolicy = NativeCommandBindingPolicy()
     native_cgi_dispatch_policy: ArmCgiDispatchPolicy = ArmCgiDispatchPolicy()
+    native_cgi_selector_policy: ArmCgiSelectorPolicy = ArmCgiSelectorPolicy()
     native_cross_elf_call_policy: ArmCrossElfCallPolicy = ArmCrossElfCallPolicy()
     native_configuration_blob_flow_policy: ArmConfigurationBlobFlowPolicy = (
         ArmConfigurationBlobFlowPolicy()
@@ -537,6 +558,13 @@ def _classify(
             and b"/cgi-bin/" in content
         ):
             kinds.append("native_cgi_dispatch")
+        if (
+            "native_cgi_selector_dispatch" in enabled
+            and _arm_pic_callsite_applicable(content)
+            and b"webs_Tenda_CGI_BIN_Handler" in content
+            and b"cgi-bin" in content
+        ):
+            kinds.append("native_cgi_selector_dispatch")
         if (
             "native_command_binding" in enabled
             and b"daemon_exe_info" in content
@@ -833,6 +861,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v17",
                 "firmatlas.mapping.profile/auto-v18",
                 "firmatlas.mapping.profile/auto-v19",
+                "firmatlas.mapping.profile/auto-v20",
             }
         ),
         enable_tenda_get_set_data=(
@@ -851,6 +880,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v17",
                 "firmatlas.mapping.profile/auto-v18",
                 "firmatlas.mapping.profile/auto-v19",
+                "firmatlas.mapping.profile/auto-v20",
             }
         ),
         enable_regex_literals=(
@@ -866,6 +896,7 @@ def analyze_extracted_root(
                 "firmatlas.mapping.profile/auto-v17",
                 "firmatlas.mapping.profile/auto-v18",
                 "firmatlas.mapping.profile/auto-v19",
+                "firmatlas.mapping.profile/auto-v20",
             }
         ),
     )
@@ -1035,6 +1066,17 @@ def analyze_extracted_root(
             )
         )
     )
+    cgi_selector_artifacts = tuple(
+        ArmCgiSelectorArtifact(source, content)
+        for source, content, kinds in selected
+        if "native_cgi_selector_dispatch" in kinds
+    )
+    native_cgi_selector_dispatch = (
+        discover_arm_cgi_selector_dispatches(
+            cgi_selector_artifacts,
+            policy=request.native_cgi_selector_policy,
+        ),
+    ) if cgi_selector_artifacts else ()
     cross_elf_anchors = tuple(sorted((
         *(
             ArmCrossElfCallAnchor(
@@ -1314,6 +1356,7 @@ def analyze_extracted_root(
                     "firmatlas.mapping.profile/auto-v17",
                     "firmatlas.mapping.profile/auto-v18",
                     "firmatlas.mapping.profile/auto-v19",
+                    "firmatlas.mapping.profile/auto-v20",
                 }
                 else ()
             )
@@ -1339,6 +1382,7 @@ def analyze_extracted_root(
                         "firmatlas.mapping.profile/auto-v17",
                         "firmatlas.mapping.profile/auto-v18",
                         "firmatlas.mapping.profile/auto-v19",
+                        "firmatlas.mapping.profile/auto-v20",
                     },
                     include_fixed_action_dynamic_query=(
                         request.profile.profile_id
@@ -1353,6 +1397,7 @@ def analyze_extracted_root(
                             "firmatlas.mapping.profile/auto-v17",
                             "firmatlas.mapping.profile/auto-v18",
                             "firmatlas.mapping.profile/auto-v19",
+                            "firmatlas.mapping.profile/auto-v20",
                         }
                     ),
                 ),
@@ -1417,6 +1462,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.native_cgi_dispatch,
             native_cgi_dispatch,
             "auto:native-cgi-dispatch",
+        ))
+    if "native_cgi_selector_dispatch" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_cgi_selector_dispatch,
+            native_cgi_selector_dispatch,
+            "auto:native-cgi-selector-dispatch",
         ))
     if "native_cross_elf_call" in request.profile.enabled_analyzers:
         batches.append(_batch(
@@ -1563,6 +1614,12 @@ def analyze_extracted_root(
             "native_cgi_dispatch",
             native_cgi_dispatch,
             sum(len(item.bindings) for item in native_cgi_dispatch),
+        ))
+    if "native_cgi_selector_dispatch" in request.profile.enabled_analyzers:
+        stages.insert(9, _stage(
+            "native_cgi_selector_dispatch",
+            native_cgi_selector_dispatch,
+            sum(len(item.selectors) for item in native_cgi_selector_dispatch),
         ))
     if "native_cross_elf_call" in request.profile.enabled_analyzers:
         stages.insert(9, _stage(

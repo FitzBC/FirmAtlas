@@ -494,6 +494,8 @@ def _candidate_node_kind(kind: DiscoveryCandidateKind) -> CommunicationGraphNode
             CommunicationGraphNodeKind.DISPATCH,
         DiscoveryCandidateKind.NATIVE_CGI_DISPATCH:
             CommunicationGraphNodeKind.DISPATCH,
+        DiscoveryCandidateKind.NATIVE_CGI_SELECTOR:
+            CommunicationGraphNodeKind.DISPATCH,
         DiscoveryCandidateKind.NATIVE_CROSS_ELF_CALL:
             CommunicationGraphNodeKind.COMMUNICATION_RELATION,
         DiscoveryCandidateKind.NATIVE_CONFIGURATION_BLOB_FLOW:
@@ -633,6 +635,29 @@ def project_communication_architecture_graph(
     candidate_by_id = {
         item.candidate_id: item for item in catalog.candidates
     }
+    consumers_by_function_identity = {
+        dict(item.attributes).get("function_identity"): item
+        for item in catalog.candidates
+        if item.candidate_kind
+        is DiscoveryCandidateKind.NATIVE_CONFIGURATION_URL_CONSUMER
+    }
+    for candidate in catalog.candidates:
+        if candidate.candidate_kind is not DiscoveryCandidateKind.NATIVE_CGI_SELECTOR:
+            continue
+        attributes = dict(candidate.attributes)
+        consumer = consumers_by_function_identity.get(attributes["handler_identity"])
+        if consumer is not None:
+            edges.append(_edge(
+                CommunicationGraphEdgeKind.CALLS,
+                candidate.candidate_id,
+                consumer.candidate_id,
+                candidate.claim_status.value,
+                candidate.candidate_id,
+                tuple(dict.fromkeys((
+                    *candidate.evidence_ids, *consumer.evidence_ids,
+                ))),
+                "native_cgi_selector.handler_identity",
+            ))
     requests_by_operation = {}
     for candidate in catalog.candidates:
         if candidate.candidate_kind is DiscoveryCandidateKind.REQUEST_INTERFACE:

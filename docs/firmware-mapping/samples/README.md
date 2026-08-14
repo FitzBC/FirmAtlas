@@ -48,6 +48,7 @@
 - [R2-25 AC9 configuration text import correction](./r2-25-vendor-tenda-ac9-configuration-text-import.json)：`auto-v17` 深入 `RestoreMTD` 实现并回溯上传 writer，证明 `/webroot/default.cfg` 的 `key=value → hash_insert` 导入，发布 1013 个唯一 configuration-state 节点及 `imports_state`；明确否定 R2-24 的 whole-image granularity，同时保留其冻结回放。
 - [R2-26 AC9 latent URL-document consumer](./r2-26-vendor-tenda-ac9-configuration-url-document.json)：`auto-v18` 证明 `/webroot/default_url.cfg → load_url_mib@0x8d0c → parser@0x766c → cfm/url_mib/*` 是独立配置域；因 rootfs 无第二文档且上传激活边未找到，保留 partial coverage、candidate `imports_state`、0 个声明键及开放义务。
 - [R2-27 AC9 URL-store IPC and consumers](./r2-27-vendor-tenda-ac9-configuration-url-ipc.json)：`auto-v19` 闭合 `/var/cfm_socket` 上 2016-byte Get/Set/Unset/Commit/Show IPC、cfmd 分发与 5 个 httpd consumer；逐 callsite 修正 `urlgroup.*` 同前缀跨主 MIB/URL MIB 分裂，且不把 IPC 字段写成 HTTP 参数或关闭 document activation 义务。
+- [R2-28 AC9 CGI namespace and selector transport](./r2-28-vendor-tenda-ac9-cgi-selector.json)：`auto-v20` 从 registrar、path parser 与 selector arms 组合恢复 7 条 `/cgi-bin/*` route；`UploadWebsite` 连到 URL consumer，但 method 与 URL document activation 保持 open。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

@@ -184,6 +184,15 @@ from .native_arm_configuration_url_ipc_flow import (
     ArmConfigurationUrlIpcProfile,
     discover_arm_configuration_url_ipc_flows,
 )
+from .native_arm_cgi_selector_dispatch import (
+    ARM_CGI_SELECTOR_DISPATCH_SCHEMA_VERSION,
+    ArmCgiSelectorArtifact,
+    ArmCgiSelectorDispatch,
+    ArmCgiSelectorDispatchResult,
+    ArmCgiSelectorPolicy,
+    ArmCgiSelectorProfile,
+    discover_arm_cgi_selector_dispatches,
+)
 from .native_command_binding import (
     NATIVE_COMMAND_BINDING_SCHEMA_VERSION,
     NativeCommandBinding,
@@ -342,6 +351,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V20,
     BUILTIN_ANALYZER_REGISTRY_V19,
     BUILTIN_ANALYZER_REGISTRY_V18,
     BUILTIN_ANALYZER_REGISTRY_V17,
@@ -502,6 +512,13 @@ from .research_case import (
 )
 
 __all__ = (
+    "ARM_CGI_SELECTOR_DISPATCH_SCHEMA_VERSION",
+    "ArmCgiSelectorArtifact",
+    "ArmCgiSelectorDispatch",
+    "ArmCgiSelectorDispatchResult",
+    "ArmCgiSelectorPolicy",
+    "ArmCgiSelectorProfile",
+    "discover_arm_cgi_selector_dispatches",
     "ARM_CONFIGURATION_URL_IPC_FLOW_SCHEMA_VERSION",
     "ArmConfigurationUrlConsumer",
     "ArmConfigurationUrlIpcArtifact",
@@ -774,6 +791,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V20",
     "BUILTIN_ANALYZER_REGISTRY_V19",
     "BUILTIN_ANALYZER_REGISTRY_V18",
     "BUILTIN_ANALYZER_REGISTRY_V17",

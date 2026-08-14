@@ -20,6 +20,7 @@ const kinds = [
   ['native_parameter_state_flow', '参数状态流'],
   ['native_configuration_url_ipc_flow', 'URL IPC'],
   ['native_configuration_url_consumer', 'URL 状态消费者'],
+  ['native_cgi_selector', 'CGI 组合路由'],
   ['runtime_principal', '运行时主体'],
   ['ubus_backend_binding', 'ubus 后端绑定'],
   ['ubus_access_grant', 'ubus 访问策略'],
@@ -340,6 +341,7 @@ function CandidateEvidence({ detail }: { detail: MappingCandidateDetail }) {
   const attributes = Object.fromEntries(item.attributes)
   const isUrlIpc = item.candidate_kind === 'native_configuration_url_ipc_flow'
   const isUrlConsumer = item.candidate_kind === 'native_configuration_url_consumer'
+  const isCgiSelector = item.candidate_kind === 'native_cgi_selector'
   const title = item.candidate_kind === 'candidate_association'
     ? '跨层候选关联'
     : item.canonical_identity
@@ -348,6 +350,7 @@ function CandidateEvidence({ detail }: { detail: MappingCandidateDetail }) {
     {item.candidate_kind === 'candidate_association' && <p className="mt-2 break-all font-mono text-[9px] leading-4 text-slate-700">{item.canonical_identity}</p>}
     {isUrlIpc && <div className="mt-4 rounded-xl border border-cyan/20 bg-cyan/[0.045] p-3"><div className="text-[10px] font-semibold text-cyan">URL 配置 IPC</div><p className="mt-1 font-mono text-[10px] leading-5 text-slate-400">{attributes.channel_path} · {attributes.message_size} bytes · opcode@0 · key/path@{attributes.key_offset || '—'} · value@{attributes.value_offset || '—'}</p><p className="mt-1 text-[10px] text-slate-600">{attributes.operation} · request {attributes.request_opcode} · response {attributes.response_opcodes} · {attributes.access_mode}_state</p></div>}
     {isUrlConsumer && <div className="mt-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.04] p-3"><div className="text-[10px] font-semibold text-amber-200">按调用点绑定状态域</div><p className="mt-1 text-[10px] leading-5 text-slate-500">这里只展示经 URL client 调用绑定的 key template；同前缀的 rule.* / flag 属主 CFM，name 仍未绑定，不能按前缀合并。</p></div>}
+    {isCgiSelector && <div className="mt-4 rounded-xl border border-emerald-300/20 bg-emerald-300/[0.04] p-3"><div className="text-[10px] font-semibold text-emerald-200">CGI 组合式路由</div><p className="mt-1 font-mono text-[10px] leading-5 text-slate-400">{attributes.interface_path} · {attributes.interface_path_status}</p><p className="mt-1 text-[10px] leading-5 text-slate-500">由 namespace registrar、path 第二段解析和 selector compare arm 共同证明；不是完整 URL 字面量。HTTP method 为 {attributes.method_status || 'unresolved'}，不会根据上传 body 猜测 POST。</p><div className="mt-2 flex flex-wrap gap-1.5"><span className="rounded bg-black/20 px-2 py-1 font-mono text-[9px] text-cyan">selector {attributes.selector}</span><span className="rounded bg-black/20 px-2 py-1 font-mono text-[9px] text-cyan">compare {attributes.comparison_width} bytes</span><span className="rounded bg-black/20 px-2 py-1 font-mono text-[9px] text-cyan">handler {attributes.handler_address}</span></div></div>}
     <div className="mt-5 grid grid-cols-3 gap-2">{[['参数', detail.parameters.length], ['关联', detail.associations.length + detail.related_candidates.length], ['未决', detail.open_obligations.length]].map(([label, value]) => <div key={label} className="rounded-xl border border-white/[0.06] bg-black/20 p-3"><div className="text-[9px] text-slate-600">{label}</div><div className="mt-1 text-lg font-semibold text-slate-200">{value}</div></div>)}</div>
     <EvidenceSection title="架构与分析属性">{item.attributes.length ? <div className="grid gap-2 sm:grid-cols-2">{item.attributes.map(([key, value]) => <div key={`${key}:${value}`} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"><div className="text-[9px] uppercase tracking-[0.08em] text-slate-600">{key.replaceAll('_', ' ')}</div><div className="mt-1 break-all font-mono text-[10px] leading-5 text-cyan">{value}</div></div>)}</div> : <Muted />}</EvidenceSection>
     <EvidenceSection title="参数与操作选择器">{detail.parameters.length ? detail.parameters.map((parameter) => <div key={parameter.parameter_id} className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"><div className="font-mono text-xs text-cyan">{parameter.name}</div><div className="mt-1 text-[10px] text-slate-600">{parameter.namespace}{parameter.is_operation_selector ? ' · operation selector' : ''}{parameter.literal_value ? ` · ${parameter.literal_value}` : ''}</div></div>) : <Muted />}</EvidenceSection>

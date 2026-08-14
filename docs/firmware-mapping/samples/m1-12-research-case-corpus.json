@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:99e91dff8fe8e4688166e2665538e0d57ad26f31e41ef9f5c03a901d4dc3fafb",
+      "case_id": "research-case:f84882de1a95ca32b765688f08967136175f7883657382f8b16cf49c843c87a4",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -160,6 +160,15 @@
           "producer": "native-arm-configuration-url-ipc-flow@0.1.0"
         },
         {
+          "evidence_ref": "coverage:ac9-cgi-selector-transport-r2-28",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-28-vendor-tenda-ac9-cgi-selector.json",
+          "source_artifact_sha256": "c68c0548559053a32159b7a8caab3ca88466fd7e890fc830739c7a97ecb1d938",
+          "locator": "json:$.selectors",
+          "capability": "maps_cgi_namespace_and_selector_transport",
+          "producer": "native-arm-cgi-selector-dispatch@0.1.0"
+        },
+        {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
           "kind": "native_binding",
           "source_path": "bin/httpd",
@@ -207,7 +216,7 @@
         },
         {
           "claim_id": "claim:configuration-upload-cgi-owner",
-          "statement": "POST /cgi-bin/UploadCfg carries multipart form field filename; an independent ARM string-switch dispatcher at 0x3a9a0 binds UploadCfg to bin/httpd@0x3b850 with a six-entry family proof.",
+          "statement": "POST /cgi-bin/UploadCfg carries multipart form field filename; an independent ARM string-switch dispatcher at 0x3a9a0 binds UploadCfg to bin/httpd@0x3b850. This stage initially retained a six-entry anchor subset; it did not prove inventory completeness.",
           "evidence_refs": [
             "coverage:ac9-configuration-ingress-r2-22"
           ],
@@ -250,6 +259,14 @@
           "statement": "Five 2016-byte URL IPC operations connect libCfm clients through cfmd to cfm/url_mib/*, while per-callsite evidence proves that urlgroup.list*/class* use the URL store but rule.*/flag use the primary CFM store. The daily IPC is supported without closing the independent document-loader activation obligation.",
           "evidence_refs": [
             "coverage:ac9-configuration-url-ipc-r2-27"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:cgi-selector-route-correction",
+          "statement": "The /cgi-bin registrar binds webs_Tenda_CGI_BIN_Handler, whose path-segment parser calls a seven-arm selector dispatcher. Prefix plus segment control flow deterministically derives /cgi-bin/UploadWebsite and binds handler 0x3e564 to daily URL IPC consumers. HTTP method and URL document-loader activation remain independent open obligations.",
+          "evidence_refs": [
+            "coverage:ac9-cgi-selector-transport-r2-28"
           ],
           "status": "supported"
         },
@@ -434,6 +451,19 @@
           "creates_obligations": [],
           "resolves_obligations": [],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:cgi-selector-route-correction",
+          "order": 13,
+          "interpretation": "Recover the independent /cgi-bin namespace registrar and path segment parser, replace the truncated six-entry completeness claim with seven arms, close route binding, and preserve method and loader activation as non-transitive obligations.",
+          "claim_ids": [
+            "claim:cgi-selector-route-correction"
+          ],
+          "creates_obligations": [
+            "obligation:cgi-selector-http-method"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -489,6 +519,13 @@
           "required_capability": "binds_configuration_url_loader_activation",
           "status": "open",
           "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:cgi-selector-http-method",
+          "statement": "Observe a selector-specific static method guard or runtime HTTP trace before assigning GET, POST, or another method to /cgi-bin/UploadWebsite.",
+          "required_capability": "binds_cgi_selector_http_method",
+          "status": "open",
+          "closure_evidence_refs": []
         }
       ],
       "counterfactuals": [
@@ -501,7 +538,8 @@
         "Treating UploadValue as the uploaded-blob parser would miss the opcode-14 daemon dispatch and fabricate key-level semantics from a whole-configuration-image write.",
         "Treating the function name RestoreMTD and selector literal 0 as proof of raw partition zero would preserve the R2-24 error even after the implementation proves a default_mib text-document import.",
         "Treating the mere presence of a secondary writer and latent loader as a call edge would invent upload execution and copy 1013 primary MIB keys into an independent URL store with no source document.",
-        "Grouping every urlgroup.* literal by prefix would move rule.* and flag from the primary CFM store into the URL store despite their GetValue/UnSetValue/CommitCfm callsites."
+        "Grouping every urlgroup.* literal by prefix would move rule.* and flag from the primary CFM store into the URL store despite their GetValue/UnSetValue/CommitCfm callsites.",
+        "Requiring a complete endpoint literal would miss prefix-plus-segment routes, while inferring POST from upload-body consumption would invent a method binding."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
@@ -1486,7 +1524,7 @@
       ]
     },
     {
-      "case_id": "research-case:c8d39ae31c65b51090442ef2b732111533b52843d8b0b6054c071070790c59d7",
+      "case_id": "research-case:b7284f5dd6c5b86e3caee1a565ad90ef7acd820f9024e8249092c09498d3537a",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -2198,7 +2236,7 @@
           "evidence_ref": "coverage:ac9-dlna-http-console-graph",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-19-vendor-tenda-ac9-http-console-graph.json",
-          "source_artifact_sha256": "628ff492679223fe0c5adb2e83c31549f897268b3106c18363d70adeb171bcd9",
+          "source_artifact_sha256": "9cdd74a034ca38f97bdafb9638bd726d06782842df99f712f0ca8b1aa3af1dde",
           "locator": "json:$.http_acceptance",
           "capability": "replays_product_graph_query_with_evidence",
           "producer": "communication-graph-http-console@v1alpha1"

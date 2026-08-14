@@ -98,6 +98,10 @@ AC9_R2_27_CONFIGURATION_URL_IPC = Path(
     "docs/firmware-mapping/samples/"
     "r2-27-vendor-tenda-ac9-configuration-url-ipc.json"
 )
+AC9_R2_28_CGI_SELECTOR = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-28-vendor-tenda-ac9-cgi-selector.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -201,6 +205,16 @@ def build_ac9_split_web_stack_case():
         "maps_configuration_url_ipc_and_store_split",
         "native-arm-configuration-url-ipc-flow@0.1.0",
     )
+    cgi_selector_sha = hashlib.sha256(AC9_R2_28_CGI_SELECTOR.read_bytes()).hexdigest()
+    cgi_selector_ref = CaseEvidenceReference(
+        "coverage:ac9-cgi-selector-transport-r2-28",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_28_CGI_SELECTOR.as_posix(),
+        cgi_selector_sha,
+        "json:$.selectors",
+        "maps_cgi_namespace_and_selector_transport",
+        "native-arm-cgi-selector-dispatch@0.1.0",
+    )
 
     return build_research_case(ResearchCaseInput(
         case_key="tenda-ac9-split-web-stack-goform-ownership",
@@ -289,6 +303,7 @@ def build_ac9_split_web_stack_case():
             configuration_text_import_ref,
             configuration_url_document_ref,
             configuration_url_ipc_ref,
+            cgi_selector_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -338,7 +353,8 @@ def build_ac9_split_web_stack_case():
                 "claim:configuration-upload-cgi-owner",
                 "POST /cgi-bin/UploadCfg carries multipart form field filename; "
                 "an independent ARM string-switch dispatcher at 0x3a9a0 binds "
-                "UploadCfg to bin/httpd@0x3b850 with a six-entry family proof.",
+                "UploadCfg to bin/httpd@0x3b850. This stage initially retained a "
+                "six-entry anchor subset; it did not prove inventory completeness.",
                 (ingress_ref.evidence_ref,),
             ),
             CaseClaim(
@@ -390,6 +406,16 @@ def build_ac9_split_web_stack_case():
                 "primary CFM store. The daily IPC is supported without closing "
                 "the independent document-loader activation obligation.",
                 (configuration_url_ipc_ref.evidence_ref,),
+            ),
+            CaseClaim(
+                "claim:cgi-selector-route-correction",
+                "The /cgi-bin registrar binds webs_Tenda_CGI_BIN_Handler, whose "
+                "path-segment parser calls a seven-arm selector dispatcher. "
+                "Prefix plus segment control flow deterministically derives "
+                "/cgi-bin/UploadWebsite and binds handler 0x3e564 to daily URL "
+                "IPC consumers. HTTP method and URL document-loader activation "
+                "remain independent open obligations.",
+                (cgi_selector_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -522,6 +548,15 @@ def build_ac9_split_web_stack_case():
                 "activation open.",
                 ("claim:configuration-url-ipc-store-split",),
             ),
+            CaseStage(
+                "stage:cgi-selector-route-correction", 13,
+                "Recover the independent /cgi-bin namespace registrar and path "
+                "segment parser, replace the truncated six-entry completeness "
+                "claim with seven arms, close route binding, and preserve method "
+                "and loader activation as non-transitive obligations.",
+                ("claim:cgi-selector-route-correction",),
+                creates_obligations=("obligation:cgi-selector-http-method",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -574,6 +609,14 @@ def build_ac9_split_web_stack_case():
                 "binds_configuration_url_loader_activation",
                 CaseObligationStatus.OPEN,
             ),
+            CaseObligation(
+                "obligation:cgi-selector-http-method",
+                "Observe a selector-specific static method guard or runtime HTTP "
+                "trace before assigning GET, POST, or another method to "
+                "/cgi-bin/UploadWebsite.",
+                "binds_cgi_selector_http_method",
+                CaseObligationStatus.OPEN,
+            ),
         ),
         counterfactuals=(
             "A firmware-level or path-style merge would incorrectly assign /goform "
@@ -601,6 +644,9 @@ def build_ac9_split_web_stack_case():
             "Grouping every urlgroup.* literal by prefix would move rule.* and "
             "flag from the primary CFM store into the URL store despite their "
             "GetValue/UnSetValue/CommitCfm callsites.",
+            "Requiring a complete endpoint literal would miss prefix-plus-segment "
+            "routes, while inferring POST from upload-body consumption would "
+            "invent a method binding.",
         ),
         paper_uses=(
             "Motivating case for why communication mapping must precede "
