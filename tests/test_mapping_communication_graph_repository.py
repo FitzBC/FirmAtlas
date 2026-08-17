@@ -14,6 +14,7 @@ from firmatlas.mapping import (
     CommunicationGraphConflictError,
     DiscoveryCatalogRepository,
     HistoricalApplicability,
+    HistoricalCoverageLedgerQuery,
     HistoricalGraphOverlayQuery,
     HistoricalInterfaceExpectation,
     HistoricalMatchStatus,
@@ -22,6 +23,7 @@ from firmatlas.mapping import (
     project_historical_graph_overlay,
     project_communication_architecture_graph,
 )
+from tests.test_mapping_historical_coverage_ledger import _ledger_fixture
 from tests.test_mapping_catalog_repository import _catalog
 from firmatlas.cli import main as firmatlas_main
 from firmatlas.mapping.repository import _reachable_graph_neighbors
@@ -147,6 +149,39 @@ class CommunicationGraphRepositoryContractTests(unittest.TestCase):
             self.repository.publish_historical_graph_overlay(replace(
                 overlay, entries=(bad_entry,)
             ))
+
+    def test_historical_coverage_ledger_persists_complete_denominator_and_queries_reason(self):
+        catalog, graph, overlay, queue = _ledger_fixture()
+        from firmatlas.mapping import build_historical_coverage_ledger
+        ledger = build_historical_coverage_ledger(overlay, queue)
+
+        with self.assertRaisesRegex(ValueError, "graph is not published"):
+            self.repository.publish_historical_coverage_ledger(ledger)
+        self.repository.publish(catalog)
+        self.repository.publish_communication_graph(graph)
+        self.repository.publish_historical_graph_overlay(overlay)
+        first = self.repository.publish_historical_coverage_ledger(ledger)
+        second = self.repository.publish_historical_coverage_ledger(ledger)
+        result = self.repository.query_historical_coverage_ledger(
+            graph.graph_id,
+            HistoricalCoverageLedgerQuery(
+                text="security.ddos.map",
+                statuses=("partial",),
+                audit_categories=("parameter_only",),
+            ),
+        )
+
+        self.assertTrue(first["created"])
+        self.assertFalse(second["created"])
+        self.assertEqual(3, result["total_entry_count"])
+        self.assertEqual(1, result["selected_entry_count"])
+        self.assertEqual("CVE-parameter", result["entries"][0][
+            "vulnerability_identifier"
+        ])
+        self.assertEqual(
+            {"not_assessable": 1, "observed": 1, "partial": 1},
+            result["facets"]["status"],
+        )
         bad_catalog_entry = replace(
             overlay.entries[0],
             catalog_candidate_ids=("candidate:not-in-catalog",),
@@ -388,6 +423,53 @@ class CommunicationGraphRepositoryContractTests(unittest.TestCase):
         result = json.loads(queried.getvalue())
         self.assertEqual(1, result["selected_entry_count"])
         self.assertEqual(overlay.overlay_id, result["overlay"]["overlay_id"])
+
+    def test_cli_publishes_and_queries_complete_historical_ledger(self):
+        catalog, graph, overlay, queue = _ledger_fixture()
+        from firmatlas.mapping import build_historical_coverage_ledger
+        ledger = build_historical_coverage_ledger(overlay, queue)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            database = root / "mapping.db"
+            run_document = root / "analysis-run.json"
+            graph_document = root / "graph.json"
+            overlay_document = root / "overlay.json"
+            ledger_document = root / "ledger.json"
+            run_document.write_text(
+                json.dumps({"catalog": catalog.to_dict()}), encoding="utf-8"
+            )
+            graph_document.write_text(json.dumps(graph.to_dict()), encoding="utf-8")
+            overlay_document.write_text(json.dumps(overlay.to_dict()), encoding="utf-8")
+            ledger_document.write_text(json.dumps(ledger.to_dict()), encoding="utf-8")
+            with redirect_stdout(io.StringIO()):
+                firmatlas_main((
+                    "mapping", "publish-graph", "--database", str(database),
+                    "--catalog-document", str(run_document), str(graph_document),
+                ))
+                firmatlas_main((
+                    "mapping", "publish-history-overlay", "--database", str(database),
+                    str(overlay_document),
+                ))
+                publish_code = firmatlas_main((
+                    "mapping", "publish-history-ledger", "--database", str(database),
+                    str(ledger_document),
+                ))
+            queried = io.StringIO()
+            with redirect_stdout(queried):
+                query_code = firmatlas_main((
+                    "mapping", "query-history-ledger", "--database", str(database),
+                    graph.graph_id, "--query", "security.ddos.map",
+                    "--status", "partial", "--audit-category", "parameter_only",
+                ))
+
+        self.assertEqual(0, publish_code)
+        self.assertEqual(0, query_code)
+        result = json.loads(queried.getvalue())
+        self.assertEqual(3, result["total_entry_count"])
+        self.assertEqual(1, result["selected_entry_count"])
+        self.assertEqual("CVE-parameter", result["entries"][0][
+            "vulnerability_identifier"
+        ])
 
     def test_persisted_graph_is_queryable_after_repository_reopen(self):
         with tempfile.TemporaryDirectory() as directory:

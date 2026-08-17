@@ -27,6 +27,7 @@ from .historical_coverage_queue import (
     build_historical_coverage_queue,
     load_historical_semantic_clues,
 )
+from .historical_coverage_ledger import build_historical_coverage_ledger
 from .communication_graph import (
     CommunicationGraphPolicy,
     project_communication_architecture_graph,
@@ -185,6 +186,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="write the deterministic historical coverage work queue",
     )
     compare_history.add_argument(
+        "--coverage-ledger-output",
+        help="write the complete historical denominator coverage ledger",
+    )
+    compare_history.add_argument(
         "--profile", choices=("auto", "base"), default="auto",
         help="versioned analyzer profile (default: auto)",
     )
@@ -217,6 +222,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 raise ValueError(
                     "coverage-queue-output requires vulnerability-scope and semantic-clues"
                 )
+            if args.coverage_ledger_output and not (
+                args.overlay_output and args.coverage_queue_output
+            ):
+                raise ValueError(
+                    "coverage-ledger-output requires overlay-output and coverage-queue-output"
+                )
             history_paths = [Path(args.output).resolve()]
             if args.graph_output:
                 history_paths.append(Path(args.graph_output).resolve())
@@ -224,6 +235,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 history_paths.append(Path(args.overlay_output).resolve())
             if args.coverage_queue_output:
                 history_paths.append(Path(args.coverage_queue_output).resolve())
+            if args.coverage_ledger_output:
+                history_paths.append(Path(args.coverage_ledger_output).resolve())
             if len(history_paths) != len(set(history_paths)):
                 raise ValueError(
                     "history, graph, overlay, and coverage queue outputs must differ"
@@ -283,6 +296,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 graph = None
                 overlay = None
                 queue = None
+                ledger = None
                 audit = None
                 if args.graph_output:
                     graph_output = Path(args.graph_output)
@@ -338,6 +352,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         ) + "\n",
                         encoding="utf-8",
                     )
+                if args.coverage_ledger_output:
+                    if overlay is None or queue is None:
+                        raise ValueError(
+                            "historical overlay and coverage queue are required for ledger"
+                        )
+                    ledger = build_historical_coverage_ledger(overlay, queue)
+                    Path(args.coverage_ledger_output).write_text(
+                        json.dumps(
+                            ledger.to_dict(), ensure_ascii=False,
+                            indent=2, sort_keys=True,
+                        ) + "\n",
+                        encoding="utf-8",
+                    )
                 result = {
                     "schema_version": diff.schema_version,
                     "report_id": diff.report_id,
@@ -361,6 +388,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         "coverage_queue_id": queue.queue_id,
                         "coverage_queue_output": str(args.coverage_queue_output),
                         "coverage_queue_summary": queue.summary,
+                    })
+                if ledger is not None:
+                    result.update({
+                        "coverage_ledger_id": ledger.ledger_id,
+                        "coverage_ledger_output": str(args.coverage_ledger_output),
+                        "coverage_ledger_summary": ledger.summary,
                     })
                 print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
                 return 0

@@ -25,6 +25,10 @@ from .historical_expectation import (
     HistoricalRouteBindingStatus,
 )
 from .historical_graph_overlay import HistoricalGraphOverlay
+from .historical_coverage_ledger import (
+    HistoricalCoverageLedger,
+    HistoricalCoverageLedgerStatus,
+)
 from .hidden_interface import project_potential_hidden_interface_document
 from .snapshot_diff import MappingReleaseContext, compare_mapping_catalog_documents
 
@@ -34,6 +38,9 @@ COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION = (
 )
 HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION = (
     "firmatlas.mapping.historical-graph-overlay-query-result/v1alpha1"
+)
+HISTORICAL_COVERAGE_LEDGER_QUERY_RESULT_SCHEMA_VERSION = (
+    "firmatlas.mapping.historical-coverage-ledger-query-result/v1alpha1"
 )
 
 
@@ -108,6 +115,30 @@ class HistoricalGraphOverlayQuery:
                 raise ValueError("historical overlay query filters must be unique")
             if not set(values).issubset(allowed):
                 raise ValueError("historical overlay query has unknown filter")
+
+
+@dataclass(frozen=True)
+class HistoricalCoverageLedgerQuery:
+    text: str = ""
+    statuses: tuple = ()
+    audit_categories: tuple = ()
+    evidence_states: tuple = ()
+
+    def __post_init__(self) -> None:
+        selections = (
+            (self.statuses, {item.value for item in HistoricalCoverageLedgerStatus}),
+            (self.audit_categories, {
+                "compared_interface", "parameter_only",
+                "no_structured_communication", "not_analyzed",
+            }),
+        )
+        for values, allowed in selections:
+            if len(values) != len(set(values)):
+                raise ValueError("historical ledger query filters must be unique")
+            if not set(values).issubset(allowed):
+                raise ValueError("historical ledger query has unknown filter")
+        if len(self.evidence_states) != len(set(self.evidence_states)):
+            raise ValueError("historical ledger query filters must be unique")
 
 
 def _utc_now() -> str:
@@ -299,6 +330,25 @@ class DiscoveryCatalogRepository:
                 CREATE INDEX IF NOT EXISTS idx_mapping_history_overlay_graph
                     ON mapping_historical_graph_overlays(
                         graph_id, published_at DESC, overlay_id
+                    );
+                CREATE TABLE IF NOT EXISTS mapping_historical_coverage_ledgers (
+                    ledger_id TEXT PRIMARY KEY,
+                    schema_version TEXT NOT NULL,
+                    graph_id TEXT NOT NULL,
+                    catalog_id TEXT NOT NULL,
+                    overlay_id TEXT NOT NULL,
+                    audit_id TEXT NOT NULL,
+                    entry_count INTEGER NOT NULL,
+                    content_sha256 TEXT NOT NULL,
+                    document_json TEXT NOT NULL,
+                    published_at TEXT NOT NULL,
+                    FOREIGN KEY(graph_id)
+                        REFERENCES mapping_communication_graphs(graph_id)
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_mapping_history_ledger_graph
+                    ON mapping_historical_coverage_ledgers(
+                        graph_id, published_at DESC, ledger_id
                     );
                 """
             )
@@ -689,6 +739,142 @@ class DiscoveryCatalogRepository:
                 "route_binding_status": facets("route_binding_status"),
             },
             "diagnostics": list(overlay.diagnostics),
+        }
+
+    def publish_historical_coverage_ledger(
+        self, ledger: HistoricalCoverageLedger
+    ) -> dict:
+        """Publish one complete contextual denominator for an existing graph."""
+
+        document = ledger.to_dict()
+        payload = _encoded(document)
+        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        with self._lock, self._connection:
+            graph_row = self._connection.execute(
+                "SELECT source_catalog_id FROM mapping_communication_graphs WHERE graph_id = ?",
+                (ledger.graph_id,),
+            ).fetchone()
+            if graph_row is None:
+                raise ValueError("historical coverage ledger graph is not published")
+            if graph_row["source_catalog_id"] != ledger.catalog_id:
+                raise ValueError("historical coverage ledger catalog does not match graph")
+            overlay_row = self._connection.execute(
+                "SELECT graph_id FROM mapping_historical_graph_overlays WHERE overlay_id = ?",
+                (ledger.overlay_id,),
+            ).fetchone()
+            if overlay_row is None or overlay_row["graph_id"] != ledger.graph_id:
+                raise ValueError("historical coverage ledger overlay is not published")
+            existing = self._connection.execute(
+                "SELECT content_sha256 FROM mapping_historical_coverage_ledgers WHERE ledger_id = ?",
+                (ledger.ledger_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing["content_sha256"] != digest:
+                    raise ValueError(
+                        "historical coverage ledger identity contains different content"
+                    )
+                return {
+                    "ledger_id": ledger.ledger_id,
+                    "created": False,
+                    "content_sha256": digest,
+                }
+            self._connection.execute(
+                """INSERT INTO mapping_historical_coverage_ledgers (
+                       ledger_id, schema_version, graph_id, catalog_id,
+                       overlay_id, audit_id, entry_count, content_sha256,
+                       document_json, published_at
+                   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    ledger.ledger_id, ledger.schema_version, ledger.graph_id,
+                    ledger.catalog_id, ledger.overlay_id, ledger.audit_id,
+                    len(ledger.entries), digest, payload, _utc_now(),
+                ),
+            )
+        return {
+            "ledger_id": ledger.ledger_id,
+            "created": True,
+            "content_sha256": digest,
+        }
+
+    def query_historical_coverage_ledger(
+        self,
+        graph_id: str,
+        query: HistoricalCoverageLedgerQuery = HistoricalCoverageLedgerQuery(),
+    ) -> Optional[dict]:
+        """Query all explained and unexplained CVEs for one graph."""
+
+        with self._lock:
+            row = self._connection.execute(
+                """SELECT document_json
+                   FROM mapping_historical_coverage_ledgers
+                   WHERE graph_id = ?
+                   ORDER BY published_at DESC, ledger_id DESC
+                   LIMIT 1""",
+                (graph_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        ledger = HistoricalCoverageLedger.from_dict(json.loads(row["document_json"]))
+        document = ledger.to_dict()
+        entries = document["entries"]
+        text_tokens = _search_text(query.text).split()
+        selected = [
+            item for item in entries
+            if (not query.statuses or item["status"] in query.statuses)
+            and (
+                not query.audit_categories
+                or item["audit_category"] in query.audit_categories
+            )
+            and (
+                not query.evidence_states
+                or item["evidence_state"] in query.evidence_states
+            )
+            and all(
+                token in _search_text(" ".join((
+                    item["vulnerability_identifier"],
+                    " ".join(item["interface_values"]),
+                    " ".join(item["handler_values"]),
+                    " ".join(item["expected_parameters"]),
+                    " ".join(item["observed_parameters"]),
+                    " ".join(item["configuration_keys"]),
+                    " ".join(item["reason_codes"]),
+                )))
+                for token in text_tokens
+            )
+        ]
+
+        def facets(key: str) -> dict:
+            values = sorted({item[key] or "structured" for item in entries})
+            return {
+                value: sum((item[key] or "structured") == value for item in entries)
+                for value in values
+            }
+
+        identity = {
+            "schema_version": HISTORICAL_COVERAGE_LEDGER_QUERY_RESULT_SCHEMA_VERSION,
+            "ledger_id": ledger.ledger_id,
+            "query": asdict(query),
+            "vulnerability_identifiers": [
+                item["vulnerability_identifier"] for item in selected
+            ],
+        }
+        return {
+            "schema_version": HISTORICAL_COVERAGE_LEDGER_QUERY_RESULT_SCHEMA_VERSION,
+            "query_id": "historical-coverage-ledger-query:" + hashlib.sha256(
+                _encoded(identity).encode("utf-8")
+            ).hexdigest(),
+            "ledger": {
+                key: value for key, value in document.items() if key != "entries"
+            },
+            "query": asdict(query),
+            "entries": selected,
+            "total_entry_count": len(entries),
+            "selected_entry_count": len(selected),
+            "facets": {
+                "status": facets("status"),
+                "audit_category": facets("audit_category"),
+                "evidence_state": facets("evidence_state"),
+            },
         }
 
     def query_communication_graph(

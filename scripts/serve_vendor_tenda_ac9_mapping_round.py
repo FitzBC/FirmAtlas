@@ -14,9 +14,12 @@ from firmatlas.mapping import (
 from http.server import ThreadingHTTPServer
 
 from build_vendor_tenda_ac9_registrar_inventory_report import ARTIFACT_SHA256, ROOT
+from build_vendor_tenda_ac9_historical_coverage_ledger_report import (
+    build_historical_context,
+)
 
 
-DATABASE = Path("var/mapping-work/r2-28-final-browser/firmatlas.db")
+DATABASE = Path("var/mapping-work/r2-29-final-browser/firmatlas.db")
 
 
 def main() -> None:
@@ -25,9 +28,13 @@ def main() -> None:
     service = IntelligenceService(repository)
     run = analyze_extracted_root(MappingAnalysisRequest(ROOT, ARTIFACT_SHA256))
     graph = project_communication_architecture_graph(run.catalog)
+    _, _, overlay, _, ledger = build_historical_context(run, graph)
     repository.mapping_catalogs.publish(run.catalog)
     repository.mapping_catalogs.publish_communication_graph(graph)
+    repository.mapping_catalogs.publish_historical_graph_overlay(overlay)
+    repository.mapping_catalogs.publish_historical_coverage_ledger(ledger)
     print("graph_id={}".format(graph.graph_id), flush=True)
+    print("historical_coverage_ledger_id={}".format(ledger.ledger_id), flush=True)
     server = ThreadingHTTPServer(
         ("127.0.0.1", 18787),
         create_handler(

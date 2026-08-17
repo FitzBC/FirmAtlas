@@ -197,6 +197,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     query_overlay_parser.add_argument(
         "--route-binding-status", action="append", default=[]
     )
+    publish_ledger_parser = mapping_subparsers.add_parser(
+        "publish-history-ledger",
+        help="publish an immutable complete historical coverage ledger",
+    )
+    _database_argument(publish_ledger_parser)
+    publish_ledger_parser.add_argument(
+        "document", help="path to a historical coverage ledger JSON document"
+    )
+    query_ledger_parser = mapping_subparsers.add_parser(
+        "query-history-ledger",
+        help="query the complete historical coverage ledger for a graph",
+    )
+    _database_argument(query_ledger_parser)
+    query_ledger_parser.add_argument("graph_id")
+    query_ledger_parser.add_argument("--query", default="")
+    query_ledger_parser.add_argument("--status", action="append", default=[])
+    query_ledger_parser.add_argument(
+        "--audit-category", action="append", default=[]
+    )
+    query_ledger_parser.add_argument(
+        "--evidence-state", action="append", default=[]
+    )
     args = parser.parse_args(argv)
 
     if args.command == "demo-report":
@@ -272,9 +294,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             CommunicationArchitectureGraph,
         )
         from .mapping.historical_graph_overlay import HistoricalGraphOverlay
+        from .mapping.historical_coverage_ledger import HistoricalCoverageLedger
         from .mapping.repository import (
             CommunicationGraphQuery,
             DiscoveryCatalogRepository,
+            HistoricalCoverageLedgerQuery,
             HistoricalGraphOverlayQuery,
         )
 
@@ -325,7 +349,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     Path(args.document).read_text(encoding="utf-8")
                 ))
                 result = repository.publish_historical_graph_overlay(overlay)
-            else:
+            elif args.mapping_command == "query-history-overlay":
                 result = repository.query_historical_graph_overlay(
                     args.graph_id,
                     HistoricalGraphOverlayQuery(
@@ -341,6 +365,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if result is None:
                     raise ValueError(
                         "historical graph overlay does not exist"
+                    )
+            elif args.mapping_command == "publish-history-ledger":
+                ledger = HistoricalCoverageLedger.from_dict(json.loads(
+                    Path(args.document).read_text(encoding="utf-8")
+                ))
+                result = repository.publish_historical_coverage_ledger(ledger)
+            else:
+                result = repository.query_historical_coverage_ledger(
+                    args.graph_id,
+                    HistoricalCoverageLedgerQuery(
+                        text=args.query,
+                        statuses=tuple(args.status),
+                        audit_categories=tuple(args.audit_category),
+                        evidence_states=tuple(args.evidence_state),
+                    ),
+                )
+                if result is None:
+                    raise ValueError(
+                        "historical coverage ledger does not exist"
                     )
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0

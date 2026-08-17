@@ -295,3 +295,10 @@ Remote checks:
 稳定 query identity、节点/边集合、EvidenceAtom 与 diagnostics；Console 只能选择和展示返回
 内容。真实浏览器检查至少覆盖图列表、接口搜索、精确焦点、preset 切换、参数证据下钻、开放
 义务和 partial/coverage 可见性，并在窄屏保持可滚动而不丢失证据面板。
+
+历史漏洞完整覆盖账本必须满足 denominator closure：structured overlay 与 complementary queue
+的 CVE 集合不重叠，合计恰好等于漏洞审计分母且每个标识唯一。`not_assessable` 不得改写成
+`not_found`；configuration key、handler clue 或模型候选不得创建接口/参数/graph reference。
+Repository、HTTP 与 Console 必须显示相同 status/category/evidence-state facets，并可逐条解释
+为什么未发现。真实 AC9 回归固定为 14 structured + 57 queue = 71，且精确制品 expectation
+保持 3/3 observed。

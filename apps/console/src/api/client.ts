@@ -30,6 +30,7 @@ import type {
   CommunicationGraphQueryResult,
   CommunicationGraphSummary,
   HistoricalGraphOverlayQueryResult,
+  HistoricalCoverageLedgerQueryResult,
 } from '../types'
 
 interface Envelope<T> {
@@ -234,6 +235,11 @@ export const intelligenceApi = {
   mappingHistoricalOverlay: (graphId: string, signal?: AbortSignal) =>
     request<HistoricalGraphOverlayQueryResult>(
       `/api/mappings/graphs/${encodeURIComponent(graphId)}/historical-overlay`,
+      { signal },
+    ),
+  mappingHistoricalCoverage: (graphId: string, signal?: AbortSignal) =>
+    request<HistoricalCoverageLedgerQueryResult>(
+      `/api/mappings/graphs/${encodeURIComponent(graphId)}/historical-coverage`,
       { signal },
     ),
 }

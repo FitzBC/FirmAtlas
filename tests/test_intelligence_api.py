@@ -30,6 +30,8 @@ from firmatlas.mapping import (
 )
 from firmatlas.mapping.repository import DiscoveryCatalogRepository
 from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
+from tests.test_mapping_historical_coverage_ledger import _ledger_fixture
+from firmatlas.mapping import build_historical_coverage_ledger
 
 
 class IntelligenceApiTests(unittest.TestCase):
@@ -236,6 +238,35 @@ class IntelligenceApiTests(unittest.TestCase):
             "out_of_scope", result["entries"][0]["applicability"]
         )
         self.assertIn("contextual expectations", result["overlay"][
+            "claim_boundary"
+        ])
+
+    def test_mapping_graph_historical_coverage_route_explains_full_denominator(self) -> None:
+        catalog, graph, overlay, queue = _ledger_fixture()
+        ledger = build_historical_coverage_ledger(overlay, queue)
+        self.mapping_repository.publish(catalog)
+        self.mapping_repository.publish_communication_graph(graph)
+        self.mapping_repository.publish_historical_graph_overlay(overlay)
+        self.mapping_repository.publish_historical_coverage_ledger(ledger)
+
+        status, result = self.get(
+            "/api/mappings/graphs/{}/historical-coverage?{}".format(
+                graph.graph_id,
+                urlencode({
+                    "q": "security.ddos.map",
+                    "status": "partial",
+                    "audit_category": "parameter_only",
+                }),
+            )
+        )
+
+        self.assertEqual(200, status)
+        self.assertEqual(3, result["total_entry_count"])
+        self.assertEqual(1, result["selected_entry_count"])
+        self.assertEqual("CVE-parameter", result["entries"][0][
+            "vulnerability_identifier"
+        ])
+        self.assertIn("do not assert vulnerability presence", result["ledger"][
             "claim_boundary"
         ])
 

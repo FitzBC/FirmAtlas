@@ -278,6 +278,13 @@ parser 线索。这个阶段说明“共同前缀、共同进程、共同函数�
 全局图计数，会把一个用户不可见的关系误报为已交付。补入 node kind 后二次验收为 4 nodes /
 3 edges（read/write/delete），因此本案例也用于展示“投影正确性不等于可视化查询正确性”。
 
+R2-29 把此前分离的 14 条历史 expectation overlay 与 57 条研究 queue 合并为不可变完整覆盖
+账本，使 71 条 AC9 漏洞每条都有唯一的证据可用性状态：9 observed、2 partial、60 not
+assessable。页面不再用“14 条列表 + 71 总数”隐藏剩余 57 条原因；同时只有精确 Catalog/graph
+reference 才能形成图焦点。`security.ddos.map` 等配置键仍显示为配置状态，不因进入漏洞账本而
+升级为 HTTP 参数。机器记录见
+[R2-29](./samples/r2-29-vendor-tenda-ac9-historical-coverage-ledger.json)。
+
 反事实包括：只展示最终 130 个参数会把初次失败倒写成始终成功；把所有 AC9 CVE 当当前制品
 oracle 会把 `.14/.13` 接口误报成 `.19` 漏检；只做字符串搜索则会把
 `/cgi-bin/DownloadCfg` 静默等同于历史 `.jpg` 路径。论文可用它展示 version-scoped oracle、

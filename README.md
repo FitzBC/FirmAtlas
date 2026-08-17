@@ -183,10 +183,11 @@ PYTHONPATH=src python3 -m firmatlas.mapping compare-history /path/to/rootfs \
   --overlay-output historical-graph-overlay.json \
   --vulnerability-scope historical-vulnerability-scope.json \
   --semantic-clues historical-semantic-clues.json \
-  --coverage-queue-output historical-coverage-queue.json
+  --coverage-queue-output historical-coverage-queue.json \
+  --coverage-ledger-output historical-coverage-ledger.json
 ```
 
-输出区分接口/参数/method/dispatcher/coverage/artifact-scope 缺口，并保留 Catalog candidate 与 EvidenceAtom 引用。`--expectations` 可重复，用不可变 supplement 扩展旧基线；semantic clues 与漏洞分母可进一步生成内容寻址的优先队列，显式区分 HTTP 参数、配置键、route token、来源确认的 path 和当前制品 Catalog clue。可选的 graph/overlay 输出把比较链接到精确图节点和语义边，但历史声明始终是只读上下文，不会创建或修改固件事实。覆盖层可用 `firmatlas mapping publish-history-overlay` 发布到 SQLite，并用 `query-history-overlay` 或 Console“历史漏洞对照”按发现状态、版本适用性和漏检原因检索。原厂 AC9 的 [R2-20 报告](./docs/firmware-mapping/samples/r2-20-vendor-tenda-ac9-historical-graph-overlay.json)固化旧 13 条基线；[R2-21 回放](./docs/firmware-mapping/progress/2026-08-11-r2-21-ac9-historical-coverage-queue.md)通过原始来源把 CVE-2021-42659 升级为第 3 条 exact-artifact observed，并把剩余 57 条缺口变成稳定队列。接口结构出现不等同于当前版本存在漏洞。
+输出区分接口/参数/method/dispatcher/coverage/artifact-scope 缺口，并保留 Catalog candidate 与 EvidenceAtom 引用。`--expectations` 可重复，用不可变 supplement 扩展旧基线；semantic clues 与漏洞分母可进一步生成内容寻址的优先队列，显式区分 HTTP 参数、配置键、route token、来源确认的 path 和当前制品 Catalog clue。`--coverage-ledger-output` 将结构化 overlay 与互补 queue 合并为完整漏洞分母读模型，但不会从历史文本创建固件事实。可选的 graph/overlay 输出把比较链接到精确图节点和语义边。原厂 AC9 的 [R2-29 报告](./docs/firmware-mapping/samples/r2-29-vendor-tenda-ac9-historical-coverage-ledger.json)逐项覆盖全部 71 条记录：9 observed、2 partial、60 not assessable；接口结构出现仍不等同于当前版本存在漏洞。
 
 ```bash
 PYTHONPATH=src python3 -m firmatlas.cli mapping publish-history-overlay \
@@ -195,6 +196,13 @@ PYTHONPATH=src python3 -m firmatlas.cli mapping publish-history-overlay \
 PYTHONPATH=src python3 -m firmatlas.cli mapping query-history-overlay \
   --database var/firmatlas.db <graph-id> \
   --status observed --applicability exact_artifact
+
+PYTHONPATH=src python3 -m firmatlas.cli mapping publish-history-ledger \
+  --database var/firmatlas.db historical-coverage-ledger.json
+
+PYTHONPATH=src python3 -m firmatlas.cli mapping query-history-ledger \
+  --database var/firmatlas.db <graph-id> \
+  --status partial --audit-category parameter_only
 ```
 
 输出包含清单 SHA-256、观察/处理数量、实际读取字节、归档展开字节和诊断。Inventory v1alpha2 会在固件 chroot 内解析绝对与链式 symlink，但不会经链接打开或散列目标；普通缺失、循环、深度耗尽和越界仍进入 coverage ledger。内置 Inventory 只读取已解包目录并以内容识别 ZIP；原始固件的 SquashFS/TAR/厂商封装由独立 Container Extraction Worker 处理，不能把原始固件直接交给此命令。

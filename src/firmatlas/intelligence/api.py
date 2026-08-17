@@ -14,6 +14,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 from firmatlas.mapping.repository import (
     CommunicationGraphQuery,
     DiscoveryCatalogRepository,
+    HistoricalCoverageLedgerQuery,
     HistoricalGraphOverlayQuery,
 )
 
@@ -152,6 +153,27 @@ def create_handler(
             graph_prefix = "/api/mappings/graphs/"
             if method == "GET" and path.startswith(graph_prefix):
                 graph_remainder = path[len(graph_prefix):]
+                graph_segment, coverage_separator, coverage_nested = (
+                    graph_remainder.partition("/historical-coverage")
+                )
+                if coverage_separator:
+                    if coverage_nested:
+                        raise ApiError(HTTPStatus.NOT_FOUND, "route not found")
+                    result = mappings.query_historical_coverage_ledger(
+                        unquote(graph_segment),
+                        HistoricalCoverageLedgerQuery(
+                            text=_one(query, "q"),
+                            statuses=_many(query, "status"),
+                            audit_categories=_many(query, "audit_category"),
+                            evidence_states=_many(query, "evidence_state"),
+                        ),
+                    )
+                    if result is None:
+                        raise ApiError(
+                            HTTPStatus.NOT_FOUND,
+                            "historical coverage ledger not found",
+                        )
+                    return HTTPStatus.OK, result
                 graph_segment, overlay_separator, overlay_nested = (
                     graph_remainder.partition("/historical-overlay")
                 )

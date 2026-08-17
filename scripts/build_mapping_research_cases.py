@@ -102,6 +102,10 @@ AC9_R2_28_CGI_SELECTOR = Path(
     "docs/firmware-mapping/samples/"
     "r2-28-vendor-tenda-ac9-cgi-selector.json"
 )
+AC9_R2_29_HISTORICAL_LEDGER = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-29-vendor-tenda-ac9-historical-coverage-ledger.json"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -215,6 +219,18 @@ def build_ac9_split_web_stack_case():
         "maps_cgi_namespace_and_selector_transport",
         "native-arm-cgi-selector-dispatch@0.1.0",
     )
+    historical_ledger_sha = hashlib.sha256(
+        AC9_R2_29_HISTORICAL_LEDGER.read_bytes()
+    ).hexdigest()
+    historical_ledger_ref = CaseEvidenceReference(
+        "coverage:ac9-complete-historical-ledger-r2-29",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        AC9_R2_29_HISTORICAL_LEDGER.as_posix(),
+        historical_ledger_sha,
+        "json:$.coverage_ledger",
+        "explains_complete_historical_vulnerability_denominator",
+        "historical-coverage-ledger@v1alpha1",
+    )
 
     return build_research_case(ResearchCaseInput(
         case_key="tenda-ac9-split-web-stack-goform-ownership",
@@ -304,6 +320,7 @@ def build_ac9_split_web_stack_case():
             configuration_url_document_ref,
             configuration_url_ipc_ref,
             cgi_selector_ref,
+            historical_ledger_ref,
             CaseEvidenceReference(
                 "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
                 CaseEvidenceKind.NATIVE_BINDING,
@@ -416,6 +433,16 @@ def build_ac9_split_web_stack_case():
                 "IPC consumers. HTTP method and URL document-loader activation "
                 "remain independent open obligations.",
                 (cgi_selector_ref.evidence_ref,),
+            ),
+            CaseClaim(
+                "claim:complete-historical-denominator",
+                "The immutable ledger joins 14 structured expectation records "
+                "with 57 unresolved queue records so all 71 AC9 vulnerabilities "
+                "have one evidence-availability state. Nine structures are "
+                "observed, two parameter-only records remain partial, and sixty "
+                "are not assessable; none of these states assert vulnerability "
+                "presence or exploitability.",
+                (historical_ledger_ref.evidence_ref,),
             ),
             CaseClaim(
                 "claim:namespace-divergence",
@@ -557,6 +584,13 @@ def build_ac9_split_web_stack_case():
                 ("claim:cgi-selector-route-correction",),
                 creates_obligations=("obligation:cgi-selector-http-method",),
             ),
+            CaseStage(
+                "stage:complete-historical-denominator", 14,
+                "Join the structured graph overlay and complementary research "
+                "queue without creating graph facts, then expose every AC9 CVE "
+                "with its observation state and explicit reason in the product.",
+                ("claim:complete-historical-denominator",),
+            ),
         ),
         obligations=(
             CaseObligation(
@@ -628,6 +662,9 @@ def build_ac9_split_web_stack_case():
             "Treating a cross-version historical interface match as a current "
             "vulnerability would collapse structural observation, version "
             "applicability, and exploitability into one unsupported claim.",
+            "Showing only the 14 structured expectations would hide 57 source "
+            "and semantic gaps and falsely imply that the UI covers the 71-record "
+            "historical denominator.",
             "Treating a native configuration key as an HTTP request parameter "
             "would fabricate a direct ingress edge and conceal the missing upload chain.",
             "Assuming every /cgi-bin operation uses websFormDefine would miss the "

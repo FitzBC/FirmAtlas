@@ -1,0 +1,232 @@
+{
+  "analysis": {
+    "analysis_run_id": "mapping-analysis-run:32487fbbff90766cebcab7f1170cfe90ff1b22c08d4a5defdf3952ded0f65f2d",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v20",
+    "catalog_coverage_status": "partial",
+    "catalog_id": "discovery-catalog:928b9884ac447fcb5e677edc76f39bb872eec9be3486e37f04ad9d233154ca57",
+    "graph_id": "communication-graph:cbc905a860d6027093579c5cb430bd352303e2cd47465c961554d2dac7d779b8",
+    "ledger_id": "historical-coverage-ledger:81e7e2bc5297d1433573cc96037e30ff79c2fc1c1336a147ebc4c2e8a0e5bd68",
+    "overlay_id": "historical-graph-overlay:73254684c7b9d29c30a2fe506ba5a419a53ece76e33e69f90bea98ea5827c298",
+    "profile_id": "firmatlas.mapping.profile/auto-v20",
+    "queue_id": "historical-coverage-queue:54c26c3674cfad9b232652b523de1c3c5d17b220cf7f17c2c2613b2d36c877cc"
+  },
+  "console_acceptance": {
+    "interaction_contract": [
+      "complete_71_record_denominator",
+      "status_summary_visible",
+      "search_by_cve_interface_parameter_reason",
+      "configuration_key_not_http_parameter",
+      "graph_focus_only_when_graph_references_exist"
+    ],
+    "production_document_served": true,
+    "source_sha256": {
+      "apps/console/src/api/client.ts": "a19661ed1b792e4e5d1384b7d66a98d1124f9837ec89ca0065fb1d52b8dccf6b",
+      "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
+      "apps/console/src/types.ts": "2e89678f99ad8d47e7af55b65308a730bc96587f09569398d2ea2a2b2a7d562d"
+    }
+  },
+  "coverage_ledger": {
+    "audit_category_summary": {
+      "compared_interface": 14,
+      "no_structured_communication": 9,
+      "not_analyzed": 46,
+      "parameter_only": 2
+    },
+    "claim_boundary": "Historical coverage states describe evidence availability and structural observation only; they do not assert vulnerability presence, reachability, or exploitability.",
+    "evidence_state_summary": {
+      "needs_primary_source": 9,
+      "semantic_analysis_missing": 46,
+      "source_partial": 2,
+      "structured": 14
+    },
+    "exact_artifact_expectation_count": 3,
+    "exact_artifact_observed_count": 3,
+    "open_queue_count": 57,
+    "selected_cases": {
+      "CVE-2021-42659": {
+        "action": "none",
+        "applicabilities": [
+          "exact_artifact"
+        ],
+        "applicability_bases": [
+          "primary report directly names V1.0 V15.03.05.19(6318), matching the selected AC9 15.03.05.19 release; the conflicting CVE V1 build claim remains separately recorded"
+        ],
+        "audit_category": "compared_interface",
+        "catalog_candidate_ids": [
+          "frontend-request:d5600ca384b3e70503044ab5129039b92065d9794abfc922cdd88fe87a6736fe"
+        ],
+        "catalog_evidence_ids": [
+          "evidence:5e22f635486fea4455132f7e198b78443e8ea0b207c6db2c44c9b7b583f9233a",
+          "evidence:bc23ff7c20d766b16dd741dd19ed869efe125a7a9fbbab803344a0dd38868d83",
+          "evidence:dbab69185d3ef1b625ab6b393be9c1e238fa4d6dc49c9bfad624c98e662c74f6"
+        ],
+        "claimed_versions": [
+          "V1.0 V15.03.05.19(6318)",
+          "V3.0 V15.03.06.42_multi"
+        ],
+        "configuration_keys": [],
+        "evidence_state": "structured",
+        "expected_parameters": [
+          "list"
+        ],
+        "graph_edge_ids": [
+          "communication-edge:a6f5e6456cb9c882a33ff2cb5f3ba90ee00085a2b780649eaa47ae7c1bdb9d26",
+          "communication-edge:d082d933fce9feb665cedff21373279705cbe0e15c060e314d930346c5869edc"
+        ],
+        "graph_node_ids": [
+          "frontend-parameter:a1623cf3c95d0422277b304256766bdfe5abec13ece04c757bb0bb1b174d55e9",
+          "frontend-request:d5600ca384b3e70503044ab5129039b92065d9794abfc922cdd88fe87a6736fe",
+          "native-handler:7575fa7127d339c677003e9d4d38e8650834be5d0ab79d5b333d71fcc2a5d1b1",
+          "native-hint:37b619be619e920a18e5ceb3c608d63ea9104012f395f57b92074bb1834c652e",
+          "native-hint:6799f5ccb76c19d789b768e72f57c9dd44c860a81fce973c8b6fab28052bb870",
+          "native-route-binding:c92376995a919d7347936e41e532969f8ce2c7588b6c79a558cacfd076dc6916"
+        ],
+        "handler_values": [
+          "formSetVirtualSer"
+        ],
+        "interface_values": [
+          "/goform/SetVirtualServerCfg"
+        ],
+        "methods": [
+          "POST"
+        ],
+        "missing_parameters": [],
+        "observed_parameters": [
+          "list"
+        ],
+        "reason_codes": [
+          "none"
+        ],
+        "reason_explanations": [
+          "The expected interface, method, and parameters were observed in the evidence-backed catalog."
+        ],
+        "source_refs": [
+          "https://github.com/Lyc-heng/routers/blob/5092242e7154712c1cf74bd00d92654557cfe9a6/routers/stack4.md#L27-L54"
+        ],
+        "status": "observed",
+        "vulnerability_identifier": "CVE-2021-42659"
+      },
+      "CVE-2026-2191": {
+        "action": "repair_parameter_extraction",
+        "applicabilities": [],
+        "applicability_bases": [],
+        "audit_category": "parameter_only",
+        "catalog_candidate_ids": [
+          "native-route-binding:3fd5d466dd8ce975fa94c2a987c07d68e74aa4153671e47d5f2d1598e5b02b8a"
+        ],
+        "catalog_evidence_ids": [],
+        "claimed_versions": [],
+        "configuration_keys": [
+          "security.ddos.map"
+        ],
+        "evidence_state": "source_partial",
+        "expected_parameters": [],
+        "graph_edge_ids": [],
+        "graph_node_ids": [],
+        "handler_values": [
+          "formGetDdosDefenceList"
+        ],
+        "interface_values": [],
+        "methods": [],
+        "missing_parameters": [],
+        "observed_parameters": [
+          "security.ddos.map"
+        ],
+        "reason_codes": [
+          "configuration_key_misclassified_as_request_parameter",
+          "interface_observation_missing"
+        ],
+        "reason_explanations": [],
+        "source_refs": [
+          "https://github.com/glkfc/IoT-Vulnerability/blob/2568d62c9bf94ef0ffb14da0f0dc97b933da0481/Tenda/tenda3.md#L4-L74"
+        ],
+        "status": "partial",
+        "vulnerability_identifier": "CVE-2026-2191"
+      },
+      "CVE-2026-2192": {
+        "action": "repair_parameter_extraction",
+        "applicabilities": [],
+        "applicability_bases": [],
+        "audit_category": "parameter_only",
+        "catalog_candidate_ids": [
+          "native-route-binding:4450bbb9e6c0aa29b0ddd63db6fffb4960f6e288144bad6d9105ce14dbfa0b2b"
+        ],
+        "catalog_evidence_ids": [],
+        "claimed_versions": [],
+        "configuration_keys": [
+          "sys.schedulereboot.end_time",
+          "sys.schedulereboot.start_time"
+        ],
+        "evidence_state": "source_partial",
+        "expected_parameters": [],
+        "graph_edge_ids": [],
+        "graph_node_ids": [],
+        "handler_values": [
+          "formGetRebootTimer"
+        ],
+        "interface_values": [],
+        "methods": [],
+        "missing_parameters": [
+          "sys.schedulereboot.end_time"
+        ],
+        "observed_parameters": [
+          "sys.schedulereboot.start_time"
+        ],
+        "reason_codes": [
+          "compound_parameter_member_missing",
+          "configuration_key_misclassified_as_request_parameter",
+          "interface_observation_missing",
+          "source_route_token_without_http_interface"
+        ],
+        "reason_explanations": [],
+        "source_refs": [
+          "https://github.com/glkfc/IoT-Vulnerability/blob/2568d62c9bf94ef0ffb14da0f0dc97b933da0481/Tenda/tenda4.md#L10-L69"
+        ],
+        "status": "partial",
+        "vulnerability_identifier": "CVE-2026-2192"
+      }
+    },
+    "status_summary": {
+      "not_assessable": 60,
+      "observed": 9,
+      "partial": 2
+    },
+    "structured_expectation_count": 14,
+    "total_vulnerability_count": 71
+  },
+  "http_acceptance": {
+    "all_entry_count": 71,
+    "facets": {
+      "audit_category": {
+        "compared_interface": 14,
+        "no_structured_communication": 9,
+        "not_analyzed": 46,
+        "parameter_only": 2
+      },
+      "evidence_state": {
+        "needs_primary_source": 9,
+        "semantic_analysis_missing": 46,
+        "source_partial": 2,
+        "structured": 14
+      },
+      "status": {
+        "not_assessable": 60,
+        "observed": 9,
+        "partial": 2
+      }
+    },
+    "parameter_gap_query_count": 1,
+    "publication": {
+      "content_sha256": "c53769bec593b6f43a207c6d9fb86e4546c69e769cd3b0dbfbe31c96b49991bb",
+      "created": true,
+      "ledger_id": "historical-coverage-ledger:81e7e2bc5297d1433573cc96037e30ff79c2fc1c1336a147ebc4c2e8a0e5bd68"
+    },
+    "repeated_publication": {
+      "content_sha256": "c53769bec593b6f43a207c6d9fb86e4546c69e769cd3b0dbfbe31c96b49991bb",
+      "created": false,
+      "ledger_id": "historical-coverage-ledger:81e7e2bc5297d1433573cc96037e30ff79c2fc1c1336a147ebc4c2e8a0e5bd68"
+    }
+  },
+  "sample_role": "tenda-ac9-primary-complete-historical-denominator",
+  "schema_version": "firmatlas.mapping.vendor-tenda-ac9-r2-29/historical-coverage-ledger-v1alpha1"
+}

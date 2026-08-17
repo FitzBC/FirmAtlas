@@ -597,6 +597,62 @@ export interface HistoricalGraphOverlayQueryResult {
   diagnostics: string[]
 }
 
+export interface HistoricalCoverageLedgerEntry {
+  vulnerability_identifier: string
+  audit_category: 'compared_interface' | 'parameter_only' | 'no_structured_communication' | 'not_analyzed'
+  status: 'observed' | 'partial' | 'not_found' | 'not_assessable'
+  reason_codes: string[]
+  reason_explanations: string[]
+  action: string
+  evidence_state: string
+  applicabilities: string[]
+  claimed_versions: string[]
+  applicability_bases: string[]
+  interface_values: string[]
+  methods: string[]
+  handler_values: string[]
+  expected_parameters: string[]
+  observed_parameters: string[]
+  missing_parameters: string[]
+  configuration_keys: string[]
+  source_refs: string[]
+  catalog_candidate_ids: string[]
+  catalog_evidence_ids: string[]
+  graph_node_ids: string[]
+  graph_edge_ids: string[]
+}
+
+export interface HistoricalCoverageLedgerQueryResult {
+  schema_version: string
+  query_id: string
+  ledger: {
+    schema_version: string
+    ledger_id: string
+    graph_id: string
+    catalog_id: string
+    overlay_id: string
+    queue_id: string
+    audit_id: string
+    total_vulnerability_count: number
+    claim_boundary: string
+    summary: Record<string, Record<string, number>>
+  }
+  query: {
+    text: string
+    statuses: string[]
+    audit_categories: string[]
+    evidence_states: string[]
+  }
+  entries: HistoricalCoverageLedgerEntry[]
+  total_entry_count: number
+  selected_entry_count: number
+  facets: {
+    status: Record<string, number>
+    audit_category: Record<string, number>
+    evidence_state: Record<string, number>
+  }
+}
+
 export interface SemanticInterfaceObservation {
   value: string
   kind: string

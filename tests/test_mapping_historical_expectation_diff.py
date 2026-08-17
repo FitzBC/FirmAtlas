@@ -280,6 +280,7 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
             graph_output = Path(directory) / "communication-graph.json"
             overlay_output = Path(directory) / "historical-overlay.json"
             queue_output = Path(directory) / "historical-queue.json"
+            ledger_output = Path(directory) / "historical-ledger.json"
             scope = Path(directory) / "scope.json"
             scope.write_text(json.dumps({"records": [
                 {
@@ -319,6 +320,7 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
                     "--vulnerability-scope", str(scope),
                     "--semantic-clues", str(clues),
                     "--coverage-queue-output", str(queue_output),
+                    "--coverage-ledger-output", str(ledger_output),
                     "--profile", "base",
                 ))
             summary = json.loads(stdout.getvalue())
@@ -331,6 +333,9 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
             )
             queue_document = json.loads(
                 queue_output.read_text(encoding="utf-8")
+            )
+            ledger_document = json.loads(
+                ledger_output.read_text(encoding="utf-8")
             )
 
         self.assertEqual(0, exit_code)
@@ -348,6 +353,12 @@ class HistoricalExpectationDiffContractTests(unittest.TestCase):
         self.assertEqual(1, queue_document["summary"]["open"])
         self.assertEqual(
             "repair_parameter_extraction", queue_document["entries"][0]["action"]
+        )
+        self.assertEqual(summary["coverage_ledger_id"], ledger_document["ledger_id"])
+        self.assertEqual(2, ledger_document["total_vulnerability_count"])
+        self.assertEqual(
+            {"not_assessable": 1, "observed": 1},
+            ledger_document["summary"]["status"],
         )
 
     def test_cli_rejects_vulnerability_scope_without_overlay_before_writing(self):

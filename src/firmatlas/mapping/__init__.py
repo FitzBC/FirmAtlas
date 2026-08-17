@@ -306,11 +306,13 @@ from .extraction import (
 from .container_worker import ContainerBinwalkConfig, ContainerBinwalkWorker
 from .repository import (
     COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION,
+    HISTORICAL_COVERAGE_LEDGER_QUERY_RESULT_SCHEMA_VERSION,
     HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION,
     CatalogConflictError,
     CommunicationGraphConflictError,
     CommunicationGraphQuery,
     DiscoveryCatalogRepository,
+    HistoricalCoverageLedgerQuery,
     HistoricalGraphOverlayConflictError,
     HistoricalGraphOverlayQuery,
 )
@@ -417,6 +419,14 @@ from .historical_coverage_queue import (
     HistoricalSemanticClue,
     build_historical_coverage_queue,
     load_historical_semantic_clues,
+)
+from .historical_coverage_ledger import (
+    HISTORICAL_COVERAGE_LEDGER_CLAIM_BOUNDARY,
+    HISTORICAL_COVERAGE_LEDGER_SCHEMA_VERSION,
+    HistoricalCoverageLedger,
+    HistoricalCoverageLedgerEntry,
+    HistoricalCoverageLedgerStatus,
+    build_historical_coverage_ledger,
 )
 from .native_nested_dispatch import (
     MIPS_NESTED_DISPATCH_RESULT_SCHEMA_VERSION,
@@ -762,11 +772,13 @@ __all__ = (
     "CatalogConflictError",
     "COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION",
     "HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION",
+    "HISTORICAL_COVERAGE_LEDGER_QUERY_RESULT_SCHEMA_VERSION",
     "CommunicationGraphConflictError",
     "CommunicationGraphQuery",
     "DiscoveryCatalogRepository",
     "HistoricalGraphOverlayConflictError",
     "HistoricalGraphOverlayQuery",
+    "HistoricalCoverageLedgerQuery",
     "NATIVE_DEEP_RESULT_SCHEMA_VERSION",
     "ArmPicCallsiteProfile",
     "MipsInlineRouteTableProfile",
@@ -850,6 +862,12 @@ __all__ = (
     "HistoricalSemanticClue",
     "build_historical_coverage_queue",
     "load_historical_semantic_clues",
+    "HISTORICAL_COVERAGE_LEDGER_CLAIM_BOUNDARY",
+    "HISTORICAL_COVERAGE_LEDGER_SCHEMA_VERSION",
+    "HistoricalCoverageLedger",
+    "HistoricalCoverageLedgerEntry",
+    "HistoricalCoverageLedgerStatus",
+    "build_historical_coverage_ledger",
     "MIPS_VALUE_FLOW_RESULT_SCHEMA_VERSION",
     "MipsHandlerValueFlowDiagnostic",
     "MipsHandlerValueFlowPolicy",

@@ -6,6 +6,7 @@ import type {
   MappingSnapshotDiff, PotentialHiddenInterfacePage,
   CommunicationGraphQueryResult, CommunicationGraphSummary,
   HistoricalGraphOverlayQueryResult,
+  HistoricalCoverageLedgerQueryResult,
 } from '../types'
 import { MappingCatalogWorkspace } from './MappingCatalogWorkspace'
 
@@ -281,6 +282,42 @@ const historicalOverlay: HistoricalGraphOverlayQueryResult = {
   diagnostics: [],
 }
 
+const historicalCoverage: HistoricalCoverageLedgerQueryResult = {
+  schema_version: 'firmatlas.mapping.historical-coverage-ledger-query-result/v1alpha1',
+  query_id: 'historical-coverage-ledger-query:ac9',
+  ledger: {
+    schema_version: 'firmatlas.mapping.historical-coverage-ledger/v1alpha1',
+    ledger_id: 'historical-coverage-ledger:ac9', graph_id: graphSummary.graph_id,
+    catalog_id: catalog.catalog_id, overlay_id: 'historical-graph-overlay:ac9',
+    queue_id: 'historical-coverage-queue:ac9', audit_id: 'historical-vulnerability-audit:ac9',
+    total_vulnerability_count: 71,
+    claim_boundary: 'Historical coverage states describe evidence availability and structural observation only; they do not assert vulnerability presence, reachability, or exploitability.',
+    summary: { status: { observed: 9, partial: 2, not_assessable: 60 } },
+  },
+  query: { text: '', statuses: [], audit_categories: [], evidence_states: [] },
+  entries: [{
+    vulnerability_identifier: 'CVE-2025-5836', audit_category: 'compared_interface',
+    status: 'observed', reason_codes: ['none'], reason_explanations: ['Observed.'],
+    action: 'none', evidence_state: 'structured', applicabilities: ['out_of_scope'],
+    claimed_versions: ['V15.03.06.42_multi'], applicability_bases: ['Different AC9 firmware lineage.'],
+    interface_values: ['/goform/SetDlnaCfg'], methods: ['POST'], handler_values: ['formSetIptv'],
+    expected_parameters: ['list'], observed_parameters: ['list'], missing_parameters: [],
+    configuration_keys: [], source_refs: ['semantic-analysis:CVE-2025-5836'],
+    catalog_candidate_ids: [interfaceNode.node_id], catalog_evidence_ids: ['evidence:dlna'],
+    graph_node_ids: [interfaceNode.node_id, parameterNode.node_id], graph_edge_ids: ['edge:parameter'],
+  }, {
+    vulnerability_identifier: 'CVE-2026-2191', audit_category: 'parameter_only',
+    status: 'partial', reason_codes: ['configuration_key_misclassified_as_request_parameter', 'interface_observation_missing'],
+    reason_explanations: [], action: 'repair_parameter_extraction', evidence_state: 'source_partial',
+    applicabilities: [], claimed_versions: [], applicability_bases: [], interface_values: [], methods: [],
+    handler_values: ['formGetDdosDefenceList'], expected_parameters: [], observed_parameters: ['security.ddos.map'],
+    missing_parameters: [], configuration_keys: ['security.ddos.map'], source_refs: ['primary:tenda3'],
+    catalog_candidate_ids: ['native-route:get-ddos'], catalog_evidence_ids: [], graph_node_ids: [], graph_edge_ids: [],
+  }],
+  total_entry_count: 71, selected_entry_count: 71,
+  facets: { status: { observed: 9, partial: 2, not_assessable: 60 }, audit_category: { compared_interface: 14, parameter_only: 2, not_analyzed: 46, no_structured_communication: 9 }, evidence_state: { structured: 14, source_partial: 2, semantic_analysis_missing: 46, needs_primary_source: 9 } },
+}
+
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
@@ -542,6 +579,7 @@ it('overlays AC9 historical expectations without turning cross-version presence 
     items: [graphSummary], total: 1, limit: 100, offset: 0,
   })
   vi.spyOn(intelligenceApi, 'mappingHistoricalOverlay').mockResolvedValue(historicalOverlay)
+  vi.spyOn(intelligenceApi, 'mappingHistoricalCoverage').mockResolvedValue(historicalCoverage)
   const queryGraph = vi.spyOn(intelligenceApi, 'mappingGraph').mockImplementation(
     (_graphId, options) => Promise.resolve(options?.nodeKinds?.includes('interface')
       ? graphResult([interfaceNode])
@@ -568,4 +606,35 @@ it('overlays AC9 historical expectations without turning cross-version presence 
     expect.objectContaining({ focusNodeIds: [interfaceNode.node_id, parameterNode.node_id] }),
     expect.any(AbortSignal),
   ))
+})
+
+it('shows all AC9 vulnerabilities and explains parameter-only gaps without graph invention', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({ items: [candidate], total: 1, limit: 100, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingGraphs').mockResolvedValue({ items: [graphSummary], total: 1, limit: 100, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingHistoricalOverlay').mockResolvedValue(historicalOverlay)
+  vi.spyOn(intelligenceApi, 'mappingHistoricalCoverage').mockResolvedValue(historicalCoverage)
+  const queryGraph = vi.spyOn(intelligenceApi, 'mappingGraph').mockImplementation(
+    (_graphId, options) => Promise.resolve(options?.nodeKinds?.includes('interface')
+      ? graphResult([interfaceNode]) : graphResult([])),
+  )
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '架构图谱' }))
+  fireEvent.click(await screen.findByRole('button', { name: '历史漏洞对照' }))
+
+  expect(await screen.findByText('71 条漏洞均已进入覆盖账本')).toBeInTheDocument()
+  fireEvent.change(screen.getByRole('textbox', { name: '搜索历史漏洞' }), {
+    target: { value: 'CVE-2026-2191' },
+  })
+  fireEvent.click(await screen.findByRole('button', { name: '查看历史漏洞 CVE-2026-2191' }))
+  expect(screen.getByText('security.ddos.map')).toBeInTheDocument()
+  expect(screen.getByText('配置键，不是已证明的 HTTP 参数')).toBeInTheDocument()
+  expect(screen.getByText('repair_parameter_extraction')).toBeInTheDocument()
+  expect(screen.getByText('该历史记录没有可用于图聚焦的 Catalog 证据')).toBeInTheDocument()
+  expect(queryGraph).not.toHaveBeenCalledWith(
+    graphSummary.graph_id,
+    expect.objectContaining({ focusNodeIds: ['native-route:get-ddos'] }),
+    expect.any(AbortSignal),
+  )
 })

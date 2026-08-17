@@ -202,8 +202,9 @@ M1 工作项：
 | R2-26 | AC9 独立 URL 配置文档消费者 | 已验证 | R2-25 | `load_url_mib → parser@0x766c → cfm/url_mib/*` + candidate state scope + missing-document partial coverage + activation obligation + auto-v18；517 Python、23 Console、production build 与本地页面交互通过；[记录](./progress/2026-08-13-r2-26-ac9-configuration-url-document.md) |
 | R2-27 | AC9 URL 日常 IPC 与跨状态域消费者 | 已验证 | R2-26 | `/var/cfm_socket` 2016-byte frame + 5 opcode operations + cfmd wrapper/store primitive + 5 httpd consumers + per-callsite `urlgroup.*` store split + auto-v19；521 Python、24 Console、production build 与两轮真实页面验收通过；[记录](./progress/2026-08-13-r2-27-ac9-configuration-url-ipc.md) |
 | R2-28 | AC9 CGI namespace 与 selector transport | 已验证 | R2-27 | `/cgi-bin` registrar + path 第二段 parser + 7-arm inventory + `/cgi-bin/UploadWebsite → httpd@0x3e564 → URL IPC consumer`；route closed、method/loader activation open；526 Python、26 Console、production build、API 与真实页面验收通过；[记录](./progress/2026-08-14-r2-28-ac9-cgi-selector-transport.md) |
+| R2-29 | AC9 历史漏洞完整覆盖账本 | 已验证 | R2-20/21/28 | 14 structured + 57 queue = 71；9 observed / 2 partial / 60 not assessable；immutable SQLite/HTTP/CLI + Console 全分母解释；[记录](./progress/2026-08-14-r2-29-ac9-complete-historical-coverage-ledger.md) |
 
-**下一项建议**：沿 `UploadWebsite` selector 恢复其外层 HTTP transport/route binding，并取得动态上传证据验证是否存在间接 `load_url_mib` 激活；继续保持 URL IPC 字段、HTTP 参数、主 MIB 状态与 URL MIB 状态分层。
+**下一项建议**：AC9 历史漏洞逐项解释已收敛；转向用户上传入口到统一 AnalyzeRun、代表性 corpus gate 和带证据晋级门的 MiniMax 业务 Adapter。除非出现新原始来源或明确 mapper 假阴性，不再按单 CVE 无界深挖 AC9。
 
 ## 7. 跨会话无缝工作协议
 
