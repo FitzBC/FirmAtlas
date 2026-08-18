@@ -775,6 +775,16 @@ def project_communication_architecture_graph(
                 candidate.evidence_ids,
                 "ubus_backend_binding.principal_id",
             ))
+            if attributes.get("handler_ref"):
+                edges.append(_edge(
+                    CommunicationGraphEdgeKind.BINDS_HANDLER,
+                    candidate.candidate_id,
+                    attributes["handler_ref"],
+                    candidate.claim_status.value,
+                    candidate.candidate_id,
+                    candidate.evidence_ids,
+                    "native_ubus_registration.handler_ref",
+                ))
         elif candidate.candidate_kind is DiscoveryCandidateKind.UBUS_ACCESS_GRANT:
             edges.append(_edge(
                 CommunicationGraphEdgeKind.HAS_ACCESS_GRANT,

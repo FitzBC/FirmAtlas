@@ -387,7 +387,31 @@ AC9 从 rootfs 独立重建后，HTTP 的 DLNA 接口索引稳定返回四条请
 验收中超时，但 DOM、点击路径、生产文档和真实 HTTP 均成功；该失败保留在时间线中。案例新增
 第十二阶段，用于说明产品可视化必须保持预算、coverage 和义务语义，视觉邻近不是新证据。
 
-## 6. 后续案例准入触发器
+## 6. FRITZ!Box 4040：Frontend 引用不是 Native UBUS 全集
+
+本案例已接受进入机器案例库，固定制品为 OpenWrt 19.07.10 FRITZ!Box 4040 sysupgrade，
+SHA-256 `cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00`。
+一手来源与插件谱系见 [R2-34 primary sources](./research/2026-08-18-r2-34-fritz4040-native-catalog-primary-sources.md)，
+机器结果见 [R2-34 report](./samples/r2-34-openwrt-fritz4040-native-catalog.json)。
+
+认识时间线必须保留三段。第一阶段，既有 Frontend 驱动的 UBUS backend Adapter 只发布
+20/24 个静态方法；`iwinfo/devices`、`info`、`phyname`、`survey` 没有前端引用，因此从
+Catalog 消失。第二阶段，独立 Native Producer 已从 4 个 ARM rpcd plugin 恢复 4 objects、
+24 methods、60 EvidenceAtom，但 Producer 结果尚无直接 Catalog 出口。第三阶段，`auto-v21`
+加入纯投影 Adapter：不重新反汇编，只复用原 EvidenceAtom，发布 24 operation、24 binding、
+24 handler 和 24 条 `binds_handler` 图边；独立 scoped Catalog 为 completed，完整 Catalog
+仍因其他分析面的 117 条义务保持 partial。
+
+代表证据是 `usr/lib/rpcd/iwinfo.so`（SHA-256
+`82afa783fc8e2f485742bb52823bea7833618be5f04198bd7f72da50bca91695`）中的
+`registers_ubus_method devices`（`binary:bytes=11680-11684`）与 handler
+`usr/lib/rpcd/iwinfo.so@0x0000181c`（`binary:bytes=11684-11688`）。反事实包括：把前端引用
+当作 Native 全集会静默漏掉 4 条接口；在 Adapter 内重新反汇编会产生第二套事实与证据身份；
+把静态注册升级为运行时可达会越过证据边界。论文可用它做 Frontend-seeded/direct-native
+recall ablation 和证据保持式图投影案例。限制是当前只覆盖一个 OpenWrt 版本、一个 ARM 目标、
+4 个插件，不证明运行时、访问控制、漏洞或跨 ISA 泛化。
+
+## 7. 后续案例准入触发器
 
 每轮测绘出现下列任一现象时，必须评估是否加入案例库：
 
@@ -403,7 +427,7 @@ AC9 从 rootfs 独立重建后，HTTP 的 DLNA 接口索引稳定返回四条请
 准入不是要求案例必须成功解决。一个证据充分、局限明确且仍然 open 的案例同样
 有研究价值；但不得把 open 写成 supported。
 
-## 7. 案例模板
+## 8. 案例模板
 
 每个案例至少包含：
 

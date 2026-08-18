@@ -301,7 +301,7 @@ class ResearchCaseTests(unittest.TestCase):
         case = corpus["cases"][2]
 
         self.assertEqual("tenda-ac9-dlna-fixture-daemon-split", case["case_key"])
-        self.assertEqual(3, corpus["validation"]["case_count"])
+        self.assertEqual(4, corpus["validation"]["case_count"])
         self.assertEqual(
             [
                 "supported", "supported", "supported", "supported",
@@ -328,6 +328,7 @@ class ResearchCaseTests(unittest.TestCase):
             {"constructs_request"},
             {item["capability"] for item in frontend},
         )
+
         relationships = [
             item for item in case["evidence"]
             if item["kind"] == "native_relationship"
@@ -408,6 +409,28 @@ class ResearchCaseTests(unittest.TestCase):
         self.assertEqual(
             hashlib.sha256(report_path.read_bytes()).hexdigest(),
             resolution["source_artifact_sha256"],
+        )
+
+    def test_fritz_holdout_preserves_frontend_gap_and_direct_resolution(self) -> None:
+        corpus = build_research_case_corpus()
+        case = corpus["cases"][3]
+
+        self.assertEqual(
+            "openwrt-fritz4040-frontend-native-ubus-split",
+            case["case_key"],
+        )
+        self.assertEqual(
+            [
+                "stage:fritz-frontend-driven-catalog",
+                "stage:fritz-native-registration-producer",
+                "stage:fritz-direct-native-catalog",
+            ],
+            [stage["stage_id"] for stage in case["stages"]],
+        )
+        self.assertEqual("resolved", case["obligations"][0]["status"])
+        self.assertIn(
+            "four iwinfo operations",
+            case["claims"][0]["statement"],
         )
 
     def test_real_ac9_case_evidence_replays_from_current_producers(self) -> None:

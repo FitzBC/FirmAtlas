@@ -34,6 +34,7 @@ from firmatlas.mapping import (
     discover_mips_request_protection,
     discover_mips_service_assembly,
     discover_native_hints,
+    discover_native_ubus_registrations,
     discover_script_backend,
     discover_web_configuration,
     native_deep_scheduler_analyzer,
@@ -56,6 +57,7 @@ AC9_FIRMWARE_SHA256 = "981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528da
 AC9_INVENTORY_SHA256 = "a6b3a57b7262de8692ebf9f9fac2aa249bbbdb69272a45c8c0a651089a6ddcf4"
 DAP3520_FIRMWARE_SHA256 = "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9"
 X5000R_FIRMWARE_SHA256 = "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9"
+FRITZ4040_FIRMWARE_SHA256 = "cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00"
 X5000R_ROOT = Path(
     "var/mapping-work/x5000r-v9.1.0u.6118/extractions/firmware.bin.extracted/"
     "1004C/C8343R-6118.bin.extracted/184C70/squashfs-root"
@@ -65,6 +67,16 @@ DAP3520_ROOT = Path(
     "_DAP-3520_REVA_FIRMWARE_PATCH_1.17.RC047.ZIP.extracted/"
     "_DAP-3520_FW_v117-rc047.bin.extracted/squashfs-root"
 )
+FRITZ4040_ROOT = Path(
+    "var/mapping-work/r2-34-fritz4040/extracted/"
+    "_firmware.bin.extracted/squashfs-root"
+)
+FRITZ4040_RPCD_SHA256 = {
+    "usr/lib/rpcd/file.so": "91163cbcc4ae596288f29e3b513db2f57989784094c17e9ce126967e030c3379",
+    "usr/lib/rpcd/iwinfo.so": "82afa783fc8e2f485742bb52823bea7833618be5f04198bd7f72da50bca91695",
+    "usr/lib/rpcd/luci.so": "1fa7d49d50408365cfd175206f811d4ffdf36d6fd6b9d3a5c7834ff45b23fc60",
+    "usr/lib/rpcd/rrdns.so": "3d726800cd7f2d0a204101eaac962cbafb05ff6c1a7682d139a758b456575a3b",
+}
 
 
 def _source(path: str, content: bytes) -> SourceArtifactEntry:
@@ -305,10 +317,35 @@ def _x5000r_catalog(root: Path):
     ))
 
 
+def _fritz4040_native_catalog(root: Path):
+    if not all((root / path).is_file() for path in FRITZ4040_RPCD_SHA256):
+        return None
+    registrations = []
+    for path, expected_sha256 in FRITZ4040_RPCD_SHA256.items():
+        content = (root / path).read_bytes()
+        source = _source(path, content)
+        if source.content_sha256 != expected_sha256:
+            raise ValueError("FRITZ rpcd plugin identity mismatch: {}".format(path))
+        result = discover_native_ubus_registrations(source, content)
+        if not result.registration_coverage_complete:
+            raise ValueError("FRITZ rpcd registration is incomplete: {}".format(path))
+        registrations.append(result)
+    inventory = build_inventory(root, InventoryPolicy())
+    return assemble_discovery_catalog(DiscoveryCatalogInput(
+        FRITZ4040_FIRMWARE_SHA256,
+        inventory.inventory_sha256,
+        (DiscoveryProducerBatch.native_ubus_registration(
+            tuple(registrations), "usr/lib/rpcd/{file,iwinfo,luci,rrdns}.so"
+        ),),
+        source_inventory_coverage_status=inventory.coverage_status,
+    ))
+
+
 def build_m1_report(
     ac9_root: Path,
     dap3520_root: Path = DAP3520_ROOT,
     x5000r_root: Path = X5000R_ROOT,
+    fritz4040_root: Path = FRITZ4040_ROOT,
 ):
     """Replay available evidence without promoting fixtures or leads to firmware truth."""
 
@@ -331,6 +368,7 @@ def build_m1_report(
     )
     dap3520 = _dap3520_catalog(dap3520_root)
     x5000r = _x5000r_catalog(x5000r_root)
+    fritz4040 = _fritz4040_native_catalog(fritz4040_root)
     dap3520_script_scope = tuple(
         item.candidate_id for item in dap3520.candidates
         if item.source_path in {"www/home_sys.php", "www/__action.php"}
@@ -341,8 +379,13 @@ def build_m1_report(
         and dict(item.attributes).get("attribution_kind")
         == "native_registration_no_frontend_reference"
     ) if x5000r is not None else ()
+    fritz4040_native_scope = tuple(
+        item.candidate_id for item in fritz4040.candidates
+        if item.candidate_kind.value == "request_interface"
+        and dict(item.attributes).get("request_role") == "native_registration"
+    ) if fritz4040 is not None else ()
     return build_corpus_report(CorpusReportInput(
-        corpus_version="firmatlas.mapping.corpus/m1.3",
+        corpus_version="firmatlas.mapping.corpus/m1.4",
         required_categories=(
             "form_handler", "hnap_soap", "cgi_gateway",
             "script_backend", "native_only",
@@ -417,6 +460,16 @@ def build_m1_report(
                 catalog=x5000r,
                 scope_candidate_ids=x5000r_native_only_scope,
             ),
+            CorpusSampleInput(
+                "openwrt-fritz4040-native-only-holdout", "native_only",
+                "arm_rpcd_native_registration", "independent-holdout",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                ("mentions_endpoint", "binds_handler"),
+                ("constructs_request",),
+                expected_firmware_sha256=FRITZ4040_FIRMWARE_SHA256,
+                catalog=fritz4040,
+                scope_candidate_ids=fritz4040_native_scope,
+            ),
         ),
     ))
 
@@ -432,10 +485,12 @@ def main() -> int:
     )
     parser.add_argument("--dap3520-root", type=Path, default=DAP3520_ROOT)
     parser.add_argument("--x5000r-root", type=Path, default=X5000R_ROOT)
+    parser.add_argument("--fritz4040-root", type=Path, default=FRITZ4040_ROOT)
     args = parser.parse_args()
     print(json.dumps(
         build_m1_report(
-            args.ac9_root, args.dap3520_root, args.x5000r_root
+            args.ac9_root, args.dap3520_root, args.x5000r_root,
+            args.fritz4040_root,
         ).to_dict(),
         ensure_ascii=False,
         indent=2,

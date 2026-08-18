@@ -20,9 +20,10 @@ const catalog: MappingCatalogSummary = {
   association_count: 0, open_obligation_count: 0,
 }
 const corpusReport: MappingCorpusReport = {
-  schema_version: 'firmatlas.mapping.corpus-report/v1alpha2',
+  schema_version: 'firmatlas.mapping.corpus-report/v1alpha3',
+  capability_policy_version: 'firmatlas.mapping.corpus-capability-policy/v1',
   report_id: `corpus-report:${'c'.repeat(64)}`,
-  corpus_version: 'firmatlas-representative-corpus/m1.3', gate_status: 'passed',
+  corpus_version: 'firmatlas-representative-corpus/m1.4', gate_status: 'passed',
   required_categories: ['form_handler', 'hnap_soap', 'cgi_gateway', 'script_backend', 'native_only'],
   categories: ['form_handler', 'hnap_soap', 'cgi_gateway', 'script_backend', 'native_only'].map((architecture_category) => ({
     architecture_category, status: 'verified', sample_count: 1,
@@ -51,6 +52,17 @@ const corpusReport: MappingCorpusReport = {
     missing_capabilities: [], unexpected_capabilities: [], candidate_kinds: ['native_route_binding'],
     candidate_count: 10, evidence_count: 40, open_obligation_count: 0,
     scope_candidate_ids: ['native-binding:1'],
+  }, {
+    sample_id: 'openwrt-fritz4040-native-only-holdout', architecture_category: 'native_only',
+    architecture_subtype: 'arm-rpcd-direct-registration', role: 'independent-holdout',
+    evidence_tier: 'real_firmware', status: 'verified', catalog_id: 'catalog:fritz4040',
+    required_capabilities: ['binds_handler', 'mentions_endpoint'],
+    forbidden_capabilities: ['constructs_request'],
+    observed_capabilities: ['binds_handler', 'mentions_endpoint', 'registers_ubus_method'],
+    missing_capabilities: [], unexpected_capabilities: [],
+    candidate_kinds: ['request_interface', 'ubus_backend_binding', 'native_handler'],
+    candidate_count: 24, evidence_count: 60, open_obligation_count: 0,
+    scope_candidate_ids: ['request-interface:fritz:1'],
   }],
 }
 const candidate: MappingCandidate = {
@@ -375,6 +387,10 @@ it('explains the scope-aware representative corpus gate without overstating gene
   expect(screen.getByText('268 候选 · 276 证据')).toBeInTheDocument()
   expect(screen.getByText('x5000r-native-only')).toBeInTheDocument()
   expect(screen.getByText('10 候选 · 40 证据')).toBeInTheDocument()
+  expect(screen.getByText('openwrt-fritz4040-native-only-holdout')).toBeInTheDocument()
+  expect(screen.getByText('24 候选 · 60 证据')).toBeInTheDocument()
+  expect(screen.getByText('独立 holdout')).toBeInTheDocument()
+  expect(screen.getByText(/capability policy firmatlas\.mapping\.corpus-capability-policy\/v1/)).toBeInTheDocument()
   expect(screen.getByText(/不等于所有厂商与子类型均已泛化验证/)).toBeInTheDocument()
 })
 

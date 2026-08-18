@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 
 from firmatlas.mapping import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V21,
     BUILTIN_ANALYZER_REGISTRY_V20,
     BUILTIN_ANALYZER_REGISTRY_V19,
     BUILTIN_ANALYZER_REGISTRY_V18,
@@ -31,23 +32,27 @@ from firmatlas.mapping.__main__ import main as mapping_main
 
 
 class MappingAnalysisRunContractTests(unittest.TestCase):
-    def test_current_default_profile_and_registry_have_frozen_v20_aliases(self):
+    def test_current_default_profile_and_registry_have_frozen_v21_aliases(self):
         self.assertEqual(
-            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v20()
+            MappingAnalysisProfile.auto(), MappingAnalysisProfile.auto_v21()
         )
         self.assertEqual(
-            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V20
+            BUILTIN_ANALYZER_REGISTRY, BUILTIN_ANALYZER_REGISTRY_V21
         )
         self.assertNotEqual(
-            MappingAnalysisProfile.auto_v20(), MappingAnalysisProfile.auto_v19()
+            MappingAnalysisProfile.auto_v21(), MappingAnalysisProfile.auto_v20()
         )
         self.assertNotEqual(
-            BUILTIN_ANALYZER_REGISTRY_V20, BUILTIN_ANALYZER_REGISTRY_V19
+            BUILTIN_ANALYZER_REGISTRY_V21, BUILTIN_ANALYZER_REGISTRY_V20
         )
 
     AC9_ROOT = Path(
         "var/mapping-work/ac9-version-diff/extractions/openwrt-19.07.8/"
         "extractions/firmware.bin.extracted/0/partition_1.bin.extracted/0/squashfs-root"
+    )
+    FRITZ4040_ROOT = Path(
+        "var/mapping-work/r2-34-fritz4040/extracted/"
+        "_firmware.bin.extracted/squashfs-root"
     )
     TENDA_AC9_ROOT = (
         Path(__file__).resolve().parents[2]
@@ -97,6 +102,7 @@ class MappingAnalysisRunContractTests(unittest.TestCase):
                 "frontend_reachability",
                 "web_configuration",
                 "script_backend", "native", "native_ubus_registration",
+                "native_ubus_catalog",
                 "arm_pic_callsite", "arm_pic_registrar", "set_difference",
                 "parameter_clue", "response_fixture", "ubus_backend",
                 "native_relationship",
@@ -349,13 +355,22 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
             profile=MappingAnalysisProfile.auto(),
         ))
 
-        bindings = [
+        frontend_bindings = [
             item for item in result.catalog.candidates
             if item.candidate_kind is DiscoveryCandidateKind.UBUS_BACKEND_BINDING
             and dict(item.attributes).get("binding_status")
             == "verified_native_registration"
+            and "handler_ref" not in dict(item.attributes)
         ]
-        self.assertEqual(31, len(bindings))
+        direct_bindings = [
+            item for item in result.catalog.candidates
+            if item.candidate_kind is DiscoveryCandidateKind.UBUS_BACKEND_BINDING
+            and dict(item.attributes).get("binding_status")
+            == "verified_native_registration"
+            and "handler_ref" in dict(item.attributes)
+        ]
+        self.assertEqual(31, len(frontend_bindings))
+        self.assertEqual(24, len(direct_bindings))
         self.assertNotIn(
             "resolve_ubus_registration_table",
             {item.required_capability for item in result.catalog.open_obligations},
@@ -366,9 +381,47 @@ case "usb_dlna":showIframe("DLNA","dlna.html",620,450);''',
         )
         self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
         self.assertEqual(4, stage.output_count)
-        self.assertEqual("firmatlas.mapping.profile/auto-v20", result.profile_id)
+        self.assertEqual("firmatlas.mapping.profile/auto-v21", result.profile_id)
         self.assertEqual(
-            "firmatlas.mapping.analyzer-registry/builtin-v20",
+            "firmatlas.mapping.analyzer-registry/builtin-v21",
+            result.analyzer_registry_id,
+        )
+
+    def test_auto_profile_publishes_complete_fritz_native_ubus_universe_without_frontend(self):
+        if not self.FRITZ4040_ROOT.is_dir():
+            self.skipTest("local FRITZ!Box 4040 holdout rootfs is unavailable")
+
+        result = analyze_extracted_root(MappingAnalysisRequest(
+            root=self.FRITZ4040_ROOT,
+            firmware_artifact_sha256=(
+                "cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00"
+            ),
+            profile=MappingAnalysisProfile.auto(),
+        ))
+
+        direct_operations = {
+            item.canonical_identity
+            for item in result.catalog.candidates
+            if (
+                item.candidate_kind is DiscoveryCandidateKind.REQUEST_INTERFACE
+                and dict(item.attributes).get("request_role")
+                == "native_registration"
+            )
+        }
+        self.assertEqual(24, len(direct_operations))
+        self.assertTrue({
+            "ubus://iwinfo/devices", "ubus://iwinfo/info",
+            "ubus://iwinfo/phyname", "ubus://iwinfo/survey",
+        } <= direct_operations)
+        stage = next(
+            item for item in result.stages
+            if item.stage_name == "native_ubus_catalog"
+        )
+        self.assertEqual(CoverageStatus.COMPLETED, stage.coverage_status)
+        self.assertEqual(24, stage.output_count)
+        self.assertEqual("firmatlas.mapping.profile/auto-v21", result.profile_id)
+        self.assertEqual(
+            "firmatlas.mapping.analyzer-registry/builtin-v21",
             result.analyzer_registry_id,
         )
 

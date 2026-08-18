@@ -1,7 +1,8 @@
 {
-  "schema_version": "firmatlas.mapping.corpus-report/v1alpha2",
-  "report_id": "corpus-report:4f4dd2ef53aca35852ef847dd23b8acd5191baaa0fb2ff5042edd3f6b245aa91",
-  "corpus_version": "firmatlas.mapping.corpus/m1.3",
+  "schema_version": "firmatlas.mapping.corpus-report/v1alpha3",
+  "report_id": "corpus-report:f1fcf6b416a783caea6afc517ecc474799ec73a2765781c9fbc956555631c6a1",
+  "corpus_version": "firmatlas.mapping.corpus/m1.4",
+  "capability_policy_version": "firmatlas.mapping.corpus-capability-policy/v1",
   "gate_status": "passed",
   "required_categories": [
     "cgi_gateway",
@@ -402,6 +403,65 @@
       "scope_candidate_ids": []
     },
     {
+      "sample_id": "openwrt-fritz4040-native-only-holdout",
+      "architecture_category": "native_only",
+      "architecture_subtype": "arm_rpcd_native_registration",
+      "role": "independent-holdout",
+      "evidence_tier": "real_firmware",
+      "status": "verified",
+      "catalog_id": "discovery-catalog:2ee1e1d2cd5c4b3285174446aefa8b0cbecdb55176fca6ce33f44cc871f18752",
+      "required_capabilities": [
+        "binds_handler",
+        "mentions_endpoint"
+      ],
+      "forbidden_capabilities": [
+        "constructs_request"
+      ],
+      "observed_capabilities": [
+        "binds_handler",
+        "binds_ubus_handler",
+        "calls_ubus_add_object",
+        "identifies_rpcd_plugin_init",
+        "mentions_endpoint",
+        "registers_ubus_method",
+        "registers_ubus_object"
+      ],
+      "missing_capabilities": [],
+      "unexpected_capabilities": [],
+      "candidate_kinds": [
+        "request_interface"
+      ],
+      "candidate_count": 24,
+      "evidence_count": 60,
+      "open_obligation_count": 0,
+      "scope_candidate_ids": [
+        "native-ubus-operation:01ad867e6c6bd7ce70b9a746b750d37ac829f0c978ab9f7b8d35def5adc8a2c8",
+        "native-ubus-operation:14fd14fba9fe0ffffefeb22307fbb6c2044951e0eab4c6f0dc9425153ccb6e9b",
+        "native-ubus-operation:1e7fe66916d2f09896432fec478b35aa40ace119028711218e3fe77e5c4a58f6",
+        "native-ubus-operation:30c1bebceb1cfae967a172f76e2a98bb1d1f992682b9cc039a146a8f26b816d3",
+        "native-ubus-operation:3fda75891e8487bb2747ccac7492150f0032a924af1d32044c684b8e0543db70",
+        "native-ubus-operation:3fee9c3e82d96205bda3b42dbd501cf80b603db996780ec559b5a8ea231ecd37",
+        "native-ubus-operation:44e54f6ebd8f7b4b25f3b47f1e846efa5a8e79ad3eb0798e6fe81221769294eb",
+        "native-ubus-operation:48721eaaf9b93d7652915bc8d480d798aa53d6bf2919aa785d24d43b9052239d",
+        "native-ubus-operation:51076fffdfef3923ca9b37a0a11c5ec10dcbe374a759dd6bfab0ee67879cc58d",
+        "native-ubus-operation:52f374f61e4c6f9b28f8857de739db0f3e1af3907c1d0e32be903af7bd46bd63",
+        "native-ubus-operation:5a8af3fc65ea96e75f8043621d4d0fabaf5a0af875726ef567a3468260cddbdc",
+        "native-ubus-operation:5e0927ffcf84edb487bd304381fe3ad19d8299aafbaecd05ef3f1d8022b0229c",
+        "native-ubus-operation:70fc7d34ed6a3403408db3e89a728cb3bc375cded22ca48b1747e0231bc88b7e",
+        "native-ubus-operation:7105af82dd7ca9a8e78cbbc87f25091accd0da48e6b744b6d12beea1332adc15",
+        "native-ubus-operation:77b39095f47fb70a907fe08997577b09d454a2989fb3bec117dcaa70ac37fc96",
+        "native-ubus-operation:7aa33170c65f71fb6ec5c458aa44221a214917e8173a2aeb735985248611d8a9",
+        "native-ubus-operation:8a17f06ad95a6bf1c6d0145fe68bb3ce0042a28250a03b6882d1efe5b1669641",
+        "native-ubus-operation:925f2979a2483eaef1e0d46194e76bfe2cf3c5e5d87bbb4a13246e2b41be6aad",
+        "native-ubus-operation:a82a89e71f0e374e54548918883335faf35eab66c98ce59a5a34204b263c286e",
+        "native-ubus-operation:a8e18214d3d410c6711659194e07678500dcf139f04a82d721c1edaed273ef84",
+        "native-ubus-operation:b91b7899dc36dc4f4b7362eb363b11b3178f1add91da6c23f02fff7abe8e75db",
+        "native-ubus-operation:bacca0bf8a3fcaa069ec86d87d8696f753fd50e3d9146ae14659fe2370ea162a",
+        "native-ubus-operation:d09f7b2024ffd31f5b896a9352ce65a574dd9b0b3a2ff8378eaed8ef88bf44d0",
+        "native-ubus-operation:e9d21f84b40af4cb758ee9201a0d8f308c958c8a33c620b906993e1c5b7cd7cb"
+      ]
+    },
+    {
       "sample_id": "shared-cgi-selector-contract",
       "architecture_category": "cgi_gateway",
       "architecture_subtype": "shared_cgi_dispatcher",
@@ -710,19 +770,25 @@
     {
       "architecture_category": "native_only",
       "status": "verified",
-      "sample_count": 1,
-      "real_firmware_verified_count": 1,
+      "sample_count": 2,
+      "real_firmware_verified_count": 2,
       "derived_firmware_verified_count": 0,
       "contract_verified_count": 0,
       "coverage_gap_count": 0,
       "acquisition_gap_count": 0,
       "observed_capabilities": [
         "binds_handler",
+        "binds_ubus_handler",
+        "calls_ubus_add_object",
+        "identifies_rpcd_plugin_init",
         "mentions_endpoint",
         "registers_route",
+        "registers_ubus_method",
+        "registers_ubus_object",
         "resolves_table_symbol"
       ],
       "candidate_kinds": [
+        "request_interface",
         "set_difference_attribution"
       ],
       "open_obligation_count": 0

@@ -6,6 +6,10 @@ from dataclasses import replace
 
 from firmatlas.mapping import (
     CoverageStatus,
+    CommunicationGraphEdgeKind,
+    CorpusEvidenceTier,
+    CorpusReportInput,
+    CorpusSampleInput,
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
     FrontendParameterNamespace,
@@ -13,6 +17,9 @@ from firmatlas.mapping import (
     NativeHint,
     NativeHintKind,
     NativeProducerResult,
+    NativeUbusMethodRegistration,
+    NativeUbusObjectRegistration,
+    NativeUbusRegistrationResult,
     EvidenceAtom,
     EvidenceSpan,
     ObservationKind,
@@ -20,6 +27,8 @@ from firmatlas.mapping import (
     run_obligation_scheduler,
     SourceArtifactEntry,
     assemble_discovery_catalog,
+    build_corpus_report,
+    project_communication_architecture_graph,
     discover_frontend_requests,
     discover_script_backend,
     discover_web_configuration,
@@ -36,6 +45,93 @@ from firmatlas.mapping import (
 
 
 class DiscoveryCatalogContractTests(unittest.TestCase):
+    def test_completed_native_ubus_registration_publishes_operations_without_frontend(self):
+        source_path = "usr/lib/rpcd/file.so"
+        capabilities = (
+            "identifies_rpcd_plugin_init", "calls_ubus_add_object",
+            "registers_ubus_object", "registers_ubus_method",
+            "binds_ubus_handler",
+        )
+        atoms = tuple(
+            EvidenceAtom(
+                evidence_id="native-ubus-evidence:{}".format(index),
+                subject_ref=("native-ubus-object:file" if index < 3
+                             else "native-ubus-method:file/read"),
+                predicate="proves", object_value=capability,
+                source_span=EvidenceSpan(
+                    artifact_path=source_path, artifact_sha256="3" * 64,
+                    locator="binary:bytes={}-{}".format(index, index + 1),
+                ),
+                producer="native-ubus-registration", producer_version="0.1.0",
+                observation_kind=ObservationKind.DETERMINISTIC_DERIVED,
+                capability=capability, confidence=1.0,
+            )
+            for index, capability in enumerate(capabilities)
+        )
+        registration = NativeUbusRegistrationResult(
+            source_path, CoverageStatus.COMPLETED, True, 4096,
+            AnalyzerIdentity("native-ubus-registration", "0.1.0"),
+            "openwrt-rpcd-arm32-static-object/v1",
+            (NativeUbusObjectRegistration(
+                "native-ubus-object:file", "file", "luci-rpc-file",
+                0x2400, 0x1100, 0x1000,
+                (NativeUbusMethodRegistration(
+                    "native-ubus-method:file/read", "file", "read",
+                    0x1200, "usr/lib/rpcd/file.so@0x00001200", 0x2500,
+                    tuple(atom.evidence_id for atom in atoms[3:]),
+                ),),
+                tuple(atom.evidence_id for atom in atoms[:3]),
+            ),),
+            atoms,
+        )
+
+        catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
+            "1" * 64, "2" * 64,
+            (DiscoveryProducerBatch.native_ubus_registration(
+                (registration,), "usr/lib/rpcd/*"
+            ),),
+        ))
+
+        self.assertEqual(CoverageStatus.COMPLETED, catalog.coverage_status)
+        self.assertEqual((), catalog.open_obligations)
+        self.assertEqual(set(atoms), set(catalog.evidence_atoms))
+        candidates = {item.candidate_kind.value: item for item in catalog.candidates}
+        self.assertEqual(
+            {"request_interface", "runtime_principal", "ubus_backend_binding", "native_handler"},
+            set(candidates),
+        )
+        self.assertEqual("ubus://file/read", candidates["request_interface"].canonical_identity)
+        self.assertEqual("supported", candidates["request_interface"].claim_status.value)
+        self.assertEqual(
+            "usr/lib/rpcd/file.so@0x00001200",
+            candidates["native_handler"].canonical_identity,
+        )
+        self.assertEqual(
+            candidates["request_interface"].candidate_id,
+            dict(candidates["ubus_backend_binding"].attributes)["target_ref"],
+        )
+        graph = project_communication_architecture_graph(catalog)
+        self.assertTrue(any(
+            edge.edge_kind is CommunicationGraphEdgeKind.BINDS_HANDLER
+            and edge.source_ref == candidates["ubus_backend_binding"].candidate_id
+            and edge.target_ref == candidates["native_handler"].candidate_id
+            for edge in graph.edges
+        ))
+        report = build_corpus_report(CorpusReportInput(
+            "firmatlas.mapping.corpus/native-ubus-test",
+            (CorpusSampleInput(
+                "native-ubus", "native_only", "rpcd-static-object", "holdout",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                ("mentions_endpoint", "binds_handler"),
+                ("constructs_request",),
+                expected_firmware_sha256="1" * 64,
+                catalog=catalog,
+                scope_candidate_ids=(candidates["request_interface"].candidate_id,),
+            ),),
+            ("native_only",),
+        ))
+        self.assertEqual("passed", report.gate_status.value)
+
     def test_feature_gate_batch_publishes_disabled_request_scope(self):
         contents = {
             "webroot_ro/js/macro_config.js": b'var CONFIG_DLNA_SERVER="n";',

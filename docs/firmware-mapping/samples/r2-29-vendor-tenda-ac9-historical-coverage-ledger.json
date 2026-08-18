@@ -1,14 +1,14 @@
 {
   "analysis": {
-    "analysis_run_id": "mapping-analysis-run:32487fbbff90766cebcab7f1170cfe90ff1b22c08d4a5defdf3952ded0f65f2d",
-    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v20",
+    "analysis_run_id": "mapping-analysis-run:93edf75380201d7c5866fd37086e04ed4ff5557cbaafcb6bbb7b1770c2358063",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v21",
     "catalog_coverage_status": "partial",
-    "catalog_id": "discovery-catalog:928b9884ac447fcb5e677edc76f39bb872eec9be3486e37f04ad9d233154ca57",
-    "graph_id": "communication-graph:cbc905a860d6027093579c5cb430bd352303e2cd47465c961554d2dac7d779b8",
-    "ledger_id": "historical-coverage-ledger:81e7e2bc5297d1433573cc96037e30ff79c2fc1c1336a147ebc4c2e8a0e5bd68",
-    "overlay_id": "historical-graph-overlay:73254684c7b9d29c30a2fe506ba5a419a53ece76e33e69f90bea98ea5827c298",
-    "profile_id": "firmatlas.mapping.profile/auto-v20",
-    "queue_id": "historical-coverage-queue:54c26c3674cfad9b232652b523de1c3c5d17b220cf7f17c2c2613b2d36c877cc"
+    "catalog_id": "discovery-catalog:29081f8e9f48b65ee10c85b81cb73fbce5dffa26023726397ae691397e5373a4",
+    "graph_id": "communication-graph:76c48ab0cdf06c0dbd14b6626ee27f0d8cc4fcefd63ec3ae22c7cc59941ee84a",
+    "ledger_id": "historical-coverage-ledger:d24ee08d0e6e6fbbe91034df55fc04c7a76dcf343e788854c5c2dd31b86fde51",
+    "overlay_id": "historical-graph-overlay:19591dd5a8389c703d0eb0ea1b5da3cc90e0e636e80517827a789fda5bdafa88",
+    "profile_id": "firmatlas.mapping.profile/auto-v21",
+    "queue_id": "historical-coverage-queue:d34f8045437db025d9cd2a6bbf938d60a536a447d2cbc011831d0ca0877ed84e"
   },
   "console_acceptance": {
     "interaction_contract": [
@@ -22,7 +22,7 @@
     "source_sha256": {
       "apps/console/src/api/client.ts": "c4a4450f257572ddc868545bafa1a35d45ce0419bc311e778e668e28007ede10",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
-      "apps/console/src/types.ts": "13a01ec90f7e8686b4de5f859c83acf43bfda1de6a513ead1260df4b9b11cedc"
+      "apps/console/src/types.ts": "b3bdb3755285c79ef6309f8d2ff7eb1f857437e749af9d8189474cf869b279b1"
     }
   },
   "coverage_ledger": {
@@ -217,14 +217,14 @@
     },
     "parameter_gap_query_count": 1,
     "publication": {
-      "content_sha256": "c53769bec593b6f43a207c6d9fb86e4546c69e769cd3b0dbfbe31c96b49991bb",
+      "content_sha256": "119b1d3d62b67d896f04f74abe5819a9f1faee71c6dacf2f746151ad90c06c3d",
       "created": true,
-      "ledger_id": "historical-coverage-ledger:81e7e2bc5297d1433573cc96037e30ff79c2fc1c1336a147ebc4c2e8a0e5bd68"
+      "ledger_id": "historical-coverage-ledger:d24ee08d0e6e6fbbe91034df55fc04c7a76dcf343e788854c5c2dd31b86fde51"
     },
     "repeated_publication": {
-      "content_sha256": "c53769bec593b6f43a207c6d9fb86e4546c69e769cd3b0dbfbe31c96b49991bb",
+      "content_sha256": "119b1d3d62b67d896f04f74abe5819a9f1faee71c6dacf2f746151ad90c06c3d",
       "created": false,
-      "ledger_id": "historical-coverage-ledger:81e7e2bc5297d1433573cc96037e30ff79c2fc1c1336a147ebc4c2e8a0e5bd68"
+      "ledger_id": "historical-coverage-ledger:d24ee08d0e6e6fbbe91034df55fc04c7a76dcf343e788854c5c2dd31b86fde51"
     }
   },
   "sample_role": "tenda-ac9-primary-complete-historical-denominator",

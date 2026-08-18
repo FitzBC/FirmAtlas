@@ -387,6 +387,7 @@ from .native_value_flow import (
 )
 from .analysis_run import (
     BUILTIN_ANALYZER_REGISTRY,
+    BUILTIN_ANALYZER_REGISTRY_V21,
     BUILTIN_ANALYZER_REGISTRY_V20,
     BUILTIN_ANALYZER_REGISTRY_V19,
     BUILTIN_ANALYZER_REGISTRY_V18,
@@ -527,6 +528,7 @@ from .set_difference import (
     attribute_frontend_native_set_difference,
 )
 from .corpus_report import (
+    CORPUS_CAPABILITY_POLICY_VERSION,
     CORPUS_REPORT_SCHEMA_VERSION,
     CorpusCategoryResult,
     CorpusEvidenceTier,
@@ -780,6 +782,7 @@ __all__ = (
     "DiscoveryProducerKind",
     "assemble_discovery_catalog",
     "CORPUS_REPORT_SCHEMA_VERSION",
+    "CORPUS_CAPABILITY_POLICY_VERSION",
     "CorpusCategoryResult",
     "CorpusEvidenceTier",
     "CorpusGateStatus",
@@ -865,6 +868,7 @@ __all__ = (
     "discover_native_ubus_registrations",
     "MAPPING_ANALYSIS_RUN_SCHEMA_VERSION",
     "BUILTIN_ANALYZER_REGISTRY",
+    "BUILTIN_ANALYZER_REGISTRY_V21",
     "BUILTIN_ANALYZER_REGISTRY_V20",
     "BUILTIN_ANALYZER_REGISTRY_V19",
     "BUILTIN_ANALYZER_REGISTRY_V18",

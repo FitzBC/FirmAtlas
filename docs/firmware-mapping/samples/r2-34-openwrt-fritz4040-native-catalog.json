@@ -1,0 +1,106 @@
+{
+  "analysis_run": {
+    "analysis_run_id": "mapping-analysis-run:08bb80e7a6c6736b904b2a40b8139ecda22f0e640eb086f532aa1ef495213d8f",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v21",
+    "candidate_count": 1286,
+    "candidate_kind_distribution": {
+      "candidate_association": 22,
+      "frontend_invocation": 74,
+      "native_handler": 24,
+      "native_hint": 620,
+      "parameter_clue_assessment": 212,
+      "request_interface": 98,
+      "runtime_principal": 9,
+      "script_route": 2,
+      "script_source": 3,
+      "set_difference_attribution": 63,
+      "ubus_access_grant": 72,
+      "ubus_backend_binding": 80,
+      "web_configuration": 7
+    },
+    "catalog_id": "discovery-catalog:7cd924eaa89d51f7023a0f6cf72c88468809cc01193298a914f55fe8b56fb2f5",
+    "coverage_status": "partial",
+    "evidence_count": 8475,
+    "open_obligation_count": 117,
+    "profile_id": "firmatlas.mapping.profile/auto-v21",
+    "stage": {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 4,
+      "output_count": 24
+    }
+  },
+  "direct_native_projection": {
+    "binding_count": 24,
+    "binds_handler_edge_count": 24,
+    "handler_count": 24,
+    "object_count": 4,
+    "operation_count": 24,
+    "operations": [
+      "ubus://file/exec",
+      "ubus://file/list",
+      "ubus://file/md5",
+      "ubus://file/read",
+      "ubus://file/remove",
+      "ubus://file/stat",
+      "ubus://file/write",
+      "ubus://iwinfo/assoclist",
+      "ubus://iwinfo/countrylist",
+      "ubus://iwinfo/devices",
+      "ubus://iwinfo/freqlist",
+      "ubus://iwinfo/info",
+      "ubus://iwinfo/phyname",
+      "ubus://iwinfo/scan",
+      "ubus://iwinfo/survey",
+      "ubus://iwinfo/txpowerlist",
+      "ubus://luci-rpc/getBoardJSON",
+      "ubus://luci-rpc/getDHCPLeases",
+      "ubus://luci-rpc/getDSLStatus",
+      "ubus://luci-rpc/getDUIDHints",
+      "ubus://luci-rpc/getHostHints",
+      "ubus://luci-rpc/getNetworkDevices",
+      "ubus://luci-rpc/getWirelessDevices",
+      "ubus://network.rrdns/lookup"
+    ],
+    "scoped_candidate_count": 76,
+    "scoped_catalog_coverage_status": "completed",
+    "scoped_catalog_id": "discovery-catalog:2ee1e1d2cd5c4b3285174446aefa8b0cbecdb55176fca6ce33f44cc871f18752",
+    "scoped_evidence_count": 60
+  },
+  "firmware": {
+    "artifact_sha256": "cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00",
+    "inventory_coverage_status": "completed",
+    "inventory_sha256": "a8c4722264d6abb5d918db514d65c243f743a5dd23d376d6e9e3eeeeb48d8f1c",
+    "product": "AVM FRITZ!Box 4040",
+    "release": "OpenWrt 19.07.10"
+  },
+  "graph": {
+    "edge_count": 2429,
+    "graph_id": "communication-graph:71de244b6ec7c2737c36b4f63780c7a9af47ec51aa0566ba9e68115b5d585438",
+    "node_count": 1746,
+    "projection_status": "completed"
+  },
+  "interpretation_boundary": [
+    "direct native registration proves a statically registered UBUS operation and handler binding",
+    "full auto-v21 coverage remains partial where unrelated analyzers preserve open obligations",
+    "static registration does not prove runtime reachability, access control, vulnerability, or exploitability"
+  ],
+  "regression_delta": {
+    "direct_native_operation_count": 24,
+    "frontend_driven_operation_count": 20,
+    "previously_missing_now_present": [
+      "ubus://iwinfo/devices",
+      "ubus://iwinfo/info",
+      "ubus://iwinfo/phyname",
+      "ubus://iwinfo/survey"
+    ],
+    "previously_missing_operations": [
+      "ubus://iwinfo/devices",
+      "ubus://iwinfo/info",
+      "ubus://iwinfo/phyname",
+      "ubus://iwinfo/survey"
+    ]
+  },
+  "sample_role": "independent-native-only-holdout",
+  "schema_version": "firmatlas.mapping.fritz4040-native-catalog-report/v1alpha1"
+}

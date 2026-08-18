@@ -87,3 +87,11 @@ PYTHONPATH=src python -m firmatlas mapping query-corpus-report \
 本轮服务继续运行于 `127.0.0.1:18789`，供后续检查。通信测绘专项按用户明确范围不执行 SSH 部署；本轮必须提交并通过 GitHub SSH 推送。
 
 下一出口为 R2-34：优先实现 Native registration result → Catalog Adapter，并对 FRITZ!Box 4040 做独立 holdout；随后受控重取 DAP-2695，走 raw artifact/rootfs → AnalyzeRun → Catalog，验证门禁能否在不复用 DAP-3520/X5000R 的情况下保持通过。
+
+## R2-34 后续状态
+
+R2-34 已关闭 FRITZ 的 Catalog Adapter 缺口：4 个 rpcd plugin 的 24 个方法现在形成独立
+completed scoped Catalog，并补回 Frontend 驱动链漏掉的 4 个 `iwinfo` operation。FRITZ 已从
+“producer 证据、尚未发布 Catalog”晋级为 corpus 中明确标注的 `independent-holdout`；DAP-2695
+仍保持下一出口，不能把两者状态合并。详见
+[R2-34 记录](./2026-08-18-r2-34-fritz4040-native-catalog.md)。

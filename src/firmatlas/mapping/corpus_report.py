@@ -13,7 +13,14 @@ from .discovery_catalog import DiscoveryCatalog
 from .domain import CoverageStatus
 
 
-CORPUS_REPORT_SCHEMA_VERSION = "firmatlas.mapping.corpus-report/v1alpha2"
+CORPUS_REPORT_SCHEMA_VERSION = "firmatlas.mapping.corpus-report/v1alpha3"
+CORPUS_CAPABILITY_POLICY_VERSION = (
+    "firmatlas.mapping.corpus-capability-policy/v1"
+)
+_CAPABILITY_ALIASES = {
+    "registers_ubus_method": ("mentions_endpoint",),
+    "binds_ubus_handler": ("binds_handler",),
+}
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -143,6 +150,7 @@ class CorpusReport:
     required_categories: Tuple[str, ...]
     samples: Tuple[CorpusSampleResult, ...]
     categories: Tuple[CorpusCategoryResult, ...]
+    capability_policy_version: str = CORPUS_CAPABILITY_POLICY_VERSION
     schema_version: str = CORPUS_REPORT_SCHEMA_VERSION
 
     def to_dict(self) -> dict:
@@ -150,6 +158,7 @@ class CorpusReport:
             "schema_version": self.schema_version,
             "report_id": self.report_id,
             "corpus_version": self.corpus_version,
+            "capability_policy_version": self.capability_policy_version,
             "gate_status": self.gate_status.value,
             "required_categories": list(self.required_categories),
             "samples": [
@@ -213,8 +222,11 @@ class CorpusReport:
             required_categories=tuple(value.get("required_categories", ())),
             samples=samples,
             categories=categories,
+            capability_policy_version=value["capability_policy_version"],
             schema_version=value["schema_version"],
         )
+        if report.capability_policy_version != CORPUS_CAPABILITY_POLICY_VERSION:
+            raise ValueError("unsupported corpus capability policy")
         identity_document = report.to_dict()
         identity_document.pop("report_id")
         expected_id = "corpus-report:" + hashlib.sha256(json.dumps(
@@ -283,7 +295,12 @@ def _sample_result(sample: CorpusSampleInput) -> CorpusSampleResult:
         item for item in sample.catalog.open_obligations
         if not scope_ids or item.target_ref in scope_set
     )
-    observed = tuple(sorted({atom.capability for atom in selected_evidence}))
+    raw_capabilities = {atom.capability for atom in selected_evidence}
+    observed = tuple(sorted(raw_capabilities | {
+        alias
+        for capability in raw_capabilities
+        for alias in _CAPABILITY_ALIASES.get(capability, ())
+    }))
     missing = tuple(sorted(set(sample.required_capabilities) - set(observed)))
     unexpected = tuple(sorted(set(sample.forbidden_capabilities) & set(observed)))
     candidate_kinds = tuple(sorted({
@@ -378,6 +395,7 @@ def build_corpus_report(value: CorpusReportInput) -> CorpusReport:
     payload = {
         "schema_version": CORPUS_REPORT_SCHEMA_VERSION,
         "corpus_version": value.corpus_version,
+        "capability_policy_version": CORPUS_CAPABILITY_POLICY_VERSION,
         "gate_status": gate_status.value,
         "required_categories": sorted(value.required_categories),
         "samples": [
@@ -397,4 +415,5 @@ def build_corpus_report(value: CorpusReportInput) -> CorpusReport:
         "corpus-report:" + hashlib.sha256(encoded).hexdigest(),
         value.corpus_version, gate_status,
         tuple(sorted(value.required_categories)), samples, categories,
+        CORPUS_CAPABILITY_POLICY_VERSION,
     )

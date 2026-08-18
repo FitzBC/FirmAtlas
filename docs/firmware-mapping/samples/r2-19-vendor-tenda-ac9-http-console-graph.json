@@ -26,8 +26,8 @@
     "source_sha256": {
       "apps/console/src/api/client.ts": "c4a4450f257572ddc868545bafa1a35d45ce0419bc311e778e668e28007ede10",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
-      "apps/console/src/components/MappingCatalogWorkspace.tsx": "83885eba0b93f83f35961716402ec01c5c945e5aa323c9e5744504903ed786f1",
-      "apps/console/src/types.ts": "13a01ec90f7e8686b4de5f859c83acf43bfda1de6a513ead1260df4b9b11cedc"
+      "apps/console/src/components/MappingCatalogWorkspace.tsx": "02c46186bd001f32209fc2f799a7209f04168c8edb76fe45eb1ec39885668433",
+      "apps/console/src/types.ts": "b3bdb3755285c79ef6309f8d2ff7eb1f857437e749af9d8189474cf869b279b1"
     }
   },
   "evidence_boundary": "The HTTP adapter translates request parameters into the shared CommunicationGraphQuery. The Console selects and renders returned facts; neither layer creates interface, owner, runtime, or vulnerability conclusions.",

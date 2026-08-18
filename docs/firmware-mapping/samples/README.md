@@ -21,7 +21,7 @@
 - [M1-08 AC9 Discovery Catalog 中间输出](./m1-08-ac9-discovery-catalog-summary.json)：三份前端/模板、配置、脚本、Native、关联和调度结果组装出的 395 个无 seed 候选、参数、覆盖与开放义务。
 - [M1-10 Native Deep route-table 中间输出](./m1-10-native-deep-route-table-summary.json)：ARM ELF `{route_ptr, handler_ptr}` 正例的三段证据链、Scheduler 义务关闭、Catalog 投影，以及 AC9 无可信命名表的真实负面对照。
 - [M1-10B AC9 ARM PIC call-site 中间输出](./m1-10b-ac9-arm-pic-callsite-summary.json)：从 `online_list.js` 的 5 个接口关联到 `httpd` 的 5 个 handler、共同 131-pair registrar、五段证据链和 10/10 义务关闭。
-- [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；AC9、DAP-3520 与 X5000R 三类真实样本已验证，整个 gate 仍因脚本后端和 Native-only 缺口保持 `partial`。
+- [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；候选范围门禁当前为 `passed`，并加入 FRITZ!Box 4040 独立 native-only holdout。报告冻结 capability alias policy，避免分类语义随代码静默漂移。
 - [M1-14 X5000R 共享 CGI 记录](../progress/2026-08-09-m1-14-x5000r-shared-cgi.md)：固定原始固件、隔离 Binwalk 谱系、completed Inventory、lighttpd CGI namespace、JSON selector、MIPS 目标与跨资源/handler 开放义务。
 - [M1-15 X5000R Frontend Asset Graph](./m1-15-x5000r-frontend-asset-graph.json)：跨 `config.js/topicurl.js` 的唯一 endpoint binding、199 个 operation、逐候选双来源证据、动态 method 未决状态和 Native handler 开放义务；进度说明见 [M1-15 记录](../progress/2026-08-09-m1-15-frontend-asset-graph.md)。
 - [M1-16 X5000R MIPS dispatcher](./m1-16-x5000r-mips-dispatch.json)：四张 `char[64]+handler` 导出表、138 registrations、123/199 selector binding、76/14 双向差集、重复注册和开放 value-flow 义务；进度说明见 [M1-16 记录](../progress/2026-08-09-m1-16-x5000r-mips-inline-dispatch.md)。
@@ -29,7 +29,7 @@
 - [M1-18 X5000R frontend/native 集合差异](./m1-18-x5000r-set-difference.json)：将 76 个 Frontend-only 与 14 个 Native-only operation 分为 38/38/3/1/10 五类证据形状，保留精确 token、suffix 变体负例和开放因果义务；进度说明见 [M1-18 记录](../progress/2026-08-09-m1-18-x5000r-set-difference.md)。
 - [M1-19 X5000R 扩展前端范围](./m1-19-x5000r-expanded-frontend.json)：加入 `kr.js`、`wan_ie.html` 与 `advance/config.html`，恢复默认 URL + payload variable 与 multipart 两级 selector，使 operation 从 199 增至 203、范围缺口从 3 降至 0、差集变为 77/11；进度说明见 [M1-19 记录](../progress/2026-08-09-m1-19-x5000r-expanded-frontend.md)。
 - [M1-11A DAP-3520 HNAP/PHP-XGI Catalog](./m1-11a-dap3520-hnap-xgi-catalog-summary.json)：273 个候选、1 个 `ACTION_POST` selector、288 个 EvidenceAtom，以及 `/HNAP1 → /www/HNAP1 → /usr/sbin/hnap` 与 XGI 状态树链；M1-13 重放后上游 Inventory 与 Catalog 均为 completed。
-- [M1-12 通信架构 research-case corpus](./m1-12-research-case-corpus.json)：保存 AC9 split web stack 与 X5000R shared-CGI 的内容寻址证据时间线；X5000R 当前已演进到第 12 阶段，包含差集反向驱动范围扩展、三种请求架构、nested upload dispatch、请求保护范围、静态服务装配与潜在隐藏接口集合。
+- [M1-12 通信架构 research-case corpus](./m1-12-research-case-corpus.json)：保存 AC9 split web stack、X5000R shared-CGI、AC9 DLNA 分层和 FRITZ!Box 4040 Frontend/Native UBUS 分裂的内容寻址证据时间线；保留早期缺口、反事实、义务迁移和静态边界。
 - [M1-21 X5000R 请求保护范围](./m1-21-x5000r-request-protection.json)：跨 `usr/sbin/lighttpd` 与 `www/cgi-bin/cstecgi.cgi` 保存 suffix/path gate、SESSION_ID 会话验证、302 enforcement、CGI 排除分类和 nested upload handler 链；进度说明见 [M1-21 记录](../progress/2026-08-09-m1-21-x5000r-request-protection.md)。
 - [M1-22 X5000R 静态服务装配](./m1-22-x5000r-service-assembly.json)：从 `sbin/rc:init_router` 重放 service group、lighttpd argv/config、listener、document root、CGI namespace 与目标 ELF 的十一段证据；进度说明见 [M1-22 记录](../progress/2026-08-09-m1-22-x5000r-service-assembly.md)。
 - [M1-23 X5000R 潜在隐藏接口](./m1-23-x5000r-potential-hidden-interfaces.json)：在 Source Inventory、Frontend 和 Set Difference completed 门槛下保存 10 条 native registration + handler + zero-observed-reference 信号，并固定非后门/非运行时结论边界；进度说明见 [M1-23 记录](../progress/2026-08-09-m1-23-potential-hidden-interfaces.md)。
@@ -51,6 +51,7 @@
 - [R2-26 AC9 latent URL-document consumer](./r2-26-vendor-tenda-ac9-configuration-url-document.json)：`auto-v18` 证明 `/webroot/default_url.cfg → load_url_mib@0x8d0c → parser@0x766c → cfm/url_mib/*` 是独立配置域；因 rootfs 无第二文档且上传激活边未找到，保留 partial coverage、candidate `imports_state`、0 个声明键及开放义务。
 - [R2-27 AC9 URL-store IPC and consumers](./r2-27-vendor-tenda-ac9-configuration-url-ipc.json)：`auto-v19` 闭合 `/var/cfm_socket` 上 2016-byte Get/Set/Unset/Commit/Show IPC、cfmd 分发与 5 个 httpd consumer；逐 callsite 修正 `urlgroup.*` 同前缀跨主 MIB/URL MIB 分裂，且不把 IPC 字段写成 HTTP 参数或关闭 document activation 义务。
 - [R2-28 AC9 CGI namespace and selector transport](./r2-28-vendor-tenda-ac9-cgi-selector.json)：`auto-v20` 从 registrar、path parser 与 selector arms 组合恢复 7 条 `/cgi-bin/*` route；`UploadWebsite` 连到 URL consumer，但 method 与 URL document activation 保持 open。
+- [R2-34 FRITZ!Box 4040 direct native UBUS Catalog](./r2-34-openwrt-fritz4040-native-catalog.json)：`auto-v21` 从 4 个 ARM rpcd 插件直接发布 24 个方法、24 个 binding、24 个 handler 与 24 条 `binds_handler` 边；修复 Frontend 驱动路径漏掉的 4 个 `iwinfo` 方法。独立 scoped Catalog completed，整固件 Catalog 因其他 117 条义务保持 partial。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

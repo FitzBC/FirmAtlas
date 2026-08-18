@@ -252,6 +252,12 @@ const corpusStatusLabels: Record<string, string> = {
   coverage_gap: '覆盖缺口', acquisition_gap: '样本获取缺口',
 }
 
+const corpusRoleLabels: Record<string, string> = {
+  positive: '正向样本',
+  regression: '回归样本',
+  'independent-holdout': '独立 holdout',
+}
+
 function CorpusGateWorkspace({
   report, loading,
 }: {
@@ -292,7 +298,7 @@ function CorpusGateWorkspace({
       <div className="rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 p-5">
         <div className="eyebrow"><Radar size={12} /> Scope-aware evidence samples</div>
         <div className="mt-4 space-y-3">{report.samples.filter((sample) => sample.status === 'verified').map((sample) => <div key={sample.sample_id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div><div className="font-mono text-xs text-slate-200">{sample.sample_id}</div><div className="mt-1 text-[10px] text-slate-600">{corpusCategoryLabels[sample.architecture_category] ?? sample.architecture_category} · {sample.architecture_subtype}</div></div><span className="text-[10px] text-signal">{sample.candidate_count} 候选 · {sample.evidence_count} 证据</span></div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex flex-wrap items-center gap-2"><div className="font-mono text-xs text-slate-200">{sample.sample_id}</div><span className="rounded-full border border-cyan/15 bg-cyan/[0.05] px-2 py-0.5 text-[9px] text-cyan">{corpusRoleLabels[sample.role] ?? sample.role}</span></div><div className="mt-1 text-[10px] text-slate-600">{corpusCategoryLabels[sample.architecture_category] ?? sample.architecture_category} · {sample.architecture_subtype}</div></div><span className="text-[10px] text-signal">{sample.candidate_count} 候选 · {sample.evidence_count} 证据</span></div>
           <div className="mt-3 flex flex-wrap gap-1.5">{sample.observed_capabilities.map((capability) => <span key={capability} className="rounded-md border border-white/[0.06] bg-black/20 px-2 py-1 font-mono text-[9px] text-slate-500">{capability}</span>)}</div>
           <div className="mt-3 text-[9px] text-slate-600">范围约束 {sample.scope_candidate_ids.length ? `${sample.scope_candidate_ids.length} 个候选` : '整个 Catalog'} · 未决义务 {sample.open_obligation_count}</div>
         </div>)}</div>
@@ -300,8 +306,8 @@ function CorpusGateWorkspace({
       <aside className="rounded-2xl border border-cyan/15 bg-cyan/[0.035] p-5">
         <div className="eyebrow text-cyan"><ShieldQuestion size={12} /> Interpretation boundary</div>
         <h3 className="mt-4 text-sm font-medium text-slate-200">通过代表类别，不夸大泛化范围</h3>
-        <p className="mt-3 text-xs leading-6 text-slate-500">门禁通过不等于所有厂商与子类型均已泛化验证。D-Link DAP-2695 与 OpenWrt FRITZ!Box 4040 是下一轮独立 holdout：当前已取得一手样本和 producer 证据，但尚未发布为完整 Catalog。</p>
-        <div className="mt-5 rounded-xl border border-white/[0.06] bg-black/20 p-3 font-mono text-[9px] leading-5 text-slate-600">report {report.report_id.slice(0, 30)}…<br />schema {report.schema_version}</div>
+        <p className="mt-3 text-xs leading-6 text-slate-500">门禁通过不等于所有厂商与子类型均已泛化验证。OpenWrt FRITZ!Box 4040 已作为独立 holdout 发布 24 个原生 UBUS 方法；D-Link DAP-2695 仍待进入完整 Catalog。</p>
+        <div className="mt-5 rounded-xl border border-white/[0.06] bg-black/20 p-3 font-mono text-[9px] leading-5 text-slate-600">report {report.report_id.slice(0, 30)}…<br />schema {report.schema_version}<br />capability policy {report.capability_policy_version}</div>
       </aside>
     </div>
   </div>

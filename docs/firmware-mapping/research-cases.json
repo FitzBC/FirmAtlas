@@ -2,7 +2,7 @@
   "schema_version": "firmatlas.mapping.research-case-corpus/v1alpha1",
   "cases": [
     {
-      "case_id": "research-case:8f18eecc63ba53e3af02356b2161af3455a1bc77b073ca587e77cbef1189827d",
+      "case_id": "research-case:21b1d69f6cdf0827506b02c327c6b3568870c4f58eaa0b678e069cebf4c6c5d9",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-split-web-stack-goform-ownership",
       "title": "Tenda AC9: split nginx/FastCGI and native goform backends",
@@ -82,7 +82,7 @@
           "evidence_ref": "coverage:ac9-historical-graph-overlay",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-20-vendor-tenda-ac9-historical-graph-overlay.json",
-          "source_artifact_sha256": "63875bfc54e45bf9baa1e6f127868c54d3992dd47b2c4340b9de5f4c429da39e",
+          "source_artifact_sha256": "bf4d30763c69a082d48c329e0a44bac396050af15688fb06b3b77e0608c9e341",
           "locator": "json:$.historical_comparison",
           "capability": "compares_historical_expectations_without_fact_promotion",
           "producer": "historical-graph-overlay@v1alpha1"
@@ -127,7 +127,7 @@
           "evidence_ref": "coverage:ac9-configuration-blob-state-flow-r2-24",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-24-vendor-tenda-ac9-configuration-blob-flow.json",
-          "source_artifact_sha256": "9865d8084d7acfd8796a525d7cd555e0ffe228cf87cd8f49bb8869b91cd12113",
+          "source_artifact_sha256": "f6a53930365d946f6ece3c3c98bf4874d884087b90c8c23db20ef8a4b3b142b6",
           "locator": "json:$.flow",
           "capability": "binds_whole_configuration_image_state_write",
           "producer": "native-arm-configuration-blob-flow@0.1.0"
@@ -136,10 +136,46 @@
           "evidence_ref": "coverage:ac9-configuration-text-import-r2-25",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-25-vendor-tenda-ac9-configuration-text-import.json",
-          "source_artifact_sha256": "504bcdf5d16dc61a5d28682865b1268bdb61f8f6c40f2a8ea8142f5050512db2",
+          "source_artifact_sha256": "313b196341e2f180d4c815b12160bcc1332ceff5ac60ec9e652be5b1cccd9768",
           "locator": "json:$.flow",
           "capability": "binds_configuration_key_parser",
           "producer": "native-arm-configuration-text-import-flow@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-configuration-url-document-r2-26",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-26-vendor-tenda-ac9-configuration-url-document.json",
+          "source_artifact_sha256": "8fabd079b89101511c54a6391c31a754cd248a53b900b70096bca0e6a98eed71",
+          "locator": "json:$.flow",
+          "capability": "maps_configuration_url_document_consumer",
+          "producer": "native-arm-configuration-url-document-flow@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-configuration-url-ipc-r2-27",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-27-vendor-tenda-ac9-configuration-url-ipc.json",
+          "source_artifact_sha256": "a5301e62b9576a40973a8d20387e0dd9b6eaa8bc2f6d5f9327d23550725269b2",
+          "locator": "json:$.operations",
+          "capability": "maps_configuration_url_ipc_and_store_split",
+          "producer": "native-arm-configuration-url-ipc-flow@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-cgi-selector-transport-r2-28",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-28-vendor-tenda-ac9-cgi-selector.json",
+          "source_artifact_sha256": "c68c0548559053a32159b7a8caab3ca88466fd7e890fc830739c7a97ecb1d938",
+          "locator": "json:$.selectors",
+          "capability": "maps_cgi_namespace_and_selector_transport",
+          "producer": "native-arm-cgi-selector-dispatch@0.1.0"
+        },
+        {
+          "evidence_ref": "coverage:ac9-complete-historical-ledger-r2-29",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-29-vendor-tenda-ac9-historical-coverage-ledger.json",
+          "source_artifact_sha256": "b69c69b0e046b33da42905979057ba9f7cc91b759db08aaa0408f2e37185aaa6",
+          "locator": "json:$.coverage_ledger",
+          "capability": "explains_complete_historical_vulnerability_denominator",
+          "producer": "historical-coverage-ledger@v1alpha1"
         },
         {
           "evidence_ref": "evidence:a5b3ee3a7fc2b3abaf51d76517e5efd4fd919f9f8ca0559dcd71cb570f289cb5",
@@ -189,7 +225,7 @@
         },
         {
           "claim_id": "claim:configuration-upload-cgi-owner",
-          "statement": "POST /cgi-bin/UploadCfg carries multipart form field filename; an independent ARM string-switch dispatcher at 0x3a9a0 binds UploadCfg to bin/httpd@0x3b850 with a six-entry family proof.",
+          "statement": "POST /cgi-bin/UploadCfg carries multipart form field filename; an independent ARM string-switch dispatcher at 0x3a9a0 binds UploadCfg to bin/httpd@0x3b850. This stage initially retained a six-entry anchor subset; it did not prove inventory completeness.",
           "evidence_refs": [
             "coverage:ac9-configuration-ingress-r2-22"
           ],
@@ -216,6 +252,38 @@
           "statement": "libtpi splits uploaded text into /webroot/default.cfg and /webroot/default_url.cfg before cfm Upload. libCfm then selects default_mib, reloads /webroot/default.cfg, tokenizes newline and key=value entries, and inserts keys into its hash store. This supersedes the R2-24 whole-image interpretation and proves security.ddos.map plus sys.schedulereboot.* as configuration state keys, never as HTTP parameters.",
           "evidence_refs": [
             "coverage:ac9-configuration-text-import-r2-25"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:configuration-url-document-latent-consumer",
+          "statement": "The secondary document has a distinct load_url_mib parser and cfm/url_mib/* hash store, but the current artifact has no static default_url.cfg content and no verified activation edge from cfm Upload or RestoreMTD. The flow therefore remains candidate with zero declared keys and an open activation obligation.",
+          "evidence_refs": [
+            "coverage:ac9-configuration-url-document-r2-26"
+          ],
+          "status": "unresolved"
+        },
+        {
+          "claim_id": "claim:configuration-url-ipc-store-split",
+          "statement": "Five 2016-byte URL IPC operations connect libCfm clients through cfmd to cfm/url_mib/*, while per-callsite evidence proves that urlgroup.list*/class* use the URL store but rule.*/flag use the primary CFM store. The daily IPC is supported without closing the independent document-loader activation obligation.",
+          "evidence_refs": [
+            "coverage:ac9-configuration-url-ipc-r2-27"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:cgi-selector-route-correction",
+          "statement": "The /cgi-bin registrar binds webs_Tenda_CGI_BIN_Handler, whose path-segment parser calls a seven-arm selector dispatcher. Prefix plus segment control flow deterministically derives /cgi-bin/UploadWebsite and binds handler 0x3e564 to daily URL IPC consumers. HTTP method and URL document-loader activation remain independent open obligations.",
+          "evidence_refs": [
+            "coverage:ac9-cgi-selector-transport-r2-28"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:complete-historical-denominator",
+          "statement": "The immutable ledger joins 14 structured expectation records with 57 unresolved queue records so all 71 AC9 vulnerabilities have one evidence-availability state. Nine structures are observed, two parameter-only records remain partial, and sixty are not assessable; none of these states assert vulnerability presence or exploitability.",
+          "evidence_refs": [
+            "coverage:ac9-complete-historical-ledger-r2-29"
           ],
           "status": "supported"
         },
@@ -376,6 +444,54 @@
             "obligation:configuration-key-parser"
           ],
           "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-url-document-consumer",
+          "order": 11,
+          "interpretation": "Split the secondary URL document from the primary MIB, prove its independent parser and state scope, and retain the missing upload-to-loader activation as an explicit obligation instead of fabricating a deterministic call edge.",
+          "claim_ids": [
+            "claim:configuration-url-document-latent-consumer"
+          ],
+          "creates_obligations": [
+            "obligation:configuration-url-activation"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:configuration-url-ipc-store-split",
+          "order": 12,
+          "interpretation": "Close the daily URL IPC operation set, then bind each key template to its actual store callsite. Correct the earlier prefix-level URL-store grouping while leaving document-loader activation open.",
+          "claim_ids": [
+            "claim:configuration-url-ipc-store-split"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:cgi-selector-route-correction",
+          "order": 13,
+          "interpretation": "Recover the independent /cgi-bin namespace registrar and path segment parser, replace the truncated six-entry completeness claim with seven arms, close route binding, and preserve method and loader activation as non-transitive obligations.",
+          "claim_ids": [
+            "claim:cgi-selector-route-correction"
+          ],
+          "creates_obligations": [
+            "obligation:cgi-selector-http-method"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:complete-historical-denominator",
+          "order": 14,
+          "interpretation": "Join the structured graph overlay and complementary research queue without creating graph facts, then expose every AC9 CVE with its observation state and explicit reason in the product.",
+          "claim_ids": [
+            "claim:complete-historical-denominator"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
         }
       ],
       "obligations": [
@@ -424,6 +540,20 @@
           "closure_evidence_refs": [
             "coverage:ac9-configuration-text-import-r2-25"
           ]
+        },
+        {
+          "obligation_id": "obligation:configuration-url-activation",
+          "statement": "Bind or reject the runtime trigger from configuration upload to load_url_mib/reload_url_mib and obtain the secondary document before publishing exact URL-store key declarations.",
+          "required_capability": "binds_configuration_url_loader_activation",
+          "status": "open",
+          "closure_evidence_refs": []
+        },
+        {
+          "obligation_id": "obligation:cgi-selector-http-method",
+          "statement": "Observe a selector-specific static method guard or runtime HTTP trace before assigning GET, POST, or another method to /cgi-bin/UploadWebsite.",
+          "required_capability": "binds_cgi_selector_http_method",
+          "status": "open",
+          "closure_evidence_refs": []
         }
       ],
       "counterfactuals": [
@@ -431,10 +561,14 @@
         "Choosing dhttpd by filename alone would spend deep-analysis effort on the weaker candidate.",
         "Treating a route string and a similar symbol name as a binding would skip the registrar call-site proof.",
         "Treating a cross-version historical interface match as a current vulnerability would collapse structural observation, version applicability, and exploitability into one unsupported claim.",
+        "Showing only the 14 structured expectations would hide 57 source and semantic gaps and falsely imply that the UI covers the 71-record historical denominator.",
         "Treating a native configuration key as an HTTP request parameter would fabricate a direct ingress edge and conceal the missing upload chain.",
         "Assuming every /cgi-bin operation uses websFormDefine would miss the independent UploadCfg/DownloadCfg string-switch dispatcher.",
         "Treating UploadValue as the uploaded-blob parser would miss the opcode-14 daemon dispatch and fabricate key-level semantics from a whole-configuration-image write.",
-        "Treating the function name RestoreMTD and selector literal 0 as proof of raw partition zero would preserve the R2-24 error even after the implementation proves a default_mib text-document import."
+        "Treating the function name RestoreMTD and selector literal 0 as proof of raw partition zero would preserve the R2-24 error even after the implementation proves a default_mib text-document import.",
+        "Treating the mere presence of a secondary writer and latent loader as a call edge would invent upload execution and copy 1013 primary MIB keys into an independent URL store with no source document.",
+        "Grouping every urlgroup.* literal by prefix would move rule.* and flag from the primary CFM store into the URL store despite their GetValue/UnSetValue/CommitCfm callsites.",
+        "Requiring a complete endpoint literal would miss prefix-plus-segment routes, while inferring POST from upload-body consumption would invent a method binding."
       ],
       "paper_uses": [
         "Motivating case for why communication mapping must precede target-binary vulnerability analysis.",
@@ -443,13 +577,16 @@
         "Historical-ground-truth overlay example separating mapper recall from firmware-version vulnerability conclusions.",
         "Typed historical-field case showing why request parameters, route tokens, configuration keys, and inferred paths need separate states.",
         "Architecture-split case where a second dispatcher family changes an obligation from unknown ingress to known owner plus open persistence.",
-        "Self-correction case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers."
+        "Self-correction case showing why IPC framing, daemon dispatch, and key-level parsing must remain separate evidence layers.",
+        "Negative activation case showing how a mapper can publish both halves of a state pipeline while preserving the missing execution edge.",
+        "Per-callsite storage-split case showing why common prefixes, process ownership, and function co-location do not prove one state domain."
       ],
       "limitations": [
         "The native result proves selected static registrations, not runtime reachability or authentication state.",
         "Historical expectation coverage is limited to 14 structured interfaces from a 71-record product-level denominator and is not a vulnerability or exploitability audit of the artifact.",
         "The dhttpd negative control is bounded by the declared shallow producer and is not proof of total runtime non-participation.",
-        "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality."
+        "One firmware case motivates and illustrates the method but cannot establish cross-vendor generality.",
+        "The shipped rootfs contains no default_url.cfg content, and static analysis cannot determine whether an indirect or runtime-only trigger invokes the latent loader."
       ]
     },
     {
@@ -1416,7 +1553,7 @@
       ]
     },
     {
-      "case_id": "research-case:f8af8264c6929ac8f1d8fff56052261f6edf681327df8257ec7eebbc827f7236",
+      "case_id": "research-case:4c4aa0dd3e47ba8348c25a1dd1e9ed6d9cdfc5a56126440079c0fdfb6d69430a",
       "schema_version": "firmatlas.mapping.research-case/v1alpha1",
       "case_key": "tenda-ac9-dlna-fixture-daemon-split",
       "title": "Tenda AC9: DLNA response fixtures without a proven goform handler",
@@ -2128,7 +2265,7 @@
           "evidence_ref": "coverage:ac9-dlna-http-console-graph",
           "kind": "coverage_ledger",
           "source_path": "docs/firmware-mapping/samples/r2-19-vendor-tenda-ac9-http-console-graph.json",
-          "source_artifact_sha256": "0d7aec8ffde03572bc9fbd8329793f0f769ee26d732d80fc03ea164b58b331e4",
+          "source_artifact_sha256": "eb41ca70742cda8b593bd2e0409333a259eedd6e8600a8c85aaf08fc8c660747",
           "locator": "json:$.http_acceptance",
           "capability": "replays_product_graph_query_with_evidence",
           "producer": "communication-graph-http-console@v1alpha1"
@@ -2603,12 +2740,151 @@
         "The AC18 positive control proves only AC18 bindings; the AC9 benchmark remains a repacked rootfs and may omit partitions or conditional components.",
         "The v1 frontend call graph is intrafile and bounded; dynamic property calls, cross-resource wiring, and runtime event eligibility remain open."
       ]
+    },
+    {
+      "case_id": "research-case:d8f290785183707d68fc9116c3c619461738b77d2bd7a527d12da206e7a018d1",
+      "schema_version": "firmatlas.mapping.research-case/v1alpha1",
+      "case_key": "openwrt-fritz4040-frontend-native-ubus-split",
+      "title": "FRITZ!Box 4040: frontend references are not the native UBUS universe",
+      "firmware_artifact_sha256": "cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00",
+      "architecture_tags": [
+        "rpcd_native_plugin",
+        "ubus_static_registration",
+        "frontend_native_coverage_split",
+        "native_only_holdout"
+      ],
+      "research_question": "Can a frontend-seeded UBUS mapper recover the complete native method universe, and how should direct registration evidence enter the Catalog?",
+      "evidence": [
+        {
+          "evidence_ref": "coverage:fritz4040-native-catalog-delta",
+          "kind": "coverage_ledger",
+          "source_path": "docs/firmware-mapping/samples/r2-34-openwrt-fritz4040-native-catalog.json",
+          "source_artifact_sha256": "4f5a84e98f70d123cc25729d6a2ff570a1aeab52d3c0e93754f4c640c95773e6",
+          "locator": "json:$.regression_delta",
+          "capability": "compares_frontend_and_direct_native_operation_universes",
+          "producer": "fritz4040-native-catalog-report@v1alpha1"
+        },
+        {
+          "evidence_ref": "evidence:2c0ca41b1fa1bd3b5d8c3eb6c6c22299432b1a215084506f66b7f02425a0d8cc",
+          "kind": "native_binding",
+          "source_path": "usr/lib/rpcd/iwinfo.so",
+          "source_artifact_sha256": "82afa783fc8e2f485742bb52823bea7833618be5f04198bd7f72da50bca91695",
+          "locator": "binary:bytes=11680-11684",
+          "capability": "registers_ubus_method",
+          "producer": "native-ubus-registration@0.1.0"
+        },
+        {
+          "evidence_ref": "evidence:fed30b68eea9c6a1335628054368e404caffd59039f59c3d04c6e894243722db",
+          "kind": "native_binding",
+          "source_path": "usr/lib/rpcd/iwinfo.so",
+          "source_artifact_sha256": "82afa783fc8e2f485742bb52823bea7833618be5f04198bd7f72da50bca91695",
+          "locator": "binary:bytes=11684-11688",
+          "capability": "binds_ubus_handler",
+          "producer": "native-ubus-registration@0.1.0"
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "claim:fritz-frontend-native-gap",
+          "statement": "The frontend-driven binding path publishes 20 of 24 statically registered methods and omits four iwinfo operations.",
+          "evidence_refs": [
+            "coverage:fritz4040-native-catalog-delta"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:fritz-direct-native-binding",
+          "statement": "The iwinfo table directly registers devices and binds it to usr/lib/rpcd/iwinfo.so@0x0000181c.",
+          "evidence_refs": [
+            "evidence:2c0ca41b1fa1bd3b5d8c3eb6c6c22299432b1a215084506f66b7f02425a0d8cc",
+            "evidence:fed30b68eea9c6a1335628054368e404caffd59039f59c3d04c6e894243722db"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "claim:fritz-direct-catalog-complete",
+          "statement": "The direct registration adapter publishes all 24 native operations in a completed scoped Catalog with handler edges.",
+          "evidence_refs": [
+            "coverage:fritz4040-native-catalog-delta",
+            "evidence:2c0ca41b1fa1bd3b5d8c3eb6c6c22299432b1a215084506f66b7f02425a0d8cc",
+            "evidence:fed30b68eea9c6a1335628054368e404caffd59039f59c3d04c6e894243722db"
+          ],
+          "status": "supported"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "stage:fritz-frontend-driven-catalog",
+          "order": 1,
+          "interpretation": "Frontend seeding resolves 20 native bindings but leaves four registered iwinfo methods outside the Catalog.",
+          "claim_ids": [
+            "claim:fritz-frontend-native-gap"
+          ],
+          "creates_obligations": [
+            "obligation:fritz-direct-native-catalog"
+          ],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:fritz-native-registration-producer",
+          "order": 2,
+          "interpretation": "The native producer recovers method and handler evidence independently of frontend assets.",
+          "claim_ids": [
+            "claim:fritz-direct-native-binding"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [],
+          "rejects_obligations": []
+        },
+        {
+          "stage_id": "stage:fritz-direct-native-catalog",
+          "order": 3,
+          "interpretation": "A pure evidence-reusing adapter closes the Catalog projection gap and adds explicit binds_handler graph edges.",
+          "claim_ids": [
+            "claim:fritz-direct-catalog-complete"
+          ],
+          "creates_obligations": [],
+          "resolves_obligations": [
+            "obligation:fritz-direct-native-catalog"
+          ],
+          "rejects_obligations": []
+        }
+      ],
+      "obligations": [
+        {
+          "obligation_id": "obligation:fritz-direct-native-catalog",
+          "statement": "Publish completed native registrations without requiring a frontend reference.",
+          "required_capability": "publishes_native_ubus_catalog",
+          "status": "resolved",
+          "closure_evidence_refs": [
+            "coverage:fritz4040-native-catalog-delta",
+            "evidence:2c0ca41b1fa1bd3b5d8c3eb6c6c22299432b1a215084506f66b7f02425a0d8cc",
+            "evidence:fed30b68eea9c6a1335628054368e404caffd59039f59c3d04c6e894243722db"
+          ]
+        }
+      ],
+      "counterfactuals": [
+        "Treating frontend references as the complete UBUS universe silently loses devices, info, phyname, and survey.",
+        "Re-disassembling inside the Catalog adapter would duplicate analysis and risk evidence identity drift.",
+        "Merging static registration with runtime reachability would overstate what the firmware bytes prove."
+      ],
+      "paper_uses": [
+        "Independent holdout demonstrating recall gain from producer-to-Catalog composition.",
+        "Ablation comparing frontend-seeded and direct native registration universes.",
+        "Evidence-preserving graph example with operation, principal, binding, and handler nodes."
+      ],
+      "limitations": [
+        "Static registration does not establish runtime reachability, authentication, vulnerability, or exploitability.",
+        "The full auto-v21 Catalog remains partial because unrelated analyzers preserve 117 open obligations.",
+        "One OpenWrt target and four ARM plugins do not establish cross-ISA or cross-version generality."
+      ]
     }
   ],
   "validation": {
     "schema_version": "firmatlas.mapping.research-case-corpus-validation/v1alpha1",
     "paper_ready": true,
-    "case_count": 3,
+    "case_count": 4,
     "evidence_line_count": 14,
     "issues": []
   }

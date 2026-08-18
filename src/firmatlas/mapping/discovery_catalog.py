@@ -34,6 +34,7 @@ from .native_arm_cgi_selector_dispatch import ArmCgiSelectorDispatchResult
 from .web_config import WebConfigProducerResult
 from .script_backend import ScriptBackendProducerResult
 from .native import NativeProducerResult
+from .native_ubus_registration import NativeUbusRegistrationResult
 from .native_deep import NativeDeepResult
 from .native_value_flow import MipsHandlerValueFlowResult
 from .native_nested_dispatch import MipsNestedDispatchResult
@@ -70,6 +71,7 @@ class DiscoveryProducerKind(str, Enum):
     CORRELATION = "correlation"
     SCHEDULER = "scheduler"
     UBUS_BACKEND = "ubus_backend"
+    NATIVE_UBUS_REGISTRATION = "native_ubus_registration"
     PARAMETER_CLUE = "parameter_clue"
     RESPONSE_FIXTURE = "response_fixture"
     NATIVE_RELATIONSHIP = "native_relationship"
@@ -405,6 +407,22 @@ class DiscoveryProducerBatch:
             else AnalyzerIdentity("native-shallow-producer", "0.1.0")
         )
         return cls(DiscoveryProducerKind.NATIVE, producer, scope, results)
+
+    @classmethod
+    def native_ubus_registration(
+        cls, results: Tuple[NativeUbusRegistrationResult, ...], scope: str
+    ) -> "DiscoveryProducerBatch":
+        producer = (
+            results[0].producer
+            if results
+            else AnalyzerIdentity("native-ubus-registration", "0.1.0")
+        )
+        return cls(
+            DiscoveryProducerKind.NATIVE_UBUS_REGISTRATION,
+            producer,
+            scope,
+            results,
+        )
 
     @classmethod
     def native_deep(
@@ -1148,6 +1166,115 @@ def assemble_discovery_catalog(value: DiscoveryCatalogInput) -> DiscoveryCatalog
                             ("machine", result.machine),
                         ) if raw is not None),
                     ))
+            elif (
+                batch.producer_kind
+                is DiscoveryProducerKind.NATIVE_UBUS_REGISTRATION
+            ):
+                if result.objects and not result.registration_coverage_complete:
+                    raise ValueError(
+                        "partial native ubus registration cannot publish candidates"
+                    )
+                for obj in result.objects:
+                    principal_id = obj.registration_id
+                    candidates.append(DiscoveryCandidate(
+                        principal_id,
+                        DiscoveryCandidateKind.RUNTIME_PRINCIPAL,
+                        result.source_path,
+                        DiscoveryClaimStatus.SUPPORTED,
+                        result.source_path,
+                        result.profile,
+                        obj.evidence_ids,
+                        (
+                            ("principal_kind", "rpcd_native_plugin"),
+                            ("object_names", obj.object_name),
+                            ("object_name", obj.object_name),
+                            ("type_name", obj.type_name),
+                            ("init_address", "0x{:08x}".format(obj.init_address)),
+                            ("registrar_address", "0x{:08x}".format(
+                                obj.registrar_address
+                            )),
+                        ),
+                    ))
+                    for method in obj.methods:
+                        operation_id = _stable_id(
+                            "native-ubus-operation", result.source_path,
+                            obj.object_name, method.method_name,
+                            method.registration_id,
+                        )
+                        binding_id = _stable_id(
+                            "native-ubus-binding", operation_id, principal_id,
+                        )
+                        handler_id = _stable_id(
+                            "native-ubus-handler", method.handler_identity,
+                            method.registration_id,
+                        )
+                        proof_ids = tuple(dict.fromkeys((
+                            *obj.evidence_ids, *method.evidence_ids,
+                        )))
+                        candidates.append(DiscoveryCandidate(
+                            operation_id,
+                            DiscoveryCandidateKind.REQUEST_INTERFACE,
+                            "ubus://{}/{}".format(
+                                obj.object_name, method.method_name
+                            ),
+                            DiscoveryClaimStatus.SUPPORTED,
+                            result.source_path,
+                            result.profile,
+                            proof_ids,
+                            (
+                                ("endpoint_shape", "logical_rpc"),
+                                ("request_role", "native_registration"),
+                                ("representation", "ubus"),
+                                ("object_name", obj.object_name),
+                                ("method", method.method_name),
+                                ("registration_id", method.registration_id),
+                                ("handler_identity", method.handler_identity),
+                            ),
+                        ))
+                        candidates.append(DiscoveryCandidate(
+                            binding_id,
+                            DiscoveryCandidateKind.UBUS_BACKEND_BINDING,
+                            "ubus://{}/{}".format(
+                                obj.object_name, method.method_name
+                            ),
+                            DiscoveryClaimStatus.SUPPORTED,
+                            result.source_path,
+                            "verified_native_registration",
+                            proof_ids,
+                            (
+                                ("target_ref", operation_id),
+                                ("principal_id", principal_id),
+                                ("binding_status", "verified_native_registration"),
+                                ("parameter_names", ""),
+                                ("handler_identity", method.handler_identity),
+                                ("handler_ref", handler_id),
+                                ("object_name", obj.object_name),
+                                ("method_name", method.method_name),
+                            ),
+                        ))
+                        handler_evidence = tuple(
+                            evidence_id for evidence_id in method.evidence_ids
+                            if evidence[evidence_id].capability
+                            == "binds_ubus_handler"
+                        )
+                        candidates.append(DiscoveryCandidate(
+                            handler_id,
+                            DiscoveryCandidateKind.NATIVE_HANDLER,
+                            method.handler_identity,
+                            DiscoveryClaimStatus.SUPPORTED,
+                            result.source_path,
+                            result.profile,
+                            handler_evidence,
+                            (
+                                ("target_ref", operation_id),
+                                ("binding_ref", binding_id),
+                                ("object_name", obj.object_name),
+                                ("method_name", method.method_name),
+                                ("handler_address", "0x{:08x}".format(
+                                    method.handler_address
+                                )),
+                            ),
+                        ))
             elif batch.producer_kind is DiscoveryProducerKind.NATIVE_DEEP:
                 for item in result.bindings:
                     native_deep_target_refs.add(item.target_ref)

@@ -309,6 +309,7 @@ export interface MappingCorpusCategory {
 
 export interface MappingCorpusReport {
   schema_version: string
+  capability_policy_version: string
   report_id: string
   corpus_version: string
   gate_status: 'passed' | 'partial' | 'failed'

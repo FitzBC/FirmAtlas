@@ -356,6 +356,16 @@ End If
         self.assertEqual(10, native_only.candidate_count)
         self.assertEqual(40, native_only.evidence_count)
         self.assertNotIn("constructs_request", native_only.observed_capabilities)
+        fritz = next(
+            item for item in report.samples
+            if item.sample_id == "openwrt-fritz4040-native-only-holdout"
+        )
+        self.assertEqual(CorpusSampleStatus.VERIFIED, fritz.status)
+        self.assertEqual(24, fritz.candidate_count)
+        self.assertEqual(60, fritz.evidence_count)
+        self.assertIn("mentions_endpoint", fritz.observed_capabilities)
+        self.assertIn("binds_handler", fritz.observed_capabilities)
+        self.assertNotIn("constructs_request", fritz.observed_capabilities)
 
     def test_open_obligation_prevents_verified_status(self):
         catalog = _frontend_catalog(b'$.post("/goform/SetX", {});')

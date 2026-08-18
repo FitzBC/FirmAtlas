@@ -106,6 +106,13 @@ AC9_R2_29_HISTORICAL_LEDGER = Path(
     "docs/firmware-mapping/samples/"
     "r2-29-vendor-tenda-ac9-historical-coverage-ledger.json"
 )
+FRITZ4040_R2_34_NATIVE_CATALOG = Path(
+    "docs/firmware-mapping/samples/"
+    "r2-34-openwrt-fritz4040-native-catalog.json"
+)
+FRITZ4040_FIRMWARE_SHA256 = (
+    "cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00"
+)
 
 
 def build_ac9_split_web_stack_case():
@@ -2090,11 +2097,122 @@ def build_ac9_dlna_fixture_split_case():
     ))
 
 
+def build_fritz4040_native_catalog_case():
+    """Preserve the frontend-driven/direct-registration architecture split."""
+
+    report_sha256 = hashlib.sha256(
+        FRITZ4040_R2_34_NATIVE_CATALOG.read_bytes()
+    ).hexdigest()
+    coverage_ref = CaseEvidenceReference(
+        "coverage:fritz4040-native-catalog-delta",
+        CaseEvidenceKind.COVERAGE_LEDGER,
+        FRITZ4040_R2_34_NATIVE_CATALOG.as_posix(),
+        report_sha256,
+        "json:$.regression_delta",
+        "compares_frontend_and_direct_native_operation_universes",
+        "fritz4040-native-catalog-report@v1alpha1",
+    )
+    method_ref = CaseEvidenceReference(
+        "evidence:2c0ca41b1fa1bd3b5d8c3eb6c6c22299432b1a215084506f66b7f02425a0d8cc",
+        CaseEvidenceKind.NATIVE_BINDING,
+        "usr/lib/rpcd/iwinfo.so",
+        "82afa783fc8e2f485742bb52823bea7833618be5f04198bd7f72da50bca91695",
+        "binary:bytes=11680-11684",
+        "registers_ubus_method",
+        "native-ubus-registration@0.1.0",
+    )
+    handler_ref = CaseEvidenceReference(
+        "evidence:fed30b68eea9c6a1335628054368e404caffd59039f59c3d04c6e894243722db",
+        CaseEvidenceKind.NATIVE_BINDING,
+        "usr/lib/rpcd/iwinfo.so",
+        "82afa783fc8e2f485742bb52823bea7833618be5f04198bd7f72da50bca91695",
+        "binary:bytes=11684-11688",
+        "binds_ubus_handler",
+        "native-ubus-registration@0.1.0",
+    )
+    return build_research_case(ResearchCaseInput(
+        case_key="openwrt-fritz4040-frontend-native-ubus-split",
+        title="FRITZ!Box 4040: frontend references are not the native UBUS universe",
+        firmware_artifact_sha256=FRITZ4040_FIRMWARE_SHA256,
+        architecture_tags=(
+            "rpcd_native_plugin", "ubus_static_registration",
+            "frontend_native_coverage_split", "native_only_holdout",
+        ),
+        research_question=(
+            "Can a frontend-seeded UBUS mapper recover the complete native method "
+            "universe, and how should direct registration evidence enter the Catalog?"
+        ),
+        evidence=(coverage_ref, method_ref, handler_ref),
+        claims=(
+            CaseClaim(
+                "claim:fritz-frontend-native-gap",
+                "The frontend-driven binding path publishes 20 of 24 statically registered methods and omits four iwinfo operations.",
+                (coverage_ref.evidence_ref,),
+                CaseClaimStatus.SUPPORTED,
+            ),
+            CaseClaim(
+                "claim:fritz-direct-native-binding",
+                "The iwinfo table directly registers devices and binds it to usr/lib/rpcd/iwinfo.so@0x0000181c.",
+                (method_ref.evidence_ref, handler_ref.evidence_ref),
+                CaseClaimStatus.SUPPORTED,
+            ),
+            CaseClaim(
+                "claim:fritz-direct-catalog-complete",
+                "The direct registration adapter publishes all 24 native operations in a completed scoped Catalog with handler edges.",
+                (coverage_ref.evidence_ref, method_ref.evidence_ref, handler_ref.evidence_ref),
+                CaseClaimStatus.SUPPORTED,
+            ),
+        ),
+        stages=(
+            CaseStage(
+                "stage:fritz-frontend-driven-catalog", 1,
+                "Frontend seeding resolves 20 native bindings but leaves four registered iwinfo methods outside the Catalog.",
+                ("claim:fritz-frontend-native-gap",),
+                creates_obligations=("obligation:fritz-direct-native-catalog",),
+            ),
+            CaseStage(
+                "stage:fritz-native-registration-producer", 2,
+                "The native producer recovers method and handler evidence independently of frontend assets.",
+                ("claim:fritz-direct-native-binding",),
+            ),
+            CaseStage(
+                "stage:fritz-direct-native-catalog", 3,
+                "A pure evidence-reusing adapter closes the Catalog projection gap and adds explicit binds_handler graph edges.",
+                ("claim:fritz-direct-catalog-complete",),
+                resolves_obligations=("obligation:fritz-direct-native-catalog",),
+            ),
+        ),
+        obligations=(CaseObligation(
+            "obligation:fritz-direct-native-catalog",
+            "Publish completed native registrations without requiring a frontend reference.",
+            "publishes_native_ubus_catalog",
+            CaseObligationStatus.RESOLVED,
+            (coverage_ref.evidence_ref, method_ref.evidence_ref, handler_ref.evidence_ref),
+        ),),
+        counterfactuals=(
+            "Treating frontend references as the complete UBUS universe silently loses devices, info, phyname, and survey.",
+            "Re-disassembling inside the Catalog adapter would duplicate analysis and risk evidence identity drift.",
+            "Merging static registration with runtime reachability would overstate what the firmware bytes prove.",
+        ),
+        paper_uses=(
+            "Independent holdout demonstrating recall gain from producer-to-Catalog composition.",
+            "Ablation comparing frontend-seeded and direct native registration universes.",
+            "Evidence-preserving graph example with operation, principal, binding, and handler nodes.",
+        ),
+        limitations=(
+            "Static registration does not establish runtime reachability, authentication, vulnerability, or exploitability.",
+            "The full auto-v21 Catalog remains partial because unrelated analyzers preserve 117 open obligations.",
+            "One OpenWrt target and four ARM plugins do not establish cross-ISA or cross-version generality.",
+        ),
+    ))
+
+
 def build_research_case_corpus() -> dict:
     cases = (
         build_ac9_split_web_stack_case(),
         build_x5000r_shared_cgi_case(),
         build_ac9_dlna_fixture_split_case(),
+        build_fritz4040_native_catalog_case(),
     )
     validation = validate_research_case_corpus(cases)
     return {

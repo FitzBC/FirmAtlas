@@ -127,6 +127,7 @@ from .web_config import discover_web_configuration
 
 MAPPING_ANALYSIS_RUN_SCHEMA_VERSION = "firmatlas.mapping.analysis-run/v1alpha1"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_AUTO_PROFILE_ID = re.compile(r"^firmatlas\.mapping\.profile/auto-v(?P<version>[0-9]+)$")
 _FRONTEND_SUFFIXES = frozenset({".js", ".html", ".htm", ".php", ".asp"})
 _SCRIPT_SUFFIXES = frozenset({".php", ".asp", ".lua", ".cgi"})
 _BASE_ANALYZERS = (
@@ -166,7 +167,15 @@ _AUTO_V19_ANALYZERS = _AUTO_V18_ANALYZERS + (
 _AUTO_V20_ANALYZERS = _AUTO_V19_ANALYZERS + (
     "native_cgi_selector_dispatch",
 )
-_AUTO_ANALYZERS = _AUTO_V20_ANALYZERS
+_AUTO_V21_ANALYZERS = _AUTO_V20_ANALYZERS + ("native_ubus_catalog",)
+_AUTO_ANALYZERS = _AUTO_V21_ANALYZERS
+
+
+def _auto_profile_version_at_least(
+    profile: "MappingAnalysisProfile", minimum: int,
+) -> bool:
+    match = _AUTO_PROFILE_ID.fullmatch(profile.profile_id)
+    return bool(match and int(match.group("version")) >= minimum)
 
 
 @dataclass(frozen=True)
@@ -186,7 +195,11 @@ class MappingAnalysisProfile:
 
     @classmethod
     def auto(cls) -> "MappingAnalysisProfile":
-        return cls("firmatlas.mapping.profile/auto-v20", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.profile/auto-v21", _AUTO_ANALYZERS)
+
+    @classmethod
+    def auto_v21(cls) -> "MappingAnalysisProfile":
+        return cls("firmatlas.mapping.profile/auto-v21", _AUTO_V21_ANALYZERS)
 
     @classmethod
     def auto_v20(cls) -> "MappingAnalysisProfile":
@@ -282,7 +295,14 @@ class MappingAnalyzerRegistry:
 
     @classmethod
     def builtin(cls) -> "MappingAnalyzerRegistry":
-        return cls("firmatlas.mapping.analyzer-registry/builtin-v20", _AUTO_ANALYZERS)
+        return cls("firmatlas.mapping.analyzer-registry/builtin-v21", _AUTO_ANALYZERS)
+
+    @classmethod
+    def builtin_v21(cls) -> "MappingAnalyzerRegistry":
+        return cls(
+            "firmatlas.mapping.analyzer-registry/builtin-v21",
+            _AUTO_V21_ANALYZERS,
+        )
 
     @classmethod
     def builtin_v20(cls) -> "MappingAnalyzerRegistry":
@@ -431,6 +451,7 @@ class MappingAnalyzerRegistry:
 
 
 BUILTIN_ANALYZER_REGISTRY = MappingAnalyzerRegistry.builtin()
+BUILTIN_ANALYZER_REGISTRY_V21 = MappingAnalyzerRegistry.builtin_v21()
 BUILTIN_ANALYZER_REGISTRY_V20 = MappingAnalyzerRegistry.builtin_v20()
 BUILTIN_ANALYZER_REGISTRY_V19 = MappingAnalyzerRegistry.builtin_v19()
 BUILTIN_ANALYZER_REGISTRY_V18 = MappingAnalyzerRegistry.builtin_v18()
@@ -845,59 +866,14 @@ def analyze_extracted_root(
         for source, content, kinds in selected if "frontend" in kinds
     )
     frontend_policy = FrontendPolicy(
-        enable_inline_form_literal=(
-            request.profile.profile_id in {
-                "firmatlas.mapping.profile/auto-v6",
-                "firmatlas.mapping.profile/auto-v7",
-                "firmatlas.mapping.profile/auto-v8",
-                "firmatlas.mapping.profile/auto-v9",
-                "firmatlas.mapping.profile/auto-v10",
-                "firmatlas.mapping.profile/auto-v11",
-                "firmatlas.mapping.profile/auto-v12",
-                "firmatlas.mapping.profile/auto-v13",
-                "firmatlas.mapping.profile/auto-v14",
-                "firmatlas.mapping.profile/auto-v15",
-                "firmatlas.mapping.profile/auto-v16",
-                "firmatlas.mapping.profile/auto-v17",
-                "firmatlas.mapping.profile/auto-v18",
-                "firmatlas.mapping.profile/auto-v19",
-                "firmatlas.mapping.profile/auto-v20",
-            }
+        enable_inline_form_literal=_auto_profile_version_at_least(
+            request.profile, 6
         ),
-        enable_tenda_get_set_data=(
-            request.profile.profile_id in {
-                "firmatlas.mapping.profile/auto-v6",
-                "firmatlas.mapping.profile/auto-v7",
-                "firmatlas.mapping.profile/auto-v8",
-                "firmatlas.mapping.profile/auto-v9",
-                "firmatlas.mapping.profile/auto-v10",
-                "firmatlas.mapping.profile/auto-v11",
-                "firmatlas.mapping.profile/auto-v12",
-                "firmatlas.mapping.profile/auto-v13",
-                "firmatlas.mapping.profile/auto-v14",
-                "firmatlas.mapping.profile/auto-v15",
-                "firmatlas.mapping.profile/auto-v16",
-                "firmatlas.mapping.profile/auto-v17",
-                "firmatlas.mapping.profile/auto-v18",
-                "firmatlas.mapping.profile/auto-v19",
-                "firmatlas.mapping.profile/auto-v20",
-            }
+        enable_tenda_get_set_data=_auto_profile_version_at_least(
+            request.profile, 6
         ),
-        enable_regex_literals=(
-            request.profile.profile_id
-            in {
-                "firmatlas.mapping.profile/auto-v10",
-                "firmatlas.mapping.profile/auto-v11",
-                "firmatlas.mapping.profile/auto-v12",
-                "firmatlas.mapping.profile/auto-v13",
-                "firmatlas.mapping.profile/auto-v14",
-                "firmatlas.mapping.profile/auto-v15",
-                "firmatlas.mapping.profile/auto-v16",
-                "firmatlas.mapping.profile/auto-v17",
-                "firmatlas.mapping.profile/auto-v18",
-                "firmatlas.mapping.profile/auto-v19",
-                "firmatlas.mapping.profile/auto-v20",
-            }
+        enable_regex_literals=_auto_profile_version_at_least(
+            request.profile, 10
         ),
     )
     frontend_graph = None
@@ -1339,25 +1315,7 @@ def analyze_extracted_root(
                     )
                     for source, content, kinds in selected if "native" in kinds
                 )
-                if request.profile.profile_id
-                in {
-                    "firmatlas.mapping.profile/auto-v5",
-                    "firmatlas.mapping.profile/auto-v6",
-                    "firmatlas.mapping.profile/auto-v7",
-                    "firmatlas.mapping.profile/auto-v8",
-                    "firmatlas.mapping.profile/auto-v9",
-                    "firmatlas.mapping.profile/auto-v10",
-                    "firmatlas.mapping.profile/auto-v11",
-                    "firmatlas.mapping.profile/auto-v12",
-                    "firmatlas.mapping.profile/auto-v13",
-                    "firmatlas.mapping.profile/auto-v14",
-                    "firmatlas.mapping.profile/auto-v15",
-                    "firmatlas.mapping.profile/auto-v16",
-                    "firmatlas.mapping.profile/auto-v17",
-                    "firmatlas.mapping.profile/auto-v18",
-                    "firmatlas.mapping.profile/auto-v19",
-                    "firmatlas.mapping.profile/auto-v20",
-                }
+                if _auto_profile_version_at_least(request.profile, 5)
                 else ()
             )
             set_difference = attribute_frontend_native_set_difference(
@@ -1365,40 +1323,11 @@ def analyze_extracted_root(
                 registrar_inventory,
                 attribution_artifacts,
                 SetDifferencePolicy.route_aware(
-                    frontend_auxiliary_only=request.profile.profile_id
-                    in {
-                        "firmatlas.mapping.profile/auto-v5",
-                        "firmatlas.mapping.profile/auto-v6",
-                        "firmatlas.mapping.profile/auto-v7",
-                        "firmatlas.mapping.profile/auto-v8",
-                        "firmatlas.mapping.profile/auto-v9",
-                        "firmatlas.mapping.profile/auto-v10",
-                        "firmatlas.mapping.profile/auto-v11",
-                        "firmatlas.mapping.profile/auto-v12",
-                        "firmatlas.mapping.profile/auto-v13",
-                        "firmatlas.mapping.profile/auto-v14",
-                        "firmatlas.mapping.profile/auto-v15",
-                        "firmatlas.mapping.profile/auto-v16",
-                        "firmatlas.mapping.profile/auto-v17",
-                        "firmatlas.mapping.profile/auto-v18",
-                        "firmatlas.mapping.profile/auto-v19",
-                        "firmatlas.mapping.profile/auto-v20",
-                    },
+                    frontend_auxiliary_only=_auto_profile_version_at_least(
+                        request.profile, 5
+                    ),
                     include_fixed_action_dynamic_query=(
-                        request.profile.profile_id
-                        in {
-                            "firmatlas.mapping.profile/auto-v10",
-                            "firmatlas.mapping.profile/auto-v11",
-                            "firmatlas.mapping.profile/auto-v12",
-                            "firmatlas.mapping.profile/auto-v13",
-                            "firmatlas.mapping.profile/auto-v14",
-                            "firmatlas.mapping.profile/auto-v15",
-                            "firmatlas.mapping.profile/auto-v16",
-                            "firmatlas.mapping.profile/auto-v17",
-                            "firmatlas.mapping.profile/auto-v18",
-                            "firmatlas.mapping.profile/auto-v19",
-                            "firmatlas.mapping.profile/auto-v20",
-                        }
+                        _auto_profile_version_at_least(request.profile, 10)
                     ),
                 ),
                 feature_gates=frontend_feature_gates,
@@ -1534,6 +1463,12 @@ def analyze_extracted_root(
             DiscoveryProducerBatch.ubus_backend,
             (ubus_backend,) if ubus_backend is not None else (),
             "auto:ubus-backend",
+        ))
+    if "native_ubus_catalog" in request.profile.enabled_analyzers:
+        batches.append(_batch(
+            DiscoveryProducerBatch.native_ubus_registration,
+            native_ubus,
+            "auto:native-ubus-registration",
         ))
     catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
         firmware_artifact_sha256=request.firmware_artifact_sha256,
@@ -1733,6 +1668,16 @@ def analyze_extracted_root(
         stages.append(_stage(
             "native_ubus_registration", native_ubus,
             sum(len(item.objects) for item in native_ubus if item.registration_coverage_complete),
+        ))
+    if "native_ubus_catalog" in request.profile.enabled_analyzers:
+        stages.append(_stage(
+            "native_ubus_catalog", native_ubus,
+            sum(
+                len(obj.methods)
+                for item in native_ubus
+                if item.registration_coverage_complete
+                for obj in item.objects
+            ),
         ))
     if "arm_pic_callsite" in request.profile.enabled_analyzers:
         stages.append(_stage(
