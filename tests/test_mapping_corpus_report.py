@@ -18,6 +18,7 @@ from firmatlas.mapping import (
     assemble_discovery_catalog,
     build_corpus_report,
     discover_frontend_requests,
+    discover_script_backend,
 )
 
 
@@ -38,6 +39,75 @@ def _frontend_catalog(content: bytes, firmware_sha256: str = "1" * 64):
 
 
 class CorpusReportContractTests(unittest.TestCase):
+    def test_candidate_scope_evaluates_one_architecture_inside_a_mixed_catalog(self):
+        frontend_content = b'fetch("/ui/status");'
+        backend_content = b'''<%
+If Request_Form("button_type") = "1" Then
+    TCWebApi_set("Account_Entry0","web_passwd","button_type")
+End If
+%>'''
+        frontend = discover_frontend_requests(
+            SourceArtifactEntry(
+                "www/app.js", "www/app.js", "file", len(frontend_content),
+                hashlib.sha256(frontend_content).hexdigest(),
+            ),
+            frontend_content,
+        )
+        backend = discover_script_backend(
+            SourceArtifactEntry(
+                "www/admin.asp", "www/admin.asp", "file", len(backend_content),
+                hashlib.sha256(backend_content).hexdigest(),
+            ),
+            backend_content,
+        )
+        catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
+            firmware_artifact_sha256="1" * 64,
+            source_inventory_sha256="2" * 64,
+            batches=(
+                DiscoveryProducerBatch.frontend((frontend,), "www/app.js"),
+                DiscoveryProducerBatch.script_backend((backend,), "www/admin.asp"),
+            ),
+        ))
+        backend_ids = tuple(
+            item.candidate_id for item in catalog.candidates
+            if item.source_path == "www/admin.asp"
+        )
+
+        report = build_corpus_report(CorpusReportInput(
+            corpus_version="firmatlas.mapping.corpus/m1.3",
+            required_categories=("script_backend",),
+            samples=(CorpusSampleInput(
+                "scoped-script", "script_backend", "vendor_asp_controller",
+                "validation", CorpusEvidenceTier.REAL_FIRMWARE,
+                required_capabilities=("reads_parameter", "writes_configuration"),
+                forbidden_capabilities=("constructs_request",),
+                expected_firmware_sha256="1" * 64,
+                catalog=catalog,
+                scope_candidate_ids=backend_ids,
+            ),),
+        ))
+
+        sample = report.samples[0]
+        self.assertEqual(CorpusGateStatus.PASSED, report.gate_status)
+        self.assertEqual(CorpusSampleStatus.VERIFIED, sample.status)
+        self.assertEqual(tuple(sorted(backend_ids)), sample.scope_candidate_ids)
+        self.assertNotIn("constructs_request", sample.observed_capabilities)
+        self.assertEqual(len(backend_ids), sample.candidate_count)
+        with self.assertRaisesRegex(ValueError, "scope candidate"):
+            build_corpus_report(CorpusReportInput(
+                corpus_version="firmatlas.mapping.corpus/m1.3",
+                required_categories=("script_backend",),
+                samples=(replace(
+                    CorpusSampleInput(
+                        "invalid-scope", "script_backend", "vendor_asp_controller",
+                        "validation", CorpusEvidenceTier.REAL_FIRMWARE,
+                        required_capabilities=("reads_parameter",),
+                        expected_firmware_sha256="1" * 64, catalog=catalog,
+                    ),
+                    scope_candidate_ids=("candidate:unknown",),
+                ),),
+            ))
+
     def test_real_firmware_evidence_verifies_one_required_architecture(self):
         catalog = _frontend_catalog(
             b'$.post("/goform/SetOnlineDevName", {mac: value});'
@@ -233,12 +303,12 @@ class CorpusReportContractTests(unittest.TestCase):
         categories = {
             item.architecture_category: item.status for item in report.categories
         }
-        self.assertEqual(CorpusGateStatus.PARTIAL, report.gate_status)
+        self.assertEqual(CorpusGateStatus.PASSED, report.gate_status)
         self.assertEqual(CorpusSampleStatus.VERIFIED, categories["form_handler"])
         self.assertEqual(CorpusSampleStatus.VERIFIED, categories["hnap_soap"])
         self.assertEqual(CorpusSampleStatus.VERIFIED, categories["cgi_gateway"])
-        self.assertEqual(CorpusSampleStatus.COVERAGE_GAP, categories["script_backend"])
-        self.assertEqual(CorpusSampleStatus.ACQUISITION_GAP, categories["native_only"])
+        self.assertEqual(CorpusSampleStatus.VERIFIED, categories["script_backend"])
+        self.assertEqual(CorpusSampleStatus.VERIFIED, categories["native_only"])
         ac9 = next(item for item in report.samples if item.sample_id.startswith("tenda-ac9"))
         self.assertEqual(0, ac9.open_obligation_count)
         self.assertIn("binds_handler", ac9.observed_capabilities)
@@ -271,6 +341,21 @@ class CorpusReportContractTests(unittest.TestCase):
             "set_difference_attribution",
         } <= set(x5000r.candidate_kinds))
         self.assertEqual((), x5000r.missing_capabilities)
+        script_backend = next(
+            item for item in report.samples
+            if item.sample_id == "dlink-dap3520-script-backend"
+        )
+        self.assertEqual(CorpusSampleStatus.VERIFIED, script_backend.status)
+        self.assertEqual(268, script_backend.candidate_count)
+        self.assertEqual(276, script_backend.evidence_count)
+        native_only = next(
+            item for item in report.samples
+            if item.sample_id == "totolink-x5000r-native-only"
+        )
+        self.assertEqual(CorpusSampleStatus.VERIFIED, native_only.status)
+        self.assertEqual(10, native_only.candidate_count)
+        self.assertEqual(40, native_only.evidence_count)
+        self.assertNotIn("constructs_request", native_only.observed_capabilities)
 
     def test_open_obligation_prevents_verified_status(self):
         catalog = _frontend_catalog(b'$.post("/goform/SetX", {});')

@@ -256,6 +256,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     query_ledger_parser.add_argument(
         "--evidence-state", action="append", default=[]
     )
+    publish_corpus_parser = mapping_subparsers.add_parser(
+        "publish-corpus-report",
+        help="publish an immutable representative corpus gate report",
+    )
+    _database_argument(publish_corpus_parser)
+    publish_corpus_parser.add_argument(
+        "document", help="path to a representative corpus report JSON document"
+    )
+    query_corpus_parser = mapping_subparsers.add_parser(
+        "query-corpus-report",
+        help="read the latest published representative corpus gate report",
+    )
+    _database_argument(query_corpus_parser)
     args = parser.parse_args(argv)
 
     if args.command == "demo-report":
@@ -366,6 +379,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         from .mapping.communication_graph import (
             CommunicationArchitectureGraph,
         )
+        from .mapping.corpus_report import CorpusReport
         from .mapping.historical_graph_overlay import HistoricalGraphOverlay
         from .mapping.historical_coverage_ledger import HistoricalCoverageLedger
         from .mapping.repository import (
@@ -444,7 +458,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     Path(args.document).read_text(encoding="utf-8")
                 ))
                 result = repository.publish_historical_coverage_ledger(ledger)
-            else:
+            elif args.mapping_command == "query-history-ledger":
                 result = repository.query_historical_coverage_ledger(
                     args.graph_id,
                     HistoricalCoverageLedgerQuery(
@@ -458,6 +472,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     raise ValueError(
                         "historical coverage ledger does not exist"
                     )
+            elif args.mapping_command == "publish-corpus-report":
+                report = CorpusReport.from_dict(json.loads(
+                    Path(args.document).read_text(encoding="utf-8")
+                ))
+                result = repository.publish_corpus_report(report)
+            else:
+                result = repository.latest_corpus_report()
+                if result is None:
+                    raise ValueError("representative corpus report does not exist")
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
         finally:

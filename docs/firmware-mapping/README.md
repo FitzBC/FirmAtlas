@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1 corpus gate 仍为 `partial`；R2-32 MiniMax 证据受限建议链已验证
+> 当前状态：R2-33 scope-aware corpus gate 已通过；五类代表架构均有真实固件 verified 样本
 > 最近更新：2026-08-18
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -90,6 +90,7 @@
 | [R2-30 原始制品 AnalyzeRun](./progress/2026-08-17-r2-30-raw-artifact-analyze-run.md) | 隔离提取、保守 rootfs 选择与 raw artifact → AnalyzeRun/图谱闭环 | 原始制品入口、Container Binwalk 或根目录选择变化时 |
 | [R2-31 浏览器上传作业生命周期](./progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md) | 有界上传、持久化异步状态、Catalog/Graph 发布与真实 AC9 页面回放 | 上传预算、任务状态、发布流程或 Console 交互变化时 |
 | [R2-32 MiniMax 证据受限建议](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) | 最小脱敏证据包、proposal 白名单、运行审计、API/Console 与官方协议 | 模型合同、供应商协议、晋级门或数据策略变化时 |
+| [R2-33 scope-aware corpus gate](./progress/2026-08-18-r2-33-scope-aware-corpus-gate.md) | 混合 Catalog 候选范围、五类门禁、不可变发布、API/Console 与独立 holdout | corpus 范围、门禁语义、样本或 Adapter 变化时 |
 | [R2-02 Profile/Registry](./progress/2026-08-09-r2-02-analysis-profile-registry.md) | 原厂 Tenda AC9 主样本、ARM PIC 自动深化、OpenWrt ubus 对照 | Profile、Registry、适用性 gate 或主样本结果变化时 |
 | [R2-03 历史 expectation diff](./progress/2026-08-09-r2-03-historical-expectation-diff.md) | 版本范围护栏、漏检归因、AC9 对象 payload 参数闭环 | expectation 合同、归因、历史样本或参数结果变化时 |
 | [R2-04 AC9 框架语义与全集审计](./progress/2026-08-09-r2-04-ac9-framework-history-audit.md) | 跨文件 POST 证明、71 条漏洞全集、30 条样本关联、路由绑定缺口 | framework graph、历史分母、样本关联或 binding 状态变化时 |
@@ -176,7 +177,7 @@ M1 工作项：
 | M1-09 | FirmAtlas 查询与最小 UI 纵向接入 | 已验证 | M1-08 | repository/API tests + React test + browser regression |
 | M1-10A | Native 命名 route-table 深绑定 Adapter | 已验证 | M1-09 | 10 contract tests + synthetic ARM ELF + AC9 negative control + obligation closure |
 | M1-10B | ARM PIC call-site deterministic Adapter | 已验证 | M1-10A | 12 contract tests + AC9 5/5 binding + 10/10 obligation closure + browser regression |
-| M1-11 | 代表性架构 corpus 出口门 | 进行中 | M1-04/06B/10B | `/goform`、共享 CGI、HNAP/SOAP、脚本后端、Native-only 的可重复 coverage report；当前 `partial` |
+| M1-11 | 代表性架构 corpus 出口门 | 已验证 | M1-04/06B/10B/R2-33 | scope-aware 真实固件 coverage report；前端、Web 配置、脚本后端、Native-only、混合链路五类当前 `passed` |
 | M1-11A | DAP-3520 proprietary httpd / PHP-XGI Catalog | 已验证 | M1-02B/05/06B/08/11 | 273 candidates + 288 replayable evidence + completed Inventory/Catalog propagation |
 | M1-12 | 复杂通信架构研究案例合同与案例库 | 已验证 | M1-03/05/06A/10B | 12 contract tests + 内容寻址 AC9 跨层案例 + 7 EvidenceAtom 重放 + full regression |
 | M1-13 | 固件 chroot symlink Inventory | 已验证 | M1-02/02B/11A | Inventory v1alpha2 + escape/cycle/missing/depth tests + DAP-3520 753-node completed replay |
@@ -209,10 +210,11 @@ M1 工作项：
 | R2-30 | OpenWrt AC9 原始制品 AnalyzeRun | 已验证 | R2-01/29 | 原始 `.trx` → 固定容器 → 保守 rootfs → AnalyzeRun/图谱；1665 nodes / 2273 edges，提取 coverage 保持 partial；[记录](./progress/2026-08-17-r2-30-raw-artifact-analyze-run.md) |
 | R2-31 | AC9 浏览器上传作业生命周期 | 已验证 | R2-30 | 64 MiB 有界 raw upload → 内容寻址 artifact → 单 worker AnalyzeRun → Catalog/Graph 发布；真实页面显示 partial、1665 nodes / 2273 edges 并可跳转图谱；[记录](./progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md) |
 | R2-32 | MiniMax 证据受限分析建议 | 已验证 | R2-31 | 有界脱敏 Catalog bundle → MiniMax Adapter → target/evidence 白名单 Validator → 独立 ReasoningRun；模型不能改写 Catalog；[记录](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) |
+| R2-33 | 候选范围感知代表性语料门禁 | 已验证 | M1-11/R2-32 | 混合 Catalog 显式 scope + 五类真实样本门禁 passed + immutable SQLite/CLI/API + Console 解释边界；[记录](./progress/2026-08-18-r2-33-scope-aware-corpus-gate.md) |
 
-**下一项建议**：R2-32 验收后转向代表性 corpus gate，补齐 script-backend coverage 和 native-only
-真实样本。MiniMax proposal 仍不具备事实晋级能力；除非出现新原始来源或明确 mapper 假阴性，
-不再按单 CVE 无界深挖 AC9。
+**下一项建议**：R2-34 实现 direct Native registration → Catalog Adapter，并用 OpenWrt
+FRITZ!Box 4040 做独立 native-only holdout；随后受控重取 DAP-2695，跑完整 AnalyzeRun 验证
+script-backend 跨厂商泛化。AC9 保持主回归样本，MiniMax proposal 仍不具备事实晋级能力。
 
 ## 7. 跨会话无缝工作协议
 

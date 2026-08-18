@@ -5,7 +5,7 @@
     "catalog_coverage_status": "completed",
     "catalog_id": "discovery-catalog:e1b1f16da33f8d9ac0725bb3ae917efb80becc4d7b3d6db9305309126862a14a",
     "edge_count": 7212,
-    "graph_id": "communication-graph:15050fd4a63917119af0ffa4ce0f154841e47b72de24104d0c7b128208b1afaf",
+    "graph_id": "communication-graph:e1106817678327c6fc1249507ace8330cc201dc2e9d800f4b953ff1679d26222",
     "graph_projection_status": "completed",
     "node_count": 5674,
     "profile_id": "firmatlas.mapping.profile/auto-v13"
@@ -24,10 +24,10 @@
     ],
     "production_document_served": true,
     "source_sha256": {
-      "apps/console/src/api/client.ts": "d2964a8c06d6cea3bd1e114d5941e41c23f727d7699cd51a6678cddbef548e18",
+      "apps/console/src/api/client.ts": "c4a4450f257572ddc868545bafa1a35d45ce0419bc311e778e668e28007ede10",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
-      "apps/console/src/components/MappingCatalogWorkspace.tsx": "cf78caaedaf237af5ca3c4f9deae5b57a11e041042ce06e6dccbe238c791196f",
-      "apps/console/src/types.ts": "5f3d7e37bdba94082eae7e66f381120db878c708ff330ee188871a5b4db5d1b1"
+      "apps/console/src/components/MappingCatalogWorkspace.tsx": "83885eba0b93f83f35961716402ec01c5c945e5aa323c9e5744504903ed786f1",
+      "apps/console/src/types.ts": "13a01ec90f7e8686b4de5f859c83acf43bfda1de6a513ead1260df4b9b11cedc"
     }
   },
   "evidence_boundary": "The HTTP adapter translates request parameters into the shared CommunicationGraphQuery. The Console selects and renders returned facts; neither layer creates interface, owner, runtime, or vulnerability conclusions.",
@@ -39,7 +39,7 @@
         "goform/SetDlnaCfg",
         "goform/expandDlnaFile?"
       ],
-      "query_id": "communication-graph-query:251b2e05037ab296318f9eef2e05c207c11f88db2a8a139a5ce222181770f62d"
+      "query_id": "communication-graph-query:a552c573433864a208311ed429967407a11ee33caf822903602e987642d1d3af"
     },
     "focused_interface_structure": {
       "dlnaEn_evidence": [
@@ -67,7 +67,7 @@
         "registers_route",
         "registers_route"
       ],
-      "query_id": "communication-graph-query:d636f92a99313937bc5b5c26f00694f29b3e2b95f90c6f9680bd1bb64a1a0932",
+      "query_id": "communication-graph-query:1e95b8d4e60d0c2dd090a81ce77d608eb063c38d75cd4b423df4f2e352e6b382",
       "query_status": "completed"
     },
     "health": {
@@ -82,7 +82,7 @@
         "dlnaEn",
         "scanList"
       ],
-      "query_id": "communication-graph-query:85a91a584c06df95ed1d00443bd49bf2f2f3483b8ba1a25710e8e34e73d9ed60"
+      "query_id": "communication-graph-query:4a4b7e8c6e08fddac1e94835ccc228851139976217d117b9ab9f09707c132331"
     }
   },
   "sample_role": "tenda-ac9-primary",

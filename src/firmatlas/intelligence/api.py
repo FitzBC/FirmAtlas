@@ -138,6 +138,14 @@ def create_handler(
                 return HTTPStatus.OK, mappings.list_catalogs(
                     limit=page_size, offset=(page - 1) * page_size,
                 )
+            if method == "GET" and path == "/api/mappings/corpus-report":
+                report = mappings.latest_corpus_report()
+                if report is None:
+                    raise ApiError(
+                        HTTPStatus.NOT_FOUND,
+                        "representative corpus report not found",
+                    )
+                return HTTPStatus.OK, report
             if method == "GET" and path == "/api/mappings/jobs":
                 return HTTPStatus.OK, {
                     "enabled": mapping_job_service is not None,

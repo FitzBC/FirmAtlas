@@ -16,6 +16,9 @@ from firmatlas.intelligence.sample_data import demo_records
 from firmatlas.intelligence.service import IntelligenceService
 from http.server import ThreadingHTTPServer
 from firmatlas.mapping import (
+    CorpusEvidenceTier,
+    CorpusReportInput,
+    CorpusSampleInput,
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
     SourceArtifactEntry,
@@ -32,6 +35,7 @@ from firmatlas.mapping import (
     MappingReasoningProposal,
     MappingReasoningRun,
     MappingReasoningRunStatus,
+    build_corpus_report,
 )
 from firmatlas.mapping.repository import DiscoveryCatalogRepository
 from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
@@ -202,6 +206,27 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertTrue(observed["enabled"])
         self.assertEqual("minimax-reasoner:test", observed["adapter_id"])
         self.assertEqual(submitted["run_id"], observed["latest"]["run_id"])
+
+    def test_mapping_corpus_route_returns_latest_published_gate(self) -> None:
+        catalog = _hidden_catalog()
+        report = build_corpus_report(CorpusReportInput(
+            corpus_version="firmatlas.mapping.corpus/test",
+            required_categories=("native_only",),
+            samples=(CorpusSampleInput(
+                "native", "native_only", "native_registry", "test",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                required_capabilities=("binds_handler",),
+                expected_firmware_sha256=catalog.firmware_artifact_sha256,
+                catalog=catalog,
+            ),),
+        ))
+        self.mapping_repository.publish_corpus_report(report)
+
+        status, observed = self.get("/api/mappings/corpus-report")
+
+        self.assertEqual(200, status)
+        self.assertEqual(report.report_id, observed["report_id"])
+        self.assertEqual("passed", observed["gate_status"])
 
     def test_overview_and_filtered_feed(self) -> None:
         status, overview = self.get("/api/intelligence/overview")

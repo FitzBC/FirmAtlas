@@ -22,6 +22,7 @@ import type {
   FirmwareCandidateDetail,
   FirmwareCandidate,
   MappingCatalogSummary,
+  MappingCorpusReport,
   FirmwareMappingJob,
   FirmwareMappingJobPage,
   MappingReasoningCapability,
@@ -183,6 +184,8 @@ export const intelligenceApi = {
     request<{ items: MappingCatalogSummary[]; total: number; limit: number; offset: number }>(
       '/api/mappings/catalogs?page_size=50', { signal },
     ),
+  mappingCorpusReport: (signal?: AbortSignal) =>
+    request<MappingCorpusReport>('/api/mappings/corpus-report', { signal }),
   mappingJobs: (signal?: AbortSignal) =>
     request<FirmwareMappingJobPage>('/api/mappings/jobs', { signal }),
   mappingJob: (jobId: string, signal?: AbortSignal) =>

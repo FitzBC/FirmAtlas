@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { intelligenceApi } from '../api/client'
 import type {
   MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
+  MappingCorpusReport,
   MappingSnapshotDiff, PotentialHiddenInterfacePage,
   CommunicationGraphQueryResult, CommunicationGraphSummary,
   HistoricalGraphOverlayQueryResult,
@@ -17,6 +18,40 @@ const catalog: MappingCatalogSummary = {
   scheduler_termination: 'fixed_point',
   published_at: '2026-08-09T00:00:00Z', candidate_count: 1, parameter_count: 2,
   association_count: 0, open_obligation_count: 0,
+}
+const corpusReport: MappingCorpusReport = {
+  schema_version: 'firmatlas.mapping.corpus-report/v1alpha2',
+  report_id: `corpus-report:${'c'.repeat(64)}`,
+  corpus_version: 'firmatlas-representative-corpus/m1.3', gate_status: 'passed',
+  required_categories: ['form_handler', 'hnap_soap', 'cgi_gateway', 'script_backend', 'native_only'],
+  categories: ['form_handler', 'hnap_soap', 'cgi_gateway', 'script_backend', 'native_only'].map((architecture_category) => ({
+    architecture_category, status: 'verified', sample_count: 1,
+    real_firmware_verified_count: 1, derived_firmware_verified_count: 0,
+    contract_verified_count: 0, coverage_gap_count: architecture_category === 'script_backend' ? 1 : 0,
+    acquisition_gap_count: 0, observed_capabilities: ['mentions_endpoint'],
+    candidate_kinds: ['request_interface'], open_obligation_count: 0,
+  })),
+  samples: [{
+    sample_id: 'dap3520-script-backend', architecture_category: 'script_backend',
+    architecture_subtype: 'asp-command-backend', role: 'positive', evidence_tier: 'real_firmware',
+    status: 'verified', catalog_id: 'catalog:dap3520',
+    required_capabilities: ['reads_parameter', 'writes_configuration'],
+    forbidden_capabilities: ['constructs_request'],
+    observed_capabilities: ['reads_parameter', 'writes_configuration'],
+    missing_capabilities: [], unexpected_capabilities: [], candidate_kinds: ['script_route'],
+    candidate_count: 268, evidence_count: 276, open_obligation_count: 0,
+    scope_candidate_ids: ['script-route:1'],
+  }, {
+    sample_id: 'x5000r-native-only', architecture_category: 'native_only',
+    architecture_subtype: 'native-registration-no-frontend-reference', role: 'positive',
+    evidence_tier: 'real_firmware', status: 'verified', catalog_id: 'catalog:x5000r',
+    required_capabilities: ['binds_handler', 'mentions_endpoint'],
+    forbidden_capabilities: ['constructs_request'],
+    observed_capabilities: ['binds_handler', 'mentions_endpoint'],
+    missing_capabilities: [], unexpected_capabilities: [], candidate_kinds: ['native_route_binding'],
+    candidate_count: 10, evidence_count: 40, open_obligation_count: 0,
+    scope_candidate_ids: ['native-binding:1'],
+  }],
 }
 const candidate: MappingCandidate = {
   candidate_id: 'request:abc', candidate_kind: 'request_interface',
@@ -323,9 +358,32 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+it('explains the scope-aware representative corpus gate without overstating generalization', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({ items: [candidate], total: 1, limit: 100, offset: 0 })
+  vi.spyOn(intelligenceApi, 'mappingCorpusReport').mockResolvedValue(corpusReport)
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '语料门禁' }))
+
+  expect(await screen.findByText('五类通信架构门禁通过')).toBeInTheDocument()
+  expect(screen.getByText('表单处理链')).toBeInTheDocument()
+  expect(screen.getByText('HNAP / SOAP')).toBeInTheDocument()
+  expect(screen.getByText('共享 CGI 网关')).toBeInTheDocument()
+  expect(screen.getAllByText('已验证').length).toBeGreaterThanOrEqual(5)
+  expect(screen.getByText('dap3520-script-backend')).toBeInTheDocument()
+  expect(screen.getByText('268 候选 · 276 证据')).toBeInTheDocument()
+  expect(screen.getByText('x5000r-native-only')).toBeInTheDocument()
+  expect(screen.getByText('10 候选 · 40 证据')).toBeInTheDocument()
+  expect(screen.getByText(/不等于所有厂商与子类型均已泛化验证/)).toBeInTheDocument()
+})
+
 it('uploads one firmware artifact and exposes its published mapping job', async () => {
   vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
     items: [], total: 0, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
+    items: [], total: 0, limit: 100, offset: 0,
   })
   vi.spyOn(intelligenceApi, 'mappingJobs').mockResolvedValue({
     enabled: true, max_upload_bytes: 64 * 1024 * 1024, items: [],

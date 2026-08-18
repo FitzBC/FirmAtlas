@@ -331,8 +331,18 @@ def build_m1_report(
     )
     dap3520 = _dap3520_catalog(dap3520_root)
     x5000r = _x5000r_catalog(x5000r_root)
+    dap3520_script_scope = tuple(
+        item.candidate_id for item in dap3520.candidates
+        if item.source_path in {"www/home_sys.php", "www/__action.php"}
+    ) if dap3520 is not None else ()
+    x5000r_native_only_scope = tuple(
+        item.candidate_id for item in x5000r.candidates
+        if dict(item.attributes).get("difference_side") == "native_only"
+        and dict(item.attributes).get("attribution_kind")
+        == "native_registration_no_frontend_reference"
+    ) if x5000r is not None else ()
     return build_corpus_report(CorpusReportInput(
-        corpus_version="firmatlas.mapping.corpus/m1.2",
+        corpus_version="firmatlas.mapping.corpus/m1.3",
         required_categories=(
             "form_handler", "hnap_soap", "cgi_gateway",
             "script_backend", "native_only",
@@ -381,16 +391,31 @@ def build_m1_report(
                 catalog=x5000r,
             ),
             CorpusSampleInput(
+                "dlink-dap3520-script-backend", "script_backend",
+                "php_xgi_controller", "cross-architecture-validation",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                ("reads_parameter", "writes_configuration"),
+                ("constructs_request",),
+                expected_firmware_sha256=DAP3520_FIRMWARE_SHA256,
+                catalog=dap3520,
+                scope_candidate_ids=dap3520_script_scope,
+            ),
+            CorpusSampleInput(
                 "dlink-dsl2877-derived", "script_backend",
                 "vendor_asp_controller", "cross-architecture-validation",
                 CorpusEvidenceTier.DERIVED_FIRMWARE,
                 ("reads_parameter", "writes_configuration"),
             ),
             CorpusSampleInput(
-                "native-only-acquisition-gap", "native_only",
-                "native_route_registry", "acquisition-gap",
-                CorpusEvidenceTier.EXTERNAL_LEAD,
+                "totolink-x5000r-native-only", "native_only",
+                "native_route_registry_without_frontend_reference",
+                "cross-architecture-validation",
+                CorpusEvidenceTier.REAL_FIRMWARE,
                 ("mentions_endpoint", "binds_handler"),
+                ("constructs_request",),
+                expected_firmware_sha256=X5000R_FIRMWARE_SHA256,
+                catalog=x5000r,
+                scope_candidate_ids=x5000r_native_only_scope,
             ),
         ),
     ))

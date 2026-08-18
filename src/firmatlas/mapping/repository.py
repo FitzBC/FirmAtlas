@@ -18,6 +18,7 @@ from .communication_graph import (
     CommunicationGraphEdgeKind,
     CommunicationGraphNodeKind,
 )
+from .corpus_report import CorpusReport
 from .historical_expectation import (
     HistoricalApplicability,
     HistoricalGapReason,
@@ -350,6 +351,17 @@ class DiscoveryCatalogRepository:
                     ON mapping_historical_coverage_ledgers(
                         graph_id, published_at DESC, ledger_id
                     );
+                CREATE TABLE IF NOT EXISTS mapping_corpus_reports (
+                    report_id TEXT PRIMARY KEY,
+                    schema_version TEXT NOT NULL,
+                    corpus_version TEXT NOT NULL,
+                    gate_status TEXT NOT NULL,
+                    content_sha256 TEXT NOT NULL,
+                    document_json TEXT NOT NULL,
+                    published_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_mapping_corpus_report_latest
+                    ON mapping_corpus_reports(published_at DESC, report_id DESC);
                 """
             )
             rows = self._connection.execute(
@@ -410,6 +422,54 @@ class DiscoveryCatalogRepository:
 
     def publish(self, catalog: DiscoveryCatalog) -> dict:
         return self.publish_dict(catalog.to_dict())
+
+    def publish_corpus_report(self, report: CorpusReport) -> dict:
+        """Publish one content-addressed representative corpus gate report."""
+
+        document = report.to_dict()
+        payload = _encoded(document)
+        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        with self._lock, self._connection:
+            existing = self._connection.execute(
+                "SELECT content_sha256 FROM mapping_corpus_reports WHERE report_id = ?",
+                (report.report_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing["content_sha256"] != digest:
+                    raise ValueError(
+                        "corpus report identity contains different content"
+                    )
+                return {
+                    "report_id": report.report_id,
+                    "created": False,
+                    "content_sha256": digest,
+                }
+            self._connection.execute(
+                """INSERT INTO mapping_corpus_reports (
+                       report_id, schema_version, corpus_version, gate_status,
+                       content_sha256, document_json, published_at
+                   ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    report.report_id, report.schema_version,
+                    report.corpus_version, report.gate_status.value,
+                    digest, payload, _utc_now(),
+                ),
+            )
+        return {
+            "report_id": report.report_id,
+            "created": True,
+            "content_sha256": digest,
+        }
+
+    def latest_corpus_report(self) -> Optional[dict]:
+        """Return the newest immutable corpus gate report, if published."""
+
+        with self._lock:
+            row = self._connection.execute(
+                """SELECT document_json FROM mapping_corpus_reports
+                   ORDER BY published_at DESC, report_id DESC LIMIT 1"""
+            ).fetchone()
+        return json.loads(row["document_json"]) if row else None
 
     def publish_communication_graph(
         self, graph: CommunicationArchitectureGraph

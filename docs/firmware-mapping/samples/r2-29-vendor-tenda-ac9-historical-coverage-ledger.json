@@ -20,9 +20,9 @@
     ],
     "production_document_served": true,
     "source_sha256": {
-      "apps/console/src/api/client.ts": "d2964a8c06d6cea3bd1e114d5941e41c23f727d7699cd51a6678cddbef548e18",
+      "apps/console/src/api/client.ts": "c4a4450f257572ddc868545bafa1a35d45ce0419bc311e778e668e28007ede10",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
-      "apps/console/src/types.ts": "5f3d7e37bdba94082eae7e66f381120db878c708ff330ee188871a5b4db5d1b1"
+      "apps/console/src/types.ts": "13a01ec90f7e8686b4de5f859c83acf43bfda1de6a513ead1260df4b9b11cedc"
     }
   },
   "coverage_ledger": {

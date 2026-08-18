@@ -273,6 +273,50 @@ export interface MappingCatalogSummary {
   release_context?: MappingReleaseContext | null
 }
 
+export interface MappingCorpusSample {
+  sample_id: string
+  architecture_category: string
+  architecture_subtype: string
+  role: string
+  evidence_tier: 'real_firmware' | 'derived_firmware' | 'contract_fixture' | 'external_lead'
+  status: 'verified' | 'derived_only' | 'contract_only' | 'coverage_gap' | 'acquisition_gap'
+  catalog_id: string | null
+  required_capabilities: string[]
+  forbidden_capabilities: string[]
+  observed_capabilities: string[]
+  missing_capabilities: string[]
+  unexpected_capabilities: string[]
+  candidate_kinds: string[]
+  candidate_count: number
+  evidence_count: number
+  open_obligation_count: number
+  scope_candidate_ids: string[]
+}
+
+export interface MappingCorpusCategory {
+  architecture_category: string
+  status: MappingCorpusSample['status']
+  sample_count: number
+  real_firmware_verified_count: number
+  derived_firmware_verified_count: number
+  contract_verified_count: number
+  coverage_gap_count: number
+  acquisition_gap_count: number
+  observed_capabilities: string[]
+  candidate_kinds: string[]
+  open_obligation_count: number
+}
+
+export interface MappingCorpusReport {
+  schema_version: string
+  report_id: string
+  corpus_version: string
+  gate_status: 'passed' | 'partial' | 'failed'
+  required_categories: string[]
+  samples: MappingCorpusSample[]
+  categories: MappingCorpusCategory[]
+}
+
 export interface FirmwareMappingJob {
   schema_version: string
   job_id: string

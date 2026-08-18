@@ -6,10 +6,10 @@
     "catalog_id": "discovery-catalog:e1b1f16da33f8d9ac0725bb3ae917efb80becc4d7b3d6db9305309126862a14a",
     "expectation_diff_id": "historical-expectation-diff:bd29c387726065bb15d0d60115b928ad6640322e8a1f685fe86a41eb7e6bc91f",
     "graph_edge_count": 7212,
-    "graph_id": "communication-graph:15050fd4a63917119af0ffa4ce0f154841e47b72de24104d0c7b128208b1afaf",
+    "graph_id": "communication-graph:e1106817678327c6fc1249507ace8330cc201dc2e9d800f4b953ff1679d26222",
     "graph_node_count": 5674,
     "graph_projection_status": "completed",
-    "overlay_id": "historical-graph-overlay:e7f8cf3c9aca3cc9ee7815dd8eb93cb48c6627e26792220da11b04d57bf34393",
+    "overlay_id": "historical-graph-overlay:a6cca047038eb6ac0b7499569c8afbcf22c7d6f92bd862eb2a6ba9446bcf462e",
     "profile_id": "firmatlas.mapping.profile/auto-v13",
     "route_binding_report_id": "historical-route-binding:763463e385a2dfa412afbd15881dd80ff8d4bf6025a54e28ffdcb796e7d88ec3",
     "vulnerability_audit_id": "historical-vulnerability-audit:174bdd4fcaee593b0d3daa0b8a7057a0fa3274dab87aff817427911f42cd2e33"
@@ -27,9 +27,9 @@
     ],
     "production_document_served": true,
     "source_sha256": {
-      "apps/console/src/api/client.ts": "d2964a8c06d6cea3bd1e114d5941e41c23f727d7699cd51a6678cddbef548e18",
+      "apps/console/src/api/client.ts": "c4a4450f257572ddc868545bafa1a35d45ce0419bc311e778e668e28007ede10",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
-      "apps/console/src/types.ts": "5f3d7e37bdba94082eae7e66f381120db878c708ff330ee188871a5b4db5d1b1"
+      "apps/console/src/types.ts": "13a01ec90f7e8686b4de5f859c83acf43bfda1de6a513ead1260df4b9b11cedc"
     }
   },
   "diagnostics": [],
@@ -413,20 +413,20 @@
     },
     "not_assessable_count": 5,
     "publication": {
-      "content_sha256": "ed21add739c74fc19976b0bc2b3dd6a04a3d70febe673420dfea5e6a16697537",
+      "content_sha256": "67efa95e28e41caa86d38ff647121fa6cde172b8b0cd200a01cb9efbc28fe715",
       "created": true,
-      "overlay_id": "historical-graph-overlay:e7f8cf3c9aca3cc9ee7815dd8eb93cb48c6627e26792220da11b04d57bf34393"
+      "overlay_id": "historical-graph-overlay:a6cca047038eb6ac0b7499569c8afbcf22c7d6f92bd862eb2a6ba9446bcf462e"
     },
     "query_ids": {
-      "all": "historical-graph-overlay-query:f8216dcaf5f5d57a0663258e4e6c81213c52042118c3f0e842f4b2959cbf69eb",
-      "cross_version": "historical-graph-overlay-query:850c5d3645fa2be125b17c3185615bed07303961b41cd3378f2658d3fb416c27",
-      "exact_observed": "historical-graph-overlay-query:510c3c890707f4ec069467d63944cb26a22ee8881922b931278eea73540f4683",
-      "not_assessable": "historical-graph-overlay-query:2679a5b2e931622dc7ba0f10b774b5eb3b223e29d6263ce3337270e39e6ceccc"
+      "all": "historical-graph-overlay-query:8eacbb756b580d7bc64e8d5efd3470c0e2276d5f48a2c252c514584d63e57898",
+      "cross_version": "historical-graph-overlay-query:9e8a4824f030fafa6392c565ed5565a3b30ac2b61d0bff373f7f7e97940bd0aa",
+      "exact_observed": "historical-graph-overlay-query:d7d72fe4df06efe2aadf6c1e9ca8a8999fd57b2356899400025b9f607e730158",
+      "not_assessable": "historical-graph-overlay-query:f2f59517010efdd812e63366cf9acc38f41938c1f28d5196406466952ec41d49"
     },
     "repeated_publication": {
-      "content_sha256": "ed21add739c74fc19976b0bc2b3dd6a04a3d70febe673420dfea5e6a16697537",
+      "content_sha256": "67efa95e28e41caa86d38ff647121fa6cde172b8b0cd200a01cb9efbc28fe715",
       "created": false,
-      "overlay_id": "historical-graph-overlay:e7f8cf3c9aca3cc9ee7815dd8eb93cb48c6627e26792220da11b04d57bf34393"
+      "overlay_id": "historical-graph-overlay:a6cca047038eb6ac0b7499569c8afbcf22c7d6f92bd862eb2a6ba9446bcf462e"
     }
   },
   "sample_role": "tenda-ac9-primary",

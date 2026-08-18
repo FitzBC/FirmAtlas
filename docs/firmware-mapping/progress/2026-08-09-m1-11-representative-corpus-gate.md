@@ -82,3 +82,9 @@ M1-11A 的实现与验证记录由本次 Git 历史共同固定。通信测绘�
 > verified；新 report ID 和最终门禁见
 > [M1-13 记录](./2026-08-09-m1-13-chroot-symlink-inventory.md)。上面的 partial
 > UI/API 观察属于 M1-11A 历史验证，不是当前状态。
+
+## 7. R2-33 后续状态（2026-08-18）
+
+R2-33 证明旧报告的两个缺口部分来自混合 Catalog 无法按架构候选子集验收的编排缺陷。报告契约升为 v1alpha2，并加入显式 `scope_candidate_ids`；DAP-3520 的真实脚本后端子集和 X5000R 的真实 native-only 子集均满足能力、禁止能力、completed coverage 与零开放义务门限，五个 required category 因而成为 `verified`，总 gate 变为 `passed`。
+
+该状态不删除旧 D-Link DSL coverage gap，也不把 producer 级 DAP-2695/FRITZ 证据冒充为完整 Catalog 泛化结果。完整时间线、独立 holdout 和解释边界见 [R2-33 记录](./2026-08-18-r2-33-scope-aware-corpus-gate.md)。

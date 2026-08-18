@@ -13,7 +13,7 @@ from .discovery_catalog import DiscoveryCatalog
 from .domain import CoverageStatus
 
 
-CORPUS_REPORT_SCHEMA_VERSION = "firmatlas.mapping.corpus-report/v1alpha1"
+CORPUS_REPORT_SCHEMA_VERSION = "firmatlas.mapping.corpus-report/v1alpha2"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -49,6 +49,7 @@ class CorpusSampleInput:
     forbidden_capabilities: Tuple[str, ...] = ()
     expected_firmware_sha256: Optional[str] = None
     catalog: Optional[DiscoveryCatalog] = None
+    scope_candidate_ids: Tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         required_text = (
@@ -72,6 +73,10 @@ class CorpusSampleInput:
             raise ValueError("real firmware evidence requires an expected artifact identity")
         if set(self.required_capabilities) & set(self.forbidden_capabilities):
             raise ValueError("a capability cannot be both required and forbidden")
+        if len(self.scope_candidate_ids) != len(set(self.scope_candidate_ids)):
+            raise ValueError("duplicate corpus scope candidate")
+        if self.scope_candidate_ids and self.catalog is None:
+            raise ValueError("corpus scope candidates require a discovery catalog")
 
 
 @dataclass(frozen=True)
@@ -112,6 +117,7 @@ class CorpusSampleResult:
     candidate_count: int
     evidence_count: int
     open_obligation_count: int
+    scope_candidate_ids: Tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -160,6 +166,64 @@ class CorpusReport:
             ],
         }
 
+    @classmethod
+    def from_dict(cls, value: dict) -> "CorpusReport":
+        if value.get("schema_version") != CORPUS_REPORT_SCHEMA_VERSION:
+            raise ValueError("unsupported corpus report schema")
+        samples = tuple(CorpusSampleResult(
+            sample_id=item["sample_id"],
+            architecture_category=item["architecture_category"],
+            architecture_subtype=item["architecture_subtype"],
+            role=item["role"],
+            evidence_tier=CorpusEvidenceTier(item["evidence_tier"]),
+            status=CorpusSampleStatus(item["status"]),
+            catalog_id=item.get("catalog_id"),
+            required_capabilities=tuple(item.get("required_capabilities", ())),
+            forbidden_capabilities=tuple(item.get("forbidden_capabilities", ())),
+            observed_capabilities=tuple(item.get("observed_capabilities", ())),
+            missing_capabilities=tuple(item.get("missing_capabilities", ())),
+            unexpected_capabilities=tuple(item.get("unexpected_capabilities", ())),
+            candidate_kinds=tuple(item.get("candidate_kinds", ())),
+            candidate_count=int(item.get("candidate_count", 0)),
+            evidence_count=int(item.get("evidence_count", 0)),
+            open_obligation_count=int(item.get("open_obligation_count", 0)),
+            scope_candidate_ids=tuple(item.get("scope_candidate_ids", ())),
+        ) for item in value.get("samples", ()))
+        categories = tuple(CorpusCategoryResult(
+            architecture_category=item["architecture_category"],
+            status=CorpusSampleStatus(item["status"]),
+            sample_count=int(item.get("sample_count", 0)),
+            real_firmware_verified_count=int(
+                item.get("real_firmware_verified_count", 0)
+            ),
+            derived_firmware_verified_count=int(
+                item.get("derived_firmware_verified_count", 0)
+            ),
+            contract_verified_count=int(item.get("contract_verified_count", 0)),
+            coverage_gap_count=int(item.get("coverage_gap_count", 0)),
+            acquisition_gap_count=int(item.get("acquisition_gap_count", 0)),
+            observed_capabilities=tuple(item.get("observed_capabilities", ())),
+            candidate_kinds=tuple(item.get("candidate_kinds", ())),
+            open_obligation_count=int(item.get("open_obligation_count", 0)),
+        ) for item in value.get("categories", ()))
+        report = cls(
+            report_id=value["report_id"],
+            corpus_version=value["corpus_version"],
+            gate_status=CorpusGateStatus(value["gate_status"]),
+            required_categories=tuple(value.get("required_categories", ())),
+            samples=samples,
+            categories=categories,
+            schema_version=value["schema_version"],
+        )
+        identity_document = report.to_dict()
+        identity_document.pop("report_id")
+        expected_id = "corpus-report:" + hashlib.sha256(json.dumps(
+            identity_document, separators=(",", ":"), sort_keys=True,
+        ).encode()).hexdigest()
+        if report.report_id != expected_id:
+            raise ValueError("corpus report identity does not match its content")
+        return report
+
 
 def _sample_result(sample: CorpusSampleInput) -> CorpusSampleResult:
     if sample.evidence_tier is CorpusEvidenceTier.EXTERNAL_LEAD:
@@ -171,7 +235,7 @@ def _sample_result(sample: CorpusSampleInput) -> CorpusSampleResult:
             CorpusSampleStatus.ACQUISITION_GAP, None,
             tuple(sorted(set(sample.required_capabilities))),
             tuple(sorted(set(sample.forbidden_capabilities))), (),
-            tuple(sorted(set(sample.required_capabilities))), (), (), 0, 0, 0,
+            tuple(sorted(set(sample.required_capabilities))), (), (), 0, 0, 0, (),
         )
     if sample.catalog is None:
         return CorpusSampleResult(
@@ -180,7 +244,7 @@ def _sample_result(sample: CorpusSampleInput) -> CorpusSampleResult:
             CorpusSampleStatus.COVERAGE_GAP, None,
             tuple(sorted(set(sample.required_capabilities))),
             tuple(sorted(set(sample.forbidden_capabilities))), (),
-            tuple(sorted(set(sample.required_capabilities))), (), (), 0, 0, 0,
+            tuple(sorted(set(sample.required_capabilities))), (), (), 0, 0, 0, (),
         )
     if (
         sample.expected_firmware_sha256 is not None
@@ -188,14 +252,45 @@ def _sample_result(sample: CorpusSampleInput) -> CorpusSampleResult:
     ):
         raise ValueError("corpus catalog firmware identity does not match its sample")
 
-    observed = tuple(sorted({atom.capability for atom in sample.catalog.evidence_atoms}))
+    scope_ids = tuple(sorted(sample.scope_candidate_ids))
+    scope_set = set(scope_ids)
+    candidate_by_id = {
+        item.candidate_id: item for item in sample.catalog.candidates
+    }
+    unknown_scope_ids = tuple(
+        candidate_id for candidate_id in scope_ids
+        if candidate_id not in candidate_by_id
+    )
+    if unknown_scope_ids:
+        raise ValueError(
+            "corpus scope candidate does not exist: {}".format(
+                unknown_scope_ids[0]
+            )
+        )
+    selected_candidates = tuple(
+        candidate_by_id[candidate_id] for candidate_id in scope_ids
+    ) if scope_ids else sample.catalog.candidates
+    selected_evidence_ids = {
+        evidence_id
+        for item in selected_candidates
+        for evidence_id in item.evidence_ids
+    }
+    selected_evidence = tuple(
+        atom for atom in sample.catalog.evidence_atoms
+        if not scope_ids or atom.evidence_id in selected_evidence_ids
+    )
+    selected_obligations = tuple(
+        item for item in sample.catalog.open_obligations
+        if not scope_ids or item.target_ref in scope_set
+    )
+    observed = tuple(sorted({atom.capability for atom in selected_evidence}))
     missing = tuple(sorted(set(sample.required_capabilities) - set(observed)))
     unexpected = tuple(sorted(set(sample.forbidden_capabilities) & set(observed)))
     candidate_kinds = tuple(sorted({
-        item.candidate_kind.value for item in sample.catalog.candidates
+        item.candidate_kind.value for item in selected_candidates
     }))
     if (
-        missing or unexpected or sample.catalog.open_obligations
+        missing or unexpected or selected_obligations
         or sample.catalog.coverage_status is not CoverageStatus.COMPLETED
     ):
         status = CorpusSampleStatus.COVERAGE_GAP
@@ -212,8 +307,8 @@ def _sample_result(sample: CorpusSampleInput) -> CorpusSampleResult:
         tuple(sorted(set(sample.required_capabilities))),
         tuple(sorted(set(sample.forbidden_capabilities))),
         observed, missing, unexpected,
-        candidate_kinds, len(sample.catalog.candidates),
-        len(sample.catalog.evidence_atoms), len(sample.catalog.open_obligations),
+        candidate_kinds, len(selected_candidates),
+        len(selected_evidence), len(selected_obligations), scope_ids,
     )
 
 

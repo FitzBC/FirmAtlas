@@ -8,12 +8,17 @@ import tempfile
 import unittest
 
 from firmatlas.mapping import (
+    CorpusEvidenceTier,
+    CorpusReport,
+    CorpusReportInput,
+    CorpusSampleInput,
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
     MappingReleaseContext,
     SourceArtifactEntry,
     UbusArtifactInput,
     assemble_discovery_catalog,
+    build_corpus_report,
     discover_frontend_requests,
     discover_ubus_backend_graph,
     ubus_operation_references_from_frontend,
@@ -69,6 +74,31 @@ class DiscoveryCatalogRepositoryTests(unittest.TestCase):
             "completed",
             result["items"][0]["source_inventory_coverage_status"],
         )
+
+    def test_publishes_immutable_corpus_report_and_reads_latest_gate(self):
+        report = build_corpus_report(CorpusReportInput(
+            corpus_version="firmatlas.mapping.corpus/test",
+            required_categories=("form_handler",),
+            samples=(CorpusSampleInput(
+                "form", "form_handler", "goform", "test",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                required_capabilities=("constructs_request",),
+                expected_firmware_sha256="1" * 64,
+                catalog=self.catalog,
+            ),),
+        ))
+
+        first = self.repository.publish_corpus_report(report)
+        second = self.repository.publish_corpus_report(
+            CorpusReport.from_dict(report.to_dict())
+        )
+        observed = self.repository.latest_corpus_report()
+
+        self.assertTrue(first["created"])
+        self.assertFalse(second["created"])
+        self.assertEqual(report.report_id, observed["report_id"])
+        self.assertEqual("passed", observed["gate_status"])
+        self.assertEqual("verified", observed["categories"][0]["status"])
 
     def test_same_catalog_id_with_different_payload_is_rejected(self):
         self.repository.publish(self.catalog)
@@ -231,6 +261,37 @@ if arg[1] == "list" then elseif arg[1] == "call" then end
             rendered = output.getvalue()
             self.assertIn(self.catalog.catalog_id, rendered)
             self.assertIn('"created": true', rendered)
+
+    def test_cli_publishes_and_queries_latest_corpus_report(self):
+        report = build_corpus_report(CorpusReportInput(
+            corpus_version="firmatlas.mapping.corpus/test",
+            required_categories=("form_handler",),
+            samples=(CorpusSampleInput(
+                "form", "form_handler", "goform", "test",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                required_capabilities=("constructs_request",),
+                expected_firmware_sha256="1" * 64,
+                catalog=self.catalog,
+            ),),
+        ))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            database = root / "mapping.db"
+            document = root / "corpus.json"
+            document.write_text(json.dumps(report.to_dict()), encoding="utf-8")
+            output = io.StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(0, main([
+                    "mapping", "publish-corpus-report", "--database", str(database),
+                    str(document),
+                ]))
+                self.assertEqual(0, main([
+                    "mapping", "query-corpus-report", "--database", str(database),
+                ]))
+
+        rendered = output.getvalue()
+        self.assertIn(report.report_id, rendered)
+        self.assertIn('"gate_status": "passed"', rendered)
 
     def test_potential_hidden_interfaces_are_projected_and_queryable(self):
         catalog = _hidden_catalog()

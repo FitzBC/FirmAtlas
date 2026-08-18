@@ -8,6 +8,7 @@ import { intelligenceApi } from '../api/client'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type {
   FirmwareMappingJob, MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
+  MappingCorpusReport,
   MappingReasoningCapability, MappingReasoningRun,
   MappingSnapshotChange, MappingSnapshotDiff, PotentialHiddenInterface,
   PotentialHiddenInterfacePage,
@@ -38,7 +39,8 @@ export function MappingCatalogWorkspace() {
   const [kind, setKind] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<'catalog' | 'graph' | 'hidden' | 'compare' | 'upload'>('catalog')
+  const [view, setView] = useState<'catalog' | 'graph' | 'hidden' | 'compare' | 'upload' | 'corpus'>('catalog')
+  const [corpusReport, setCorpusReport] = useState<MappingCorpusReport | null>(null)
   const [hiddenQuery, setHiddenQuery] = useState('')
   const [hiddenPage, setHiddenPage] = useState<PotentialHiddenInterfacePage | null>(null)
   const [selectedHidden, setSelectedHidden] = useState<PotentialHiddenInterface | null>(null)
@@ -48,6 +50,21 @@ export function MappingCatalogWorkspace() {
   const [selectedChange, setSelectedChange] = useState<MappingSnapshotChange | null>(null)
   const debouncedQuery = useDebouncedValue(query, 180)
   const debouncedHiddenQuery = useDebouncedValue(hiddenQuery, 180)
+
+  useEffect(() => {
+    if (view !== 'corpus') return
+    const controller = new AbortController()
+    setLoading(true)
+    void intelligenceApi.mappingCorpusReport(controller.signal).then((report) => {
+      setCorpusReport(report)
+      setError(null)
+    }).catch((caught) => {
+      if (!controller.signal.aborted) {
+        setError(caught instanceof Error ? caught.message : '代表性语料报告加载失败')
+      }
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    return () => controller.abort()
+  }, [view])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -161,6 +178,7 @@ export function MappingCatalogWorkspace() {
             <button type="button" onClick={() => setView('graph')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'graph' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>架构图谱</button>
             <button type="button" onClick={() => setView('hidden')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'hidden' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>潜在隐藏接口</button>
             <button type="button" onClick={() => setView('compare')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'compare' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>版本对比</button>
+            <button type="button" onClick={() => setView('corpus')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'corpus' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>语料门禁</button>
             <button type="button" onClick={() => setView('upload')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'upload' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>上传分析</button>
           </div>
           {view === 'catalog' && activeCatalog && <StatusPill catalog={activeCatalog} />}
@@ -169,7 +187,7 @@ export function MappingCatalogWorkspace() {
 
       {error && <div role="alert" className="mb-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
 
-      {view === 'upload' ? <FirmwareUploadWorkspace
+      {view === 'corpus' ? <CorpusGateWorkspace report={corpusReport} loading={loading} /> : view === 'upload' ? <FirmwareUploadWorkspace
         onPublished={refreshPublishedCatalogs} onOpenGraph={() => setView('graph')}
       /> : view === 'graph' ? <CommunicationGraphWorkspace /> : view === 'hidden' ? <HiddenInterfaceWorkspace
         page={hiddenPage} query={hiddenQuery} onQuery={setHiddenQuery}
@@ -216,6 +234,77 @@ export function MappingCatalogWorkspace() {
       )}
     </section>
   )
+}
+
+const corpusCategoryLabels: Record<string, string> = {
+  form_handler: '表单处理链',
+  hnap_soap: 'HNAP / SOAP',
+  cgi_gateway: '共享 CGI 网关',
+  frontend: '前端请求',
+  web_configuration: 'Web 配置',
+  script_backend: '脚本后端',
+  native_only: '纯原生注册',
+  hybrid: '混合链路',
+}
+
+const corpusStatusLabels: Record<string, string> = {
+  verified: '已验证', derived_only: '仅派生验证', contract_only: '仅契约验证',
+  coverage_gap: '覆盖缺口', acquisition_gap: '样本获取缺口',
+}
+
+function CorpusGateWorkspace({
+  report, loading,
+}: {
+  report: MappingCorpusReport | null
+  loading: boolean
+}) {
+  if (loading && !report) {
+    return <div className="grid min-h-[480px] place-items-center rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 text-xs text-slate-600">正在核对代表性通信架构…</div>
+  }
+  if (!report) {
+    return <div className="grid min-h-[480px] place-items-center rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 text-xs text-slate-600">尚未发布代表性语料门禁报告</div>
+  }
+  const passed = report.gate_status === 'passed'
+  return <div className="detail-enter space-y-4">
+    <div className={`overflow-hidden rounded-2xl border p-6 ${passed ? 'border-signal/20 bg-gradient-to-br from-signal/[0.09] via-[#0a1118] to-[#090d13]' : 'border-ember/20 bg-ember/[0.04]'}`}>
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className={`eyebrow ${passed ? 'text-signal' : 'text-ember'}`}><ShieldCheck size={13} /> Representative corpus / {report.corpus_version}</div>
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-white">{passed ? '五类通信架构门禁通过' : '通信架构门禁尚未通过'}</h2>
+          <p className="mt-2 max-w-3xl text-xs leading-6 text-slate-500">门禁按真实固件证据和候选范围验收表单处理、HNAP/SOAP、共享 CGI、脚本后端与纯原生注册；禁止把另一架构的证据借给当前样本。</p>
+        </div>
+        <div className="rounded-2xl border border-white/[0.08] bg-black/20 px-6 py-4 text-center">
+          <div className={`font-mono text-3xl font-semibold ${passed ? 'text-signal' : 'text-ember'}`}>{report.categories.filter((item) => item.status === 'verified').length}/{report.required_categories.length}</div>
+          <div className="mt-1 text-[9px] uppercase tracking-[0.16em] text-slate-600">required categories verified</div>
+        </div>
+      </div>
+    </div>
+
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+      {report.categories.filter((item) => report.required_categories.includes(item.architecture_category)).map((category) => <div key={category.architecture_category} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
+        <div className="flex items-start justify-between gap-2"><div className="text-xs font-medium text-slate-200">{corpusCategoryLabels[category.architecture_category] ?? category.architecture_category}</div><span className={`rounded-full border px-2 py-1 text-[9px] ${category.status === 'verified' ? 'border-signal/20 bg-signal/[0.07] text-signal' : 'border-ember/20 bg-ember/[0.07] text-ember'}`}>{corpusStatusLabels[category.status]}</span></div>
+        <div className="mt-4 flex gap-4 font-mono text-[10px] text-slate-500"><span>{category.real_firmware_verified_count} real</span><span>{category.coverage_gap_count} gap</span></div>
+        <div className="mt-3 text-[9px] leading-4 text-slate-600">{category.candidate_kinds.join(' · ') || 'no candidate kind'}</div>
+      </div>)}
+    </div>
+
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+      <div className="rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 p-5">
+        <div className="eyebrow"><Radar size={12} /> Scope-aware evidence samples</div>
+        <div className="mt-4 space-y-3">{report.samples.filter((sample) => sample.status === 'verified').map((sample) => <div key={sample.sample_id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div><div className="font-mono text-xs text-slate-200">{sample.sample_id}</div><div className="mt-1 text-[10px] text-slate-600">{corpusCategoryLabels[sample.architecture_category] ?? sample.architecture_category} · {sample.architecture_subtype}</div></div><span className="text-[10px] text-signal">{sample.candidate_count} 候选 · {sample.evidence_count} 证据</span></div>
+          <div className="mt-3 flex flex-wrap gap-1.5">{sample.observed_capabilities.map((capability) => <span key={capability} className="rounded-md border border-white/[0.06] bg-black/20 px-2 py-1 font-mono text-[9px] text-slate-500">{capability}</span>)}</div>
+          <div className="mt-3 text-[9px] text-slate-600">范围约束 {sample.scope_candidate_ids.length ? `${sample.scope_candidate_ids.length} 个候选` : '整个 Catalog'} · 未决义务 {sample.open_obligation_count}</div>
+        </div>)}</div>
+      </div>
+      <aside className="rounded-2xl border border-cyan/15 bg-cyan/[0.035] p-5">
+        <div className="eyebrow text-cyan"><ShieldQuestion size={12} /> Interpretation boundary</div>
+        <h3 className="mt-4 text-sm font-medium text-slate-200">通过代表类别，不夸大泛化范围</h3>
+        <p className="mt-3 text-xs leading-6 text-slate-500">门禁通过不等于所有厂商与子类型均已泛化验证。D-Link DAP-2695 与 OpenWrt FRITZ!Box 4040 是下一轮独立 holdout：当前已取得一手样本和 producer 证据，但尚未发布为完整 Catalog。</p>
+        <div className="mt-5 rounded-xl border border-white/[0.06] bg-black/20 p-3 font-mono text-[9px] leading-5 text-slate-600">report {report.report_id.slice(0, 30)}…<br />schema {report.schema_version}</div>
+      </aside>
+    </div>
+  </div>
 }
 
 function FirmwareUploadWorkspace({
