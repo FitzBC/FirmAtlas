@@ -15,6 +15,12 @@ from .analysis_run import (
     MappingAnalysisRequest,
     analyze_extracted_root,
 )
+from .container_worker import ContainerBinwalkConfig, ContainerBinwalkWorker
+from .extraction import BinwalkExtractor, ExtractionPolicy
+from .firmware_artifact_analysis import (
+    FirmwareArtifactAnalysisRequest,
+    analyze_firmware_artifact,
+)
 from .historical_expectation import (
     HistoricalVulnerabilityRecord,
     build_historical_vulnerability_audit,
@@ -154,6 +160,52 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     analyze.add_argument(
         "--graph-max-edges", type=int, default=graph_defaults.max_edges,
     )
+    analyze_artifact = subparsers.add_parser(
+        "analyze-artifact",
+        help="extract a raw firmware artifact in isolation and publish its mapping run",
+    )
+    analyze_artifact.add_argument("artifact")
+    analyze_artifact.add_argument(
+        "--destination", required=True,
+        help="empty directory for isolated derived extraction output",
+    )
+    analyze_artifact.add_argument("--runtime", required=True)
+    analyze_artifact.add_argument(
+        "--image-ref", required=True,
+        help="immutable Binwalk container reference pinned by sha256",
+    )
+    analyze_artifact.add_argument(
+        "--expected-version", default="3.1.0",
+        help="Binwalk version attested by the pinned image (default: 3.1.0)",
+    )
+    analyze_artifact.add_argument("--output", required=True)
+    analyze_artifact.add_argument(
+        "--profile", choices=("auto", "base"), default="auto",
+    )
+    analyze_artifact.add_argument("--max-seconds", type=int, default=900)
+    analyze_artifact.add_argument("--max-files", type=int, default=defaults.max_files)
+    analyze_artifact.add_argument(
+        "--max-total-bytes", type=int, default=defaults.max_total_bytes
+    )
+    analyze_artifact.add_argument(
+        "--max-file-bytes", type=int, default=defaults.max_file_bytes
+    )
+    analyze_artifact.add_argument(
+        "--max-expanded-bytes", type=int, default=defaults.max_expanded_bytes
+    )
+    analyze_artifact.add_argument(
+        "--max-archive-depth", type=int, default=defaults.max_archive_depth
+    )
+    analyze_artifact.add_argument("--graph-output")
+    analyze_artifact.add_argument(
+        "--graph-max-hops", type=int, default=graph_defaults.max_hops,
+    )
+    analyze_artifact.add_argument(
+        "--graph-max-nodes", type=int, default=graph_defaults.max_nodes,
+    )
+    analyze_artifact.add_argument(
+        "--graph-max-edges", type=int, default=graph_defaults.max_edges,
+    )
     compare_history = subparsers.add_parser(
         "compare-history",
         help="analyze a root and compare its catalog with historical expectations",
@@ -209,6 +261,86 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        if args.command == "analyze-artifact":
+            output = Path(args.output)
+            graph_output = Path(args.graph_output) if args.graph_output else None
+            if graph_output is not None and graph_output.resolve() == output.resolve():
+                raise ValueError("graph-output must differ from output")
+            inventory_policy = InventoryPolicy(
+                max_files=args.max_files,
+                max_total_bytes=args.max_total_bytes,
+                max_file_bytes=args.max_file_bytes,
+                max_expanded_bytes=args.max_expanded_bytes,
+                max_archive_depth=args.max_archive_depth,
+            )
+            profile = (
+                MappingAnalysisProfile.auto()
+                if args.profile == "auto" else MappingAnalysisProfile.base()
+            )
+            extractor = BinwalkExtractor(ContainerBinwalkWorker(
+                ContainerBinwalkConfig(
+                    runtime_path=Path(args.runtime), image_ref=args.image_ref,
+                    expected_version=args.expected_version,
+                )
+            ))
+            artifact_run = analyze_firmware_artifact(
+                FirmwareArtifactAnalysisRequest(
+                    artifact_path=Path(args.artifact),
+                    extraction_destination=Path(args.destination),
+                    extraction_policy=ExtractionPolicy(
+                        max_seconds=args.max_seconds,
+                        inventory_policy=inventory_policy,
+                    ),
+                    mapping_profile=profile,
+                ),
+                extractor,
+            )
+            output.write_text(
+                json.dumps(artifact_run.to_dict(), ensure_ascii=False, indent=2, sort_keys=True)
+                + "\n", encoding="utf-8",
+            )
+            graph = None
+            if graph_output is not None and artifact_run.mapping_run is not None:
+                graph = project_communication_architecture_graph(
+                    artifact_run.mapping_run.catalog,
+                    CommunicationGraphPolicy(
+                        max_nodes=args.graph_max_nodes,
+                        max_edges=args.graph_max_edges,
+                        max_hops=args.graph_max_hops,
+                    ),
+                )
+                graph_output.write_text(
+                    json.dumps(graph.to_dict(), ensure_ascii=False, indent=2, sort_keys=True)
+                    + "\n", encoding="utf-8",
+                )
+            result = {
+                "schema_version": artifact_run.schema_version,
+                "artifact_analysis_id": artifact_run.artifact_analysis_id,
+                "firmware_artifact_sha256": artifact_run.firmware_artifact_sha256,
+                "status": artifact_run.status.value,
+                "selected_root_path": artifact_run.selected_root_path,
+                "analysis_run_id": (
+                    artifact_run.mapping_run.analysis_run_id
+                    if artifact_run.mapping_run else None
+                ),
+                "catalog_id": (
+                    artifact_run.mapping_run.catalog.catalog_id
+                    if artifact_run.mapping_run else None
+                ),
+                "extraction_status": artifact_run.extraction.status.value,
+                "diagnostic_codes": list(artifact_run.diagnostic_codes),
+                "output": str(output),
+            }
+            if graph is not None and graph_output is not None:
+                result.update({
+                    "graph_id": graph.graph_id,
+                    "graph_projection_status": graph.projection_status.value,
+                    "graph_node_count": len(graph.nodes),
+                    "graph_edge_count": len(graph.edges),
+                    "graph_output": str(graph_output),
+                })
+            print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+            return 0 if artifact_run.mapping_run is not None else 2
         if args.command == "compare-history":
             if args.overlay_output and not args.graph_output:
                 raise ValueError("overlay-output requires graph-output")

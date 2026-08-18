@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 import unittest
 
+import firmatlas.mapping.frontend as frontend_module
+
 from firmatlas.mapping import (
     CoverageStatus,
     FrontendEndpointShape,
@@ -18,6 +20,26 @@ from firmatlas.mapping import (
 
 
 class FrontendRequestProducerContractTests(unittest.TestCase):
+    def test_public_analysis_reuses_javascript_tokens_within_one_asset(self):
+        content = (
+            b"var callInfo=rpc.declare({object:'system',method:'info',"
+            b"params:['name'],expect:{result:{}}});"
+        )
+        source = SourceArtifactEntry(
+            "www/luci-static/resources/system.js",
+            "www/luci-static/resources/system.js",
+            "file",
+            len(content),
+            hashlib.sha256(content).hexdigest(),
+        )
+        frontend_module._tokenize_javascript.cache_clear()
+
+        discover_frontend_requests(source, content)
+
+        cache = frontend_module._tokenize_javascript.cache_info()
+        self.assertEqual(1, cache.misses)
+        self.assertGreater(cache.hits, 1)
+
     def test_jquery_post_form_encoded_literal_publishes_request_parameter(self):
         content = b'''function refreshDLNA() {
     $.post("/goform/refreshDLNA", "action=1", callback);

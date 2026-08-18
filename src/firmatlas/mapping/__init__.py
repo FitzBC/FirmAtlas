@@ -304,6 +304,14 @@ from .extraction import (
     WorkerExtractionRequest,
 )
 from .container_worker import ContainerBinwalkConfig, ContainerBinwalkWorker
+from .firmware_artifact_analysis import (
+    FIRMWARE_ARTIFACT_ANALYSIS_SCHEMA_VERSION,
+    FirmwareArtifactAnalysisRequest,
+    FirmwareArtifactAnalysisRun,
+    FirmwareArtifactAnalysisStatus,
+    RootfsSelectionPolicy,
+    analyze_firmware_artifact,
+)
 from .repository import (
     COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION,
     HISTORICAL_COVERAGE_LEDGER_QUERY_RESULT_SCHEMA_VERSION,
@@ -769,6 +777,12 @@ __all__ = (
     "WorkerExtractionRequest",
     "ContainerBinwalkConfig",
     "ContainerBinwalkWorker",
+    "FIRMWARE_ARTIFACT_ANALYSIS_SCHEMA_VERSION",
+    "FirmwareArtifactAnalysisRequest",
+    "FirmwareArtifactAnalysisRun",
+    "FirmwareArtifactAnalysisStatus",
+    "RootfsSelectionPolicy",
+    "analyze_firmware_artifact",
     "CatalogConflictError",
     "COMMUNICATION_GRAPH_QUERY_RESULT_SCHEMA_VERSION",
     "HISTORICAL_GRAPH_OVERLAY_QUERY_RESULT_SCHEMA_VERSION",

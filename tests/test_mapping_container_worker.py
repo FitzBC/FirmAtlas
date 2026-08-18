@@ -45,6 +45,31 @@ print("extracted squashfs")
     return script
 
 
+def _versionless_runtime(root: Path) -> Path:
+    script = root / "versionless-docker"
+    script.write_text(
+        """#!{python}
+import pathlib
+import sys
+
+args = sys.argv[1:]
+if args[-1:] == ["--version"]:
+    raise SystemExit(0)
+if args[-1:] == ["-h"]:
+    print("Binwalk v2.2.1")
+    raise SystemExit(0)
+output_mount = next(value for index, value in enumerate(args) if args[index - 1] == "--volume" and value.endswith(":/output:rw"))
+output = pathlib.Path(output_mount.rsplit(":/output:rw", 1)[0])
+target = output / "extractions" / "squashfs-root" / "www"
+target.mkdir(parents=True)
+(target / "index.js").write_text("fetch('/HNAP1')\\n", encoding="utf-8")
+""".format(python=sys.executable),
+        encoding="utf-8",
+    )
+    script.chmod(0o755)
+    return script
+
+
 def _burst_runtime(root: Path) -> Path:
     script = root / "burst-docker"
     script.write_text(
@@ -196,6 +221,10 @@ class ContainerBinwalkWorkerContractTests(unittest.TestCase):
             self.assertIn("--network", launcher)
             self.assertIn("none", launcher)
             self.assertIn("--read-only", launcher)
+            self.assertIn("--tmpfs", launcher)
+            self.assertIn("/tmp:rw,nosuid,nodev,noexec,size=268435456", launcher)
+            self.assertIn("--env", launcher)
+            self.assertIn("HOME=/tmp", launcher)
             self.assertIn("--pull", launcher)
             self.assertIn("never", launcher)
             self.assertTrue(any(value.endswith(":/input/firmware.bin:ro") for value in launcher))
@@ -348,6 +377,21 @@ class ContainerBinwalkWorkerContractTests(unittest.TestCase):
 
             with self.assertRaisesRegex(RuntimeError, "version mismatch"):
                 worker.probe()
+
+    def test_probe_uses_help_banner_when_version_flag_is_silent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            worker = ContainerBinwalkWorker(ContainerBinwalkConfig(
+                runtime_path=_versionless_runtime(root),
+                image_ref="ghcr.io/firmatlas/binwalk@" + IMAGE_DIGEST,
+                expected_version="2.2.1",
+            ))
+
+            tool = worker.probe()
+
+        self.assertEqual(
+            ToolIdentity("binwalk", "2.2.1", image_digest=IMAGE_DIGEST), tool
+        )
 
     def test_probe_log_flood_is_terminated_at_the_log_budget(self):
         with tempfile.TemporaryDirectory() as directory:

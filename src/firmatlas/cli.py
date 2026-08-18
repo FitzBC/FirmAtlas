@@ -306,14 +306,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         try:
             if args.mapping_command == "publish-catalog":
                 document = json.loads(Path(args.document).read_text(encoding="utf-8"))
-                result = repository.publish_dict(document)
+                result = repository.publish_dict(_catalog_document(document))
             elif args.mapping_command == "list-catalogs":
                 result = repository.list_catalogs()
             elif args.mapping_command == "publish-graph":
                 catalog_document = json.loads(
                     Path(args.catalog_document).read_text(encoding="utf-8")
                 )
-                catalog = catalog_document.get("catalog", catalog_document)
+                catalog = _catalog_document(catalog_document)
                 graph = CommunicationArchitectureGraph.from_dict(json.loads(
                     Path(args.document).read_text(encoding="utf-8")
                 ))
@@ -390,6 +390,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         finally:
             repository.close()
     return 2
+
+
+def _catalog_document(document: dict) -> dict:
+    """Accept a Catalog, AnalyzeRun, or raw-artifact analysis document."""
+    mapping_run = document.get("mapping_run")
+    if mapping_run is not None:
+        if not isinstance(mapping_run, dict):
+            raise ValueError("raw artifact analysis has no publishable mapping run")
+        document = mapping_run
+    catalog = document.get("catalog", document)
+    if not isinstance(catalog, dict) or "catalog_id" not in catalog:
+        raise ValueError("document does not contain a publishable discovery catalog")
+    return catalog
 
 
 def _database_argument(parser: argparse.ArgumentParser) -> None:

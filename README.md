@@ -145,6 +145,24 @@ PYTHONPATH=src python3 -m firmatlas.mapping analyze-root /path/to/rootfs \
 
 该入口会自动建立 Source Plan，运行 Frontend、跨资源 Frontend Asset Graph、Frontend Feature Gate、Frontend Invocation Reachability、Web configuration、Script backend、Native shallow、Correlation 和 Scheduler，并按版本化 Profile/Registry 自动选择适用的确定性深化 Adapter，最后发布不可变 Discovery Catalog；单个 producer 失败会保留为 partial stage/coverage，不会伪装成空成功。可选 `--graph-output` 会从同一 Catalog 生成确定性的通信架构图 read model。当前默认冻结为 `auto-v20`：它恢复独立 `/cgi-bin` registrar、path 第二段 parser 与 7-arm selector dispatcher，并把组合式 `/cgi-bin/UploadWebsite` 绑定到 `httpd@0x3e564` 及其 URL IPC consumer；method 仍 unresolved，上传 body 不会被误推为 POST。它继承 `auto-v19` 的 URL document consumer 与 `/var/cfm_socket` Get/Set/Unset/Commit/Show IPC，逐 callsite 保留 URL MIB 与主 CFM 的状态域分裂，也不会自动关闭 document loader activation 义务。AC9 主 `default.cfg` 的 1013 个唯一键不会被复制进无静态文档证据的 URL 域；配置键也不会被提升为 HTTP 参数。历史 Profile 均保留冻结回放。图谱不会创造运行时或漏洞事实。首要样本最新结果见 [R2-28 CGI namespace 与 selector transport](./docs/firmware-mapping/progress/2026-08-14-r2-28-ac9-cgi-selector-transport.md)、[R2-27 URL 日常 IPC 与跨状态域消费者](./docs/firmware-mapping/progress/2026-08-13-r2-27-ac9-configuration-url-ipc.md)与 [R2-26 URL 配置文档消费者](./docs/firmware-mapping/progress/2026-08-13-r2-26-ac9-configuration-url-document.md)。
 
+对原始固件制品执行同一条链路时，不需要人工挑选解包目录：
+
+```bash
+PYTHONPATH=src python3 -m firmatlas.mapping analyze-artifact /path/to/firmware.bin \
+  --destination var/mapping-work/my-firmware/extraction \
+  --runtime /usr/local/bin/docker \
+  --image-ref registry.example/binwalk@sha256:<pinned-image-digest> \
+  --expected-version 3.1.0 \
+  --output firmware-artifact-analysis.json \
+  --graph-output communication-graph.json
+```
+
+该入口在隔离容器中提取制品、自动计算原始 SHA-256，并只在唯一且有根文件系统标记的
+`squashfs-root`/`rootfs` 目录上执行 AnalyzeRun。若提取失败、没有根文件系统或存在并列根目录，
+仍写出内容寻址的结构化结果且不猜测目标。成功或部分成功的结果可直接作为 Catalog 来源发布到
+Console：`mapping publish-graph --catalog-document firmware-artifact-analysis.json communication-graph.json`。
+OpenWrt Tenda AC9 原始 `.trx` 的实际回放见 [R2-30 原始制品报告](./docs/firmware-mapping/samples/r2-30-openwrt-ac9-raw-artifact-analysis.json)。
+
 将 AnalyzeRun 与图发布到本地 SQLite，并用与后续 HTTP/Console 相同的语义查询：
 
 ```bash

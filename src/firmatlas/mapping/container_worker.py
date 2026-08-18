@@ -148,12 +148,14 @@ class ContainerBinwalkWorker(ExtractionWorker):
             "--memory", self._config.memory_limit,
             "--cpus", self._config.cpu_limit,
             "--user", "{}:{}".format(os.getuid(), os.getgid()),
+            "--tmpfs", "/tmp:rw,nosuid,nodev,noexec,size=268435456",
+            "--env", "HOME=/tmp",
         )
 
-    def probe(self) -> ToolIdentity:
+    def _probe_command(self, argument: str) -> Tuple[int, str]:
         launcher = (
             *self._hardening_argv(), "--entrypoint", "binwalk",
-            self._config.image_ref, "--version",
+            self._config.image_ref, argument,
         )
         with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
             process = subprocess.Popen(
@@ -196,8 +198,17 @@ class ContainerBinwalkWorker(ExtractionWorker):
             stdout, stderr, _, _ = _read_logs_bounded(
                 stdout_file, stderr_file, self._config.max_log_bytes
             )
-        rendered = stdout + "\n" + stderr
+        return return_code, stdout + "\n" + stderr
+
+    def probe(self) -> ToolIdentity:
+        return_code, rendered = self._probe_command("--version")
         match = _VERSION.search(rendered)
+        # Binwalk 2.2.x treats --version as an input file. If that command did
+        # not yield a version banner, the equally isolated -h invocation is the
+        # compatibility probe; its banner must still exactly match the pin.
+        if match is None:
+            return_code, rendered = self._probe_command("-h")
+            match = _VERSION.search(rendered)
         if return_code != 0 or match is None:
             raise RuntimeError("pinned Binwalk container probe failed")
         if match.group("version") != self._config.expected_version:
@@ -214,7 +225,6 @@ class ContainerBinwalkWorker(ExtractionWorker):
             "--volume", "{}:/input/firmware.bin:ro".format(request.artifact_path),
             "--volume", "{}:/output:rw".format(request.destination),
             "--workdir", "/output",
-            "--tmpfs", "/tmp:rw,nosuid,nodev,noexec,size=268435456",
             "--entrypoint", "binwalk",
             self._config.image_ref,
             "-Me", "/input/firmware.bin",

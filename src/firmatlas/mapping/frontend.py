@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from enum import Enum
+from functools import lru_cache
 import hashlib
 from html.parser import HTMLParser
 import json
@@ -344,6 +345,7 @@ def _parameter_id(
     return "frontend-parameter:{}".format(hashlib.sha256(payload).hexdigest())
 
 
+@lru_cache(maxsize=8)
 def _tokenize_javascript(
     content: bytes, enable_regex_literals: bool = True,
 ) -> Tuple[_Token, ...]:
