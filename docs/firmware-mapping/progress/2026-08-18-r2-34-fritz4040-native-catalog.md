@@ -119,7 +119,8 @@ checked-in 报告和 Console。最终验证记录：
   warning/error 日志为空；最终页面已切回 FRITZ 焦点并保留；
 - AC9 主回归：direct UBUS 31 个 Frontend binding 与 24 个独立 binding 均保留；原厂 AC9
   `expandDlnaFile?` 和 disabled-feature 差集在修复 profile 继承后恢复；
-- Git commit/push：待最终写入；
+- 实现与报告提交 `d91e144f780e038d2ec00a48fe8d14bb13931400` 已通过 GitHub SSH
+  推送到 `main`；本文最终交付状态由紧随其后的文档闭环提交保存；
 - SSH 部署：不适用，依据 `AGENTS.md` 的 firmware mapping research exception。
 
 下一出口为 R2-35：受控重取 D-Link DAP-2695，走 raw artifact/rootfs -> AnalyzeRun -> Catalog，
