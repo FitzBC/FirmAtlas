@@ -1,7 +1,7 @@
 # R2-33：候选范围感知的代表性语料门禁
 
 > 日期：2026-08-18
-> 状态：本地实现与回归完成，待本轮 Git 发布
+> 状态：已实现、完整回归并通过 GitHub SSH 推送
 > 范围：`firmatlas.mapping`、Console、测试与 `docs/firmware-mapping`；SSH 部署不适用
 
 ## 1. 本轮问题与结论
