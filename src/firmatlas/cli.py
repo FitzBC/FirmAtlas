@@ -67,6 +67,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--static-dir",
         help="serve the built console from this directory on non-API routes",
     )
+    serve_parser.add_argument(
+        "--mapping-binwalk-image-ref",
+        help="enable firmware upload jobs with an immutable Binwalk image digest",
+    )
+    serve_parser.add_argument(
+        "--mapping-runtime", default="/usr/local/bin/docker",
+        help="container runtime used only for configured firmware mapping jobs",
+    )
+    serve_parser.add_argument(
+        "--mapping-workspace", default="var/mapping-jobs",
+        help="content-addressed firmware upload and derived-run workspace",
+    )
+    serve_parser.add_argument("--mapping-binwalk-version", default="3.1.0")
+    serve_parser.add_argument(
+        "--mapping-upload-max-bytes", type=int, default=64 * 1024 * 1024,
+    )
+    serve_parser.add_argument(
+        "--mapping-analysis-max-seconds", type=int, default=900,
+    )
 
     sync_parser = intelligence_subparsers.add_parser(
         "sync", help="incrementally update official intelligence sources"
@@ -227,9 +246,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.command == "intelligence":
         if args.intelligence_command == "serve":
             from .intelligence.api import serve
+            from .mapping import FirmwareMappingRuntimeConfig
 
             logging.basicConfig(level=logging.INFO, format="%(message)s")
-            serve(args.database, args.host, args.port, args.static_dir)
+            mapping_runtime_config = (
+                FirmwareMappingRuntimeConfig(
+                    workspace=Path(args.mapping_workspace),
+                    runtime_path=Path(args.mapping_runtime),
+                    image_ref=args.mapping_binwalk_image_ref,
+                    expected_version=args.mapping_binwalk_version,
+                    max_upload_bytes=args.mapping_upload_max_bytes,
+                    max_analysis_seconds=args.mapping_analysis_max_seconds,
+                )
+                if args.mapping_binwalk_image_ref else None
+            )
+            serve(
+                args.database, args.host, args.port, args.static_dir,
+                mapping_runtime_config,
+            )
             return 0
 
         from .intelligence.relevance import FirmwareRelevanceClassifier

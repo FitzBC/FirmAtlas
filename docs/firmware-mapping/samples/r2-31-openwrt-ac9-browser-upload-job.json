@@ -1,0 +1,37 @@
+{
+  "schema_version": "firmatlas.mapping.browser-upload-replay/v1alpha1",
+  "captured_at": "2026-08-18T02:15:51.135556+00:00",
+  "service_url": "http://127.0.0.1:18789",
+  "job": {
+    "schema_version": "firmatlas.mapping.job/v1alpha1",
+    "job_id": "firmware-mapping-job:6addf3318c8b11cc80ff405027b9247bc13de3d8ec1c07264b1244f95500b3a2",
+    "original_filename": "openwrt-19.07.8-bcm53xx-tenda-ac9-squashfs.trx",
+    "firmware_artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
+    "artifact_size": 4657152,
+    "runner_id": "container-binwalk:sha256:03d1560ae439250f69a73f3d0bacff45cf1c04d8b0d0cbdf7d0170aa7e0cf303:2.2.1:firmatlas.mapping.profile/auto-v20",
+    "status": "partial",
+    "submitted_at": "2026-08-18T02:15:15.881315+00:00",
+    "started_at": "2026-08-18T02:15:15.883491+00:00",
+    "finished_at": "2026-08-18T02:15:51.135556+00:00",
+    "artifact_analysis_id": "firmware-artifact-analysis:f9a3498dee6924e1ff211feebd8cbff46d05e106536042a07ea849bb9746302a",
+    "catalog_id": "discovery-catalog:e1e06e0f9c15567ef088689896a7cc9e975b8f84a5069c901ef249d36eaff933",
+    "graph_id": "communication-graph:28161bc5edf299b6e171e8d3c92a2e49f04f9901bb3814ad1ea089604e77acf5",
+    "error_code": null
+  },
+  "measurements": {
+    "candidate_count": 1202,
+    "parameter_count": 220,
+    "association_count": 22,
+    "open_obligation_count": 117,
+    "graph_node_count": 1665,
+    "graph_edge_count": 2273,
+    "exact_interface_focus_count": 74
+  },
+  "browser_assertions": [
+    "upload capability shows a 64 MiB budget",
+    "lifecycle transitions from running to partial",
+    "catalog and graph identities become visible",
+    "generated graph opens from the upload result",
+    "graph page reports 1665 nodes and 2273 edges"
+  ]
+}

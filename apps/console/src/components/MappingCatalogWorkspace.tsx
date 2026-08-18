@@ -1,13 +1,13 @@
 import {
-  Activity, Binary, Braces, ChevronRight, CircleDot, Database, EyeOff,
-  FileCode2, GitCompareArrows, Minus, Plus, Radar, Search, ShieldQuestion,
-  TriangleAlert, Waypoints,
+  Activity, Binary, Braces, CheckCircle2, ChevronRight, CircleDot, Database, EyeOff,
+  FileArchive, FileCode2, GitCompareArrows, LoaderCircle, Minus, Plus, Radar,
+  Search, ShieldQuestion, TriangleAlert, UploadCloud, Waypoints,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { intelligenceApi } from '../api/client'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type {
-  MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
+  FirmwareMappingJob, MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
   MappingSnapshotChange, MappingSnapshotDiff, PotentialHiddenInterface,
   PotentialHiddenInterfacePage,
 } from '../types'
@@ -37,7 +37,7 @@ export function MappingCatalogWorkspace() {
   const [kind, setKind] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<'catalog' | 'graph' | 'hidden' | 'compare'>('catalog')
+  const [view, setView] = useState<'catalog' | 'graph' | 'hidden' | 'compare' | 'upload'>('catalog')
   const [hiddenQuery, setHiddenQuery] = useState('')
   const [hiddenPage, setHiddenPage] = useState<PotentialHiddenInterfacePage | null>(null)
   const [selectedHidden, setSelectedHidden] = useState<PotentialHiddenInterface | null>(null)
@@ -138,6 +138,12 @@ export function MappingCatalogWorkspace() {
     }
   }
 
+  const refreshPublishedCatalogs = useCallback(async (job: FirmwareMappingJob) => {
+    const page = await intelligenceApi.mappingCatalogs()
+    setCatalogs(page.items)
+    setCatalogId(job.catalog_id || page.items[0]?.catalog_id || '')
+  }, [])
+
   return (
     <section>
       {/* Design rationale: a stable three-column evidence hierarchy replaces overlapping drawers;
@@ -154,6 +160,7 @@ export function MappingCatalogWorkspace() {
             <button type="button" onClick={() => setView('graph')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'graph' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>架构图谱</button>
             <button type="button" onClick={() => setView('hidden')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'hidden' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>潜在隐藏接口</button>
             <button type="button" onClick={() => setView('compare')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'compare' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>版本对比</button>
+            <button type="button" onClick={() => setView('upload')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'upload' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>上传分析</button>
           </div>
           {view === 'catalog' && activeCatalog && <StatusPill catalog={activeCatalog} />}
         </div>
@@ -161,7 +168,9 @@ export function MappingCatalogWorkspace() {
 
       {error && <div role="alert" className="mb-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
 
-      {view === 'graph' ? <CommunicationGraphWorkspace /> : view === 'hidden' ? <HiddenInterfaceWorkspace
+      {view === 'upload' ? <FirmwareUploadWorkspace
+        onPublished={refreshPublishedCatalogs} onOpenGraph={() => setView('graph')}
+      /> : view === 'graph' ? <CommunicationGraphWorkspace /> : view === 'hidden' ? <HiddenInterfaceWorkspace
         page={hiddenPage} query={hiddenQuery} onQuery={setHiddenQuery}
         selected={selectedHidden} onSelect={setSelectedHidden} loading={loading}
       /> : view === 'compare' ? <SnapshotComparisonWorkspace
@@ -207,6 +216,90 @@ export function MappingCatalogWorkspace() {
     </section>
   )
 }
+
+function FirmwareUploadWorkspace({
+  onPublished, onOpenGraph,
+}: {
+  onPublished: (job: FirmwareMappingJob) => Promise<void>
+  onOpenGraph: () => void
+}) {
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+  const [maxBytes, setMaxBytes] = useState(0)
+  const [file, setFile] = useState<File | null>(null)
+  const [job, setJob] = useState<FirmwareMappingJob | null>(null)
+  const [recent, setRecent] = useState<FirmwareMappingJob[]>([])
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void intelligenceApi.mappingJobs(controller.signal).then((page) => {
+      setEnabled(page.enabled)
+      setMaxBytes(page.max_upload_bytes)
+      setRecent(page.items)
+      setJob(page.items[0] ?? null)
+    }).catch((caught) => {
+      if (!controller.signal.aborted) setMessage(caught instanceof Error ? caught.message : '分析任务加载失败')
+    })
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
+    if (!job || !['queued', 'running'].includes(job.status)) return
+    const controller = new AbortController()
+    const timer = window.setTimeout(() => {
+      void intelligenceApi.mappingJob(job.job_id, controller.signal).then(async (next) => {
+        setJob(next)
+        setRecent((items) => [next, ...items.filter((item) => item.job_id !== next.job_id)])
+        if (next.status === 'completed' || next.status === 'partial') await onPublished(next)
+      }).catch((caught) => {
+        if (!controller.signal.aborted) setMessage(caught instanceof Error ? caught.message : '分析状态更新失败')
+      })
+    }, 1000)
+    return () => { controller.abort(); window.clearTimeout(timer) }
+  }, [job, onPublished])
+
+  const submit = async () => {
+    if (!file) return
+    if (file.size <= 0) { setMessage('固件制品不能为空'); return }
+    if (maxBytes && file.size > maxBytes) { setMessage('固件制品超过服务端上传预算'); return }
+    setSubmitting(true)
+    setMessage(null)
+    try {
+      const next = await intelligenceApi.submitFirmwareMappingJob(file)
+      setJob(next)
+      setRecent((items) => [next, ...items.filter((item) => item.job_id !== next.job_id)])
+      if (next.status === 'completed' || next.status === 'partial') await onPublished(next)
+    } catch (caught) {
+      setMessage(caught instanceof Error ? caught.message : '固件提交失败')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const active = job?.status === 'queued' || job?.status === 'running'
+  const statusLabel = job?.status === 'completed' ? '分析已完成'
+    : job?.status === 'partial' ? '分析部分完成'
+      : job?.status === 'failed' ? '分析失败'
+        : job?.status === 'running' ? '正在恢复通信结构' : job ? '等待分析资源' : '尚未提交固件'
+
+  return <div className="detail-enter grid gap-4 xl:grid-cols-[minmax(420px,1.15fr)_minmax(320px,0.85fr)]">
+    {/* Design rationale: upload intent, safety budget, and immutable result identity share one
+        responsive glass surface; lifecycle evidence stays visible instead of disappearing into a modal. */}
+    <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-[radial-gradient(circle_at_12%_0%,rgba(73,214,179,0.08),transparent_38%),rgba(10,15,23,0.82)] p-6 backdrop-blur-xl">
+      <div className="flex items-start gap-4"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-signal/20 bg-signal/[0.07] text-signal"><UploadCloud size={22} /></div><div><div className="eyebrow">Raw artifact / Isolated AnalyzeRun</div><h2 className="mt-2 text-xl font-semibold text-white">上传一个固件制品</h2><p className="mt-2 max-w-xl text-xs leading-6 text-slate-500">文件按 SHA-256 内容寻址保存，在无网络、只读根容器中解包。HTTP 请求只创建异步任务，不直接执行分析器。</p></div></div>
+      <label className="mt-7 block rounded-2xl border border-dashed border-white/[0.12] bg-black/20 p-5 transition focus-within:border-signal/30 hover:border-white/[0.2]"><span className="flex items-center gap-2 text-xs text-slate-300"><FileArchive size={16} className="text-signal" /> 选择固件制品</span><input aria-label="选择固件制品" type="file" className="mt-4 block w-full text-[11px] text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-white/[0.07] file:px-3 file:py-2 file:text-[10px] file:text-slate-300 hover:file:bg-white/[0.1]" onChange={(event) => { setFile(event.target.files?.[0] ?? null); setMessage(null) }} /></label>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="text-[10px] leading-5 text-slate-600">{enabled === false ? '当前服务未配置固定 Binwalk 运行时' : enabled === null ? '正在读取服务能力…' : `单文件上限 ${formatBytes(maxBytes)} · 单任务串行执行`}</div><button type="button" onClick={() => void submit()} disabled={!enabled || !file || submitting || active} className="inline-flex items-center justify-center gap-2 rounded-xl border border-signal/20 bg-signal/[0.09] px-4 py-2.5 text-xs font-medium text-signal transition hover:bg-signal/[0.14] disabled:cursor-not-allowed disabled:opacity-35">{submitting || active ? <LoaderCircle size={15} className="animate-spin" /> : <UploadCloud size={15} />}开始独立分析</button></div>
+      {message && <div role="alert" className="mt-4 rounded-xl border border-ember/20 bg-ember/[0.05] px-4 py-3 text-xs text-ember">{message}</div>}
+    </section>
+
+    <section className="rounded-2xl border border-white/[0.07] bg-[#0a0f17]/80 p-5 backdrop-blur-xl"><div className="flex items-center justify-between"><div><div className="eyebrow">Analysis lifecycle</div><h3 className="mt-2 text-sm font-medium text-slate-200">{statusLabel}</h3></div>{job && (job.status === 'completed' || job.status === 'partial') ? <CheckCircle2 size={22} className="text-signal" /> : active ? <LoaderCircle size={22} className="animate-spin text-cyan" /> : <Activity size={22} className="text-slate-700" />}</div>{job ? <div className="mt-5 space-y-3"><JobDatum label="制品" value={job.original_filename} /><JobDatum label="SHA-256" value={`${job.firmware_artifact_sha256.slice(0, 16)}…`} mono /><JobDatum label="状态" value={job.status} /><JobDatum label="Catalog" value={job.catalog_id || '等待发布'} mono /><JobDatum label="Graph" value={job.graph_id || '等待发布'} mono />{active && <div className="h-1 overflow-hidden rounded-full bg-white/[0.05]"><div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-cyan/30 to-signal/70" /></div>}{job.graph_id && <button type="button" onClick={onOpenGraph} className="mt-2 w-full rounded-xl border border-cyan/15 bg-cyan/[0.05] px-3 py-2.5 text-xs text-cyan transition hover:bg-cyan/[0.09]">查看生成图谱</button>}</div> : <p className="mt-6 text-xs leading-6 text-slate-600">提交后这里会持续显示排队、执行、部分完成或失败状态，并保留 Catalog 与 Graph 身份。</p>}<div className="mt-6 border-t border-white/[0.06] pt-4"><div className="text-[9px] uppercase tracking-[0.12em] text-slate-700">最近任务 {recent.length}</div></div></section>
+  </div>
+}
+
+function JobDatum({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) { return <div className="flex items-start justify-between gap-4 text-[10px]"><span className="shrink-0 text-slate-600">{label}</span><span className={`break-all text-right text-slate-300 ${mono ? 'font-mono text-[9px]' : ''}`}>{value}</span></div> }
+
+function formatBytes(value: number) { if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(0)} MiB`; if (value >= 1024) return `${(value / 1024).toFixed(0)} KiB`; return `${value} B` }
 
 function SnapshotComparisonWorkspace({
   catalogs, baseCatalogId, targetCatalogId, onBaseCatalog, onTargetCatalog,

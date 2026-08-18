@@ -27,11 +27,39 @@ from firmatlas.mapping import (
     compare_historical_route_bindings,
     project_historical_graph_overlay,
     project_communication_architecture_graph,
+    FirmwareMappingJobSnapshot,
+    FirmwareMappingJobStatus,
 )
 from firmatlas.mapping.repository import DiscoveryCatalogRepository
 from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
 from tests.test_mapping_historical_coverage_ledger import _ledger_fixture
 from firmatlas.mapping import build_historical_coverage_ledger
+
+
+class FakeMappingJobService:
+    max_upload_bytes = 64 * 1024 * 1024
+
+    def __init__(self):
+        self.submitted = []
+        self.snapshot = FirmwareMappingJobSnapshot(
+            job_id="firmware-mapping-job:" + "a" * 64,
+            original_filename="ac9.trx",
+            firmware_artifact_sha256="b" * 64,
+            artifact_size=12,
+            runner_id="test-runner/v1",
+            status=FirmwareMappingJobStatus.QUEUED,
+            submitted_at="2026-08-18T00:00:00+00:00",
+        )
+
+    def submit(self, stream, filename, content_length):
+        self.submitted.append((stream.read(content_length), filename, content_length))
+        return self.snapshot
+
+    def get(self, job_id):
+        return self.snapshot if job_id == self.snapshot.job_id else None
+
+    def list(self, limit=20):
+        return (self.snapshot,)
 
 
 class IntelligenceApiTests(unittest.TestCase):
@@ -43,9 +71,14 @@ class IntelligenceApiTests(unittest.TestCase):
             self.repository.upsert(record, classifier.classify(record, policy))
         service = IntelligenceService(self.repository)
         self.mapping_repository = DiscoveryCatalogRepository(":memory:")
+        self.mapping_jobs = FakeMappingJobService()
         self.server = ThreadingHTTPServer(
             ("127.0.0.1", 0),
-            create_handler(service, mapping_repository=self.mapping_repository),
+            create_handler(
+                service,
+                mapping_repository=self.mapping_repository,
+                mapping_job_service=self.mapping_jobs,
+            ),
         )
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
@@ -82,6 +115,37 @@ class IntelligenceApiTests(unittest.TestCase):
         )
         with urlopen(request, timeout=2) as response:
             return response.status, json.loads(response.read())["data"]
+
+    def post_artifact(self, path, payload, filename):
+        request = Request(
+            "http://127.0.0.1:{}{}".format(self.server.server_port, path),
+            data=payload,
+            headers={
+                "Content-Type": "application/octet-stream",
+                "X-Firmware-Filename": filename,
+            },
+            method="POST",
+        )
+        with urlopen(request, timeout=2) as response:
+            return response.status, json.loads(response.read())["data"]
+
+    def test_mapping_job_routes_accept_artifact_and_expose_lifecycle(self) -> None:
+        status, submitted = self.post_artifact(
+            "/api/mappings/jobs", b"AC9 firmware", "ac9.trx",
+        )
+        detail_status, detail = self.get(
+            "/api/mappings/jobs/{}".format(submitted["job_id"])
+        )
+        list_status, listing = self.get("/api/mappings/jobs")
+
+        self.assertEqual(202, status)
+        self.assertEqual("queued", submitted["status"])
+        self.assertEqual([(b"AC9 firmware", "ac9.trx", 12)], self.mapping_jobs.submitted)
+        self.assertEqual(200, detail_status)
+        self.assertEqual(submitted["job_id"], detail["job_id"])
+        self.assertEqual(200, list_status)
+        self.assertTrue(listing["enabled"])
+        self.assertEqual([submitted["job_id"]], [item["job_id"] for item in listing["items"]])
 
     def test_overview_and_filtered_feed(self) -> None:
         status, overview = self.get("/api/intelligence/overview")

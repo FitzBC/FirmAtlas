@@ -163,6 +163,28 @@ PYTHONPATH=src python3 -m firmatlas.mapping analyze-artifact /path/to/firmware.b
 Console：`mapping publish-graph --catalog-document firmware-artifact-analysis.json communication-graph.json`。
 OpenWrt Tenda AC9 原始 `.trx` 的实际回放见 [R2-30 原始制品报告](./docs/firmware-mapping/samples/r2-30-openwrt-ac9-raw-artifact-analysis.json)。
 
+要让用户直接从 Console 上传原始固件并持续查看异步作业、Catalog 与 Graph 生命周期，可在 API
+启动时显式配置固定摘要的 Binwalk 镜像：
+
+```bash
+PYTHONPATH=src python3 -m firmatlas intelligence serve \
+  --database var/firmatlas.db \
+  --host 127.0.0.1 --port 8787 \
+  --static-dir apps/console/dist \
+  --mapping-workspace var/mapping-jobs \
+  --mapping-runtime /usr/local/bin/docker \
+  --mapping-binwalk-image-ref registry.example/binwalk@sha256:<pinned-image-digest> \
+  --mapping-binwalk-version 3.1.0 \
+  --mapping-upload-max-bytes 67108864 \
+  --mapping-analysis-max-seconds 900
+```
+
+未提供 `--mapping-binwalk-image-ref` 时上传入口只显示为未配置，不会回退到宿主机直接执行
+Binwalk。上传使用 `application/octet-stream`，按 SHA-256 内容寻址；HTTP 请求仅排队，单独的有界
+worker 负责隔离提取、AnalyzeRun 和不可变 Catalog/Graph 发布。相同制品与相同 runner 身份复用
+同一个作业，重启时未完成作业会显式转为 `job.interrupted`，不会伪装成成功。真实 AC9 页面回放
+见 [R2-31 浏览器上传作业记录](./docs/firmware-mapping/progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md)。
+
 将 AnalyzeRun 与图发布到本地 SQLite，并用与后续 HTTP/Console 相同的语义查询：
 
 ```bash

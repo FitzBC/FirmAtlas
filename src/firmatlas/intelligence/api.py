@@ -17,6 +17,11 @@ from firmatlas.mapping.repository import (
     HistoricalCoverageLedgerQuery,
     HistoricalGraphOverlayQuery,
 )
+from firmatlas.mapping.job_service import (
+    FirmwareMappingJobService,
+    FirmwareMappingRuntimeConfig,
+    create_container_firmware_mapping_job_service,
+)
 
 from .repository import IntelligenceRepository
 from .service import IntelligenceService, SyncAlreadyRunning
@@ -40,6 +45,7 @@ def create_handler(
     semantic_service: SemanticAnalysisService = None,
     static_dir: str = None,
     mapping_repository: DiscoveryCatalogRepository = None,
+    mapping_job_service: FirmwareMappingJobService = None,
 ):
     semantic = semantic_service or SemanticAnalysisService(service.repository)
     mappings = mapping_repository or service.repository.mapping_catalogs
@@ -81,7 +87,7 @@ def create_handler(
                     HTTPStatus.BAD_REQUEST,
                     {"error": str(error), "request_id": request_id},
                 )
-            except BaseException:
+            except Exception:
                 LOGGER.exception("unhandled request error")
                 self._send_json(
                     HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -125,6 +131,62 @@ def create_handler(
                 return HTTPStatus.OK, mappings.list_catalogs(
                     limit=page_size, offset=(page - 1) * page_size,
                 )
+            if method == "GET" and path == "/api/mappings/jobs":
+                return HTTPStatus.OK, {
+                    "enabled": mapping_job_service is not None,
+                    "max_upload_bytes": (
+                        mapping_job_service.max_upload_bytes
+                        if mapping_job_service is not None else 0
+                    ),
+                    "items": [
+                        item.to_dict() for item in (
+                            mapping_job_service.list(limit=20)
+                            if mapping_job_service is not None else ()
+                        )
+                    ],
+                }
+            if method == "POST" and path == "/api/mappings/jobs":
+                if mapping_job_service is None:
+                    raise ApiError(
+                        HTTPStatus.SERVICE_UNAVAILABLE,
+                        "firmware mapping jobs are not configured",
+                    )
+                if self.headers.get("Content-Type", "").split(";", 1)[0] != "application/octet-stream":
+                    raise ApiError(
+                        HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                        "firmware artifact upload must be application/octet-stream",
+                    )
+                try:
+                    content_length = int(self.headers.get("Content-Length", ""))
+                except ValueError:
+                    raise ApiError(
+                        HTTPStatus.LENGTH_REQUIRED,
+                        "firmware artifact upload requires Content-Length",
+                    )
+                if content_length > mapping_job_service.max_upload_bytes:
+                    raise ApiError(
+                        HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                        "firmware artifact upload exceeds size budget",
+                    )
+                snapshot = mapping_job_service.submit(
+                    self.rfile,
+                    unquote(self.headers.get("X-Firmware-Filename", "")),
+                    content_length,
+                )
+                return HTTPStatus.ACCEPTED, snapshot.to_dict()
+            mapping_job_prefix = "/api/mappings/jobs/"
+            if method == "GET" and path.startswith(mapping_job_prefix):
+                if mapping_job_service is None:
+                    raise ApiError(
+                        HTTPStatus.SERVICE_UNAVAILABLE,
+                        "firmware mapping jobs are not configured",
+                    )
+                snapshot = mapping_job_service.get(
+                    unquote(path[len(mapping_job_prefix):])
+                )
+                if snapshot is None:
+                    raise ApiError(HTTPStatus.NOT_FOUND, "firmware mapping job not found")
+                return HTTPStatus.OK, snapshot.to_dict()
             if method == "GET" and path == "/api/mappings/potential-hidden-interfaces":
                 page_size = max(1, min(_integer(query, "page_size", 100), 200))
                 page = max(1, _integer(query, "page", 1))
@@ -435,7 +497,8 @@ def create_handler(
                     "Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS"
                 )
                 self.send_header(
-                    "Access-Control-Allow-Headers", "Content-Type, X-Request-ID"
+                    "Access-Control-Allow-Headers",
+                    "Content-Type, X-Request-ID, X-Firmware-Filename",
                 )
 
         def log_message(self, format: str, *args: Any) -> None:
@@ -449,17 +512,28 @@ def serve(
     host: str = "127.0.0.1",
     port: int = 8787,
     static_dir: str = None,
+    mapping_runtime_config: FirmwareMappingRuntimeConfig = None,
 ) -> None:
     repository = IntelligenceRepository(database)
     service = IntelligenceService(repository)
+    mapping_jobs = (
+        create_container_firmware_mapping_job_service(
+            database, repository.mapping_catalogs, mapping_runtime_config,
+        )
+        if mapping_runtime_config is not None else None
+    )
     server = ThreadingHTTPServer(
-        (host, port), create_handler(service, static_dir=static_dir)
+        (host, port), create_handler(
+            service, static_dir=static_dir, mapping_job_service=mapping_jobs,
+        )
     )
     LOGGER.info("FirmAtlas API listening on http://%s:%s", host, port)
     try:
         server.serve_forever()
     finally:
         server.server_close()
+        if mapping_jobs is not None:
+            mapping_jobs.close()
         repository.close()
 
 

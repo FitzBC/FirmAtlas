@@ -273,6 +273,29 @@ export interface MappingCatalogSummary {
   release_context?: MappingReleaseContext | null
 }
 
+export interface FirmwareMappingJob {
+  schema_version: string
+  job_id: string
+  original_filename: string
+  firmware_artifact_sha256: string
+  artifact_size: number
+  runner_id: string
+  status: 'queued' | 'running' | 'completed' | 'partial' | 'failed'
+  submitted_at: string
+  started_at: string | null
+  finished_at: string | null
+  artifact_analysis_id: string | null
+  catalog_id: string | null
+  graph_id: string | null
+  error_code: string | null
+}
+
+export interface FirmwareMappingJobPage {
+  enabled: boolean
+  max_upload_bytes: number
+  items: FirmwareMappingJob[]
+}
+
 export interface MappingReleaseContext {
   vendor: string
   product: string

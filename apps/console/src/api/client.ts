@@ -22,6 +22,8 @@ import type {
   FirmwareCandidateDetail,
   FirmwareCandidate,
   MappingCatalogSummary,
+  FirmwareMappingJob,
+  FirmwareMappingJobPage,
   MappingSnapshotDiff,
   MappingCandidatePage,
   MappingCandidateDetail,
@@ -179,6 +181,21 @@ export const intelligenceApi = {
     request<{ items: MappingCatalogSummary[]; total: number; limit: number; offset: number }>(
       '/api/mappings/catalogs?page_size=50', { signal },
     ),
+  mappingJobs: (signal?: AbortSignal) =>
+    request<FirmwareMappingJobPage>('/api/mappings/jobs', { signal }),
+  mappingJob: (jobId: string, signal?: AbortSignal) =>
+    request<FirmwareMappingJob>(
+      `/api/mappings/jobs/${encodeURIComponent(jobId)}`, { signal },
+    ),
+  submitFirmwareMappingJob: (file: File) =>
+    request<FirmwareMappingJob>('/api/mappings/jobs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'X-Firmware-Filename': encodeURIComponent(file.name),
+      },
+      body: file,
+    }),
   potentialHiddenInterfaces: (query = '', signal?: AbortSignal) => {
     const params = new URLSearchParams({ page_size: '200' })
     if (query) params.set('q', query)

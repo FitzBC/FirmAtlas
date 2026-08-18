@@ -323,6 +323,37 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+it('uploads one firmware artifact and exposes its published mapping job', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
+    items: [], total: 0, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingJobs').mockResolvedValue({
+    enabled: true, max_upload_bytes: 64 * 1024 * 1024, items: [],
+  })
+  vi.spyOn(intelligenceApi, 'submitFirmwareMappingJob').mockResolvedValue({
+    schema_version: 'firmatlas.mapping.job/v1alpha1',
+    job_id: `firmware-mapping-job:${'a'.repeat(64)}`,
+    original_filename: 'ac9.trx', firmware_artifact_sha256: 'b'.repeat(64),
+    artifact_size: 12, runner_id: 'container-binwalk:test', status: 'completed',
+    submitted_at: '2026-08-18T00:00:00Z', started_at: '2026-08-18T00:00:01Z',
+    finished_at: '2026-08-18T00:00:02Z', artifact_analysis_id: 'analysis:ac9',
+    catalog_id: 'catalog:ac9', graph_id: 'graph:ac9', error_code: null,
+  })
+
+  render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '上传分析' }))
+  const file = new File([new Uint8Array(12)], 'ac9.trx', { type: 'application/octet-stream' })
+  fireEvent.change(await screen.findByLabelText('选择固件制品'), {
+    target: { files: [file] },
+  })
+  fireEvent.click(screen.getByRole('button', { name: '开始独立分析' }))
+
+  expect(await screen.findByText('分析已完成')).toBeInTheDocument()
+  expect(screen.getByText('ac9.trx')).toBeInTheDocument()
+  expect(screen.getByText(/bbbbbbbbbbbbbbbb/)).toBeInTheDocument()
+  expect(screen.getByText('graph:ac9')).toBeInTheDocument()
+})
+
 it('navigates catalog, candidate and evidence levels without overlay drawers', async () => {
   vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
   const query = vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({ items: [candidate], total: 1, limit: 100, offset: 0 })
