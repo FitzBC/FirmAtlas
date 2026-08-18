@@ -296,6 +296,46 @@ export interface FirmwareMappingJobPage {
   items: FirmwareMappingJob[]
 }
 
+export interface MappingReasoningProposal {
+  proposal_id: string
+  kind: 'analysis_step' | 'candidate_relation' | 'parameter_alias' | 'conflict_explanation' | 'missing_evidence'
+  target_ref: string
+  summary: string
+  rationale: string
+  cited_evidence_ids: string[]
+  required_corroboration: string
+  confidence: number
+  status: 'model_suggested'
+}
+
+export interface MappingReasoningRun {
+  schema_version: string
+  run_id: string
+  catalog_id: string
+  firmware_artifact_sha256: string
+  adapter_id: string
+  status: 'queued' | 'running' | 'completed' | 'partial' | 'failed'
+  submitted_at: string
+  attempt: number
+  started_at: string | null
+  finished_at: string | null
+  proposals: MappingReasoningProposal[]
+  rejected_proposal_count: number
+  prompt_tokens: number
+  completion_tokens: number
+  response_model?: string | null
+  provider_request_id?: string | null
+  provider_trace_id?: string | null
+  error_code: string | null
+  diagnostics: string[]
+}
+
+export interface MappingReasoningCapability {
+  enabled: boolean
+  adapter_id: string | null
+  latest: MappingReasoningRun | null
+}
+
 export interface MappingReleaseContext {
   vendor: string
   product: string

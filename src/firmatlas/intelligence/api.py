@@ -22,6 +22,12 @@ from firmatlas.mapping.job_service import (
     FirmwareMappingRuntimeConfig,
     create_container_firmware_mapping_job_service,
 )
+from firmatlas.mapping.reasoning import (
+    MappingReasoningRunStore,
+    MappingReasoningService,
+    MiniMaxReasonerAdapter,
+    MiniMaxReasonerConfig,
+)
 
 from .repository import IntelligenceRepository
 from .service import IntelligenceService, SyncAlreadyRunning
@@ -46,6 +52,7 @@ def create_handler(
     static_dir: str = None,
     mapping_repository: DiscoveryCatalogRepository = None,
     mapping_job_service: FirmwareMappingJobService = None,
+    mapping_reasoning_service: MappingReasoningService = None,
 ):
     semantic = semantic_service or SemanticAnalysisService(service.repository)
     mappings = mapping_repository or service.repository.mapping_catalogs
@@ -206,6 +213,46 @@ def create_handler(
                         "base or target mapping catalog not found",
                     )
                 return HTTPStatus.OK, result
+            mapping_reasoning_prefix = "/api/mappings/catalogs/"
+            mapping_reasoning_suffix = "/reasoning"
+            if (
+                path.startswith(mapping_reasoning_prefix)
+                and path.endswith(mapping_reasoning_suffix)
+            ):
+                catalog_id = unquote(
+                    path[
+                        len(mapping_reasoning_prefix):-len(mapping_reasoning_suffix)
+                    ].rstrip("/")
+                )
+                if not catalog_id:
+                    raise ApiError(HTTPStatus.NOT_FOUND, "mapping catalog not found")
+                if method == "GET":
+                    latest = (
+                        mapping_reasoning_service.latest(catalog_id)
+                        if mapping_reasoning_service is not None else None
+                    )
+                    return HTTPStatus.OK, {
+                        "enabled": mapping_reasoning_service is not None,
+                        "adapter_id": (
+                            mapping_reasoning_service.adapter_id
+                            if mapping_reasoning_service is not None else None
+                        ),
+                        "latest": latest.to_dict() if latest is not None else None,
+                    }
+                if method == "POST":
+                    self._body()
+                    if mapping_reasoning_service is None:
+                        raise ApiError(
+                            HTTPStatus.SERVICE_UNAVAILABLE,
+                            "mapping reasoning is not configured",
+                        )
+                    try:
+                        run = mapping_reasoning_service.submit(catalog_id)
+                    except KeyError:
+                        raise ApiError(
+                            HTTPStatus.NOT_FOUND, "mapping catalog not found",
+                        )
+                    return HTTPStatus.ACCEPTED, run.to_dict()
             if method == "GET" and path == "/api/mappings/graphs":
                 page_size = max(1, min(_integer(query, "page_size", 30), 100))
                 page = max(1, _integer(query, "page", 1))
@@ -513,6 +560,7 @@ def serve(
     port: int = 8787,
     static_dir: str = None,
     mapping_runtime_config: FirmwareMappingRuntimeConfig = None,
+    mapping_reasoning_config: MiniMaxReasonerConfig = None,
 ) -> None:
     repository = IntelligenceRepository(database)
     service = IntelligenceService(repository)
@@ -522,9 +570,18 @@ def serve(
         )
         if mapping_runtime_config is not None else None
     )
+    mapping_reasoning = (
+        MappingReasoningService(
+            repository.mapping_catalogs,
+            MappingReasoningRunStore(database),
+            MiniMaxReasonerAdapter(mapping_reasoning_config),
+        )
+        if mapping_reasoning_config is not None else None
+    )
     server = ThreadingHTTPServer(
         (host, port), create_handler(
             service, static_dir=static_dir, mapping_job_service=mapping_jobs,
+            mapping_reasoning_service=mapping_reasoning,
         )
     )
     LOGGER.info("FirmAtlas API listening on http://%s:%s", host, port)
@@ -534,6 +591,8 @@ def serve(
         server.server_close()
         if mapping_jobs is not None:
             mapping_jobs.close()
+        if mapping_reasoning is not None:
+            mapping_reasoning.close()
         repository.close()
 
 

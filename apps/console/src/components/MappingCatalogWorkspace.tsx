@@ -1,13 +1,14 @@
 import {
   Activity, Binary, Braces, CheckCircle2, ChevronRight, CircleDot, Database, EyeOff,
   FileArchive, FileCode2, GitCompareArrows, LoaderCircle, Minus, Plus, Radar,
-  Search, ShieldQuestion, TriangleAlert, UploadCloud, Waypoints,
+  Search, ShieldCheck, ShieldQuestion, Sparkles, TriangleAlert, UploadCloud, Waypoints,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { intelligenceApi } from '../api/client'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type {
   FirmwareMappingJob, MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
+  MappingReasoningCapability, MappingReasoningRun,
   MappingSnapshotChange, MappingSnapshotDiff, PotentialHiddenInterface,
   PotentialHiddenInterfacePage,
 } from '../types'
@@ -230,6 +231,9 @@ function FirmwareUploadWorkspace({
   const [recent, setRecent] = useState<FirmwareMappingJob[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [reasoningCapability, setReasoningCapability] = useState<MappingReasoningCapability | null>(null)
+  const [reasoningRun, setReasoningRun] = useState<MappingReasoningRun | null>(null)
+  const [reasoningBusy, setReasoningBusy] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -259,6 +263,32 @@ function FirmwareUploadWorkspace({
     return () => { controller.abort(); window.clearTimeout(timer) }
   }, [job, onPublished])
 
+  useEffect(() => {
+    if (!job?.catalog_id) { setReasoningCapability(null); setReasoningRun(null); return }
+    const controller = new AbortController()
+    void intelligenceApi.mappingReasoning(job.catalog_id, controller.signal).then((capability) => {
+      setReasoningCapability(capability)
+      setReasoningRun(capability.latest)
+    }).catch((caught) => {
+      if (!controller.signal.aborted) setMessage(caught instanceof Error ? caught.message : '模型能力加载失败')
+    })
+    return () => controller.abort()
+  }, [job?.catalog_id])
+
+  useEffect(() => {
+    if (!job?.catalog_id || !reasoningRun || !['queued', 'running'].includes(reasoningRun.status)) return
+    const controller = new AbortController()
+    const timer = window.setTimeout(() => {
+      void intelligenceApi.mappingReasoning(job.catalog_id!, controller.signal).then((capability) => {
+        setReasoningCapability(capability)
+        setReasoningRun(capability.latest)
+      }).catch((caught) => {
+        if (!controller.signal.aborted) setMessage(caught instanceof Error ? caught.message : '模型状态更新失败')
+      })
+    }, 1000)
+    return () => { controller.abort(); window.clearTimeout(timer) }
+  }, [job?.catalog_id, reasoningRun])
+
   const submit = async () => {
     if (!file) return
     if (file.size <= 0) { setMessage('固件制品不能为空'); return }
@@ -274,6 +304,19 @@ function FirmwareUploadWorkspace({
       setMessage(caught instanceof Error ? caught.message : '固件提交失败')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const submitReasoning = async () => {
+    if (!job?.catalog_id) return
+    setReasoningBusy(true)
+    setMessage(null)
+    try {
+      setReasoningRun(await intelligenceApi.submitMappingReasoning(job.catalog_id))
+    } catch (caught) {
+      setMessage(caught instanceof Error ? caught.message : 'MiniMax 线索补充失败')
+    } finally {
+      setReasoningBusy(false)
     }
   }
 
@@ -294,6 +337,14 @@ function FirmwareUploadWorkspace({
     </section>
 
     <section className="rounded-2xl border border-white/[0.07] bg-[#0a0f17]/80 p-5 backdrop-blur-xl"><div className="flex items-center justify-between"><div><div className="eyebrow">Analysis lifecycle</div><h3 className="mt-2 text-sm font-medium text-slate-200">{statusLabel}</h3></div>{job && (job.status === 'completed' || job.status === 'partial') ? <CheckCircle2 size={22} className="text-signal" /> : active ? <LoaderCircle size={22} className="animate-spin text-cyan" /> : <Activity size={22} className="text-slate-700" />}</div>{job ? <div className="mt-5 space-y-3"><JobDatum label="制品" value={job.original_filename} /><JobDatum label="SHA-256" value={`${job.firmware_artifact_sha256.slice(0, 16)}…`} mono /><JobDatum label="状态" value={job.status} /><JobDatum label="Catalog" value={job.catalog_id || '等待发布'} mono /><JobDatum label="Graph" value={job.graph_id || '等待发布'} mono />{active && <div className="h-1 overflow-hidden rounded-full bg-white/[0.05]"><div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-cyan/30 to-signal/70" /></div>}{job.graph_id && <button type="button" onClick={onOpenGraph} className="mt-2 w-full rounded-xl border border-cyan/15 bg-cyan/[0.05] px-3 py-2.5 text-xs text-cyan transition hover:bg-cyan/[0.09]">查看生成图谱</button>}</div> : <p className="mt-6 text-xs leading-6 text-slate-600">提交后这里会持续显示排队、执行、部分完成或失败状态，并保留 Catalog 与 Graph 身份。</p>}<div className="mt-6 border-t border-white/[0.06] pt-4"><div className="text-[9px] uppercase tracking-[0.12em] text-slate-700">最近任务 {recent.length}</div></div></section>
+
+    {job?.catalog_id && <section className="xl:col-span-2 overflow-hidden rounded-2xl border border-violet-400/15 bg-[radial-gradient(circle_at_88%_0%,rgba(167,139,250,0.09),transparent_34%),rgba(10,15,23,0.84)] p-6 backdrop-blur-xl">
+      {/* Design rationale: the model surface uses a distinct violet trust zone and persistent
+          corroboration cards so suggestions cannot visually masquerade as green verified facts. */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div className="flex items-start gap-4"><div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-violet-400/20 bg-violet-400/[0.07] text-violet-300"><Sparkles size={20} /></div><div><div className="eyebrow">Evidence-constrained reasoning</div><h3 className="mt-2 text-base font-medium text-white">MiniMax 证据补充线索</h3><div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-300/15 bg-amber-300/[0.05] px-2.5 py-1 text-[9px] text-amber-200"><ShieldCheck size={12} />模型建议不是已验证事实</div><p className="mt-3 max-w-2xl text-xs leading-6 text-slate-500">仅发送有界、脱敏的 Catalog 证据摘要。建议必须引用现有 Evidence ID，并在确定性分析器提供独立佐证前保持 proposal-only。</p></div></div><button type="button" onClick={() => void submitReasoning()} disabled={!reasoningCapability?.enabled || reasoningBusy || ['queued', 'running'].includes(reasoningRun?.status || '')} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-violet-400/20 bg-violet-400/[0.08] px-4 py-2.5 text-xs text-violet-200 transition hover:bg-violet-400/[0.13] disabled:cursor-not-allowed disabled:opacity-35">{reasoningBusy || ['queued', 'running'].includes(reasoningRun?.status || '') ? <LoaderCircle size={15} className="animate-spin" /> : <Sparkles size={15} />}使用 MiniMax 补充分析线索</button></div>
+      {reasoningCapability && !reasoningCapability.enabled && <div className="mt-5 rounded-xl border border-white/[0.06] bg-black/20 px-4 py-3 text-xs text-slate-600">当前服务未配置 MiniMax；确定性 Catalog 与 Graph 不受影响。</div>}
+      {reasoningRun && <div className="mt-6"><div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-600"><span>状态 <b className="font-mono font-normal text-violet-200">{reasoningRun.status}</b></span><span>尝试 #{reasoningRun.attempt}</span><span>建议 {reasoningRun.proposals.length}</span><span>拒绝 {reasoningRun.rejected_proposal_count}</span><span>Tokens {reasoningRun.prompt_tokens + reasoningRun.completion_tokens}</span>{reasoningRun.response_model && <span>模型 {reasoningRun.response_model}</span>}</div><div className="mt-4 grid gap-3 lg:grid-cols-2">{reasoningRun.proposals.map((proposal) => <article key={proposal.proposal_id} className="rounded-2xl border border-violet-400/10 bg-black/20 p-4"><div className="flex items-center justify-between gap-3"><span className="rounded-full bg-violet-400/[0.08] px-2 py-1 text-[9px] uppercase tracking-[0.08em] text-violet-300">{proposal.kind}</span><span className="font-mono text-[9px] text-slate-700">{Math.round(proposal.confidence * 100)}%</span></div><h4 className="mt-3 text-sm text-slate-200">{proposal.summary}</h4><p className="mt-2 text-[11px] leading-5 text-slate-500">{proposal.rationale}</p><div className="mt-4 rounded-xl border border-signal/10 bg-signal/[0.035] px-3 py-2.5"><div className="text-[9px] uppercase tracking-[0.1em] text-signal/70">仍需确定性佐证</div><div className="mt-1.5 text-[10px] leading-5 text-slate-400">{proposal.required_corroboration}</div></div><div className="mt-3 text-[9px] text-slate-700">引用 {proposal.cited_evidence_ids.length} 个既有 Evidence ID</div></article>)}</div>{reasoningRun.status === 'failed' && <div className="mt-4 rounded-xl border border-ember/20 bg-ember/[0.05] px-4 py-3 text-xs text-ember">模型补充失败：{reasoningRun.error_code || 'unknown'}。确定性分析结果保持可用。</div>}</div>}
+    </section>}
   </div>
 }
 

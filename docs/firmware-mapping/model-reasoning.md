@@ -2,7 +2,9 @@
 
 ## 1. 阶段策略
 
-当前设计和初始实现由 GPT 辅助研究、编码和审查。MiniMax 不参与 M1 Snapshot 合同、确定性 inventory 或基础证据提取；只有当这些确定性 Seam 稳定后，MiniMax 才作为持续业务运行的外部 Adapter。
+设计和初始实现由 GPT 辅助研究、编码和审查。自 R2-32 起，MiniMax 只作为持续业务运行的外部
+Adapter，为已发布 Catalog 的未决义务生成待验证建议；它不参与 Snapshot 合同、确定性 inventory、
+基础证据提取或事实晋级。
 
 这样可以避免在基础模型尚未稳定时，把规则缺口、身份混乱或测试缺失误包装成“模型能力问题”。
 
@@ -21,36 +23,38 @@
 
 ## 3. 推理 Seam
 
-模型位于 `Evidence Reasoning` 内部 Seam，而不是 `FirmwareMapper` 外部 Interface：
+模型位于 `Evidence Reasoning` 内部 Seam，而不是 `FirmwareMapper` 外部 Interface。R2-32 的生产合同为：
 
 ```python
-class EvidenceReasoner(Protocol):
-    def adjudicate(self, request: ReasoningRequest) -> ReasoningResult:
+class MappingReasonerAdapter(Protocol):
+    def propose(self, request: MappingReasoningRequest) -> dict:
         ...
 ```
 
-生产 `MiniMaxReasonerAdapter` 和测试 `DeterministicReasonerAdapter` 满足同一 Interface。FirmwareMapper 调用者不需要知道模型供应商、prompt 或重试策略。
+生产 `MiniMaxReasonerAdapter` 与测试 Fake Adapter 满足同一 Interface。`MappingReasoningService` 从不可变
+Catalog 建立最小证据包，执行 Adapter，再按 target/evidence 白名单校验并持久化独立 ReasoningRun。
+重复成功请求去重；失败后产生新的 attempt，旧失败记录不被覆盖。
 
 `ReasoningRequest` 必须包含：
 
-- obligation ID 和 required capability；
+- Catalog ID、coverage 和优先 obligation；
 - 允许引用的 entity/evidence/span ID 白名单；
-- 有界源码/反编译片段；
+- 有界候选摘要与精确 EvidenceAtom locator，不发送完整固件；
 - schema、prompt 和 policy 版本；
 - 最大 token、超时和数据分类。
 
-`ReasoningResult` 只允许：
+`MappingReasoningProposal` 只允许：
 
 - 引用白名单实体；
-- 产生 `model_suggested` EvidenceAtom；
-- 建议关系、约束或新 Obligation；
+- 保持 `model_suggested`，不伪装成 EvidenceAtom；
+- 建议分析步骤、候选关系、参数别名、冲突解释或缺失证据；
 - 提供结构化警告和 token 使用量。
 
 它不能直接发布 Snapshot 或把状态改成 supported/runtime_verified。
 
 ## 4. MiniMax 配置
 
-未来 Adapter 使用 OpenAI-compatible endpoint：
+Adapter 使用 MiniMax 当前官方 Chat Completions endpoint：
 
 ```text
 MINIMAX_BASE_URL=https://api.minimaxi.com/v1
@@ -66,8 +70,14 @@ MINIMAX_MODEL=<explicit model id>
 - prompt cache fingerprint 包含 provider、base URL、model、prompt/schema 版本，不包含 Key；
 - Key 缺失时模型能力进入 `skipped_by_policy` 或 `unsupported` Coverage，不阻断确定性结果；
 - 在模型和协议版本正式核验前不硬编码默认模型名。
+- 请求使用 `max_completion_tokens`；当前官方 OpenAPI 未声明 `response_format`，因此本地严格解析 JSON，
+  不发送或依赖该字段；
+- HTTP 码与响应体 `base_resp.status_code` 均须检查，只有明确瞬态错误使用有界重试；
+- 供应商公开材料没有给出适用于本流程的零保留/不训练承诺，因此只发送最小脱敏证据包。
 
-用户提供的凭证不会用于当前设计和实现。由于凭证已经出现在对话上下文，建议在正式接入前轮换。
+用户提供的凭证未写入仓库、数据库或文档，也未用于本轮在线调用。由于凭证已经出现在对话上下文，
+正式接入前应轮换。官方协议与数据边界核验见
+[R2-32 原始来源研究](./research/2026-08-18-minimax-mapping-reasoning-primary-sources.md)。
 
 ## 5. 调用流程
 
@@ -77,13 +87,14 @@ flowchart LR
     B --> P["Prompt + JSON Schema"]
     P --> M["MiniMax Adapter"]
     M --> V["Deterministic Validator"]
-    V --> S["model_suggested evidence"]
+    V --> S["model_suggested proposal"]
     V -->|"invalid/timeout"| D["Diagnostic + unchanged obligation"]
     S --> C["Cross-source corroboration"]
     C -->|"能力门限满足"| N["new Snapshot claim"]
 ```
 
-模型输出本身永远停留在 suggested。只有另一个确定性来源或运行时来源满足 capability rule 后，新的 Snapshot 才能发布 supported 关系。
+模型输出本身永远停留在 suggested，并与 Catalog 分库存储。只有后续确定性分析器或运行时来源满足
+capability rule 后，新的 Catalog/Snapshot 才能发布 supported 关系；R2-32 不实现自动晋级。
 
 ## 6. 成本和可靠性
 
@@ -110,4 +121,3 @@ flowchart LR
 - prompt injection fixture 和敏感信息泄漏测试。
 
 模型业务能力只有在固定离线 fixture 上通过上述门限后才允许默认开启。生产默认建议先关闭，由策略对指定 deep analysis 任务显式开启。
-

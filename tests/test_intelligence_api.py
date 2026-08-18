@@ -29,6 +29,9 @@ from firmatlas.mapping import (
     project_communication_architecture_graph,
     FirmwareMappingJobSnapshot,
     FirmwareMappingJobStatus,
+    MappingReasoningProposal,
+    MappingReasoningRun,
+    MappingReasoningRunStatus,
 )
 from firmatlas.mapping.repository import DiscoveryCatalogRepository
 from tests.test_mapping_hidden_interface import _catalog as _hidden_catalog
@@ -62,6 +65,39 @@ class FakeMappingJobService:
         return (self.snapshot,)
 
 
+class FakeMappingReasoningService:
+    adapter_id = "minimax-reasoner:test"
+
+    def __init__(self):
+        self.submitted = []
+        self.run = MappingReasoningRun(
+            run_id="mapping-reasoning-run:" + "c" * 64,
+            catalog_id="discovery-catalog:" + "d" * 64,
+            firmware_artifact_sha256="e" * 64,
+            adapter_id=self.adapter_id,
+            status=MappingReasoningRunStatus.COMPLETED,
+            submitted_at="2026-08-18T00:00:00+00:00",
+            finished_at="2026-08-18T00:00:02+00:00",
+            proposals=(MappingReasoningProposal(
+                proposal_id="mapping-reasoning-proposal:" + "f" * 64,
+                kind="analysis_step",
+                target_ref="candidate:ac9",
+                summary="Trace registrar call sites.",
+                rationale="A route owner remains unresolved.",
+                cited_evidence_ids=("evidence:ac9",),
+                required_corroboration="deterministic call-site evidence",
+                confidence=0.8,
+            ),),
+        )
+
+    def submit(self, catalog_id):
+        self.submitted.append(catalog_id)
+        return self.run
+
+    def latest(self, catalog_id):
+        return self.run if catalog_id == self.run.catalog_id else None
+
+
 class IntelligenceApiTests(unittest.TestCase):
     def setUp(self) -> None:
         self.repository = IntelligenceRepository(":memory:")
@@ -72,12 +108,14 @@ class IntelligenceApiTests(unittest.TestCase):
         service = IntelligenceService(self.repository)
         self.mapping_repository = DiscoveryCatalogRepository(":memory:")
         self.mapping_jobs = FakeMappingJobService()
+        self.mapping_reasoning = FakeMappingReasoningService()
         self.server = ThreadingHTTPServer(
             ("127.0.0.1", 0),
             create_handler(
                 service,
                 mapping_repository=self.mapping_repository,
                 mapping_job_service=self.mapping_jobs,
+                mapping_reasoning_service=self.mapping_reasoning,
             ),
         )
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -146,6 +184,24 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual(200, list_status)
         self.assertTrue(listing["enabled"])
         self.assertEqual([submitted["job_id"]], [item["job_id"] for item in listing["items"]])
+
+    def test_mapping_reasoning_routes_expose_capability_and_proposal_run(self) -> None:
+        catalog_id = self.mapping_reasoning.run.catalog_id
+
+        submitted_status, submitted = self.post(
+            "/api/mappings/catalogs/{}/reasoning".format(catalog_id), {}
+        )
+        observed_status, observed = self.get(
+            "/api/mappings/catalogs/{}/reasoning".format(catalog_id)
+        )
+
+        self.assertEqual(202, submitted_status)
+        self.assertEqual([catalog_id], self.mapping_reasoning.submitted)
+        self.assertEqual("model_suggested", submitted["proposals"][0]["status"])
+        self.assertEqual(200, observed_status)
+        self.assertTrue(observed["enabled"])
+        self.assertEqual("minimax-reasoner:test", observed["adapter_id"])
+        self.assertEqual(submitted["run_id"], observed["latest"]["run_id"])
 
     def test_overview_and_filtered_feed(self) -> None:
         status, overview = self.get("/api/intelligence/overview")

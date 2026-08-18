@@ -24,6 +24,8 @@ import type {
   MappingCatalogSummary,
   FirmwareMappingJob,
   FirmwareMappingJobPage,
+  MappingReasoningCapability,
+  MappingReasoningRun,
   MappingSnapshotDiff,
   MappingCandidatePage,
   MappingCandidateDetail,
@@ -196,6 +198,16 @@ export const intelligenceApi = {
       },
       body: file,
     }),
+  mappingReasoning: (catalogId: string, signal?: AbortSignal) =>
+    request<MappingReasoningCapability>(
+      `/api/mappings/catalogs/${encodeURIComponent(catalogId)}/reasoning`, { signal },
+    ),
+  submitMappingReasoning: (catalogId: string) =>
+    request<MappingReasoningRun>(
+      `/api/mappings/catalogs/${encodeURIComponent(catalogId)}/reasoning`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
+      },
+    ),
   potentialHiddenInterfaces: (query = '', signal?: AbortSignal) => {
     const params = new URLSearchParams({ page_size: '200' })
     if (query) params.set('q', query)

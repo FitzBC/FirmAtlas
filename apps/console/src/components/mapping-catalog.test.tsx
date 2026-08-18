@@ -339,6 +339,26 @@ it('uploads one firmware artifact and exposes its published mapping job', async 
     finished_at: '2026-08-18T00:00:02Z', artifact_analysis_id: 'analysis:ac9',
     catalog_id: 'catalog:ac9', graph_id: 'graph:ac9', error_code: null,
   })
+  vi.spyOn(intelligenceApi, 'mappingReasoning').mockResolvedValue({
+    enabled: true, adapter_id: 'minimax-reasoner:test', latest: null,
+  })
+  vi.spyOn(intelligenceApi, 'submitMappingReasoning').mockResolvedValue({
+    schema_version: 'firmatlas.mapping.reasoning-run/v1alpha1',
+    run_id: `mapping-reasoning-run:${'c'.repeat(64)}`,
+    catalog_id: 'catalog:ac9', firmware_artifact_sha256: 'b'.repeat(64),
+    adapter_id: 'minimax-reasoner:test', status: 'completed',
+    submitted_at: '2026-08-18T00:00:03Z', attempt: 1, started_at: '2026-08-18T00:00:03Z',
+    finished_at: '2026-08-18T00:00:04Z', rejected_proposal_count: 0,
+    prompt_tokens: 120, completion_tokens: 40, error_code: null, diagnostics: [],
+    proposals: [{
+      proposal_id: `mapping-reasoning-proposal:${'d'.repeat(64)}`,
+      kind: 'analysis_step', target_ref: 'candidate:ac9',
+      summary: '追踪未决接口的注册调用点', rationale: '当前只存在前端请求证据。',
+      cited_evidence_ids: ['evidence:ac9'],
+      required_corroboration: '需要确定性 registrar call-site 证据',
+      confidence: 0.82, status: 'model_suggested',
+    }],
+  })
 
   render(<MappingCatalogWorkspace />)
   fireEvent.click(await screen.findByRole('button', { name: '上传分析' }))
@@ -352,6 +372,10 @@ it('uploads one firmware artifact and exposes its published mapping job', async 
   expect(screen.getByText('ac9.trx')).toBeInTheDocument()
   expect(screen.getByText(/bbbbbbbbbbbbbbbb/)).toBeInTheDocument()
   expect(screen.getByText('graph:ac9')).toBeInTheDocument()
+  fireEvent.click(await screen.findByRole('button', { name: '使用 MiniMax 补充分析线索' }))
+  expect(await screen.findByText('追踪未决接口的注册调用点')).toBeInTheDocument()
+  expect(screen.getByText('需要确定性 registrar call-site 证据')).toBeInTheDocument()
+  expect(screen.getByText('模型建议不是已验证事实')).toBeInTheDocument()
 })
 
 it('navigates catalog, candidate and evidence levels without overlay drawers', async () => {

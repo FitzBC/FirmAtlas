@@ -1,0 +1,42 @@
+{
+  "schema_version": "firmatlas.mapping.reasoning-sample/v1",
+  "sample_kind": "offline_contract_fixture",
+  "live_provider_call": false,
+  "catalog_id": "discovery-catalog:e1e06e0f9c15567ef088689896a7cc9e975b8f84a5069c901ef249d36eaff933",
+  "firmware_artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
+  "bundle_summary": {
+    "candidate_count": 24,
+    "obligation_count": 20,
+    "evidence_count": 48,
+    "serialized_character_count": 48308,
+    "full_firmware_sent": false,
+    "credentials_sent": false
+  },
+  "selected_context": {
+    "candidate_id": "frontend-request:01b4c5c6277277107b242cb883d1cf057168151d1e526cf80f59354afe1c96a7",
+    "canonical_identity": "ubus://luci/getSwconfigFeatures",
+    "source_path": "www/luci-static/resources/view/network/switch.js",
+    "evidence_id": "evidence:9733aa848ba1428720aae0321bbcc2c57250ed0d4fe72d87b3978b64ea3894ed"
+  },
+  "accepted_proposal": {
+    "status": "model_suggested",
+    "kind": "analysis_step",
+    "target_ref": "frontend-request:01b4c5c6277277107b242cb883d1cf057168151d1e526cf80f59354afe1c96a7",
+    "summary": "追踪 getSwconfigFeatures 对应的 rpcd 插件注册与 ACL owner",
+    "rationale": "现有前端证据只证明 LuCI 发起逻辑 ubus 操作，不能单独证明后端 handler owner。",
+    "cited_evidence_ids": [
+      "evidence:9733aa848ba1428720aae0321bbcc2c57250ed0d4fe72d87b3978b64ea3894ed"
+    ],
+    "required_corroboration": "需要 Native ubus 注册表，或脚本插件注册与 ACL 文件的独立确定性证据。",
+    "confidence": 0.72,
+    "promotion_state": "proposal_only"
+  },
+  "rejected_adversarial_example": {
+    "target_ref": "handler:invented-owner",
+    "cited_evidence_ids": ["evidence:invented"],
+    "rejection_reasons": [
+      "target_ref_not_in_request_whitelist",
+      "evidence_id_not_in_request_whitelist"
+    ]
+  }
+}

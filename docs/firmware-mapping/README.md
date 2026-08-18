@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：M1 corpus gate 仍为 `partial`；R2-31 AC9 浏览器上传到图谱生命周期已验证
+> 当前状态：M1 corpus gate 仍为 `partial`；R2-32 MiniMax 证据受限建议链已验证
 > 最近更新：2026-08-18
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -89,6 +89,7 @@
 | [R2-01 AnalyzeRun 编排](./progress/2026-08-09-r2-01-analysis-run-orchestration.md) | rootfs 自动 source plan、多 producer、Scheduler 与 Catalog 一键闭环 | 运行 Interface、source plan、阶段或 CLI 变化时 |
 | [R2-30 原始制品 AnalyzeRun](./progress/2026-08-17-r2-30-raw-artifact-analyze-run.md) | 隔离提取、保守 rootfs 选择与 raw artifact → AnalyzeRun/图谱闭环 | 原始制品入口、Container Binwalk 或根目录选择变化时 |
 | [R2-31 浏览器上传作业生命周期](./progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md) | 有界上传、持久化异步状态、Catalog/Graph 发布与真实 AC9 页面回放 | 上传预算、任务状态、发布流程或 Console 交互变化时 |
+| [R2-32 MiniMax 证据受限建议](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) | 最小脱敏证据包、proposal 白名单、运行审计、API/Console 与官方协议 | 模型合同、供应商协议、晋级门或数据策略变化时 |
 | [R2-02 Profile/Registry](./progress/2026-08-09-r2-02-analysis-profile-registry.md) | 原厂 Tenda AC9 主样本、ARM PIC 自动深化、OpenWrt ubus 对照 | Profile、Registry、适用性 gate 或主样本结果变化时 |
 | [R2-03 历史 expectation diff](./progress/2026-08-09-r2-03-historical-expectation-diff.md) | 版本范围护栏、漏检归因、AC9 对象 payload 参数闭环 | expectation 合同、归因、历史样本或参数结果变化时 |
 | [R2-04 AC9 框架语义与全集审计](./progress/2026-08-09-r2-04-ac9-framework-history-audit.md) | 跨文件 POST 证明、71 条漏洞全集、30 条样本关联、路由绑定缺口 | framework graph、历史分母、样本关联或 binding 状态变化时 |
@@ -207,8 +208,11 @@ M1 工作项：
 | R2-29 | AC9 历史漏洞完整覆盖账本 | 已验证 | R2-20/21/28 | 14 structured + 57 queue = 71；9 observed / 2 partial / 60 not assessable；immutable SQLite/HTTP/CLI + Console 全分母解释；[记录](./progress/2026-08-14-r2-29-ac9-complete-historical-coverage-ledger.md) |
 | R2-30 | OpenWrt AC9 原始制品 AnalyzeRun | 已验证 | R2-01/29 | 原始 `.trx` → 固定容器 → 保守 rootfs → AnalyzeRun/图谱；1665 nodes / 2273 edges，提取 coverage 保持 partial；[记录](./progress/2026-08-17-r2-30-raw-artifact-analyze-run.md) |
 | R2-31 | AC9 浏览器上传作业生命周期 | 已验证 | R2-30 | 64 MiB 有界 raw upload → 内容寻址 artifact → 单 worker AnalyzeRun → Catalog/Graph 发布；真实页面显示 partial、1665 nodes / 2273 edges 并可跳转图谱；[记录](./progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md) |
+| R2-32 | MiniMax 证据受限分析建议 | 已验证 | R2-31 | 有界脱敏 Catalog bundle → MiniMax Adapter → target/evidence 白名单 Validator → 独立 ReasoningRun；模型不能改写 Catalog；[记录](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) |
 
-**下一项建议**：原始制品、浏览器上传与图谱发布链已经收敛；转向代表性 corpus gate 和带证据晋级门的 MiniMax 业务 Adapter。除非出现新原始来源或明确 mapper 假阴性，不再按单 CVE 无界深挖 AC9。
+**下一项建议**：R2-32 验收后转向代表性 corpus gate，补齐 script-backend coverage 和 native-only
+真实样本。MiniMax proposal 仍不具备事实晋级能力；除非出现新原始来源或明确 mapper 假阴性，
+不再按单 CVE 无界深挖 AC9。
 
 ## 7. 跨会话无缝工作协议
 

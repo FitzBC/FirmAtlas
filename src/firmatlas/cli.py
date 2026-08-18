@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Optional, Sequence
 
@@ -85,6 +86,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     serve_parser.add_argument(
         "--mapping-analysis-max-seconds", type=int, default=900,
+    )
+    serve_parser.add_argument(
+        "--mapping-reasoning-model",
+        help="enable evidence-constrained MiniMax proposals with an explicit model id",
+    )
+    serve_parser.add_argument(
+        "--mapping-reasoning-base-url", default="https://api.minimaxi.com/v1",
+    )
+    serve_parser.add_argument(
+        "--mapping-reasoning-api-key-env", default="MINIMAX_API_KEY",
+        help="environment variable containing the MiniMax API key",
+    )
+    serve_parser.add_argument(
+        "--mapping-reasoning-timeout-seconds", type=int, default=45,
+    )
+    serve_parser.add_argument(
+        "--mapping-reasoning-max-tokens", type=int, default=1800,
     )
 
     sync_parser = intelligence_subparsers.add_parser(
@@ -246,7 +264,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.command == "intelligence":
         if args.intelligence_command == "serve":
             from .intelligence.api import serve
-            from .mapping import FirmwareMappingRuntimeConfig
+            from .mapping import (
+                FirmwareMappingRuntimeConfig,
+                MiniMaxReasonerConfig,
+            )
 
             logging.basicConfig(level=logging.INFO, format="%(message)s")
             mapping_runtime_config = (
@@ -260,9 +281,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
                 if args.mapping_binwalk_image_ref else None
             )
+            mapping_reasoning_config = None
+            if args.mapping_reasoning_model:
+                reasoning_api_key = os.environ.get(
+                    args.mapping_reasoning_api_key_env, ""
+                )
+                if not reasoning_api_key:
+                    parser.error(
+                        "{} must be set when --mapping-reasoning-model is used".format(
+                            args.mapping_reasoning_api_key_env
+                        )
+                    )
+                mapping_reasoning_config = MiniMaxReasonerConfig(
+                    base_url=args.mapping_reasoning_base_url,
+                    api_key=reasoning_api_key,
+                    model=args.mapping_reasoning_model,
+                    timeout_seconds=args.mapping_reasoning_timeout_seconds,
+                    max_tokens=args.mapping_reasoning_max_tokens,
+                )
             serve(
                 args.database, args.host, args.port, args.static_dir,
-                mapping_runtime_config,
+                mapping_runtime_config, mapping_reasoning_config,
             )
             return 0
 

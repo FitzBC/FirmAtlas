@@ -185,6 +185,26 @@ worker 负责隔离提取、AnalyzeRun 和不可变 Catalog/Graph 发布。相�
 同一个作业，重启时未完成作业会显式转为 `job.interrupted`，不会伪装成成功。真实 AC9 页面回放
 见 [R2-31 浏览器上传作业记录](./docs/firmware-mapping/progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md)。
 
+要为已发布 Catalog 的开放义务生成 MiniMax 待验证建议，必须显式给出模型并从环境变量读取 Key：
+
+```bash
+export MINIMAX_API_KEY='<rotated-secret>'
+PYTHONPATH=src python3 -m firmatlas intelligence serve \
+  --database var/firmatlas.db \
+  --host 127.0.0.1 --port 8787 \
+  --static-dir apps/console/dist \
+  --mapping-reasoning-model MiniMax-M3 \
+  --mapping-reasoning-base-url https://api.minimaxi.com/v1 \
+  --mapping-reasoning-api-key-env MINIMAX_API_KEY
+```
+
+默认不启用模型能力；未配置时确定性测绘和图谱仍可完整使用。Console 的 MiniMax 区只展示
+`model_suggested` proposal、引用的既有 EvidenceAtom 及仍需补充的确定性佐证。模型不能修改 Catalog、
+关闭义务或把接口/参数提升为事实。发送内容是有界脱敏证据包，不包含完整固件或凭据；失败后可以
+创建新 attempt，历史运行不会被覆盖。设计、安全边界及当前官方协议核验见
+[大模型推理设计](./docs/firmware-mapping/model-reasoning.md)和
+[R2-32 记录](./docs/firmware-mapping/progress/2026-08-18-r2-32-minimax-evidence-proposals.md)。
+
 将 AnalyzeRun 与图发布到本地 SQLite，并用与后续 HTTP/Console 相同的语义查询：
 
 ```bash
