@@ -22,6 +22,7 @@ import type {
   FirmwareCandidateDetail,
   FirmwareCandidate,
   MappingCatalogSummary,
+  MappingReleaseContext,
   MappingCorpusReport,
   FirmwareMappingJob,
   FirmwareMappingJobPage,
@@ -192,12 +193,19 @@ export const intelligenceApi = {
     request<FirmwareMappingJob>(
       `/api/mappings/jobs/${encodeURIComponent(jobId)}`, { signal },
     ),
-  submitFirmwareMappingJob: (file: File) =>
+  submitFirmwareMappingJob: (
+    file: File,
+    identity: Pick<MappingReleaseContext, 'vendor' | 'product' | 'device_model' | 'firmware_version'>,
+  ) =>
     request<FirmwareMappingJob>('/api/mappings/jobs', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/octet-stream',
         'X-Firmware-Filename': encodeURIComponent(file.name),
+        'X-Firmware-Vendor': encodeURIComponent(identity.vendor),
+        'X-Firmware-Product': encodeURIComponent(identity.product),
+        'X-Device-Model': encodeURIComponent(identity.device_model),
+        'X-Firmware-Version': encodeURIComponent(identity.firmware_version),
       },
       body: file,
     }),
@@ -229,7 +237,7 @@ export const intelligenceApi = {
   mappingCandidates: (
     catalogId: string, filters: { query?: string; kind?: string }, signal?: AbortSignal,
   ) => {
-    const params = new URLSearchParams({ page_size: '100' })
+    const params = new URLSearchParams({ page_size: '500' })
     if (filters.query) params.set('q', filters.query)
     if (filters.kind) params.set('kind', filters.kind)
     return request<MappingCandidatePage>(

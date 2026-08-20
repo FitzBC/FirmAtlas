@@ -1,10 +1,10 @@
 # 固件通信测绘产品功能与验收手册
 
-> 验收版本：R2-37
+> 验收版本：R2-38
 >
 > 验收日期：2026-08-20
 >
-> 典型样本：OpenWrt 19.07.8 Tenda AC9
+> 典型样本：原厂 Tenda AC9 V15.03.05.19(6318)；OpenWrt 19.07.8 AC9 为内部 RPC 对照
 >
 > 服务入口：`http://127.0.0.1:18789/`
 
@@ -16,18 +16,20 @@
 
 ## 2. 用户工作流
 
-1. 在“通信测绘 → 上传分析”选择不超过 64 MiB 的原始固件。
-2. 服务按 SHA-256 内容寻址保存制品，并将隔离解包与 AnalyzeRun 放入单独工作线程。
-3. 作业完成后打开生成图谱；目录页可按能力和文本检索候选。
-4. 在架构图谱中先选择精确接口，再切换“接口结构”“参数与状态”“通信组件”“完整性与义务”。
-5. 点击节点查看来源制品、结构属性、相邻语义关系和 EvidenceAtom 定位。
-6. 使用“潜在隐藏接口”“版本对比”“历史漏洞对照”和“语料门禁”检查跨固件差集、版本变化、历史分母与代表性样本覆盖。
+1. 点击页面右上角始终可见的“上传新固件”，选择不超过 64 MiB 的原始固件，并填写厂商、产品、设备型号和固件版本。
+2. 服务按 SHA-256 内容寻址保存制品，将身份写入作业快照，并将隔离解包与 AnalyzeRun 放入单独工作线程。
+3. 回到“接口调查”，从顶部确认当前固件身份或切换已分析固件。
+4. 左侧选择通信组件，中间选择 Web 接口，右侧查看 HTTP 方法、参数组合、相关处理组件、依赖/约束和 EvidenceAtom。
+5. 需要分析 UBUS/IPC 时显式切换“内部 RPC · 实现细节”；这些逻辑操作不会混入默认 Web 接口列表。
+6. “原始证据”“高级图谱”“潜在隐藏接口”“版本对比”和“语料门禁”保留为进阶取证入口。
 
 ## 3. 已实现功能
 
 | 功能 | 当前行为 | 证据或边界 |
 | --- | --- | --- |
-| 原始固件上传 | 64 MiB 有界、异步单 worker、内容寻址、任务可恢复查询 | 固定摘要 Binwalk 镜像、禁网、只读输入/根、资源预算 |
+| 原始固件上传 | 64 MiB 有界、异步单 worker、内容寻址、厂商/产品/型号/版本持久化 | 固定摘要 Binwalk 镜像、禁网、只读输入/根、资源预算 |
+| 固件身份 | 顶部持续显示 release context、SHA 与覆盖状态，并支持切换已分析固件 | 未登记身份时明确显示“待确认”，不从文件名猜测 |
+| 接口调查 | 组件 → Web 接口 → 参数组合 → 约束与证据三栏调查 | Web 暴露面与内部逻辑调用分层，不混淆 URL 与 UBUS/IPC |
 | 自动测绘编排 | Inventory → 多 Producer → Scheduler → Catalog → Graph | producer 失败进入 coverage，不伪装为空成功 |
 | 目录浏览 | 候选类型筛选、全文搜索、参数/关联/义务详情 | 浏览器只读取服务端投影，不重新推断事实 |
 | 通信图谱 | 四种证据约束视图、精确焦点、跳数/节点/边预算 | 子图无悬空边，侧栏保留 EvidenceAtom |
@@ -40,49 +42,52 @@
 
 ## 4. Tenda AC9 验收结果
 
-样本 SHA-256 为 `d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9`。页面上传后复用了相同内容身份，发布：
+默认样本切换为原厂 Tenda AC9 `V15.03.05.19(6318)`，SHA-256 为
+`981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296`。完整 rootfs 在
+`auto-v21` 下重新分析并发布：
 
-- 1,278 个候选、8,121 个 EvidenceAtom、220 个参数、22 个关联；
-- 1,741 个图节点、2,421 条图边；
-- 117 个开放义务，Catalog 覆盖为 `partial`；
-- `ubus://system/validate_firmware_image` 参数状态焦点为 7 个节点、6 条边、90 个证据原子；
-- 代表性语料门禁 5/5 通过。
+- 4,950 个候选、14,370 个 EvidenceAtom、696 个参数、78 个关联；
+- 7,126 个图节点、9,329 条图边；
+- 73 个开放义务，Inventory `completed`、Catalog `partial`、Graph `completed`；
+- 134 个 request interface 候选一次返回，不再因 100 条查询上限截断；
+- DLNA 组件恢复 `/goform/refreshDLNA`、`/goform/GetDlnaCfg`、`/goform/SetDlnaCfg`，其中 Set 接口展示 `deviceName`、`scanList`、`dlnaEn` 三个 form 参数。
 
-### 目录浏览
+### 固件身份与组件化 Web 接口
 
-![通信测绘目录](./screenshots/2026-08-20-r2-37-catalog.jpg)
+![原厂 Tenda AC9 接口调查](./screenshots/r2-38-interface-explorer.png)
 
-### 接口结构与证据侧栏
+### 接口参数组合与约束
 
-![固件校验接口证据链](./screenshots/2026-08-20-r2-37-graph-interface-evidence.jpg)
+![DLNA 接口参数与约束](./screenshots/r2-38-dlna-parameter-constraints.png)
 
-界面将 `ubus://system/validate_firmware_image` 连接到前端 invocation、`object/method/path` 参数、访问授权和开放义务；右侧保留方法、表示形式、来源文件和精确定位。
+点击 `Web 模块 · dlna` 后只显示该组件的 3 个接口；选择 `/goform/SetDlnaCfg` 后，右栏显示
+POST、三个 form 参数、后端执行与访问链和未决分析义务。界面不会从相邻线索猜测未证实的参数约束。
 
-### 参数与状态视图
+### Web 与内部 RPC 的边界
 
-![接口参数与状态](./screenshots/2026-08-20-r2-37-graph-parameter-state.jpg)
+![内部 RPC 显式分层](./screenshots/r2-38-internal-rpc-boundary.png)
 
-### 代表性语料门禁
+OpenWrt 19.07.8 AC9 仍作为对照。`ubus://file/exec` 在默认 Web 视图中不可见；只有切到
+“内部 RPC · 实现细节”后才出现，并明确说明 UBUS/IPC 不等同于浏览器可访问 URL。
 
-![五类通信架构门禁](./screenshots/2026-08-20-r2-37-corpus-gate.jpg)
+### 固件上传与身份登记
 
-### 原始固件上传闭环
+![固件上传与身份表单](./screenshots/r2-38-firmware-upload.png)
 
-![AC9 上传分析完成](./screenshots/2026-08-20-r2-37-upload-complete.jpg)
-
-作业状态为 `partial`，同时具有可点击的 Catalog 和 Graph 身份。MiniMax 未配置时按钮安全禁用，确定性测绘不受影响。
+上传页同时显示文件、厂商、产品系列、设备型号和固件版本。API 使用四个独立身份请求头；仅填写
+部分身份会返回 400，完整身份进入作业快照和发布后的 release context。
 
 ## 5. 2026-08-20 测试结果
 
 | 验证层 | 命令或方式 | 结果 |
 | --- | --- | --- |
-| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests -v` | 560/560 通过 |
+| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests` | 最终 560/560 通过；首轮 3 个固定源码摘要失配及修复保留在 R2-38 进度记录 |
 | Python 编译检查 | `python3 -m compileall -q src` | 通过 |
-| Console 组件测试 | `pnpm test -- --run` | 29/29 通过，9 个测试文件 |
+| Console 全量回归 | `pnpm test` | 30/30 通过，9 个测试文件；接口调查专项 13/13 |
 | TypeScript | `pnpm exec tsc --noEmit` | 通过 |
 | Console 生产构建 | `pnpm build` | 通过，1,801 modules transformed |
-| API 验收矩阵 | 健康、目录、搜索、图谱、焦点、隐藏接口、语料、任务、模型边界、错误合同、SPA | 12/12 通过 |
-| 浏览器交互 | 6 个页签、四图谱视图、证据下钻、真实 AC9 上传 | 通过 |
+| API 验收 | health、最新 AC9 release context、134/134 request interfaces、作业身份合同 | 通过 |
+| 浏览器交互 | 固件切换、组件选择、DLNA 接口、参数/约束、内部 RPC 边界、上传身份表单 | 通过，浏览器 Console 无错误 |
 
 版本对比需要同型号至少两个已发布目录；当前 R2-37 验收数据库仅发布一个 AC9 目录，因此验证了预期空态和 API `404` 错误合同，而未把缺少对照数据误报为比较成功。历史 overlay 同理，当前数据库未发布该可选读模型，页面/API 均保持明确边界。
 

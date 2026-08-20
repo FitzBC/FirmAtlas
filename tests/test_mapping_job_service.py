@@ -14,6 +14,7 @@ from firmatlas.mapping import (
     FirmwareMappingJobSnapshot,
     FirmwareMappingJobStatus,
     FirmwareMappingJobStore,
+    MappingReleaseContext,
     ToolIdentity,
     WorkerExecution,
     analyze_firmware_artifact,
@@ -142,8 +143,15 @@ class FirmwareMappingJobServiceContractTests(unittest.TestCase):
                 workspace, store, mappings, runner, executor=InlineExecutor(),
             )
 
+            release = MappingReleaseContext(
+                vendor="Tenda", product="AC9", device_model="AC9",
+                firmware_version="V15.03.05.19(6318)",
+                source_ref="user-upload:ac9.trx",
+                evidence="User supplied firmware identity at upload time.",
+            )
             submitted = service.submit(
                 io.BytesIO(b"uploaded AC9 firmware"), "../../ac9.trx", 21,
+                release_context=release,
             )
             observed = service.get(submitted.job_id)
 
@@ -157,7 +165,12 @@ class FirmwareMappingJobServiceContractTests(unittest.TestCase):
             self.assertIsNotNone(observed.artifact_analysis_id)
             self.assertIsNotNone(observed.catalog_id)
             self.assertIsNotNone(observed.graph_id)
+            self.assertEqual(release, observed.release_context)
             self.assertEqual(1, mappings.list_catalogs()["total"])
+            self.assertEqual(
+                "Tenda",
+                mappings.list_catalogs()["items"][0]["release_context"]["vendor"],
+            )
             self.assertEqual(1, mappings.list_communication_graphs()["total"])
             self.assertTrue((workspace / "runs" / observed.job_id.split(":", 1)[1]
                              / "analysis.json").is_file())

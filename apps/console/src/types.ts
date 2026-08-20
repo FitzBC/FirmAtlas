@@ -333,6 +333,7 @@ export interface FirmwareMappingJob {
   catalog_id: string | null
   graph_id: string | null
   error_code: string | null
+  release_context?: MappingReleaseContext | null
 }
 
 export interface FirmwareMappingJobPage {

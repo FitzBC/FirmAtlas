@@ -53,6 +53,7 @@ FirmAtlas 是一个证据驱动的一体化固件分析平台。它聚合固件�
 | 版本关联 | 厂商 → 产品 → 版本三层匹配，支持精确版本与 NVD 范围边界 | 匹配类型、受影响边界、解释信号、相关性分值 |
 | 接口测绘 | 从漏洞证据提取路径、CGI、HTTP 方法、参数与安全影响 | 接口原文、所属类别、参数上下文、关联 CVE |
 | 固件冷启动通信测绘 | 原始固件上传、隔离解包、多 Producer、义务调度、不可变 Catalog 与通信图 | SHA-256、EvidenceAtom、Coverage Ledger、开放义务、可复核子图 |
+| 组件化接口调查 | 以固件身份为入口，按组件查看 Web 接口、参数组合、处理链与约束；UBUS/IPC 下沉为内部实现细节 | 厂商/产品/型号/版本、HTTP 方法、参数命名空间、关联组件、未决义务 |
 | 架构聚类 | 表单处理器、CGI 网关、管理路由、动态页面、资源型 API、HNAP/SOAP | 相似接口、命中理由、厂商与固件型号分布 |
 | 潜在隐藏接口 | 全固件 Native 注册减去 completed 客户端范围，默认选择每个固件最新目录 | 注册二进制、handler、覆盖 scope、证据 identity、运行时原因义务 |
 | 固件版本结构差异 | 覆盖感知地对齐同型号不可变测绘目录，比较接口、参数与潜在隐藏接口 | 发行身份依据、coverage/profile 边界、增删改置信度、BASE/TARGET 证据 |
@@ -182,9 +183,10 @@ PYTHONPATH=src python3 -m firmatlas intelligence serve \
 
 未提供 `--mapping-binwalk-image-ref` 时上传入口只显示为未配置，不会回退到宿主机直接执行
 Binwalk。上传使用 `application/octet-stream`，按 SHA-256 内容寻址；HTTP 请求仅排队，单独的有界
-worker 负责隔离提取、AnalyzeRun 和不可变 Catalog/Graph 发布。相同制品与相同 runner 身份复用
-同一个作业，重启时未完成作业会显式转为 `job.interrupted`，不会伪装成成功。真实 AC9 页面回放
-见 [R2-31 浏览器上传作业记录](./docs/firmware-mapping/progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md)。
+worker 负责隔离提取、AnalyzeRun 和不可变 Catalog/Graph 发布。Console 同时要求填写厂商、产品、
+设备型号和固件版本；这些身份进入作业快照与 Catalog release context，并参与作业幂等身份，避免
+同一字节制品的不同发行语境被误合并。重启时未完成作业会显式转为 `job.interrupted`，不会伪装成
+成功。真实 AC9 页面回放见[产品功能与验收手册](./docs/firmware-mapping/product-guide.md)。
 
 完整 Console 必须使用同时保存漏洞情报、固件资产与测绘投影的主库 `var/firmatlas.db`。单轮
 `var/mapping-work/<round>/firmatlas.db` 仅用于隔离研究回放，不能替代产品服务数据库；服务恢复时
@@ -228,9 +230,10 @@ PYTHONPATH=src python3 -m firmatlas.cli mapping query-graph \
 发布会验证 graph 与源 Catalog 的 firmware、coverage 和 EvidenceAtom 闭包；查询返回无悬空边的
 节点/边、facet、Coverage Ledger 与完整 EvidenceAtom。AC9 实证见 [R2-18 持久化图查询](./docs/firmware-mapping/progress/2026-08-11-r2-18-ac9-persisted-graph-query.md)。
 
-本地产品服务直接复用同一查询 Interface：Console 的“通信测绘 → 架构图谱”先检索接口，再按
-精确节点焦点切换接口结构、参数与状态、通信组件、完整性与义务四种视图；节点侧栏展示属性、
-相邻语义关系与源 Catalog EvidenceAtom。AC9 真实 HTTP/浏览器回放见
+本地产品服务默认进入“通信测绘 → 接口调查”：先选固件，再按组件展开 Web 接口，点击接口查看
+参数组合、关联后端、依赖/约束和 EvidenceAtom。`ubus://`、IPC 等逻辑操作不会作为 Web URL 混入
+默认列表，只能从“内部 RPC · 实现细节”显式查看。原“架构图谱”保留为高级取证入口，继续支持
+接口结构、参数与状态、通信组件、完整性与义务四种证据视图。AC9 真实 HTTP/浏览器回放见
 [R2-19 HTTP 与 Console 图谱](./docs/firmware-mapping/progress/2026-08-11-r2-19-ac9-http-console-graph.md)。
 此后每轮通信测绘实现都必须在最终代码上启动本地服务，并从真实页面完成导航、焦点查询、视图
 切换、证据下钻和浏览器 Console 检查；页面验收后的代码变化会触发服务重启与完整交互重放。

@@ -39,7 +39,7 @@ export function MappingCatalogWorkspace() {
   const [kind, setKind] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<'catalog' | 'graph' | 'hidden' | 'compare' | 'upload' | 'corpus'>('catalog')
+  const [view, setView] = useState<'explorer' | 'catalog' | 'graph' | 'hidden' | 'compare' | 'upload' | 'corpus'>('explorer')
   const [corpusReport, setCorpusReport] = useState<MappingCorpusReport | null>(null)
   const [hiddenQuery, setHiddenQuery] = useState('')
   const [hiddenPage, setHiddenPage] = useState<PotentialHiddenInterfacePage | null>(null)
@@ -87,7 +87,10 @@ export function MappingCatalogWorkspace() {
     const controller = new AbortController()
     setLoading(true)
     void intelligenceApi.mappingCandidates(
-      catalogId, { query: debouncedQuery, kind }, controller.signal,
+      catalogId, {
+        query: debouncedQuery,
+        kind: view === 'explorer' ? 'request_interface' : kind,
+      }, controller.signal,
     ).then((page) => {
       setCandidates(page.items)
       setSelected((current) => page.items.some((x) => x.candidate_id === current?.candidate.candidate_id)
@@ -97,7 +100,7 @@ export function MappingCatalogWorkspace() {
       if (!controller.signal.aborted) setError(caught instanceof Error ? caught.message : '能力查询失败')
     }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
     return () => controller.abort()
-  }, [catalogId, debouncedQuery, kind])
+  }, [catalogId, debouncedQuery, kind, view])
 
   useEffect(() => {
     if (view !== 'hidden') return
@@ -169,26 +172,33 @@ export function MappingCatalogWorkspace() {
       <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="eyebrow"><Waypoints size={13} /> Firmware mapping / Discovery catalog</div>
-          <h1 className="mt-3 text-[30px] font-semibold tracking-[-0.045em] text-white sm:text-[38px]">通信测绘目录</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">从前端请求、Web 配置、脚本后端与原生提示中发布可追溯候选，保留覆盖状态与未决分析义务。</p>
+          <h1 className="mt-3 text-[30px] font-semibold tracking-[-0.045em] text-white sm:text-[38px]">固件接口调查</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">组件 → Web 接口 → 参数组合 → 约束与证据。内部 RPC 与原始图谱保留在高级分析中。</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-xl border border-white/[0.07] bg-black/20 p-1">
-            <button type="button" onClick={() => setView('catalog')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'catalog' ? 'bg-white/[0.08] text-white' : 'text-slate-600 hover:text-slate-300'}`}>目录浏览</button>
-            <button type="button" onClick={() => setView('graph')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'graph' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>架构图谱</button>
+            <button type="button" onClick={() => setView('explorer')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'explorer' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>接口调查</button>
+            <button type="button" onClick={() => setView('catalog')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'catalog' ? 'bg-white/[0.08] text-white' : 'text-slate-600 hover:text-slate-300'}`}>原始证据</button>
+            <button type="button" aria-label="架构图谱" onClick={() => setView('graph')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'graph' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>高级图谱</button>
             <button type="button" onClick={() => setView('hidden')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'hidden' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>潜在隐藏接口</button>
             <button type="button" onClick={() => setView('compare')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'compare' ? 'bg-cyan/[0.1] text-cyan' : 'text-slate-600 hover:text-slate-300'}`}>版本对比</button>
             <button type="button" onClick={() => setView('corpus')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'corpus' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>语料门禁</button>
-            <button type="button" onClick={() => setView('upload')} className={`rounded-lg px-3 py-2 text-[10px] transition ${view === 'upload' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600 hover:text-slate-300'}`}>上传分析</button>
           </div>
-          {view === 'catalog' && activeCatalog && <StatusPill catalog={activeCatalog} />}
+          <button type="button" aria-label="上传新固件" onClick={() => setView('upload')} className="inline-flex items-center gap-2 rounded-xl border border-signal/25 bg-signal/[0.1] px-4 py-2.5 text-xs font-medium text-signal transition hover:bg-signal/[0.16]"><UploadCloud size={15} />上传新固件</button>
         </div>
       </header>
 
       {error && <div role="alert" className="mb-4 rounded-xl border border-ember/20 bg-ember/[0.06] px-4 py-3 text-xs text-ember">{error}</div>}
 
+      {activeCatalog && view !== 'upload' && <FirmwareIdentityBar
+        catalog={activeCatalog} catalogs={catalogs} onCatalog={setCatalogId}
+      />}
+
       {view === 'corpus' ? <CorpusGateWorkspace report={corpusReport} loading={loading} /> : view === 'upload' ? <FirmwareUploadWorkspace
         onPublished={refreshPublishedCatalogs} onOpenGraph={() => setView('graph')}
+      /> : view === 'explorer' ? <InterfaceExplorerWorkspace
+        candidates={candidates} selected={selected} loading={loading}
+        onOpen={openCandidate}
       /> : view === 'graph' ? <CommunicationGraphWorkspace /> : view === 'hidden' ? <HiddenInterfaceWorkspace
         page={hiddenPage} query={hiddenQuery} onQuery={setHiddenQuery}
         selected={selectedHidden} onSelect={setSelectedHidden} loading={loading}
@@ -234,6 +244,96 @@ export function MappingCatalogWorkspace() {
       )}
     </section>
   )
+}
+
+function FirmwareIdentityBar({
+  catalog, catalogs, onCatalog,
+}: {
+  catalog: MappingCatalogSummary
+  catalogs: MappingCatalogSummary[]
+  onCatalog: (catalogId: string) => void
+}) {
+  const identity = catalog.release_context
+  return <section className="mb-4 overflow-hidden rounded-2xl border border-white/[0.07] bg-[radial-gradient(circle_at_0%_0%,rgba(73,214,179,0.09),transparent_34%),rgba(10,15,23,0.82)] p-5 backdrop-blur-xl">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex min-w-0 items-start gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-signal/20 bg-signal/[0.07] text-signal"><Binary size={20} /></div>
+        <div className="min-w-0">
+          <div className="eyebrow">当前固件 / Firmware identity</div>
+          <h2 className="mt-2 text-lg font-semibold text-white">{identity ? `${identity.vendor} ${identity.device_model}` : '厂商与型号待确认'}</h2>
+          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-slate-500">
+            <span>产品 <b className="font-normal text-slate-300">{identity?.product || '待确认'}</b></span>
+            <span>版本 <b className="font-mono font-normal text-slate-300">{identity?.firmware_version || '待确认'}</b></span>
+            <span>SHA <b className="font-mono font-normal text-slate-400">{catalog.firmware_artifact_sha256.slice(0, 16)}…</b></span>
+            <span>覆盖 <b className="font-normal text-signal">{catalog.coverage_status}</b></span>
+          </div>
+        </div>
+      </div>
+      <label className="min-w-[260px] text-[9px] uppercase tracking-[0.12em] text-slate-600">切换已分析固件
+        <select aria-label="切换已分析固件" value={catalog.catalog_id} onChange={(event) => onCatalog(event.target.value)} className="mt-2 block w-full rounded-xl border border-white/[0.08] bg-[#0b111a] px-3 py-2.5 text-xs normal-case tracking-normal text-slate-300 outline-none focus:border-signal/25">
+          {catalogs.map((item) => <option key={item.catalog_id} value={item.catalog_id}>{item.release_context ? `${item.release_context.vendor} ${item.release_context.device_model} · ${item.release_context.firmware_version}` : `未识别固件 · ${item.firmware_artifact_sha256.slice(0, 12)}`}</option>)}
+        </select>
+      </label>
+    </div>
+  </section>
+}
+
+function InterfaceExplorerWorkspace({
+  candidates, selected, loading, onOpen,
+}: {
+  candidates: MappingCandidate[]
+  selected: MappingCandidateDetail | null
+  loading: boolean
+  onOpen: (candidate: MappingCandidate) => Promise<void>
+}) {
+  const [exposure, setExposure] = useState<'web' | 'internal'>('web')
+  const [component, setComponent] = useState('')
+  const isWeb = (item: MappingCandidate) => {
+    const shape = new Map(item.attributes).get('endpoint_shape')
+    if (shape === 'logical_operation' || item.canonical_identity.startsWith('ubus://') || item.canonical_identity.startsWith('ipc://')) return false
+    return item.canonical_identity.startsWith('/')
+      || item.canonical_identity.startsWith('http://')
+      || item.canonical_identity.startsWith('https://')
+      || item.canonical_identity.startsWith('goform/')
+      || ['url_path', 'exact_literal', 'literal_prefix', 'deterministic_derived'].includes(shape || '')
+  }
+  const exposed = candidates.filter((item) => exposure === 'web' ? isWeb(item) : !isWeb(item))
+  const componentIdentity = (item: MappingCandidate) => {
+    const path = item.source_path || 'owner unresolved'
+    const leaf = path.split('/').pop()?.replace(/\.[^.]+$/, '') || path
+    if (path.includes('/js/')) return `Web 模块 · ${leaf}`
+    if (path.startsWith('webroot')) return `Web 页面 · ${leaf}`
+    if (path.includes('rpcd')) return `RPCD 组件 · ${leaf}`
+    if (path.startsWith('bin/') || path.startsWith('usr/')) return `Native 组件 · ${leaf}`
+    return path
+  }
+  const components = Array.from(new Set(exposed.map(componentIdentity))).sort()
+  const activeComponent = components.includes(component) ? component : components[0] || ''
+  const interfaces = exposed.filter((item) => !activeComponent || componentIdentity(item) === activeComponent)
+  const displayIdentity = (item: MappingCandidate) => item.canonical_identity.startsWith('goform/') ? `/${item.canonical_identity}` : item.canonical_identity
+
+  return <div className="detail-enter overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0f17]/80 backdrop-blur-xl">
+    <div className="flex flex-col gap-3 border-b border-white/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><div className="eyebrow"><Waypoints size={12} /> Component interface explorer</div><p className="mt-2 text-xs text-slate-500">组件 → Web 接口 → 参数组合 → 约束与证据</p></div>
+      <div className="flex rounded-xl border border-white/[0.07] bg-black/20 p-1">
+        <button type="button" aria-label="Web 暴露接口" onClick={() => { setExposure('web'); setComponent('') }} className={`rounded-lg px-3 py-2 text-[10px] ${exposure === 'web' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600'}`}>Web 暴露接口</button>
+        <button type="button" aria-label="内部 RPC（实现细节）" onClick={() => { setExposure('internal'); setComponent('') }} className={`rounded-lg px-3 py-2 text-[10px] ${exposure === 'internal' ? 'bg-violet-400/[0.1] text-violet-300' : 'text-slate-600'}`}>内部 RPC · 实现细节</button>
+      </div>
+    </div>
+    {exposure === 'internal' && <div className="border-b border-violet-400/10 bg-violet-400/[0.035] px-5 py-3 text-[10px] leading-5 text-violet-200">UBUS、IPC 等是组件间逻辑调用，不等同于浏览器可直接访问的 Web URL；仅在此处作为调用链证据展示。</div>}
+    <div className="grid min-h-[580px] xl:grid-cols-[270px_minmax(360px,0.8fr)_minmax(430px,1.2fr)]">
+      <aside className="border-b border-white/[0.07] p-4 xl:border-b-0 xl:border-r">
+        <div className="text-[9px] uppercase tracking-[0.14em] text-slate-600">通信组件 / 来源主体</div>
+        <div className="mt-3 space-y-2">{components.map((path) => <button key={path} type="button" onClick={() => setComponent(path)} className={`w-full rounded-xl border p-3 text-left transition ${activeComponent === path ? 'border-cyan/25 bg-cyan/[0.07]' : 'border-white/[0.05] hover:bg-white/[0.03]'}`}><div className="flex items-start gap-2"><FileCode2 size={14} className="mt-0.5 shrink-0 text-cyan" /><div className="min-w-0"><div className="break-all text-[11px] leading-4 text-slate-300">{path}</div><div className="mt-1 text-[9px] text-slate-700">{exposed.filter((item) => componentIdentity(item) === path).length} 个接口</div></div></div></button>)}</div>
+        {!loading && components.length === 0 && <div className="mt-6 rounded-xl border border-dashed border-white/[0.07] p-4 text-center text-[10px] leading-5 text-slate-600">{exposure === 'web' ? '当前 Catalog 尚未恢复可验证的 Web URL' : '当前 Catalog 没有内部 RPC 逻辑操作'}</div>}
+      </aside>
+      <main className="border-b border-white/[0.07] xl:border-b-0 xl:border-r">
+        <div className="border-b border-white/[0.07] px-4 py-3 text-[9px] uppercase tracking-[0.14em] text-slate-600">{exposure === 'web' ? 'Web 接口' : '内部逻辑操作'} · {interfaces.length}</div>
+        <div className="max-h-[540px] overflow-y-auto p-2">{loading && <div className="p-8 text-center text-xs text-slate-600">正在恢复组件与接口关系…</div>}{interfaces.map((item) => <button key={item.candidate_id} type="button" aria-label={`查看接口 ${displayIdentity(item)}`} onClick={() => void onOpen(item)} className={`mb-2 w-full rounded-xl border p-4 text-left transition ${selected?.candidate.candidate_id === item.candidate_id ? 'border-signal/25 bg-signal/[0.065]' : 'border-white/[0.05] hover:bg-white/[0.03]'}`}><div className="break-all font-mono text-[11px] leading-5 text-slate-200">{displayIdentity(item)}</div><div className="mt-2 flex flex-wrap gap-2 text-[9px] text-slate-600"><span>{new Map(item.attributes).get('method') || 'method 未确认'}</span><span>{item.parameter_count} 参数</span><span>{item.open_obligation_count} 约束待验证</span></div></button>)}</div>
+      </main>
+      <aside className="min-w-0 bg-gradient-to-br from-white/[0.025] to-transparent">{selected ? <CandidateEvidence detail={selected} /> : <div className="grid min-h-[420px] place-items-center p-8 text-center"><div><CircleDot className="mx-auto text-signal/35" size={34} /><h3 className="mt-4 text-sm text-slate-300">选择接口查看参数组合</h3><p className="mt-2 text-xs leading-6 text-slate-600">这里会展示参数命名空间、选择器、固定值、关联处理组件、依赖关系、未决约束与原始证据。</p></div></div>}</aside>
+    </div>
+  </div>
 }
 
 const corpusCategoryLabels: Record<string, string> = {
@@ -322,6 +422,10 @@ function FirmwareUploadWorkspace({
   const [enabled, setEnabled] = useState<boolean | null>(null)
   const [maxBytes, setMaxBytes] = useState(0)
   const [file, setFile] = useState<File | null>(null)
+  const [vendor, setVendor] = useState('')
+  const [product, setProduct] = useState('')
+  const [deviceModel, setDeviceModel] = useState('')
+  const [firmwareVersion, setFirmwareVersion] = useState('')
   const [job, setJob] = useState<FirmwareMappingJob | null>(null)
   const [recent, setRecent] = useState<FirmwareMappingJob[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -386,12 +490,19 @@ function FirmwareUploadWorkspace({
 
   const submit = async () => {
     if (!file) return
+    if (![vendor, product, deviceModel, firmwareVersion].every((value) => value.trim())) {
+      setMessage('请先填写厂商、产品、型号和固件版本')
+      return
+    }
     if (file.size <= 0) { setMessage('固件制品不能为空'); return }
     if (maxBytes && file.size > maxBytes) { setMessage('固件制品超过服务端上传预算'); return }
     setSubmitting(true)
     setMessage(null)
     try {
-      const next = await intelligenceApi.submitFirmwareMappingJob(file)
+      const next = await intelligenceApi.submitFirmwareMappingJob(file, {
+        vendor: vendor.trim(), product: product.trim(),
+        device_model: deviceModel.trim(), firmware_version: firmwareVersion.trim(),
+      })
       setJob(next)
       setRecent((items) => [next, ...items.filter((item) => item.job_id !== next.job_id)])
       if (next.status === 'completed' || next.status === 'partial') await onPublished(next)
@@ -427,6 +538,12 @@ function FirmwareUploadWorkspace({
     <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-[radial-gradient(circle_at_12%_0%,rgba(73,214,179,0.08),transparent_38%),rgba(10,15,23,0.82)] p-6 backdrop-blur-xl">
       <div className="flex items-start gap-4"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-signal/20 bg-signal/[0.07] text-signal"><UploadCloud size={22} /></div><div><div className="eyebrow">Raw artifact / Isolated AnalyzeRun</div><h2 className="mt-2 text-xl font-semibold text-white">上传一个固件制品</h2><p className="mt-2 max-w-xl text-xs leading-6 text-slate-500">文件按 SHA-256 内容寻址保存，在无网络、只读根容器中解包。HTTP 请求只创建异步任务，不直接执行分析器。</p></div></div>
       <label className="mt-7 block rounded-2xl border border-dashed border-white/[0.12] bg-black/20 p-5 transition focus-within:border-signal/30 hover:border-white/[0.2]"><span className="flex items-center gap-2 text-xs text-slate-300"><FileArchive size={16} className="text-signal" /> 选择固件制品</span><input aria-label="选择固件制品" type="file" className="mt-4 block w-full text-[11px] text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-white/[0.07] file:px-3 file:py-2 file:text-[10px] file:text-slate-300 hover:file:bg-white/[0.1]" onChange={(event) => { setFile(event.target.files?.[0] ?? null); setMessage(null) }} /></label>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <IdentityInput label="厂商" value={vendor} onChange={setVendor} placeholder="例如 Tenda" />
+        <IdentityInput label="产品系列" value={product} onChange={setProduct} placeholder="例如 AC9" />
+        <IdentityInput label="设备型号" value={deviceModel} onChange={setDeviceModel} placeholder="例如 AC9" />
+        <IdentityInput label="固件版本" value={firmwareVersion} onChange={setFirmwareVersion} placeholder="例如 V15.03.05.19(6318)" />
+      </div>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="text-[10px] leading-5 text-slate-600">{enabled === false ? '当前服务未配置固定 Binwalk 运行时' : enabled === null ? '正在读取服务能力…' : `单文件上限 ${formatBytes(maxBytes)} · 单任务串行执行`}</div><button type="button" onClick={() => void submit()} disabled={!enabled || !file || submitting || active} className="inline-flex items-center justify-center gap-2 rounded-xl border border-signal/20 bg-signal/[0.09] px-4 py-2.5 text-xs font-medium text-signal transition hover:bg-signal/[0.14] disabled:cursor-not-allowed disabled:opacity-35">{submitting || active ? <LoaderCircle size={15} className="animate-spin" /> : <UploadCloud size={15} />}开始独立分析</button></div>
       {message && <div role="alert" className="mt-4 rounded-xl border border-ember/20 bg-ember/[0.05] px-4 py-3 text-xs text-ember">{message}</div>}
     </section>
@@ -444,6 +561,8 @@ function FirmwareUploadWorkspace({
 }
 
 function JobDatum({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) { return <div className="flex items-start justify-between gap-4 text-[10px]"><span className="shrink-0 text-slate-600">{label}</span><span className={`break-all text-right text-slate-300 ${mono ? 'font-mono text-[9px]' : ''}`}>{value}</span></div> }
+
+function IdentityInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) { return <label className="text-[9px] uppercase tracking-[0.12em] text-slate-600">{label}<input aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="mt-2 block w-full rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2.5 text-xs normal-case tracking-normal text-slate-300 outline-none placeholder:text-slate-800 focus:border-signal/25" /></label> }
 
 function formatBytes(value: number) { if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(0)} MiB`; if (value >= 1024) return `${(value / 1024).toFixed(0)} KiB`; return `${value} B` }
 

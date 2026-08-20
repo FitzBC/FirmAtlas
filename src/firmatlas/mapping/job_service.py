@@ -28,6 +28,7 @@ from .firmware_artifact_analysis import (
     analyze_firmware_artifact,
 )
 from .repository import DiscoveryCatalogRepository
+from .snapshot_diff import MappingReleaseContext
 
 
 FIRMWARE_MAPPING_JOB_SCHEMA_VERSION = "firmatlas.mapping.job/v1alpha1"
@@ -72,6 +73,7 @@ class FirmwareMappingJobSnapshot:
     catalog_id: Optional[str] = None
     graph_id: Optional[str] = None
     error_code: Optional[str] = None
+    release_context: Optional[MappingReleaseContext] = None
     schema_version: str = FIRMWARE_MAPPING_JOB_SCHEMA_VERSION
 
     def to_dict(self) -> dict:
@@ -90,6 +92,10 @@ class FirmwareMappingJobSnapshot:
             "catalog_id": self.catalog_id,
             "graph_id": self.graph_id,
             "error_code": self.error_code,
+            "release_context": (
+                self.release_context.to_dict()
+                if self.release_context is not None else None
+            ),
         }
 
 
@@ -180,10 +186,20 @@ class FirmwareMappingJobStore:
                     artifact_analysis_id TEXT,
                     catalog_id TEXT,
                     graph_id TEXT,
-                    error_code TEXT
+                    error_code TEXT,
+                    release_context_json TEXT
                 )
                 """
             )
+            columns = {
+                row[1] for row in self._connection.execute(
+                    "PRAGMA table_info(firmware_mapping_jobs)"
+                ).fetchall()
+            }
+            if "release_context_json" not in columns:
+                self._connection.execute(
+                    "ALTER TABLE firmware_mapping_jobs ADD COLUMN release_context_json TEXT"
+                )
             self._connection.execute(
                 """
                 UPDATE firmware_mapping_jobs
@@ -210,8 +226,8 @@ class FirmwareMappingJobStore:
                     job_id, schema_version, original_filename,
                     firmware_artifact_sha256, artifact_size, runner_id, status,
                     submitted_at, started_at, finished_at, artifact_analysis_id,
-                    catalog_id, graph_id, error_code
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    catalog_id, graph_id, error_code, release_context_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 self._values(snapshot),
             )
@@ -229,7 +245,7 @@ class FirmwareMappingJobStore:
                     firmware_artifact_sha256 = ?, artifact_size = ?,
                     runner_id = ?, status = ?, submitted_at = ?, started_at = ?,
                     finished_at = ?, artifact_analysis_id = ?, catalog_id = ?,
-                    graph_id = ?, error_code = ?
+                    graph_id = ?, error_code = ?, release_context_json = ?
                 WHERE job_id = ?
                 """,
                 self._values(snapshot)[1:] + (snapshot.job_id,),
@@ -280,6 +296,8 @@ class FirmwareMappingJobStore:
             snapshot.catalog_id,
             snapshot.graph_id,
             snapshot.error_code,
+            json.dumps(snapshot.release_context.to_dict(), ensure_ascii=False)
+            if snapshot.release_context is not None else None,
         )
 
     @staticmethod
@@ -299,6 +317,10 @@ class FirmwareMappingJobStore:
             catalog_id=row["catalog_id"],
             graph_id=row["graph_id"],
             error_code=row["error_code"],
+            release_context=(
+                MappingReleaseContext(**json.loads(row["release_context_json"]))
+                if row["release_context_json"] else None
+            ),
         )
 
 
@@ -342,6 +364,7 @@ class FirmwareMappingJobService:
 
     def submit(
         self, stream: BinaryIO, original_filename: str, content_length: int,
+        release_context: Optional[MappingReleaseContext] = None,
     ) -> FirmwareMappingJobSnapshot:
         filename = self._safe_filename(original_filename)
         if content_length <= 0:
@@ -377,6 +400,9 @@ class FirmwareMappingJobService:
                 {
                     "firmware_artifact_sha256": artifact_sha256,
                     "runner_id": self._runner.runner_id,
+                    "release_context": (
+                        release_context.to_dict() if release_context else None
+                    ),
                 },
                 separators=(",", ":"), sort_keys=True,
             ).encode("utf-8")).hexdigest()
@@ -388,6 +414,7 @@ class FirmwareMappingJobService:
                 runner_id=self._runner.runner_id,
                 status=FirmwareMappingJobStatus.QUEUED,
                 submitted_at=_utc_now(),
+                release_context=release_context,
             ))
             if created:
                 self._executor.submit(self._execute, snapshot.job_id, artifact_path)
@@ -442,6 +469,11 @@ class FirmwareMappingJobService:
             self._write_json_atomic(run_directory / "graph.json", graph.to_dict())
             self._mappings.publish(analysis.mapping_run.catalog)
             self._mappings.publish_communication_graph(graph)
+            if running.release_context is not None:
+                self._mappings.register_release_context(
+                    analysis.mapping_run.catalog.catalog_id,
+                    running.release_context,
+                )
             status = (
                 FirmwareMappingJobStatus.COMPLETED
                 if analysis.status is FirmwareArtifactAnalysisStatus.COMPLETED

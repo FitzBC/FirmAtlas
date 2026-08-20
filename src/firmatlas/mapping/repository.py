@@ -1385,7 +1385,7 @@ class DiscoveryCatalogRepository:
         self, catalog_id: str, query: str = "", candidate_kind: str = "",
         limit: int = 30, offset: int = 0,
     ) -> dict:
-        limit, offset = max(1, min(limit, 100)), max(0, offset)
+        limit, offset = max(1, min(limit, 500)), max(0, offset)
         clauses, values = ["catalog_id = ?"], [catalog_id]
         if candidate_kind:
             clauses.append("candidate_kind = ?")

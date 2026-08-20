@@ -28,6 +28,7 @@ from firmatlas.mapping.reasoning import (
     MiniMaxReasonerAdapter,
     MiniMaxReasonerConfig,
 )
+from firmatlas.mapping.snapshot_diff import MappingReleaseContext
 
 from .repository import IntelligenceRepository
 from .service import IntelligenceService, SyncAlreadyRunning
@@ -183,10 +184,39 @@ def create_handler(
                         HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
                         "firmware artifact upload exceeds size budget",
                     )
+                identity_headers = {
+                    "vendor": unquote(
+                        self.headers.get("X-Firmware-Vendor", "")
+                    ).strip(),
+                    "product": unquote(
+                        self.headers.get("X-Firmware-Product", "")
+                    ).strip(),
+                    "device_model": unquote(
+                        self.headers.get("X-Device-Model", "")
+                    ).strip(),
+                    "firmware_version": unquote(
+                        self.headers.get("X-Firmware-Version", "")
+                    ).strip(),
+                }
+                if any(identity_headers.values()) and not all(identity_headers.values()):
+                    raise ApiError(
+                        HTTPStatus.BAD_REQUEST,
+                        "firmware identity requires vendor, product, model, and version",
+                    )
+                release_context = None
+                if all(identity_headers.values()):
+                    release_context = MappingReleaseContext(
+                        **identity_headers,
+                        source_ref="user-upload:" + unquote(
+                            self.headers.get("X-Firmware-Filename", "")
+                        ),
+                        evidence="User supplied firmware identity at upload time.",
+                    )
                 snapshot = mapping_job_service.submit(
                     self.rfile,
                     unquote(self.headers.get("X-Firmware-Filename", "")),
                     content_length,
+                    release_context=release_context,
                 )
                 return HTTPStatus.ACCEPTED, snapshot.to_dict()
             mapping_job_prefix = "/api/mappings/jobs/"
@@ -353,7 +383,7 @@ def create_handler(
                         raise ApiError(HTTPStatus.NOT_FOUND, "mapping candidate not found")
                     return HTTPStatus.OK, candidate
                 if separator:
-                    page_size = max(1, min(_integer(query, "page_size", 30), 100))
+                    page_size = max(1, min(_integer(query, "page_size", 30), 500))
                     page = max(1, _integer(query, "page", 1))
                     if not mappings.get_catalog(catalog_id):
                         raise ApiError(HTTPStatus.NOT_FOUND, "mapping catalog not found")

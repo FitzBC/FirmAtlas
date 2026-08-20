@@ -18,6 +18,11 @@ const catalog: MappingCatalogSummary = {
   scheduler_termination: 'fixed_point',
   published_at: '2026-08-09T00:00:00Z', candidate_count: 1, parameter_count: 2,
   association_count: 0, open_obligation_count: 0,
+  release_context: {
+    vendor: 'Tenda', product: 'AC9', device_model: 'AC9',
+    firmware_version: 'V15.03.05.19(6318)', source_ref: 'official:tenda-ac9',
+    evidence: 'Official release identity.',
+  },
 }
 const corpusReport: MappingCorpusReport = {
   schema_version: 'firmatlas.mapping.corpus-report/v1alpha3',
@@ -82,6 +87,14 @@ const candidate: MappingCandidate = {
   source_path: 'webroot/js/online.js', source_construct: 'jQuery.post',
   evidence_ids: ['ev:1'], attributes: [['method', 'POST']],
   parameter_count: 2, association_count: 0, open_obligation_count: 0,
+}
+const internalRpcCandidate: MappingCandidate = {
+  ...candidate,
+  candidate_id: 'request:ubus-file-exec',
+  canonical_identity: 'ubus://file/exec',
+  source_path: 'usr/libexec/rpcd/file',
+  source_construct: 'verified_native_registration',
+  attributes: [['endpoint_shape', 'logical_operation'], ['method', 'POST']],
 }
 const detail: MappingCandidateDetail = {
   catalog: {
@@ -449,11 +462,15 @@ it('uploads one firmware artifact and exposes its published mapping job', async 
   })
 
   render(<MappingCatalogWorkspace />)
-  fireEvent.click(await screen.findByRole('button', { name: '上传分析' }))
+  fireEvent.click(await screen.findByRole('button', { name: '上传新固件' }))
   const file = new File([new Uint8Array(12)], 'ac9.trx', { type: 'application/octet-stream' })
   fireEvent.change(await screen.findByLabelText('选择固件制品'), {
     target: { files: [file] },
   })
+  fireEvent.change(screen.getByLabelText('厂商'), { target: { value: 'Tenda' } })
+  fireEvent.change(screen.getByLabelText('产品系列'), { target: { value: 'AC9' } })
+  fireEvent.change(screen.getByLabelText('设备型号'), { target: { value: 'AC9' } })
+  fireEvent.change(screen.getByLabelText('固件版本'), { target: { value: 'V15.03.05.19(6318)' } })
   fireEvent.click(screen.getByRole('button', { name: '开始独立分析' }))
 
   expect(await screen.findByText('分析已完成')).toBeInTheDocument()
@@ -466,6 +483,28 @@ it('uploads one firmware artifact and exposes its published mapping job', async 
   expect(screen.getByText('模型建议不是已验证事实')).toBeInTheDocument()
 })
 
+it('starts with a firmware-centered Web interface investigation and keeps internal RPC secondary', async () => {
+  vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
+    items: [catalog], total: 1, limit: 50, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
+    items: [candidate, internalRpcCandidate], total: 2, limit: 100, offset: 0,
+  })
+  vi.spyOn(intelligenceApi, 'mappingCandidate').mockResolvedValue(detail)
+
+  render(<MappingCatalogWorkspace />)
+
+  expect(await screen.findByText('Tenda AC9')).toBeInTheDocument()
+  expect(screen.getByText('V15.03.05.19(6318)')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '上传新固件' })).toBeInTheDocument()
+  expect(await screen.findByText('/goform/SetOnlineDevName')).toBeInTheDocument()
+  expect(screen.queryByText('ubus://file/exec')).not.toBeInTheDocument()
+  expect(screen.getByText('组件 → Web 接口 → 参数组合 → 约束与证据')).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: /内部 RPC/ }))
+  expect(await screen.findByText('ubus://file/exec')).toBeInTheDocument()
+})
+
 it('navigates catalog, candidate and evidence levels without overlay drawers', async () => {
   vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({ items: [catalog], total: 1, limit: 50, offset: 0 })
   const query = vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({ items: [candidate], total: 1, limit: 100, offset: 0 })
@@ -474,6 +513,8 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
   render(<MappingCatalogWorkspace />)
 
   expect(await screen.findByText('/goform/SetOnlineDevName')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: '原始证据' }))
+  await screen.findByText('Inventory partial')
   expect(screen.getAllByText('Inventory partial').length).toBeGreaterThan(0)
   fireEvent.click(screen.getByRole('button', { name: '请求接口' }))
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(
@@ -504,6 +545,7 @@ it('renders URL IPC framing as a first-class communication detail', async () => 
   vi.spyOn(intelligenceApi, 'mappingCandidate').mockResolvedValue(urlIpcDetail)
 
   render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '原始证据' }))
   fireEvent.click(await screen.findByRole('button', { name: `查看候选 ${urlIpcCandidate.canonical_identity}` }))
 
   expect(await screen.findByText('URL 配置 IPC')).toBeInTheDocument()
@@ -517,6 +559,7 @@ it('explains deterministic CGI path composition without inventing a method', asy
   vi.spyOn(intelligenceApi, 'mappingCandidate').mockResolvedValue(cgiSelectorDetail)
 
   render(<MappingCatalogWorkspace />)
+  fireEvent.click(await screen.findByRole('button', { name: '原始证据' }))
   fireEvent.click(await screen.findByRole('button', { name: 'CGI 组合路由' }))
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(
     catalog.catalog_id, expect.objectContaining({ kind: 'native_cgi_selector' }), expect.any(AbortSignal),

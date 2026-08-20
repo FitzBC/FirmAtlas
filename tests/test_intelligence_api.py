@@ -58,8 +58,10 @@ class FakeMappingJobService:
             submitted_at="2026-08-18T00:00:00+00:00",
         )
 
-    def submit(self, stream, filename, content_length):
-        self.submitted.append((stream.read(content_length), filename, content_length))
+    def submit(self, stream, filename, content_length, release_context=None):
+        self.submitted.append((
+            stream.read(content_length), filename, content_length, release_context,
+        ))
         return self.snapshot
 
     def get(self, job_id):
@@ -158,13 +160,15 @@ class IntelligenceApiTests(unittest.TestCase):
         with urlopen(request, timeout=2) as response:
             return response.status, json.loads(response.read())["data"]
 
-    def post_artifact(self, path, payload, filename):
+    def post_artifact(self, path, payload, filename, identity=None):
+        identity = identity or {}
         request = Request(
             "http://127.0.0.1:{}{}".format(self.server.server_port, path),
             data=payload,
             headers={
                 "Content-Type": "application/octet-stream",
                 "X-Firmware-Filename": filename,
+                **identity,
             },
             method="POST",
         )
@@ -173,7 +177,12 @@ class IntelligenceApiTests(unittest.TestCase):
 
     def test_mapping_job_routes_accept_artifact_and_expose_lifecycle(self) -> None:
         status, submitted = self.post_artifact(
-            "/api/mappings/jobs", b"AC9 firmware", "ac9.trx",
+            "/api/mappings/jobs", b"AC9 firmware", "ac9.trx", {
+                "X-Firmware-Vendor": "Tenda",
+                "X-Firmware-Product": "AC9",
+                "X-Device-Model": "AC9",
+                "X-Firmware-Version": "V15.03.05.19(6318)",
+            },
         )
         detail_status, detail = self.get(
             "/api/mappings/jobs/{}".format(submitted["job_id"])
@@ -182,7 +191,12 @@ class IntelligenceApiTests(unittest.TestCase):
 
         self.assertEqual(202, status)
         self.assertEqual("queued", submitted["status"])
-        self.assertEqual([(b"AC9 firmware", "ac9.trx", 12)], self.mapping_jobs.submitted)
+        self.assertEqual(
+            ("Tenda", "AC9", "AC9", "V15.03.05.19(6318)"),
+            tuple(getattr(self.mapping_jobs.submitted[0][3], field) for field in (
+                "vendor", "product", "device_model", "firmware_version",
+            )),
+        )
         self.assertEqual(200, detail_status)
         self.assertEqual(submitted["job_id"], detail["job_id"])
         self.assertEqual(200, list_status)
