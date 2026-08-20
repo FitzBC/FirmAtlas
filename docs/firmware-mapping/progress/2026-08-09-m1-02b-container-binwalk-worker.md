@@ -114,3 +114,12 @@ Discovery Catalog；这仍不是从 `/HNAP1` 路径风格直接断言后端同�
 ## 7. 下一步
 
 1. 重建仓库正式镜像并记录发布摘要，然后再评估 M1-02B 是否可标记已验证。
+
+## 8. R2-36 后续状态（2026-08-20）
+
+R2-36 重新执行仓库当前固定配方。显式传递 Docker build proxy 后，冷构建不再停在网络层，而是
+暴露 Ubuntu 24.04 缺少 `python3-dev`、导致 `python-lzo/minilzo` 无法找到 `Python.h` 的真实
+配方缺陷。最小补齐该依赖后，arm64 构建、Binwalk 3.1.0 probe 和 AC9 原始 `.trx` 重放均完成。
+内容 ID、红绿时间线、AnalyzeRun/Catalog/Graph 身份见
+[R2-36 收敛审计](./2026-08-20-r2-36-convergence-audit.md)。本地内容寻址构建已经验收；公开
+registry 多架构分发仍是独立发布工作，不能由本地 image ID 代替。

@@ -1,0 +1,44 @@
+{
+  "schema_version": "firmatlas.mapping.release-convergence/v1",
+  "date": "2026-08-20",
+  "release_recipe": "containers/binwalk/Dockerfile",
+  "recipe_sha256": "6dfddedfa00b7fb44ad6db207ac3355d72fb11005c265e6694576e479a0fb26a",
+  "platform": "linux/arm64",
+  "image": {
+    "content_id": "sha256:3530eae4148221dba9ca81771860807d524206e30a68b4235d08780afe00d083",
+    "binwalk_version": "3.1.0",
+    "binwalk_commit": "4fdab3d464d97b68e0af9088df3f9e2e1545b21c",
+    "rust_toolchain": "1.82.0",
+    "distribution_scope": "local_content_addressed_build"
+  },
+  "red_green": {
+    "red": "python-lzo and minilzo could not compile because Python.h was absent",
+    "minimal_fix": "install python3-dev in the fixed Ubuntu 24.04 image",
+    "green": "cold docker build completed and both extension wheels compiled"
+  },
+  "ac9_replay": {
+    "artifact_sha256": "d40b191c95c5b6e43358785d6c6e9d7915296e9a954d27fbc1936bdf48568ec9",
+    "artifact_model": "Tenda AC9",
+    "artifact_release": "OpenWrt 19.07.8",
+    "extraction_status": "partial_success",
+    "inventory_coverage_status": "partial",
+    "inventory_sha256": "46e8c1d953f5b332d60eb73cc488310cb77c49aca3ef8c28f31681cc156983a7",
+    "inventory_entry_count": 1109,
+    "selected_root_path": "extractions/firmware.bin.extracted/0/partition_1.bin.extracted/0/squashfs-root",
+    "analysis_run_id": "mapping-analysis-run:d63876f513e6ef9898f9bce658fefe38369b509ca6e57e980495fd42a8e8116b",
+    "catalog_id": "discovery-catalog:1914429d5d89e15c9027d8e16ab5e1c22604137e1c8cf79ba685a49d114b4a77",
+    "candidate_count": 1278,
+    "evidence_count": 8121,
+    "open_obligation_count": 117,
+    "graph_id": "communication-graph:602fff8adf9b7ebb46818f460db46ef9c5a30c612df1ec892789e4f7748e5a3b",
+    "graph_node_count": 1741,
+    "graph_edge_count": 2421,
+    "analysis_status": "partial",
+    "status_interpretation": "partial is inherited from conservative extraction inventory coverage and 117 open obligations; neither is promoted to complete"
+  },
+  "raw_run_files": {
+    "analysis_sha256": "f3ccec39c92bd00e8846f9135176269e9bb64029611cb10c8bb6a4832d222056",
+    "graph_sha256": "f8d91dca357be27dab9e26a6c861064376596dae257fe6105d08a4c2ff2c4370",
+    "retention": "ignored local var/mapping-work/r2-36-release; regenerate from the recorded command"
+  }
+}

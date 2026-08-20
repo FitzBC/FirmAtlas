@@ -2,9 +2,9 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：R2-35 已从 DAP-2695 原始固件闭合独立 PHP-XGI 作用域 Catalog；AC9 回归保持通过
+> 当前状态：R2-36 已关闭第一方 Binwalk 3.1.0 冷构建断点并完成目标收敛审计；静态通信测绘 MVP 已验证
 > 最近更新：2026-08-18
-> 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
+> 下一出口门：当前用户目标已收敛；后续仅在新目标下进入动态可达验证或新增 ISA holdout
 
 本文档是 FirmAtlas 新一代固件通信测绘工具的唯一主控入口。后续会话或 Agent 开始相关工作时，必须先阅读本文、仓库根目录 `AGENTS.md`、根目录 `CONTEXT.md`，再阅读当前里程碑指向的设计和进度记录。
 
@@ -142,7 +142,7 @@ Console 错误检查。若验收后代码或前端产物变化，必须重启服
 | 里程碑 | 状态 | 核心产物 | 出口门 | 证据记录 |
 | --- | --- | --- | --- | --- |
 | M0 设计基线 | 已验证 | 理论、领域、架构、集成、评测和协作设计 | 文档互链、领域一致性、本地回归、GitHub 发布；本次不部署 | [M0 记录](./progress/2026-08-08-m0-design-baseline.md) |
-| M1 冷启动发现 | 进行中 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | [M1-01](./progress/2026-08-08-m1-01-snapshot-contract.md) / [M1-02](./progress/2026-08-08-m1-02-source-inventory.md) / [M1-02A](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) / [M1-02B](./progress/2026-08-09-m1-02b-container-binwalk-worker.md) / [M1-03](./progress/2026-08-08-m1-03-replayable-evidence.md) / [M1-04](./progress/2026-08-09-m1-04-frontend-request-producer.md) |
+| M1 冷启动发现 | 已验证 | 制品清单、证据原子、前端/配置/脚本入口候选 | 不提供 seed 生成可解释候选目录 | [M1-01](./progress/2026-08-08-m1-01-snapshot-contract.md) / [M1-02](./progress/2026-08-08-m1-02-source-inventory.md) / [M1-02A](./progress/2026-08-08-m1-02a-binwalk-worker-contract.md) / [M1-02B](./progress/2026-08-09-m1-02b-container-binwalk-worker.md) / [R2-36](./progress/2026-08-20-r2-36-convergence-audit.md) |
 | M2 身份与参数 | 未开始 | Interface/Operation/Parameter 身份及别名、约束 | 共享端点正确拆分，参数有来源与 namespace | 待创建 |
 | M3 Native 绑定 | 未开始 | route/handler/getter/call-site 定向绑定 | Native 失败不阻断部分快照，义务清晰 | 待创建 |
 | M4 通信架构恢复 | 未开始 | 执行主体、接口、解析、状态和响应关系图 | 标注集上的关键节点和路径达到门限 | 待创建 |
@@ -167,7 +167,7 @@ M1 工作项：
 | M1-01 | 建立版本化 `FirmwareMappingSnapshot` 最小合同 | 已验证 | M0 | schema contract tests + Tenda AC9 replay |
 | M1-02 | 建立安全、可复现的制品文件清单 | 已验证 | M1-01 | archive/symlink/budget fixtures + AC9 full-root replay |
 | M1-02A | 冻结隔离 Binwalk worker 合同与派生制品谱系 | 已验证 | M1-02 | 8 fake worker contract tests + versioned result fixture |
-| M1-02B | 实现生产 Binwalk worker 并回放原始固件镜像 | 进行中 | M1-02A | 19 contract tests + pinned local v3.1.0 image + DIR-882 negative/DAP-3520 757-entry replay；正式镜像重建待完成 |
+| M1-02B | 实现生产 Binwalk worker 并回放原始固件镜像 | 已验证 | M1-02A | hardened worker contracts + 第一方 v3.1.0 arm64 冷构建 + AC9 原始 `.trx` 1,109-entry partial Inventory / 1,278-candidate AnalyzeRun |
 | M1-03 | 建立不可变 `EvidenceAtom` 与来源定位 | 已验证 | M1-01/02 | 8 capture/replay tests + AC9 exact-span replay |
 | M1-04 | HTML/Form/JS 请求构造证据生产器 | 已验证 | M1-02/03 | 14 producer tests + AC9 JS/ASP replay + HNAP/CGI fixtures |
 | M1-05 | Web 配置、docroot、rewrite、启动项证据生产器 | 已验证 | M1-02/03 | 11 contract tests + AC9 nginx/startup replay + full regression |
@@ -215,10 +215,11 @@ M1 工作项：
 | R2-33 | 候选范围感知代表性语料门禁 | 已验证 | M1-11/R2-32 | 混合 Catalog 显式 scope + 五类真实样本门禁 passed + immutable SQLite/CLI/API + Console 解释边界；[记录](./progress/2026-08-18-r2-33-scope-aware-corpus-gate.md) |
 | R2-34 | FRITZ!Box 4040 direct Native UBUS Catalog | 已验证 | M1-26/R2-33 | 4 objects / 24 methods / 60 evidence → 76-candidate completed scoped Catalog；补回 4 条 frontend-missed iwinfo operation；[记录](./progress/2026-08-18-r2-34-fritz4040-native-catalog.md) |
 | R2-35 | D-Link DAP-2695 独立 script-backend Catalog | 已验证 | R2-30/33 | 原始 BIN → 485 PHP sources → 3,978 candidates / 4,021 evidence / 0 obligation；整机 partial 与 scoped completed 双状态保留；[记录](./progress/2026-08-18-r2-35-dap2695-script-catalog.md) |
+| R2-36 | 第一方提取器与目标收敛审计 | 已验证 | M1-02B/R2-29/31/32/35 | 修复 Ubuntu 24.04 `Python.h` 构建断点；Binwalk 3.1.0 冷构建 + AC9 raw AnalyzeRun + 原目标逐条证据矩阵；[记录](./progress/2026-08-20-r2-36-convergence-audit.md) |
 
-**下一项建议**：停止继续扩展同类静态样本，优先做一次收敛审计：固定 Binwalk 发布镜像、
-增加非 ARM 原生注册 holdout，并为已闭合的 AC9/DAP/FRITZ 图谱选择一个最小运行时可达验证。
-AC9 保持主回归样本，MiniMax proposal 仍不具备事实晋级能力。
+**收敛状态**：当前用户目标所需的静态通信测绘 MVP 已闭合，不再把增加样本数量当作完成条件。
+AC9 保持主回归样本，MiniMax proposal 不具备事实晋级能力。非 ARM 新 holdout、仿真或最小运行时
+可达验证属于下一阶段研究增强，必须由新的明确目标启动，不能倒写为本轮欠交付。
 
 ## 7. 跨会话无缝工作协议
 

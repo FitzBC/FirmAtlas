@@ -22,6 +22,13 @@ docker build --pull --platform linux/arm64 \
 docker image inspect firmatlas/binwalk:v3.1.0 --format '{{.Id}}'
 ```
 
+When the Docker daemon needs the workstation proxy, pass it explicitly as a
+build argument (for example, `HTTP_PROXY` and `HTTPS_PROXY` using
+`host.docker.internal`). Do not bake proxy values into the image or the
+runtime configuration. The returned image ID can be supplied directly to the
+worker as `sha256:<id>`; a registry distribution must instead use its immutable
+`repository@sha256:<manifest-digest>` reference.
+
 Runtime invariants are applied by the Python Adapter rather than this image:
 no network, read-only root filesystem and input mount, writable derived-output
 mount only, dropped capabilities, `no-new-privileges`, PID/CPU/memory limits,
@@ -30,5 +37,6 @@ are supervised limits; a run that crosses either limit is rejected even if the
 container exits before the next polling interval.
 
 The repository recipe is the release source of truth. A locally built image is
-not a released toolchain until its digest, probe result, and representative raw
-firmware replay have been recorded in the mapping progress ledger.
+not an accepted toolchain until its digest, probe result, and representative raw
+firmware replay have been recorded in the mapping progress ledger. The first
+accepted arm64 cold rebuild and AC9 replay are recorded in R2-36.

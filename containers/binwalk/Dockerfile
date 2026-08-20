@@ -20,7 +20,7 @@ RUN apt-get update \
         build-essential cabextract ca-certificates clang curl device-tree-compiler \
         git libbz2-dev libfontconfig1-dev liblz4-dev liblzo2-dev liblzma-dev \
         libssl-dev libucl-dev lz4 lzop p7zip-full python3-pip sleuthkit tar \
-        unzip unyaffs wget zlib1g-dev zstd \
+        python3-dev unzip unyaffs wget zlib1g-dev zstd \
     && rm -rf /var/lib/apt/lists/*
 
 RUN case "${TARGETARCH}" in \

@@ -53,6 +53,7 @@
 - [R2-28 AC9 CGI namespace and selector transport](./r2-28-vendor-tenda-ac9-cgi-selector.json)：`auto-v20` 从 registrar、path parser 与 selector arms 组合恢复 7 条 `/cgi-bin/*` route；`UploadWebsite` 连到 URL consumer，但 method 与 URL document activation 保持 open。
 - [R2-34 FRITZ!Box 4040 direct native UBUS Catalog](./r2-34-openwrt-fritz4040-native-catalog.json)：`auto-v21` 从 4 个 ARM rpcd 插件直接发布 24 个方法、24 个 binding、24 个 handler 与 24 条 `binds_handler` 边；修复 Frontend 驱动路径漏掉的 4 个 `iwinfo` 方法。独立 scoped Catalog completed，整固件 Catalog 因其他 117 条义务保持 partial。
 - [R2-35 D-Link DAP-2695 script-backend Catalog](./r2-35-dlink-dap2695-script-catalog.json)：从官方 1.20B20 RC101 原始固件进入 485 个 PHP 源的显式作用域，发布 3,978 candidates、4,021 evidence、0 obligation；`www/__action.php` 单例保留 339 candidates/356 evidence 与 `ACTION_POST` selector。整固件 `auto-v21` 的独立 partial 原因继续可见。
+- [R2-36 第一方 Binwalk 与 AC9 收敛重放](./r2-36-first-party-binwalk-ac9-replay.json)：记录仓库配方 arm64 冷构建的内容 ID、红→绿构建断点、Binwalk 3.1.0 身份，以及 AC9 原始 `.trx` 的 1,109-entry partial Inventory、1,278-candidate Catalog 与 1,741/2,421 通信图。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 
