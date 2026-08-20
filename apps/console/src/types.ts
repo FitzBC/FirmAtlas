@@ -440,6 +440,45 @@ export interface MappingCandidatePage {
   offset: number
 }
 
+export type InterfaceForceGraphNodeKind = 'firmware' | 'component' | 'interface' | 'parameter'
+
+export interface InterfaceForceGraphNode {
+  node_id: string
+  node_kind: InterfaceForceGraphNodeKind
+  label: string
+  parent_id: string | null
+  child_ids: string[]
+  expandable: boolean
+  status: string
+  details: Record<string, unknown>
+}
+
+export interface InterfaceForceGraphEdge {
+  edge_id: string
+  source_ref: string
+  target_ref: string
+  edge_kind: 'contains' | 'exposes' | 'accepts' | string
+  label: string
+}
+
+export interface InterfaceForceGraph {
+  schema_version: string
+  catalog_id: string
+  firmware_artifact_sha256: string
+  root_node_id: string
+  nodes: InterfaceForceGraphNode[]
+  edges: InterfaceForceGraphEdge[]
+  summary: {
+    component_count: number
+    binary_component_count: number
+    interface_count: number
+    parameter_count: number
+    native_only_interface_count: number
+    unknown_parameter_type_count: number
+  }
+  claim_boundary: string
+}
+
 export interface PotentialHiddenInterface {
   interface_id: string
   catalog_id: string

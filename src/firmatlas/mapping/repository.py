@@ -31,6 +31,7 @@ from .historical_coverage_ledger import (
     HistoricalCoverageLedgerStatus,
 )
 from .hidden_interface import project_potential_hidden_interface_document
+from .interface_force_graph import project_interface_force_graph
 from .snapshot_diff import MappingReleaseContext, compare_mapping_catalog_documents
 
 
@@ -1349,6 +1350,28 @@ class DiscoveryCatalogRepository:
                 (catalog_id,),
             ).fetchone()
         return json.loads(row["document_json"]) if row else None
+
+    def get_interface_force_graph(self, catalog_id: str) -> Optional[dict]:
+        """Return the evidence-preserving expandable interface hierarchy."""
+
+        with self._lock:
+            row = self._connection.execute(
+                """SELECT c.document_json, r.context_json
+                   FROM mapping_discovery_catalogs c
+                   LEFT JOIN mapping_catalog_release_contexts r
+                     ON r.catalog_id = c.catalog_id
+                   WHERE c.catalog_id = ?""",
+                (catalog_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return project_interface_force_graph(
+            json.loads(row["document_json"]),
+            release_context=(
+                json.loads(row["context_json"])
+                if row["context_json"] is not None else None
+            ),
+        )
 
     def compare_catalogs(
         self, base_catalog_id: str, target_catalog_id: str

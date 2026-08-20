@@ -8,12 +8,14 @@ import { intelligenceApi } from '../api/client'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type {
   FirmwareMappingJob, MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
+  InterfaceForceGraph,
   MappingCorpusReport,
   MappingReasoningCapability, MappingReasoningRun,
   MappingSnapshotChange, MappingSnapshotDiff, PotentialHiddenInterface,
   PotentialHiddenInterfacePage,
 } from '../types'
 import { CommunicationGraphWorkspace } from './CommunicationGraphWorkspace'
+import { FirmwareInterfaceForceGraph } from './FirmwareInterfaceForceGraph'
 
 const kinds = [
   ['', '全部能力'], ['request_interface', '请求接口'], ['web_configuration', 'Web 配置'],
@@ -39,6 +41,8 @@ export function MappingCatalogWorkspace() {
   const [kind, setKind] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [interfaceGraph, setInterfaceGraph] = useState<InterfaceForceGraph | null>(null)
+  const [interfaceGraphLoading, setInterfaceGraphLoading] = useState(false)
   const [view, setView] = useState<'explorer' | 'catalog' | 'graph' | 'hidden' | 'compare' | 'upload' | 'corpus'>('explorer')
   const [corpusReport, setCorpusReport] = useState<MappingCorpusReport | null>(null)
   const [hiddenQuery, setHiddenQuery] = useState('')
@@ -83,13 +87,13 @@ export function MappingCatalogWorkspace() {
   }, [])
 
   useEffect(() => {
-    if (!catalogId) { setCandidates([]); return }
+    if (!catalogId || view !== 'catalog') { setCandidates([]); return }
     const controller = new AbortController()
     setLoading(true)
     void intelligenceApi.mappingCandidates(
       catalogId, {
         query: debouncedQuery,
-        kind: view === 'explorer' ? 'request_interface' : kind,
+        kind,
       }, controller.signal,
     ).then((page) => {
       setCandidates(page.items)
@@ -101,6 +105,21 @@ export function MappingCatalogWorkspace() {
     }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
     return () => controller.abort()
   }, [catalogId, debouncedQuery, kind, view])
+
+  useEffect(() => {
+    if (!catalogId || view !== 'explorer') return
+    const controller = new AbortController()
+    setInterfaceGraphLoading(true)
+    void intelligenceApi.mappingInterfaceForceGraph(catalogId, controller.signal).then((result) => {
+      setInterfaceGraph(result)
+      setError(null)
+    }).catch((caught) => {
+      if (!controller.signal.aborted) {
+        setError(caught instanceof Error ? caught.message : '接口力导图加载失败')
+      }
+    }).finally(() => { if (!controller.signal.aborted) setInterfaceGraphLoading(false) })
+    return () => controller.abort()
+  }, [catalogId, view])
 
   useEffect(() => {
     if (view !== 'hidden') return
@@ -196,10 +215,11 @@ export function MappingCatalogWorkspace() {
 
       {view === 'corpus' ? <CorpusGateWorkspace report={corpusReport} loading={loading} /> : view === 'upload' ? <FirmwareUploadWorkspace
         onPublished={refreshPublishedCatalogs} onOpenGraph={() => setView('graph')}
-      /> : view === 'explorer' ? <InterfaceExplorerWorkspace
-        candidates={candidates} selected={selected} loading={loading}
-        onOpen={openCandidate}
-      /> : view === 'graph' ? <CommunicationGraphWorkspace /> : view === 'hidden' ? <HiddenInterfaceWorkspace
+      /> : view === 'explorer' ? interfaceGraphLoading && !interfaceGraph
+        ? <div className="grid min-h-[600px] place-items-center rounded-2xl border border-white/[0.07] bg-[#0a0f17]/75 text-xs text-slate-600">正在构建可展开接口力导图…</div>
+        : interfaceGraph ? <FirmwareInterfaceForceGraph key={interfaceGraph.catalog_id} graph={interfaceGraph} />
+          : <div className="grid min-h-[600px] place-items-center rounded-2xl border border-dashed border-white/[0.07] text-xs text-slate-600">当前 Catalog 尚无可展示的接口投影</div>
+      : view === 'graph' ? <CommunicationGraphWorkspace /> : view === 'hidden' ? <HiddenInterfaceWorkspace
         page={hiddenPage} query={hiddenQuery} onQuery={setHiddenQuery}
         selected={selectedHidden} onSelect={setSelectedHidden} loading={loading}
       /> : view === 'compare' ? <SnapshotComparisonWorkspace
@@ -276,64 +296,6 @@ function FirmwareIdentityBar({
       </label>
     </div>
   </section>
-}
-
-function InterfaceExplorerWorkspace({
-  candidates, selected, loading, onOpen,
-}: {
-  candidates: MappingCandidate[]
-  selected: MappingCandidateDetail | null
-  loading: boolean
-  onOpen: (candidate: MappingCandidate) => Promise<void>
-}) {
-  const [exposure, setExposure] = useState<'web' | 'internal'>('web')
-  const [component, setComponent] = useState('')
-  const isWeb = (item: MappingCandidate) => {
-    const shape = new Map(item.attributes).get('endpoint_shape')
-    if (shape === 'logical_operation' || item.canonical_identity.startsWith('ubus://') || item.canonical_identity.startsWith('ipc://')) return false
-    return item.canonical_identity.startsWith('/')
-      || item.canonical_identity.startsWith('http://')
-      || item.canonical_identity.startsWith('https://')
-      || item.canonical_identity.startsWith('goform/')
-      || ['url_path', 'exact_literal', 'literal_prefix', 'deterministic_derived'].includes(shape || '')
-  }
-  const exposed = candidates.filter((item) => exposure === 'web' ? isWeb(item) : !isWeb(item))
-  const componentIdentity = (item: MappingCandidate) => {
-    const path = item.source_path || 'owner unresolved'
-    const leaf = path.split('/').pop()?.replace(/\.[^.]+$/, '') || path
-    if (path.includes('/js/')) return `Web 模块 · ${leaf}`
-    if (path.startsWith('webroot')) return `Web 页面 · ${leaf}`
-    if (path.includes('rpcd')) return `RPCD 组件 · ${leaf}`
-    if (path.startsWith('bin/') || path.startsWith('usr/')) return `Native 组件 · ${leaf}`
-    return path
-  }
-  const components = Array.from(new Set(exposed.map(componentIdentity))).sort()
-  const activeComponent = components.includes(component) ? component : components[0] || ''
-  const interfaces = exposed.filter((item) => !activeComponent || componentIdentity(item) === activeComponent)
-  const displayIdentity = (item: MappingCandidate) => item.canonical_identity.startsWith('goform/') ? `/${item.canonical_identity}` : item.canonical_identity
-
-  return <div className="detail-enter overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0f17]/80 backdrop-blur-xl">
-    <div className="flex flex-col gap-3 border-b border-white/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div><div className="eyebrow"><Waypoints size={12} /> Component interface explorer</div><p className="mt-2 text-xs text-slate-500">组件 → Web 接口 → 参数组合 → 约束与证据</p></div>
-      <div className="flex rounded-xl border border-white/[0.07] bg-black/20 p-1">
-        <button type="button" aria-label="Web 暴露接口" onClick={() => { setExposure('web'); setComponent('') }} className={`rounded-lg px-3 py-2 text-[10px] ${exposure === 'web' ? 'bg-signal/[0.1] text-signal' : 'text-slate-600'}`}>Web 暴露接口</button>
-        <button type="button" aria-label="内部 RPC（实现细节）" onClick={() => { setExposure('internal'); setComponent('') }} className={`rounded-lg px-3 py-2 text-[10px] ${exposure === 'internal' ? 'bg-violet-400/[0.1] text-violet-300' : 'text-slate-600'}`}>内部 RPC · 实现细节</button>
-      </div>
-    </div>
-    {exposure === 'internal' && <div className="border-b border-violet-400/10 bg-violet-400/[0.035] px-5 py-3 text-[10px] leading-5 text-violet-200">UBUS、IPC 等是组件间逻辑调用，不等同于浏览器可直接访问的 Web URL；仅在此处作为调用链证据展示。</div>}
-    <div className="grid min-h-[580px] xl:grid-cols-[270px_minmax(360px,0.8fr)_minmax(430px,1.2fr)]">
-      <aside className="border-b border-white/[0.07] p-4 xl:border-b-0 xl:border-r">
-        <div className="text-[9px] uppercase tracking-[0.14em] text-slate-600">通信组件 / 来源主体</div>
-        <div className="mt-3 space-y-2">{components.map((path) => <button key={path} type="button" onClick={() => setComponent(path)} className={`w-full rounded-xl border p-3 text-left transition ${activeComponent === path ? 'border-cyan/25 bg-cyan/[0.07]' : 'border-white/[0.05] hover:bg-white/[0.03]'}`}><div className="flex items-start gap-2"><FileCode2 size={14} className="mt-0.5 shrink-0 text-cyan" /><div className="min-w-0"><div className="break-all text-[11px] leading-4 text-slate-300">{path}</div><div className="mt-1 text-[9px] text-slate-700">{exposed.filter((item) => componentIdentity(item) === path).length} 个接口</div></div></div></button>)}</div>
-        {!loading && components.length === 0 && <div className="mt-6 rounded-xl border border-dashed border-white/[0.07] p-4 text-center text-[10px] leading-5 text-slate-600">{exposure === 'web' ? '当前 Catalog 尚未恢复可验证的 Web URL' : '当前 Catalog 没有内部 RPC 逻辑操作'}</div>}
-      </aside>
-      <main className="border-b border-white/[0.07] xl:border-b-0 xl:border-r">
-        <div className="border-b border-white/[0.07] px-4 py-3 text-[9px] uppercase tracking-[0.14em] text-slate-600">{exposure === 'web' ? 'Web 接口' : '内部逻辑操作'} · {interfaces.length}</div>
-        <div className="max-h-[540px] overflow-y-auto p-2">{loading && <div className="p-8 text-center text-xs text-slate-600">正在恢复组件与接口关系…</div>}{interfaces.map((item) => <button key={item.candidate_id} type="button" aria-label={`查看接口 ${displayIdentity(item)}`} onClick={() => void onOpen(item)} className={`mb-2 w-full rounded-xl border p-4 text-left transition ${selected?.candidate.candidate_id === item.candidate_id ? 'border-signal/25 bg-signal/[0.065]' : 'border-white/[0.05] hover:bg-white/[0.03]'}`}><div className="break-all font-mono text-[11px] leading-5 text-slate-200">{displayIdentity(item)}</div><div className="mt-2 flex flex-wrap gap-2 text-[9px] text-slate-600"><span>{new Map(item.attributes).get('method') || 'method 未确认'}</span><span>{item.parameter_count} 参数</span><span>{item.open_obligation_count} 约束待验证</span></div></button>)}</div>
-      </main>
-      <aside className="min-w-0 bg-gradient-to-br from-white/[0.025] to-transparent">{selected ? <CandidateEvidence detail={selected} /> : <div className="grid min-h-[420px] place-items-center p-8 text-center"><div><CircleDot className="mx-auto text-signal/35" size={34} /><h3 className="mt-4 text-sm text-slate-300">选择接口查看参数组合</h3><p className="mt-2 text-xs leading-6 text-slate-600">这里会展示参数命名空间、选择器、固定值、关联处理组件、依赖关系、未决约束与原始证据。</p></div></div>}</aside>
-    </div>
-  </div>
 }
 
 const corpusCategoryLabels: Record<string, string> = {

@@ -31,6 +31,7 @@ import type {
   MappingSnapshotDiff,
   MappingCandidatePage,
   MappingCandidateDetail,
+  InterfaceForceGraph,
   PotentialHiddenInterfacePage,
   CommunicationGraphQueryOptions,
   CommunicationGraphQueryResult,
@@ -247,6 +248,11 @@ export const intelligenceApi = {
   mappingCandidate: (catalogId: string, candidateId: string, signal?: AbortSignal) =>
     request<MappingCandidateDetail>(
       `/api/mappings/catalogs/${encodeURIComponent(catalogId)}/candidates/${encodeURIComponent(candidateId)}`,
+      { signal },
+    ),
+  mappingInterfaceForceGraph: (catalogId: string, signal?: AbortSignal) =>
+    request<InterfaceForceGraph>(
+      `/api/mappings/catalogs/${encodeURIComponent(catalogId)}/interface-force-graph`,
       { signal },
     ),
   mappingGraphs: (signal?: AbortSignal) =>

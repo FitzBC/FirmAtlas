@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { intelligenceApi } from '../api/client'
 import type {
   MappingCandidate, MappingCandidateDetail, MappingCatalogSummary,
@@ -8,6 +8,7 @@ import type {
   CommunicationGraphQueryResult, CommunicationGraphSummary,
   HistoricalGraphOverlayQueryResult,
   HistoricalCoverageLedgerQueryResult,
+  InterfaceForceGraph,
 } from '../types'
 import { MappingCatalogWorkspace } from './MappingCatalogWorkspace'
 
@@ -134,6 +135,35 @@ const detail: MappingCandidateDetail = {
   }],
   evidence_atoms: [{ evidence_id: 'ev:1', predicate: 'constructs', object_value: candidate.canonical_identity, capability: 'constructs_request', source_span: { artifact_path: candidate.source_path, locator: 'text:1' } }],
   coverage: [{ scope: 'webroot/**/*.js', producer_kind: 'frontend', producer: 'frontend-request-producer', status: 'completed' }],
+}
+const interfaceForceGraph: InterfaceForceGraph = {
+  schema_version: 'firmatlas.mapping.interface-force-graph/v1alpha1',
+  catalog_id: catalog.catalog_id, firmware_artifact_sha256: catalog.firmware_artifact_sha256,
+  root_node_id: 'force-root:ac9',
+  summary: { component_count: 1, binary_component_count: 1, interface_count: 1, parameter_count: 1, native_only_interface_count: 0, unknown_parameter_type_count: 1 },
+  claim_boundary: 'Catalog 的确定性界面投影；参数名称不用于猜测类型。',
+  nodes: [{
+    node_id: 'force-root:ac9', node_kind: 'firmware', label: 'Tenda AC9 V15.03.05.19(6318)',
+    parent_id: null, child_ids: ['force-component:httpd'], expandable: true, status: 'partial',
+    details: { vendor: 'Tenda', product: 'AC9', device_model: 'AC9', firmware_version: 'V15.03.05.19(6318)' },
+  }, {
+    node_id: 'force-component:httpd', node_kind: 'component', label: 'bin/httpd',
+    parent_id: 'force-root:ac9', child_ids: ['force-interface:online'], expandable: true, status: 'observed',
+    details: { component_kind: 'binary', source_path: 'bin/httpd', ownership_basis: 'native registration source' },
+  }, {
+    node_id: 'force-interface:online', node_kind: 'interface', label: '/goform/SetOnlineDevName',
+    parent_id: 'force-component:httpd', child_ids: ['force-parameter:name'], expandable: true, status: 'supported',
+    details: { method: 'POST', path_status: 'exact_literal', exposure_status: 'frontend_and_native', handler_symbol: 'formSetOnlineDevName', handler_identity: 'bin/httpd@0x00071000' },
+  }, {
+    node_id: 'force-parameter:name', node_kind: 'parameter', label: 'devName',
+    parent_id: 'force-interface:online', child_ids: [], expandable: false, status: 'observed',
+    details: { namespace: 'form', parameter_role: 'input', data_type: 'unknown', data_type_basis: 'not_recovered', allowed_values: [], function_summary: '接口输入参数；具体业务语义尚未由确定性证据恢复', constraints: [{ kind: 'code_validation', status: 'not_recovered', values: [], interpretation: '当前证据未恢复长度或格式边界。' }], dependencies: [], evidence_locations: [], claim_boundary: '名称不用于猜测类型。' },
+  }],
+  edges: [
+    { edge_id: 'force-edge:1', source_ref: 'force-root:ac9', target_ref: 'force-component:httpd', edge_kind: 'contains', label: '包含组件' },
+    { edge_id: 'force-edge:2', source_ref: 'force-component:httpd', target_ref: 'force-interface:online', edge_kind: 'exposes', label: '暴露接口' },
+    { edge_id: 'force-edge:3', source_ref: 'force-interface:online', target_ref: 'force-parameter:name', edge_kind: 'accepts', label: '接收参数' },
+  ],
 }
 const urlIpcCandidate: MappingCandidate = {
   ...candidate,
@@ -389,6 +419,10 @@ const historicalCoverage: HistoricalCoverageLedgerQueryResult = {
   facets: { status: { observed: 9, partial: 2, not_assessable: 60 }, audit_category: { compared_interface: 14, parameter_only: 2, not_analyzed: 46, no_structured_communication: 9 }, evidence_state: { structured: 14, source_partial: 2, semantic_analysis_missing: 46, needs_primary_source: 9 } },
 }
 
+beforeEach(() => {
+  vi.spyOn(intelligenceApi, 'mappingInterfaceForceGraph').mockResolvedValue(interfaceForceGraph)
+})
+
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
@@ -483,26 +517,28 @@ it('uploads one firmware artifact and exposes its published mapping job', async 
   expect(screen.getByText('模型建议不是已验证事实')).toBeInTheDocument()
 })
 
-it('starts with a firmware-centered Web interface investigation and keeps internal RPC secondary', async () => {
+it('starts with an expandable firmware to binary to interface to parameter force graph', async () => {
   vi.spyOn(intelligenceApi, 'mappingCatalogs').mockResolvedValue({
     items: [catalog], total: 1, limit: 50, offset: 0,
   })
   vi.spyOn(intelligenceApi, 'mappingCandidates').mockResolvedValue({
     items: [candidate, internalRpcCandidate], total: 2, limit: 100, offset: 0,
   })
-  vi.spyOn(intelligenceApi, 'mappingCandidate').mockResolvedValue(detail)
 
   render(<MappingCatalogWorkspace />)
 
   expect(await screen.findByText('Tenda AC9')).toBeInTheDocument()
-  expect(screen.getByText('V15.03.05.19(6318)')).toBeInTheDocument()
+  expect(screen.getAllByText('V15.03.05.19(6318)').length).toBeGreaterThan(0)
   expect(screen.getByRole('button', { name: '上传新固件' })).toBeInTheDocument()
-  expect(await screen.findByText('/goform/SetOnlineDevName')).toBeInTheDocument()
+  expect(await screen.findByText('固件 → 二进制 → 接口 → 参数')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '展开组件 bin/httpd' })).toBeInTheDocument()
   expect(screen.queryByText('ubus://file/exec')).not.toBeInTheDocument()
-  expect(screen.getByText('组件 → Web 接口 → 参数组合 → 约束与证据')).toBeInTheDocument()
-
-  fireEvent.click(screen.getByRole('button', { name: /内部 RPC/ }))
-  expect(await screen.findByText('ubus://file/exec')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: '展开组件 bin/httpd' }))
+  fireEvent.click(screen.getByRole('button', { name: '展开接口 /goform/SetOnlineDevName' }))
+  fireEvent.click(screen.getByRole('button', { name: '选择参数 devName' }))
+  expect(screen.getByText('参数详情')).toBeInTheDocument()
+  expect(screen.getAllByText('unknown').length).toBeGreaterThan(0)
+  expect(screen.getByText('当前证据未恢复长度或格式边界。')).toBeInTheDocument()
 })
 
 it('navigates catalog, candidate and evidence levels without overlay drawers', async () => {
@@ -512,8 +548,8 @@ it('navigates catalog, candidate and evidence levels without overlay drawers', a
 
   render(<MappingCatalogWorkspace />)
 
-  expect(await screen.findByText('/goform/SetOnlineDevName')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: '原始证据' }))
+  expect(await screen.findByText('/goform/SetOnlineDevName')).toBeInTheDocument()
   await screen.findByText('Inventory partial')
   expect(screen.getAllByText('Inventory partial').length).toBeGreaterThan(0)
   fireEvent.click(screen.getByRole('button', { name: '请求接口' }))

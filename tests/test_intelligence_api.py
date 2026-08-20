@@ -294,6 +294,34 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual(200, detail_status)
         self.assertEqual({"mac", "devName"}, {x["name"] for x in detail["parameters"]})
 
+    def test_mapping_catalog_force_graph_route_exposes_expandable_hierarchy(self) -> None:
+        content = b'''var body = "timezone=" + zone;
+        $.post("/goform/SetTimeCfg", body, callback);'''
+        source = SourceArtifactEntry(
+            canonical_path="webroot/js/system.js", original_path="webroot/js/system.js",
+            kind="file", size=len(content),
+            content_sha256=hashlib.sha256(content).hexdigest(),
+        )
+        frontend = discover_frontend_requests(source, content)
+        catalog = assemble_discovery_catalog(DiscoveryCatalogInput(
+            "1" * 64, "2" * 64,
+            (DiscoveryProducerBatch.frontend((frontend,), "webroot/**/*.js"),),
+        ))
+        self.mapping_repository.publish(catalog)
+
+        status, result = self.get(
+            "/api/mappings/catalogs/{}/interface-force-graph".format(catalog.catalog_id)
+        )
+
+        self.assertEqual(200, status)
+        self.assertEqual(catalog.catalog_id, result["catalog_id"])
+        self.assertEqual(
+            {"firmware", "component", "interface", "parameter"},
+            {item["node_kind"] for item in result["nodes"]},
+        )
+        self.assertEqual(1, result["summary"]["interface_count"])
+        self.assertIn("不自动证明完整 URL", result["claim_boundary"])
+
     def test_mapping_hidden_interface_route_exposes_cross_firmware_projection(self) -> None:
         self.mapping_repository.publish(_hidden_catalog())
 

@@ -82,12 +82,14 @@ curl -fsS http://127.0.0.1:18789/api/mappings/catalogs
 curl -fsS http://127.0.0.1:18789/api/mappings/graphs
 curl -fsS http://127.0.0.1:18789/api/mappings/corpus-report
 curl -fsS http://127.0.0.1:18789/api/mappings/jobs
+curl -fsS 'http://127.0.0.1:18789/api/mappings/catalogs/<catalog-id>/interface-force-graph'
 ```
 
-随后从 Console 实际完成：固件身份与切换器检查、组件 → Web 接口 → 参数组合 → 约束下钻、
-Web/内部 RPC 分层、原始证据查询、高级图谱、覆盖空态和上传表单。上传验收必须确认厂商、产品、
-设备型号、固件版本随作业持久化并出现在发布后的 release context；不得把 `ubus://`/IPC 当作 Web
-URL 展示。服务参数、当前功能、解释边界和截图见[固件通信测绘产品功能与验收手册](../docs/firmware-mapping/product-guide.md)。
+随后从 Console 实际完成：固件身份与切换器检查、固件 → 二进制/组件 → Web 接口 → 参数逐层
+展开与折叠、分支搜索、自动布局重置、参数约束/依赖/EvidenceAtom 侧栏、原始证据查询、高级图谱、
+覆盖空态和上传表单。上传验收必须确认厂商、产品、设备型号、固件版本随作业持久化并出现在发布后
+的 release context；默认接口力导图不得把 `ubus://`/IPC 当作 Web URL 展示。服务参数、当前功能、
+解释边界和截图见[固件通信测绘产品功能与验收手册](../docs/firmware-mapping/product-guide.md)。
 
 `/api/health` 只能证明进程存活，不能证明数据集选择正确。服务恢复还必须检查：
 

@@ -24,10 +24,10 @@
     ],
     "production_document_served": true,
     "source_sha256": {
-      "apps/console/src/api/client.ts": "b14830f3a96f50ebfe20c90f149dabeb8583655a452abeaaf6f59fd736161b8c",
+      "apps/console/src/api/client.ts": "4c3eac1efae87d99b94ea9be7024c5b324c8cc9d20a47b0a1e8e3d035a982920",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
-      "apps/console/src/components/MappingCatalogWorkspace.tsx": "b98e6f20bed3da153434e04eac534cc8e52af7b5668112b10a90a8420de45e5d",
-      "apps/console/src/types.ts": "690f3a9548dedeafb5d8993b8aa1478923e0abdf0e26c3a9fd31be96fe734d8e"
+      "apps/console/src/components/MappingCatalogWorkspace.tsx": "9f2656510a9eea15f42d72005946ed13512b6c27ea3a2d7d95589a15bc4360e2",
+      "apps/console/src/types.ts": "37b219d851801519897908c3753d26e8306e2a802a438155b87feda113be9b13"
     }
   },
   "evidence_boundary": "The HTTP adapter translates request parameters into the shared CommunicationGraphQuery. The Console selects and renders returned facts; neither layer creates interface, owner, runtime, or vulnerability conclusions.",

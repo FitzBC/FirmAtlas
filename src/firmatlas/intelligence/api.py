@@ -373,6 +373,17 @@ def create_handler(
             mapping_prefix = "/api/mappings/catalogs/"
             if method == "GET" and path.startswith(mapping_prefix):
                 remainder = path[len(mapping_prefix):]
+                force_suffix = "/interface-force-graph"
+                if remainder.endswith(force_suffix):
+                    catalog_id = unquote(
+                        remainder[:-len(force_suffix)].rstrip("/")
+                    )
+                    result = mappings.get_interface_force_graph(catalog_id)
+                    if result is None:
+                        raise ApiError(
+                            HTTPStatus.NOT_FOUND, "mapping catalog not found",
+                        )
+                    return HTTPStatus.OK, result
                 catalog_segment, separator, nested = remainder.partition("/candidates")
                 catalog_id = unquote(catalog_segment.rstrip("/"))
                 if separator and nested:

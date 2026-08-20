@@ -220,6 +220,7 @@ M1 工作项：
 | R2-36 | 第一方提取器与目标收敛审计 | 已验证 | M1-02B/R2-29/31/32/35 | 修复 Ubuntu 24.04 `Python.h` 构建断点；Binwalk 3.1.0 冷构建 + AC9 raw AnalyzeRun + 原目标逐条证据矩阵；[记录](./progress/2026-08-20-r2-36-convergence-audit.md) |
 | R2-37 | 本地服务与产品全功能验收 | 已验证 | R2-36 | 560 Python + 29 Console + build + 12 API + 真实 AC9 上传与截图；[记录](./progress/2026-08-20-r2-37-service-functional-acceptance.md) |
 | R2-38 | 以固件为中心的组件化接口调查 | 已验证 | R2-37 | 上传身份 + 固件切换 + 组件→Web 接口→参数/约束；UBUS/IPC 下沉为内部实现细节；原厂 AC9 4,950 candidates / 14,370 evidence 实页验收；[记录](./progress/2026-08-20-r2-38-firmware-centered-interface-explorer.md) |
+| R2-39 | 可折叠接口力导图 | 已验证 | R2-38 | 固件→二进制/组件→Web 接口→参数；自动布局、分支搜索、参数约束/依赖侧栏；默认排除 UBUS/IPC；真实 AC9 422-node 读模型与页面验收；[记录](./progress/2026-08-20-r2-39-expandable-force-interface-graph.md) |
 
 **收敛状态**：当前用户目标所需的静态通信测绘 MVP 已闭合，不再把增加样本数量当作完成条件。
 原厂 AC9 保持默认主回归样本，OpenWrt AC9 作为 UBUS/IPC 对照；MiniMax proposal 不具备事实晋级能力。非 ARM 新 holdout、仿真或最小运行时
