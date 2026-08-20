@@ -88,7 +88,7 @@
 
 ## 6. 本地启动
 
-先构建 Console，并准备固定摘要的第一方 Binwalk 3.1.0 镜像。随后运行：
+先构建 Console，并准备固定摘要的第一方 Binwalk 3.1.0 镜像。完整产品服务必须使用同时保存漏洞情报、固件资产和测绘投影的主数据库 `var/firmatlas.db`。`var/mapping-work/<round>/firmatlas.db` 只用于隔离研究回放，不能作为完整 Console 的服务数据库；需要展示的 Catalog、Graph、历史覆盖层和 corpus report 应先不可变发布到主库。随后运行：
 
 ```bash
 PYTHONPATH=src python3 -m firmatlas intelligence serve \
@@ -112,6 +112,8 @@ curl -fsS http://127.0.0.1:18789/api/mappings/graphs
 curl -fsS http://127.0.0.1:18789/api/mappings/corpus-report
 curl -fsS http://127.0.0.1:18789/api/mappings/jobs
 ```
+
+服务恢复验收不能只检查 `/api/health`。至少还要断言漏洞情报非空、固件资产非空，并同时存在测绘目录、图谱与通过的 corpus gate。2026-08-20 曾因误用单轮测绘库导致通信测绘正常而漏洞工作台为 0；切回主库并发布最新 AC9 Graph/corpus 后恢复为 373,140 条漏洞、19,218 条固件相关漏洞、173,878 个固件候选、6 个测绘目录和 1 张当前图谱。
 
 ## 7. 安全与解释边界
 

@@ -186,6 +186,10 @@ worker 负责隔离提取、AnalyzeRun 和不可变 Catalog/Graph 发布。相�
 同一个作业，重启时未完成作业会显式转为 `job.interrupted`，不会伪装成成功。真实 AC9 页面回放
 见 [R2-31 浏览器上传作业记录](./docs/firmware-mapping/progress/2026-08-18-r2-31-browser-upload-job-lifecycle.md)。
 
+完整 Console 必须使用同时保存漏洞情报、固件资产与测绘投影的主库 `var/firmatlas.db`。单轮
+`var/mapping-work/<round>/firmatlas.db` 仅用于隔离研究回放，不能替代产品服务数据库；服务恢复时
+除 `/api/health` 外，还必须同时验证 intelligence、firmware、mapping catalog/graph 与 corpus 数据域非空。
+
 要为已发布 Catalog 的开放义务生成 MiniMax 待验证建议，必须显式给出模型并从环境变量读取 Key：
 
 ```bash

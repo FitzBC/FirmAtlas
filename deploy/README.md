@@ -59,7 +59,7 @@ ssh satc_cloud 'readlink /home/fitz/apps/firmatlas/current'
 
 ## 通信测绘本地产品服务
 
-通信测绘研究轮次需要在最终代码和生产 Console 构建上启动真实本地服务，而不能只检查测试或 SQLite。先运行后端全量测试、Console 测试/类型检查/生产构建，再以固定摘要的 Binwalk 3.1.0 镜像启动：
+通信测绘研究轮次需要在最终代码和生产 Console 构建上启动真实本地服务，而不能只检查测试或 SQLite。完整 Console 必须连接 `var/firmatlas.db`；禁止把 `var/mapping-work/<round>/firmatlas.db` 作为完整产品服务数据库，因为后者可以只有测绘数据而没有漏洞情报和固件资产。单轮结果应通过 `mapping publish-*` 命令追加到主库。先运行后端全量测试、Console 测试/类型检查/生产构建，再以固定摘要的 Binwalk 3.1.0 镜像启动：
 
 ```bash
 PYTHONPATH=src python3 -m firmatlas intelligence serve \
@@ -85,3 +85,12 @@ curl -fsS http://127.0.0.1:18789/api/mappings/jobs
 ```
 
 随后从 Console 实际完成目录查询、精确接口聚焦、四种图谱视图、证据下钻、覆盖空态和一次真实固件上传。服务参数、当前功能、解释边界和截图见[固件通信测绘产品功能与验收手册](../docs/firmware-mapping/product-guide.md)。
+
+`/api/health` 只能证明进程存活，不能证明数据集选择正确。服务恢复还必须检查：
+
+- `/api/intelligence/overview` 的 `counts.relevant > 0`；
+- `/api/firmware/overview` 的 `counts.candidate_count > 0`；
+- `/api/mappings/catalogs` 和 `/api/mappings/graphs` 的 `total > 0`；
+- `/api/mappings/corpus-report` 的 `gate_status == passed`。
+
+如果任一数据域为空，先核对 `--database`，不要通过重新同步或复制临时数据库掩盖路径错误。修改主库前使用 SQLite `.backup` 创建一致性备份。
