@@ -105,3 +105,12 @@ Catalog/Graph 已发布到本轮隔离数据库，代表性 corpus API 为五类
 - 用户曾在对话中明文提供模型 Key；仓库和报告均未保存或回显，仍应轮换该 Key。
 
 mapping research 按用户明确约定不做 `satc_cloud` SSH 部署；完成后仍须提交并推送 GitHub。
+
+## 7. 发布与交接
+
+- 内容修订：`f499e7c0e571c9fc9a7db9d26bb6c8493000dea0`；
+- GitHub SSH 推送成功，显式 `/usr/bin/nc` SOCKS ProxyCommand 的 `fetch/ls-remote` 均确认远端
+  `main` 指向同一修订；仓库默认 SSH 配置仍引用本机不存在的 `/opt/homebrew/bin/ncat`，后续命令
+  应继续显式覆盖或由用户修复该配置；
+- worktree 在发布元数据提交前 clean，本地服务继续由 PID `32273` 监听 `127.0.0.1:18789`；
+- SSH 产品部署：不适用，依据 `AGENTS.md` firmware mapping research exception 与用户明确要求。
