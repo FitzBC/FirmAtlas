@@ -1,0 +1,75 @@
+{
+  "analysis_run": {
+    "analysis_run_id": "mapping-analysis-run:ba8afbdc7c0c54ad88c3672afc0d474c67684f8edb1d504331895eb9411c342f",
+    "analyzer_registry_id": "firmatlas.mapping.analyzer-registry/builtin-v21",
+    "candidate_count": 5999,
+    "catalog_id": "discovery-catalog:eb73cdcdc69e4960a91648663e43a102d1c646560e6c00ed5a3943eaa35d69ab",
+    "coverage_status": "partial",
+    "evidence_count": 9522,
+    "open_obligation_count": 91,
+    "profile_id": "firmatlas.mapping.profile/auto-v21",
+    "script_backend_stage": {
+      "coverage_status": "completed",
+      "diagnostics": [],
+      "input_count": 485,
+      "output_count": 3909
+    }
+  },
+  "firmware": {
+    "artifact_sha256": "11479c2dcce46af141954a067a0c0355d76bd49ed1793894b1d5960ac5300609",
+    "inventory_coverage_status": "partial",
+    "inventory_sha256": "0dc02c9dfe385375248044698a9cc2339cb83e0dbd676c9947db315f298fbca2",
+    "product": "DAP-2695 Rev.A",
+    "release": "1.20B20 RC101",
+    "vendor": "D-Link"
+  },
+  "focus_case": {
+    "candidate_count": 339,
+    "capabilities": [
+      "reads_configuration",
+      "reads_parameter",
+      "selects_operation",
+      "writes_configuration"
+    ],
+    "evidence_count": 356,
+    "parameter_names": [
+      "ACTION_POST"
+    ],
+    "source_path": "www/__action.php",
+    "source_sha256": "54612f24bed8c83f20b2429b39e17956a7627bbedfbb8bb7d38c3e1816335f57"
+  },
+  "graph": {
+    "edge_count": 9362,
+    "graph_id": "communication-graph:87b5d91ecdfc4ca22362876a7cfbc38c497b959cea78c7e199eb5508fc426d7c",
+    "node_count": 7301,
+    "projection_status": "completed"
+  },
+  "interpretation_boundary": [
+    "the selected-source catalog covers every readable PHP file in the explicit **/*.php rootfs scope",
+    "the full auto-v21 run remains partial because a dangling symlink and non-UTF-8 frontend inputs are preserved as independent diagnostics",
+    "static parameter and configuration access evidence does not prove runtime reachability, authentication state, vulnerability, or exploitability"
+  ],
+  "sample_role": "independent-script-backend-holdout",
+  "schema_version": "firmatlas.mapping.dap2695-script-catalog-report/v1alpha1",
+  "script_backend_projection": {
+    "candidate_count": 3978,
+    "candidate_kind_distribution": {
+      "script_source": 75,
+      "state_access": 3903
+    },
+    "capabilities": [
+      "reads_configuration",
+      "reads_parameter",
+      "selects_operation",
+      "writes_configuration"
+    ],
+    "evidence_count": 4021,
+    "open_obligation_count": 0,
+    "scoped_catalog_coverage_status": "completed",
+    "scoped_catalog_id": "discovery-catalog:2cc162721e60a07cf412923ac975daa7301af3b39e7815ac3ee868ade2246774",
+    "source_count": 485,
+    "source_glob": "**/*.php",
+    "source_inventory_sha256": "799eff9743eb67ee1098f0420adb30aa9efd7f6ed6b55a8d0a8a55a4a338bf41",
+    "source_scope_schema": "firmatlas.mapping.selected-source-inventory/v1"
+  }
+}

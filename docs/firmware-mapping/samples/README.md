@@ -21,7 +21,7 @@
 - [M1-08 AC9 Discovery Catalog 中间输出](./m1-08-ac9-discovery-catalog-summary.json)：三份前端/模板、配置、脚本、Native、关联和调度结果组装出的 395 个无 seed 候选、参数、覆盖与开放义务。
 - [M1-10 Native Deep route-table 中间输出](./m1-10-native-deep-route-table-summary.json)：ARM ELF `{route_ptr, handler_ptr}` 正例的三段证据链、Scheduler 义务关闭、Catalog 投影，以及 AC9 无可信命名表的真实负面对照。
 - [M1-10B AC9 ARM PIC call-site 中间输出](./m1-10b-ac9-arm-pic-callsite-summary.json)：从 `online_list.js` 的 5 个接口关联到 `httpd` 的 5 个 handler、共同 131-pair registrar、五段证据链和 10/10 义务关闭。
-- [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；候选范围门禁当前为 `passed`，并加入 FRITZ!Box 4040 独立 native-only holdout。报告冻结 capability alias policy，避免分类语义随代码静默漂移。
+- [M1-11 代表性架构 corpus report](./m1-11-representative-corpus-report.json)：按 real/derived/fixture/external 四层证据区分 `/goform`、HNAP、共享 CGI、脚本后端和 Native-only；候选范围门禁当前为 `passed`，并加入 FRITZ!Box 4040 native-only 与 DAP-2695 PHP-XGI 两个独立 holdout。报告冻结 capability alias policy，避免分类语义随代码静默漂移。
 - [M1-14 X5000R 共享 CGI 记录](../progress/2026-08-09-m1-14-x5000r-shared-cgi.md)：固定原始固件、隔离 Binwalk 谱系、completed Inventory、lighttpd CGI namespace、JSON selector、MIPS 目标与跨资源/handler 开放义务。
 - [M1-15 X5000R Frontend Asset Graph](./m1-15-x5000r-frontend-asset-graph.json)：跨 `config.js/topicurl.js` 的唯一 endpoint binding、199 个 operation、逐候选双来源证据、动态 method 未决状态和 Native handler 开放义务；进度说明见 [M1-15 记录](../progress/2026-08-09-m1-15-frontend-asset-graph.md)。
 - [M1-16 X5000R MIPS dispatcher](./m1-16-x5000r-mips-dispatch.json)：四张 `char[64]+handler` 导出表、138 registrations、123/199 selector binding、76/14 双向差集、重复注册和开放 value-flow 义务；进度说明见 [M1-16 记录](../progress/2026-08-09-m1-16-x5000r-mips-inline-dispatch.md)。
@@ -52,6 +52,7 @@
 - [R2-27 AC9 URL-store IPC and consumers](./r2-27-vendor-tenda-ac9-configuration-url-ipc.json)：`auto-v19` 闭合 `/var/cfm_socket` 上 2016-byte Get/Set/Unset/Commit/Show IPC、cfmd 分发与 5 个 httpd consumer；逐 callsite 修正 `urlgroup.*` 同前缀跨主 MIB/URL MIB 分裂，且不把 IPC 字段写成 HTTP 参数或关闭 document activation 义务。
 - [R2-28 AC9 CGI namespace and selector transport](./r2-28-vendor-tenda-ac9-cgi-selector.json)：`auto-v20` 从 registrar、path parser 与 selector arms 组合恢复 7 条 `/cgi-bin/*` route；`UploadWebsite` 连到 URL consumer，但 method 与 URL document activation 保持 open。
 - [R2-34 FRITZ!Box 4040 direct native UBUS Catalog](./r2-34-openwrt-fritz4040-native-catalog.json)：`auto-v21` 从 4 个 ARM rpcd 插件直接发布 24 个方法、24 个 binding、24 个 handler 与 24 条 `binds_handler` 边；修复 Frontend 驱动路径漏掉的 4 个 `iwinfo` 方法。独立 scoped Catalog completed，整固件 Catalog 因其他 117 条义务保持 partial。
+- [R2-35 D-Link DAP-2695 script-backend Catalog](./r2-35-dlink-dap2695-script-catalog.json)：从官方 1.20B20 RC101 原始固件进入 485 个 PHP 源的显式作用域，发布 3,978 candidates、4,021 evidence、0 obligation；`www/__action.php` 单例保留 339 candidates/356 evidence 与 `ACTION_POST` selector。整固件 `auto-v21` 的独立 partial 原因继续可见。
 
 ## 1. 为什么不能只选“最容易跑通”的样本
 

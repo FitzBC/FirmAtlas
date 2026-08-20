@@ -13,6 +13,7 @@ from firmatlas.mapping import (
     CorpusEvidenceTier,
     CorpusReportInput,
     CorpusSampleInput,
+    CoverageStatus,
     DiscoveryCatalogInput,
     DiscoveryProducerBatch,
     InventoryPolicy,
@@ -58,6 +59,7 @@ AC9_INVENTORY_SHA256 = "a6b3a57b7262de8692ebf9f9fac2aa249bbbdb69272a45c8c0a65108
 DAP3520_FIRMWARE_SHA256 = "0de4c72f3d7ba1dc6419328be355b51e39d1dae0a8ad14918f0e4eb4699499f9"
 X5000R_FIRMWARE_SHA256 = "2acd661c22b0ca4467af24931864946b8b6ded772ec24a8601d30aea2436ade9"
 FRITZ4040_FIRMWARE_SHA256 = "cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00"
+DAP2695_FIRMWARE_SHA256 = "11479c2dcce46af141954a067a0c0355d76bd49ed1793894b1d5960ac5300609"
 X5000R_ROOT = Path(
     "var/mapping-work/x5000r-v9.1.0u.6118/extractions/firmware.bin.extracted/"
     "1004C/C8343R-6118.bin.extracted/184C70/squashfs-root"
@@ -69,6 +71,10 @@ DAP3520_ROOT = Path(
 )
 FRITZ4040_ROOT = Path(
     "var/mapping-work/r2-34-fritz4040/extracted/"
+    "_firmware.bin.extracted/squashfs-root"
+)
+DAP2695_ROOT = Path(
+    "var/mapping-work/r2-35-dap2695/extraction-v2/"
     "_firmware.bin.extracted/squashfs-root"
 )
 FRITZ4040_RPCD_SHA256 = {
@@ -341,11 +347,60 @@ def _fritz4040_native_catalog(root: Path):
     ))
 
 
+def _selected_source_inventory_sha256(sources) -> str:
+    """Identify an explicit, fully-read producer source scope."""
+
+    payload = {
+        "schema_version": "firmatlas.mapping.selected-source-inventory/v1",
+        "sources": [
+            {
+                "canonical_path": item.canonical_path,
+                "content_sha256": item.content_sha256,
+                "size": item.size,
+            }
+            for item in sorted(sources, key=lambda value: value.canonical_path)
+        ],
+    }
+    return hashlib.sha256(json.dumps(
+        payload, separators=(",", ":"), sort_keys=True,
+    ).encode()).hexdigest()
+
+
+def _dap2695_script_catalog(root: Path):
+    if not root.is_dir():
+        return None
+    sources = []
+    results = []
+    for path in sorted(root.rglob("*.php")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(root).as_posix()
+        content = path.read_bytes()
+        source = _source(relative, content)
+        result = discover_script_backend(source, content)
+        if result.coverage_status is not CoverageStatus.COMPLETED:
+            raise ValueError(
+                "DAP-2695 script analysis is incomplete: {}".format(relative)
+            )
+        sources.append(source)
+        results.append(result)
+    if not results:
+        return None
+    return assemble_discovery_catalog(DiscoveryCatalogInput(
+        DAP2695_FIRMWARE_SHA256,
+        _selected_source_inventory_sha256(tuple(sources)),
+        (DiscoveryProducerBatch.script_backend(
+            tuple(results), "selected-source-inventory:**/*.php"
+        ),),
+    ))
+
+
 def build_m1_report(
     ac9_root: Path,
     dap3520_root: Path = DAP3520_ROOT,
     x5000r_root: Path = X5000R_ROOT,
     fritz4040_root: Path = FRITZ4040_ROOT,
+    dap2695_root: Path = DAP2695_ROOT,
 ):
     """Replay available evidence without promoting fixtures or leads to firmware truth."""
 
@@ -369,6 +424,7 @@ def build_m1_report(
     dap3520 = _dap3520_catalog(dap3520_root)
     x5000r = _x5000r_catalog(x5000r_root)
     fritz4040 = _fritz4040_native_catalog(fritz4040_root)
+    dap2695 = _dap2695_script_catalog(dap2695_root)
     dap3520_script_scope = tuple(
         item.candidate_id for item in dap3520.candidates
         if item.source_path in {"www/home_sys.php", "www/__action.php"}
@@ -385,7 +441,7 @@ def build_m1_report(
         and dict(item.attributes).get("request_role") == "native_registration"
     ) if fritz4040 is not None else ()
     return build_corpus_report(CorpusReportInput(
-        corpus_version="firmatlas.mapping.corpus/m1.4",
+        corpus_version="firmatlas.mapping.corpus/m1.5",
         required_categories=(
             "form_handler", "hnap_soap", "cgi_gateway",
             "script_backend", "native_only",
@@ -444,6 +500,15 @@ def build_m1_report(
                 scope_candidate_ids=dap3520_script_scope,
             ),
             CorpusSampleInput(
+                "dlink-dap2695-script-backend-holdout", "script_backend",
+                "php_xgi_controller", "independent-holdout",
+                CorpusEvidenceTier.REAL_FIRMWARE,
+                ("reads_parameter", "writes_configuration"),
+                ("constructs_request",),
+                expected_firmware_sha256=DAP2695_FIRMWARE_SHA256,
+                catalog=dap2695,
+            ),
+            CorpusSampleInput(
                 "dlink-dsl2877-derived", "script_backend",
                 "vendor_asp_controller", "cross-architecture-validation",
                 CorpusEvidenceTier.DERIVED_FIRMWARE,
@@ -486,11 +551,13 @@ def main() -> int:
     parser.add_argument("--dap3520-root", type=Path, default=DAP3520_ROOT)
     parser.add_argument("--x5000r-root", type=Path, default=X5000R_ROOT)
     parser.add_argument("--fritz4040-root", type=Path, default=FRITZ4040_ROOT)
+    parser.add_argument("--dap2695-root", type=Path, default=DAP2695_ROOT)
     args = parser.parse_args()
     print(json.dumps(
         build_m1_report(
             args.ac9_root, args.dap3520_root, args.x5000r_root,
             args.fritz4040_root,
+            args.dap2695_root,
         ).to_dict(),
         ensure_ascii=False,
         indent=2,

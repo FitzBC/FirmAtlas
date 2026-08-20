@@ -1,6 +1,6 @@
 {
-  "corpus_version": "firmatlas.mapping.corpus/m1.3",
-  "recorded_at": "2026-08-10",
+  "corpus_version": "firmatlas.mapping.corpus/m1.5",
+  "recorded_at": "2026-08-20",
   "source": "FirmAtlas semantic observations and firmware candidate catalog",
   "rules": {
     "vulnerability_text_is_not_firmware_truth": true,
@@ -181,23 +181,23 @@
       "vendor": "D-Link",
       "model": "DAP-2695 Rev.A",
       "firmware_candidate_id": "dlink-official:DAP-2695_fw_reva_120b20rc101_ALL_en_20190115.zip",
-      "availability": "official_artifact-producer_verified-catalog_pending",
+      "availability": "official_artifact-retained_rootfs-scoped_catalog_verified",
       "artifact_sha256": "11479c2dcce46af141954a067a0c0355d76bd49ed1793894b1d5960ac5300609",
       "firmware_version": "1.20B20 RC101",
       "category": "script_backend",
       "subtype": "php-action-backend",
       "anchors": ["www/__action.php", "reads_parameter", "writes_configuration"],
       "role": "independent-holdout",
-      "target_milestones": ["R2-34", "M2"],
-      "evidence_basis": "official ZIP and inner BIN hashes plus direct ScriptBackendProducer replay: 356 evidence and 338 state accesses",
-      "coverage_note": "producer completed, but retained rootfs and immutable Discovery Catalog are still required before gate use"
+      "target_milestones": ["R2-35", "M2"],
+      "evidence_basis": "official ZIP and inner BIN hashes plus raw artifact AnalyzeRun and an all-PHP selected-source Catalog: 3978 candidates and 4021 evidence atoms",
+      "coverage_note": "independent script-backend scope verified; full auto-v21 remains partial because dangling-symlink and non-UTF-8 frontend diagnostics are preserved"
     },
     {
       "sample_id": "openwrt-fritz4040-native-only-holdout",
       "vendor": "OpenWrt",
       "model": "AVM FRITZ!Box 4040",
       "firmware_candidate_id": "openwrt-official:19.07.10-fritz4040-squashfs-sysupgrade.bin",
-      "availability": "official-artifact-native-registration-verified-catalog-adapter-pending",
+      "availability": "official_artifact-retained_rootfs-scoped_catalog_verified",
       "artifact_sha256": "cc34c5449138fd2f247cbd448922df01093b754ed0b9ca02150f302e044c0f00",
       "firmware_version": "19.07.10",
       "category": "native_only",
@@ -206,7 +206,7 @@
       "role": "independent-holdout",
       "target_milestones": ["R2-34", "M2"],
       "evidence_basis": "official checksum plus four ARM rpcd plugins: 4 objects, 24 methods and 60 evidence atoms",
-      "coverage_note": "direct NativeUbusRegistrationResult to Discovery Catalog Adapter is not implemented; no retained rootfs"
+      "coverage_note": "direct NativeUbusRegistrationResult projection is implemented and independently verified; full auto-v21 retains unrelated open obligations"
     }
   ]
 }

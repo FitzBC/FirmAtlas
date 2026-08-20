@@ -23,7 +23,7 @@ const corpusReport: MappingCorpusReport = {
   schema_version: 'firmatlas.mapping.corpus-report/v1alpha3',
   capability_policy_version: 'firmatlas.mapping.corpus-capability-policy/v1',
   report_id: `corpus-report:${'c'.repeat(64)}`,
-  corpus_version: 'firmatlas-representative-corpus/m1.4', gate_status: 'passed',
+  corpus_version: 'firmatlas.mapping.corpus/m1.5', gate_status: 'passed',
   required_categories: ['form_handler', 'hnap_soap', 'cgi_gateway', 'script_backend', 'native_only'],
   categories: ['form_handler', 'hnap_soap', 'cgi_gateway', 'script_backend', 'native_only'].map((architecture_category) => ({
     architecture_category, status: 'verified', sample_count: 1,
@@ -33,6 +33,17 @@ const corpusReport: MappingCorpusReport = {
     candidate_kinds: ['request_interface'], open_obligation_count: 0,
   })),
   samples: [{
+    sample_id: 'dlink-dap2695-script-backend-holdout', architecture_category: 'script_backend',
+    architecture_subtype: 'php_xgi_controller', role: 'independent-holdout',
+    evidence_tier: 'real_firmware', status: 'verified', catalog_id: 'catalog:dap2695',
+    required_capabilities: ['reads_parameter', 'writes_configuration'],
+    forbidden_capabilities: ['constructs_request'],
+    observed_capabilities: ['reads_parameter', 'selects_operation', 'writes_configuration'],
+    missing_capabilities: [], unexpected_capabilities: [],
+    candidate_kinds: ['script_source', 'state_access'],
+    candidate_count: 3978, evidence_count: 4021, open_obligation_count: 0,
+    scope_candidate_ids: [],
+  }, {
     sample_id: 'dap3520-script-backend', architecture_category: 'script_backend',
     architecture_subtype: 'asp-command-backend', role: 'positive', evidence_tier: 'real_firmware',
     status: 'verified', catalog_id: 'catalog:dap3520',
@@ -389,7 +400,10 @@ it('explains the scope-aware representative corpus gate without overstating gene
   expect(screen.getByText('10 候选 · 40 证据')).toBeInTheDocument()
   expect(screen.getByText('openwrt-fritz4040-native-only-holdout')).toBeInTheDocument()
   expect(screen.getByText('24 候选 · 60 证据')).toBeInTheDocument()
-  expect(screen.getByText('独立 holdout')).toBeInTheDocument()
+  expect(screen.getByText('dlink-dap2695-script-backend-holdout')).toBeInTheDocument()
+  expect(screen.getByText('3978 候选 · 4021 证据')).toBeInTheDocument()
+  expect(screen.getAllByText('独立 holdout')).toHaveLength(2)
+  expect(screen.getByText(/485 个 PHP 源文件/)).toBeInTheDocument()
   expect(screen.getByText(/capability policy firmatlas\.mapping\.corpus-capability-policy\/v1/)).toBeInTheDocument()
   expect(screen.getByText(/不等于所有厂商与子类型均已泛化验证/)).toBeInTheDocument()
 })

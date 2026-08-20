@@ -363,6 +363,13 @@ End If
         self.assertEqual(CorpusSampleStatus.VERIFIED, fritz.status)
         self.assertEqual(24, fritz.candidate_count)
         self.assertEqual(60, fritz.evidence_count)
+        dap2695 = next(
+            item for item in report.samples
+            if item.sample_id == "dlink-dap2695-script-backend-holdout"
+        )
+        self.assertEqual(CorpusSampleStatus.VERIFIED, dap2695.status)
+        self.assertGreater(dap2695.candidate_count, 3000)
+        self.assertGreater(dap2695.evidence_count, 3000)
         self.assertIn("mentions_endpoint", fritz.observed_capabilities)
         self.assertIn("binds_handler", fritz.observed_capabilities)
         self.assertNotIn("constructs_request", fritz.observed_capabilities)

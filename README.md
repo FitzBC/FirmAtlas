@@ -299,7 +299,7 @@ ARM32 PIC Adapter 进一步从原始 ELF 验证 `.got` 基址、`R_ARM_GLOB_DAT`
 
 遇到复杂 Native 控制流时，规划使用隔离的 Ghidra Candidate Worker 枚举 xref、call-site 与 P-code value-flow，再由核心 Validator 从原始 ELF 重放后才发布事实。AC9 当前 Profile 可由确定性解码器完成，因此不会为了工具统一而引入不必要的 Ghidra 信任面；接入合同见 [Ghidra Adapter 设计](./docs/firmware-mapping/native-ghidra-adapter.md)。
 
-代表性 corpus gate 会把真实固件、旧解包派生源码、合成合同 fixture 与外部漏洞线索分层统计，只有带预期 Firmware Artifact SHA-256、覆盖完成、能力满足且无开放义务的真实目录才能把架构类别标为 `verified`。v1alpha2 支持在混合 Catalog 中显式限定候选范围，避免借用另一架构的 evidence 或 obligation。当前五类 required category 已通过：DAP-3520 脚本后端子集为 268 candidates/276 evidence，X5000R native-only 子集为 10 candidates/40 evidence；独立 DAP-2695/FRITZ holdout 尚未形成完整 Catalog，因此页面明确区分“类别门禁通过”和“跨厂商泛化完成”。可重复生成、发布、查询并与[机器可读报告](./docs/firmware-mapping/samples/m1-11-representative-corpus-report.json)比较：
+代表性 corpus gate 会把真实固件、旧解包派生源码、合成合同 fixture 与外部漏洞线索分层统计，只有带预期 Firmware Artifact SHA-256、覆盖完成、能力满足且无开放义务的真实目录才能把架构类别标为 `verified`。v1alpha3 支持在混合 Catalog 中显式限定候选范围，并冻结 capability alias policy，避免借用另一架构的 evidence/obligation 或让分类语义静默漂移。当前五类 required category 已通过：DAP-3520 脚本后端子集为 268 candidates/276 evidence，X5000R native-only 子集为 10 candidates/40 evidence；独立 FRITZ!Box 4040 holdout 为 24 candidates/60 evidence，独立 DAP-2695 holdout 从原始固件的 485 个 PHP 文件形成 completed scoped Catalog（3,978 candidates/4,021 evidence）。DAP-2695 整固件 AnalyzeRun 仍诚实保留悬空 symlink 与非 UTF-8 前端输入造成的 `partial`，不与脚本作用域完成状态混淆。可重复生成、发布、查询并与[机器可读报告](./docs/firmware-mapping/samples/m1-11-representative-corpus-report.json)比较：
 
 ```bash
 PYTHONPATH=src python3 scripts/build_mapping_corpus_report.py \
@@ -440,7 +440,7 @@ make firmware-refresh
 | 状态 | 模块 |
 | --- | --- |
 | **Available** | 漏洞情报同步与检索、固件候选目录、版本/CPE 关联、双向下钻、接口与参数语义分析、架构风格分类与推荐、Snapshot v1alpha1 合同、已解包 rootfs 的安全确定性 Inventory v1alpha2（含固件 chroot symlink 与空运行时树）、固定摘要/禁网/只读输入的 Container Binwalk Worker、可回放 EvidenceAtom、Frontend shared-CGI/custom-request、跨资源默认 URL、局部 payload variable、multipart 嵌套 selector 与 Asset Graph、lighttpd/nginx/启动项/proprietary httpd、ASP/PHP-XGI/Lua/Shell Backend、ELF Native Shallow、ARM32 PIC route registrar 与 CGI string-switch dispatch、MIPS32 inline-table、MIPS CGI nested-dispatch、MIPS handler-prefix parameter→state、frontend/native 集合差异归因、静态服务装配、全固件潜在隐藏接口投影/API/可视化、固定点调度、继承 Inventory coverage 的无 seed Discovery Catalog、SQLite 不可变发布/统一 HTTP 查询、接口/组件/参数/义务/EvidenceAtom 通信图谱、三级通信测绘 UI、scope-aware 五类代表性 corpus gate 与可视化 |
-| **Next** | 独立运行时可达验证、通用 HTML script dependency scope Planner、同型号版本差异、剩余 77/11 差集因果验证、MIPS CFG-aware DHCP/sink value-flow、动态 method 恢复、FRITZ direct Native registration→Catalog Adapter、DAP-2695 独立 script-backend AnalyzeRun、固定 Binwalk 发布镜像重建、文件系统与组件 SBOM |
+| **Next** | 独立运行时可达验证、通用 HTML script dependency scope Planner、同型号版本差异、剩余 77/11 差集因果验证、MIPS CFG-aware DHCP/sink value-flow、动态 method 恢复、固定 Binwalk 发布镜像重建、非 ARM 原生注册 holdout、文件系统与组件 SBOM |
 | **Later** | 同型号版本差异、通信拓扑、漏洞重评估与持续提醒、复现与人工复核工作流 |
 
 首个完整纵向切片的目标是：**固件入库 → 隔离解包 → 组件/服务/接口测绘 → 历史漏洞关联 → 版本差异 → 情报变化重评估**。详见[功能范围与路线图](./docs/product-scope.md)。

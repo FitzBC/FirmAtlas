@@ -1,7 +1,7 @@
 {
   "schema_version": "firmatlas.mapping.corpus-report/v1alpha3",
-  "report_id": "corpus-report:f1fcf6b416a783caea6afc517ecc474799ec73a2765781c9fbc956555631c6a1",
-  "corpus_version": "firmatlas.mapping.corpus/m1.4",
+  "report_id": "corpus-report:fb195f1895cf574f26c33de920d9f52d88ac7587a5d2e48f24f55049bbf5c464",
+  "corpus_version": "firmatlas.mapping.corpus/m1.5",
   "capability_policy_version": "firmatlas.mapping.corpus-capability-policy/v1",
   "gate_status": "passed",
   "required_categories": [
@@ -12,6 +12,38 @@
     "script_backend"
   ],
   "samples": [
+    {
+      "sample_id": "dlink-dap2695-script-backend-holdout",
+      "architecture_category": "script_backend",
+      "architecture_subtype": "php_xgi_controller",
+      "role": "independent-holdout",
+      "evidence_tier": "real_firmware",
+      "status": "verified",
+      "catalog_id": "discovery-catalog:2cc162721e60a07cf412923ac975daa7301af3b39e7815ac3ee868ade2246774",
+      "required_capabilities": [
+        "reads_parameter",
+        "writes_configuration"
+      ],
+      "forbidden_capabilities": [
+        "constructs_request"
+      ],
+      "observed_capabilities": [
+        "reads_configuration",
+        "reads_parameter",
+        "selects_operation",
+        "writes_configuration"
+      ],
+      "missing_capabilities": [],
+      "unexpected_capabilities": [],
+      "candidate_kinds": [
+        "script_source",
+        "state_access"
+      ],
+      "candidate_count": 3978,
+      "evidence_count": 4021,
+      "open_obligation_count": 0,
+      "scope_candidate_ids": []
+    },
     {
       "sample_id": "dlink-dap3520-hnap-xgi-validation",
       "architecture_category": "hnap_soap",
@@ -796,8 +828,8 @@
     {
       "architecture_category": "script_backend",
       "status": "verified",
-      "sample_count": 2,
-      "real_firmware_verified_count": 1,
+      "sample_count": 3,
+      "real_firmware_verified_count": 2,
       "derived_firmware_verified_count": 0,
       "contract_verified_count": 0,
       "coverage_gap_count": 1,

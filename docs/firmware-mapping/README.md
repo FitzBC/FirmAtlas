@@ -2,7 +2,7 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：R2-34 direct Native UBUS Catalog 已通过独立 FRITZ!Box 4040 holdout；AC9 回归保持通过
+> 当前状态：R2-35 已从 DAP-2695 原始固件闭合独立 PHP-XGI 作用域 Catalog；AC9 回归保持通过
 > 最近更新：2026-08-18
 > 下一出口门：M1-GATE（在不提供报文、PoC 或已知接口的条件下生成可解释接口候选目录）
 
@@ -92,6 +92,7 @@
 | [R2-32 MiniMax 证据受限建议](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) | 最小脱敏证据包、proposal 白名单、运行审计、API/Console 与官方协议 | 模型合同、供应商协议、晋级门或数据策略变化时 |
 | [R2-33 scope-aware corpus gate](./progress/2026-08-18-r2-33-scope-aware-corpus-gate.md) | 混合 Catalog 候选范围、五类门禁、不可变发布、API/Console 与独立 holdout | corpus 范围、门禁语义、样本或 Adapter 变化时 |
 | [R2-34 FRITZ direct Native UBUS Catalog](./progress/2026-08-18-r2-34-fritz4040-native-catalog.md) | 纯投影 Adapter、独立 holdout、前端漏检对照、图边、案例库与页面验收 | Native UBUS 投影、capability policy 或 holdout 变化时 |
+| [R2-35 DAP-2695 script-backend Catalog](./progress/2026-08-18-r2-35-dap2695-script-catalog.md) | 原始固件摄取、显式 source scope、整机 partial/作用域 completed 分离与页面验收 | Script backend、selected-source identity 或独立 holdout 变化时 |
 | [R2-02 Profile/Registry](./progress/2026-08-09-r2-02-analysis-profile-registry.md) | 原厂 Tenda AC9 主样本、ARM PIC 自动深化、OpenWrt ubus 对照 | Profile、Registry、适用性 gate 或主样本结果变化时 |
 | [R2-03 历史 expectation diff](./progress/2026-08-09-r2-03-historical-expectation-diff.md) | 版本范围护栏、漏检归因、AC9 对象 payload 参数闭环 | expectation 合同、归因、历史样本或参数结果变化时 |
 | [R2-04 AC9 框架语义与全集审计](./progress/2026-08-09-r2-04-ac9-framework-history-audit.md) | 跨文件 POST 证明、71 条漏洞全集、30 条样本关联、路由绑定缺口 | framework graph、历史分母、样本关联或 binding 状态变化时 |
@@ -213,10 +214,11 @@ M1 工作项：
 | R2-32 | MiniMax 证据受限分析建议 | 已验证 | R2-31 | 有界脱敏 Catalog bundle → MiniMax Adapter → target/evidence 白名单 Validator → 独立 ReasoningRun；模型不能改写 Catalog；[记录](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) |
 | R2-33 | 候选范围感知代表性语料门禁 | 已验证 | M1-11/R2-32 | 混合 Catalog 显式 scope + 五类真实样本门禁 passed + immutable SQLite/CLI/API + Console 解释边界；[记录](./progress/2026-08-18-r2-33-scope-aware-corpus-gate.md) |
 | R2-34 | FRITZ!Box 4040 direct Native UBUS Catalog | 已验证 | M1-26/R2-33 | 4 objects / 24 methods / 60 evidence → 76-candidate completed scoped Catalog；补回 4 条 frontend-missed iwinfo operation；[记录](./progress/2026-08-18-r2-34-fritz4040-native-catalog.md) |
+| R2-35 | D-Link DAP-2695 独立 script-backend Catalog | 已验证 | R2-30/33 | 原始 BIN → 485 PHP sources → 3,978 candidates / 4,021 evidence / 0 obligation；整机 partial 与 scoped completed 双状态保留；[记录](./progress/2026-08-18-r2-35-dap2695-script-catalog.md) |
 
-**下一项建议**：R2-35 受控重取 DAP-2695，走原始制品/rootfs → AnalyzeRun → Catalog，
-验证 script-backend 跨厂商泛化；随后扩展非 ARM 原生注册 holdout。AC9 保持主回归样本，
-MiniMax proposal 仍不具备事实晋级能力。
+**下一项建议**：停止继续扩展同类静态样本，优先做一次收敛审计：固定 Binwalk 发布镜像、
+增加非 ARM 原生注册 holdout，并为已闭合的 AC9/DAP/FRITZ 图谱选择一个最小运行时可达验证。
+AC9 保持主回归样本，MiniMax proposal 仍不具备事实晋级能力。
 
 ## 7. 跨会话无缝工作协议
 

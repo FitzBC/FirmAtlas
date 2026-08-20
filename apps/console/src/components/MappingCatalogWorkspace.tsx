@@ -306,7 +306,7 @@ function CorpusGateWorkspace({
       <aside className="rounded-2xl border border-cyan/15 bg-cyan/[0.035] p-5">
         <div className="eyebrow text-cyan"><ShieldQuestion size={12} /> Interpretation boundary</div>
         <h3 className="mt-4 text-sm font-medium text-slate-200">通过代表类别，不夸大泛化范围</h3>
-        <p className="mt-3 text-xs leading-6 text-slate-500">门禁通过不等于所有厂商与子类型均已泛化验证。OpenWrt FRITZ!Box 4040 已作为独立 holdout 发布 24 个原生 UBUS 方法；D-Link DAP-2695 仍待进入完整 Catalog。</p>
+        <p className="mt-3 text-xs leading-6 text-slate-500">门禁通过不等于所有厂商与子类型均已泛化验证。FRITZ!Box 4040 已作为独立 holdout 发布 24 个原生 UBUS 方法；D-Link DAP-2695 也已从原始固件完成 485 个 PHP 源文件的脚本后端作用域 Catalog，同时保留整固件分析中的独立 partial 诊断。</p>
         <div className="mt-5 rounded-xl border border-white/[0.06] bg-black/20 p-3 font-mono text-[9px] leading-5 text-slate-600">report {report.report_id.slice(0, 30)}…<br />schema {report.schema_version}<br />capability policy {report.capability_policy_version}</div>
       </aside>
     </div>
