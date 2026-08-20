@@ -3,6 +3,9 @@
 每项功能或修复完成后，都必须将同一 Git 修订部署到 SSH 主机
 `satc_cloud` 并验证。仓库级约束见 `AGENTS.md`。
 
+> [!NOTE]
+> 范围仅限 `firmatlas.mapping`、测绘脚本/测试和 `docs/firmware-mapping` 的固件通信测绘研究轮次适用仓库中的部署例外：完成本地全量测试、生产构建、真实 API/页面验收、提交和 GitHub 推送，但不部署到 `satc_cloud`。不得把这一例外扩展到普通 FirmAtlas 产品功能或缺陷修复。每轮记录必须明确写明“不适用”及依据。
+
 ## 布局
 
 - 应用根目录：`/home/fitz/apps/firmatlas`
@@ -53,3 +56,32 @@ ssh satc_cloud 'readlink /home/fitz/apps/firmatlas/current'
 发布后还应调用至少一个覆盖本次改动的 API。若需回滚代码，将 `current` 指向上一个
 完整发布目录并重启服务；若需回滚数据，在服务停止后把
 `firmatlas.db.previous` 恢复为 `firmatlas.db`。
+
+## 通信测绘本地产品服务
+
+通信测绘研究轮次需要在最终代码和生产 Console 构建上启动真实本地服务，而不能只检查测试或 SQLite。先运行后端全量测试、Console 测试/类型检查/生产构建，再以固定摘要的 Binwalk 3.1.0 镜像启动：
+
+```bash
+PYTHONPATH=src python3 -m firmatlas intelligence serve \
+  --database var/firmatlas.db \
+  --host 127.0.0.1 --port 18789 \
+  --static-dir apps/console/dist \
+  --mapping-workspace var/mapping-jobs \
+  --mapping-runtime /usr/local/bin/docker \
+  --mapping-binwalk-image-ref 'sha256:<pinned-image-id>' \
+  --mapping-binwalk-version 3.1.0 \
+  --mapping-upload-max-bytes 67108864 \
+  --mapping-analysis-max-seconds 900
+```
+
+验收至少包括：
+
+```bash
+curl -fsS http://127.0.0.1:18789/api/health
+curl -fsS http://127.0.0.1:18789/api/mappings/catalogs
+curl -fsS http://127.0.0.1:18789/api/mappings/graphs
+curl -fsS http://127.0.0.1:18789/api/mappings/corpus-report
+curl -fsS http://127.0.0.1:18789/api/mappings/jobs
+```
+
+随后从 Console 实际完成目录查询、精确接口聚焦、四种图谱视图、证据下钻、覆盖空态和一次真实固件上传。服务参数、当前功能、解释边界和截图见[固件通信测绘产品功能与验收手册](../docs/firmware-mapping/product-guide.md)。

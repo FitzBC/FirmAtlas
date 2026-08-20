@@ -13,7 +13,7 @@ FirmAtlas 是一个证据驱动的一体化固件分析平台。它聚合固件�
 [![SQLite FTS5](https://img.shields.io/badge/Search-SQLite_FTS5-4A90E2?style=flat-square&logo=sqlite&logoColor=white)](#能力矩阵)
 [![Evidence First](https://img.shields.io/badge/Mode-Evidence_First-B7F36B?style=flat-square)](./docs/security.md)
 
-**[系统演示](#系统演示)** · **[能力矩阵](#能力矩阵)** · **[快速开始](#快速开始)** · **[技术架构](#技术架构)** · **[文档中心](#文档中心)**
+**[系统演示](#系统演示)** · **[能力矩阵](#能力矩阵)** · **[通信测绘功能手册](./docs/firmware-mapping/product-guide.md)** · **[快速开始](#快速开始)** · **[技术架构](#技术架构)** · **[文档中心](#文档中心)**
 
 </div>
 
@@ -52,6 +52,7 @@ FirmAtlas 是一个证据驱动的一体化固件分析平台。它聚合固件�
 | 固件资产 | 公开 benchmark、研究数据集、厂商入口与候选下载地址统一检索 | 来源可信度、真实下载域名、候选版本身份、文件名与 URL |
 | 版本关联 | 厂商 → 产品 → 版本三层匹配，支持精确版本与 NVD 范围边界 | 匹配类型、受影响边界、解释信号、相关性分值 |
 | 接口测绘 | 从漏洞证据提取路径、CGI、HTTP 方法、参数与安全影响 | 接口原文、所属类别、参数上下文、关联 CVE |
+| 固件冷启动通信测绘 | 原始固件上传、隔离解包、多 Producer、义务调度、不可变 Catalog 与通信图 | SHA-256、EvidenceAtom、Coverage Ledger、开放义务、可复核子图 |
 | 架构聚类 | 表单处理器、CGI 网关、管理路由、动态页面、资源型 API、HNAP/SOAP | 相似接口、命中理由、厂商与固件型号分布 |
 | 潜在隐藏接口 | 全固件 Native 注册减去 completed 客户端范围，默认选择每个固件最新目录 | 注册二进制、handler、覆盖 scope、证据 identity、运行时原因义务 |
 | 固件版本结构差异 | 覆盖感知地对齐同型号不可变测绘目录，比较接口、参数与潜在隐藏接口 | 发行身份依据、coverage/profile 边界、增删改置信度、BASE/TARGET 证据 |
@@ -123,7 +124,7 @@ make web-dev
 make mapping-example
 ```
 
-该命令验证版本化证据、实体、关系、覆盖账本和未决义务；它是可复现的合同示例，不代表无 seed 自动发现已经完成。设计进度和样本解释见[通信测绘引擎主控文档](./docs/firmware-mapping/README.md)。
+该命令验证版本化证据、实体、关系、覆盖账本和未决义务；它是可复现的合同示例。当前原始固件冷启动 MVP、页面操作、截图和最新验收结果见[通信测绘产品功能与验收手册](./docs/firmware-mapping/product-guide.md)，设计进度和样本解释见[通信测绘引擎主控文档](./docs/firmware-mapping/README.md)。
 
 对已解包的固件 rootfs 生成安全、确定性源制品清单：
 

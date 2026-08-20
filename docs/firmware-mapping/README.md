@@ -2,8 +2,8 @@
 
 > 文档 ID：FM-MASTER
 > 当前阶段：M1 冷启动发现
-> 当前状态：R2-36 已关闭第一方 Binwalk 3.1.0 冷构建断点并完成目标收敛审计；静态通信测绘 MVP 已验证
-> 最近更新：2026-08-18
+> 当前状态：R2-37 已恢复本地产品服务并完成全功能、API 与真实 AC9 上传验收；静态通信测绘 MVP 已验证
+> 最近更新：2026-08-20
 > 下一出口门：当前用户目标已收敛；后续仅在新目标下进入动态可达验证或新增 ISA holdout
 
 本文档是 FirmAtlas 新一代固件通信测绘工具的唯一主控入口。后续会话或 Agent 开始相关工作时，必须先阅读本文、仓库根目录 `AGENTS.md`、根目录 `CONTEXT.md`，再阅读当前里程碑指向的设计和进度记录。
@@ -44,6 +44,7 @@
 
 | 文档 | 作用 | 何时更新 |
 | --- | --- | --- |
+| [产品功能与验收手册](./product-guide.md) | 用户工作流、已实现能力、启动方式、测试结果与页面截图 | 用户功能、启动参数、验收结果或截图变化时 |
 | [理论与研究模型](./theory-and-research.md) | 形式化“线索传播”、研究问题、创新点和论文边界 | 研究假设或主张改变时 |
 | [领域与证据模型](./domain-and-evidence-model.md) | 实体、身份、关系、状态和不变量 | 领域语义或持久化合同改变时 |
 | [模块与分析架构](./architecture.md) | 深模块、Interface、Seam、Adapter、流水线和目录组织 | 模块职责或依赖方向改变时 |
@@ -92,7 +93,8 @@
 | [R2-32 MiniMax 证据受限建议](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) | 最小脱敏证据包、proposal 白名单、运行审计、API/Console 与官方协议 | 模型合同、供应商协议、晋级门或数据策略变化时 |
 | [R2-33 scope-aware corpus gate](./progress/2026-08-18-r2-33-scope-aware-corpus-gate.md) | 混合 Catalog 候选范围、五类门禁、不可变发布、API/Console 与独立 holdout | corpus 范围、门禁语义、样本或 Adapter 变化时 |
 | [R2-34 FRITZ direct Native UBUS Catalog](./progress/2026-08-18-r2-34-fritz4040-native-catalog.md) | 纯投影 Adapter、独立 holdout、前端漏检对照、图边、案例库与页面验收 | Native UBUS 投影、capability policy 或 holdout 变化时 |
-| [R2-35 DAP-2695 script-backend Catalog](./progress/2026-08-18-r2-35-dap2695-script-catalog.md) | 原始固件摄取、显式 source scope、整机 partial/作用域 completed 分离与页面验收 | Script backend、selected-source identity 或独立 holdout 变化时 |
+| [R2-35 DAP-2695 script-backend Catalog](./progress/2026-08-20-r2-35-dap2695-script-catalog.md) | 原始固件摄取、显式 source scope、整机 partial/作用域 completed 分离与页面验收 | Script backend、selected-source identity 或独立 holdout 变化时 |
+| [R2-37 服务与功能验收](./progress/2026-08-20-r2-37-service-functional-acceptance.md) | 本地服务恢复、全量回归、12 项 API、真实 AC9 上传、截图与交付边界 | 服务参数、功能面、验收矩阵或页面交互变化时 |
 | [R2-02 Profile/Registry](./progress/2026-08-09-r2-02-analysis-profile-registry.md) | 原厂 Tenda AC9 主样本、ARM PIC 自动深化、OpenWrt ubus 对照 | Profile、Registry、适用性 gate 或主样本结果变化时 |
 | [R2-03 历史 expectation diff](./progress/2026-08-09-r2-03-historical-expectation-diff.md) | 版本范围护栏、漏检归因、AC9 对象 payload 参数闭环 | expectation 合同、归因、历史样本或参数结果变化时 |
 | [R2-04 AC9 框架语义与全集审计](./progress/2026-08-09-r2-04-ac9-framework-history-audit.md) | 跨文件 POST 证明、71 条漏洞全集、30 条样本关联、路由绑定缺口 | framework graph、历史分母、样本关联或 binding 状态变化时 |
@@ -214,8 +216,9 @@ M1 工作项：
 | R2-32 | MiniMax 证据受限分析建议 | 已验证 | R2-31 | 有界脱敏 Catalog bundle → MiniMax Adapter → target/evidence 白名单 Validator → 独立 ReasoningRun；模型不能改写 Catalog；[记录](./progress/2026-08-18-r2-32-minimax-evidence-proposals.md) |
 | R2-33 | 候选范围感知代表性语料门禁 | 已验证 | M1-11/R2-32 | 混合 Catalog 显式 scope + 五类真实样本门禁 passed + immutable SQLite/CLI/API + Console 解释边界；[记录](./progress/2026-08-18-r2-33-scope-aware-corpus-gate.md) |
 | R2-34 | FRITZ!Box 4040 direct Native UBUS Catalog | 已验证 | M1-26/R2-33 | 4 objects / 24 methods / 60 evidence → 76-candidate completed scoped Catalog；补回 4 条 frontend-missed iwinfo operation；[记录](./progress/2026-08-18-r2-34-fritz4040-native-catalog.md) |
-| R2-35 | D-Link DAP-2695 独立 script-backend Catalog | 已验证 | R2-30/33 | 原始 BIN → 485 PHP sources → 3,978 candidates / 4,021 evidence / 0 obligation；整机 partial 与 scoped completed 双状态保留；[记录](./progress/2026-08-18-r2-35-dap2695-script-catalog.md) |
+| R2-35 | D-Link DAP-2695 独立 script-backend Catalog | 已验证 | R2-30/33 | 原始 BIN → 485 PHP sources → 3,978 candidates / 4,021 evidence / 0 obligation；整机 partial 与 scoped completed 双状态保留；[记录](./progress/2026-08-20-r2-35-dap2695-script-catalog.md) |
 | R2-36 | 第一方提取器与目标收敛审计 | 已验证 | M1-02B/R2-29/31/32/35 | 修复 Ubuntu 24.04 `Python.h` 构建断点；Binwalk 3.1.0 冷构建 + AC9 raw AnalyzeRun + 原目标逐条证据矩阵；[记录](./progress/2026-08-20-r2-36-convergence-audit.md) |
+| R2-37 | 本地服务与产品全功能验收 | 已验证 | R2-36 | 560 Python + 29 Console + build + 12 API + 真实 AC9 上传与截图；[记录](./progress/2026-08-20-r2-37-service-functional-acceptance.md) |
 
 **收敛状态**：当前用户目标所需的静态通信测绘 MVP 已闭合，不再把增加样本数量当作完成条件。
 AC9 保持主回归样本，MiniMax proposal 不具备事实晋级能力。非 ARM 新 holdout、仿真或最小运行时
