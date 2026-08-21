@@ -1,8 +1,8 @@
 # 固件通信测绘产品功能与验收手册
 
-> 验收版本：R2-39
+> 验收版本：R2-40
 >
-> 验收日期：2026-08-20
+> 验收日期：2026-08-21
 >
 > 典型样本：原厂 Tenda AC9 V15.03.05.19(6318)
 >
@@ -23,10 +23,11 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 1. 点击右上角“上传新固件”，选择不超过 64 MiB 的制品，并填写厂商、产品、型号和版本。
 2. 服务按 SHA-256 内容寻址保存制品，隔离执行解包和 AnalyzeRun，并发布不可变 Catalog/Graph。
 3. 进入“接口调查”，确认顶部固件身份，或切换到另一个已分析固件。
-4. 从固件根节点展开二进制或组件，例如 `bin/httpd`；再次点击展开它拥有的 Web 接口。
+4. 从固件根节点展开真实二进制，例如 `bin/httpd`；JavaScript/HTML/CSS 静态资源不会成为图节点。
 5. 点击接口展开参数组合；点击参数，在右侧查看类型、作用、代码约束、依赖和精确证据。
-6. 使用搜索框把画布收敛到命中节点及其祖先，使用“重置自动布局”重新计算位置；节点可随时折叠。
-7. 需要 UBUS/IPC 等内部调用时进入“高级图谱”或“原始证据”。它们不会混入默认 Web 接口图。
+6. 拖拽节点观察邻居自动避让，悬停高亮直接邻接关系，滚轮缩放；碰撞层按卡片矩形自动分离。
+7. 使用搜索框把画布收敛到命中节点及其祖先，使用“重置自动布局”重新计算位置；节点可随时折叠。
+8. 需要 UBUS/IPC 等内部调用时进入“高级图谱”或“原始证据”。它们不会混入默认 Web 接口图。
 
 ## 3. 已实现功能
 
@@ -34,8 +35,8 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 | --- | --- | --- |
 | 原始固件上传 | 64 MiB 有界、异步单 worker、内容寻址、完整设备身份持久化 | 固定摘要 Binwalk、禁网、只读输入/根、资源预算 |
 | 固件身份 | 持续展示 release context、SHA 和覆盖状态，支持切换已分析固件 | 未登记身份显示“待确认”，不从文件名猜测 |
-| 接口力导图 | 固件 → 二进制/组件 → Web 接口 → 参数，逐层展开/折叠 | 默认只呈现请求接口；UBUS/IPC 不冒充 Web URL |
-| 自动布局与搜索 | 确定性力模拟、层级偏置、一键重置；搜索保留命中分支和祖先 | 首屏只展开组件，避免一次渲染数百接口 |
+| 接口力导图 | 固件 → 真实二进制 → Web 接口 → 参数，逐层展开/折叠 | 静态前端资源仅作 evidence locator；UBUS/IPC 不冒充 Web URL |
+| 动态布局与搜索 | 持续物理模拟、拖拽固定/释放回弹、矩形碰撞、hover 邻接、滚轮缩放、一键重置 | 大图画布按层内节点数扩容，卡片交叠为硬约束；搜索保留命中分支和祖先 |
 | 参数详情 | 语义、位置、数据类型及依据、约束、依赖、owner、EvidenceAtom | 只从字面域/selector 证据推断类型，不按参数名猜测 |
 | 自动测绘编排 | Inventory → 多 Producer → Scheduler → Catalog → Graph | Producer 失败进入 coverage，不伪装为空成功 |
 | 高级图谱 | 四种证据约束视图、精确焦点、跳数/节点/边预算 | 子图无悬空边，UBUS/IPC 在这里保留取证价值 |
@@ -48,17 +49,17 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 样本 SHA-256：`981ae43f0114432425f211783a4051a81f861b6f8208a9d80cb1528daf3bf296`。当前 Catalog 为
 `discovery-catalog:29081f8e9f48b65ee10c85b81cb73fbce5dffa26023726397ae691397e5373a4`。
 
-接口调查读模型包含 422 个节点、421 条边：29 个组件、249 个请求接口、143 个输入参数。其中真实
-Native 二进制为 `bin/httpd`（191 个接口）和 `bin/dhttpd`（2 个接口）；其余未绑定 Native owner 的
-请求接口按前端来源模块保留。122 个仅由 Native 注册发现的接口保持 `native_registration_only`，
+接口调查读模型包含 276 个节点、275 条边：2 个真实二进制、193 个请求接口、80 个输入参数。
+`bin/httpd` 拥有 191 个接口，`bin/dhttpd` 拥有 2 个接口；56 个只有前端静态文件引用、没有 Native
+二进制 owner 的请求接口从默认图排除，但原始 EvidenceAtom 和 locator 完整保留。122 个仅由 Native 注册发现的接口保持 `native_registration_only`，
 没有路径证据时显示 `path_status=unresolved`，不会擅自拼接 `/goform/...`。
 
 ### 4.1 固件根节点与二进制组件
 
-![AC9 固件根节点与组件力导图](./screenshots/2026-08-20-r2-39-force-root.png)
+![AC9 动态拖拽与碰撞分离](./screenshots/2026-08-21-r2-40-dynamic-drag-collision.png)
 
-初始画布只展开 29 个组件。右侧显示 Tenda、AC9、版本、SHA、Catalog 状态和覆盖义务；用户不会在
-数百个接口之间失去入口。
+初始画布只展开 2 个真实二进制。截图中 `bin/dhttpd` 已被拖动，状态栏确认释放后碰撞力正在重新
+分离邻居；右侧同步切换为该二进制详情。
 
 ### 4.2 展开 httpd 接口与参数
 
@@ -74,23 +75,24 @@ Native 二进制为 `bin/httpd`（191 个接口）和 `bin/dhttpd`（2 个接口
 
 点击 `timeZone` 后，侧栏同时给出 owner `/goform/SetSysTimeCfg`、所属 `bin/httpd`、依赖线索和
 前端/Native 精确位置。当前证据没有恢复整数范围、长度、格式或时间边界，因此数据类型和代码约束
-诚实显示 `unknown / not_recovered`。143 个参数中有 138 个仍为未知类型；这是后续代码使用点分析
+诚实显示 `unknown / not_recovered`。80 个参数中有 79 个仍为未知类型；这是后续代码使用点分析
 的明确任务，不是 UI 缺数或推断失败。
 
 ## 5. 测试结果
 
 | 验证层 | 命令或方式 | 结果 |
 | --- | --- | --- |
-| Python 力导图专项 | `PYTHONPATH=src python3 -m unittest tests.test_mapping_interface_force_graph tests.test_intelligence_api.IntelligenceApiTests.test_mapping_interface_force_graph_route` | 3/3 通过 |
-| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests` | 最终 563/563 通过；首轮 3 个历史报告源码摘要失配已按当前源更新并复验 |
+| Python 力导图专项 | `PYTHONPATH=src python3 -m unittest tests.test_mapping_interface_force_graph tests.test_intelligence_api.IntelligenceApiTests.test_mapping_catalog_force_graph_route_excludes_frontend_static_resources` | 4/4 通过 |
+| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests` | 564/564 通过（617.191s） |
 | Python 编译检查 | `python3 -m compileall -q src` | 通过 |
-| Console 全量回归 | `pnpm test` | 33/33 通过，10 个测试文件 |
+| Console 全量回归 | `pnpm test` | 34/34 通过，10 个测试文件 |
 | TypeScript/生产构建 | `pnpm build` | 通过，1,802 modules transformed |
-| API 验收 | AC9 force-graph endpoint | HTTP 200；422 nodes / 421 edges；响应约 1.06 MB，单节点 EvidenceAtom 最多 12 条 |
-| 浏览器交互 | 展开/折叠、分支搜索、自动布局、参数侧栏 | 通过；页面 Console 0 errors |
+| API 验收 | AC9 force-graph endpoint | HTTP 200；276 nodes / 275 edges；2 个 binary；0 frontend module；排除 56 个静态资源接口 |
+| 浏览器交互 | 拖拽/回弹、hover 邻接、滚轮缩放、展开/折叠、搜索 | `httpd` 展开 194 nodes / 193 edges；矩形交叠 0 对 |
 
-真实浏览器回放验证：首屏 30/422 可见节点、29 条可见边；展开 `bin/httpd` 后为 221/422 节点、
-220 条边；搜索目标后为 3 节点/2 边；展开接口后为 6 节点/5 边；折叠恢复为 3 节点/2 边。
+真实浏览器回放验证：首屏 3/276 可见节点、2 条边；展开 `bin/httpd` 后为 194/276 节点、193 条边。
+逐轮矩形交叠检测从 194 对降为 98、23，最终为 0；拖动 `bin/dhttpd` 后出现释放回弹状态，悬停时
+非邻接 `bin/httpd` opacity 从 1 降为 0.18。默认页面不存在 `webroot_ro/js` 或 `ubus://` 节点。
 
 ## 6. 本地启动与 API 验收
 
@@ -132,4 +134,4 @@ curl -fsS http://127.0.0.1:18789/api/mappings/jobs
 - 通信测绘范围按仓库例外执行本地完整验收、提交和 GitHub 推送，不部署到 `satc_cloud`。
 
 架构决策、迭代修正、反事实失败模式和完整复验记录见
-[R2-39 可折叠接口力导图记录](./progress/2026-08-20-r2-39-expandable-force-interface-graph.md)。
+[R2-40 动态碰撞力导图记录](./progress/2026-08-21-r2-40-dynamic-collision-force-graph.md)。

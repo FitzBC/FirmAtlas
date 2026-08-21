@@ -475,6 +475,7 @@ export interface InterfaceForceGraph {
     parameter_count: number
     native_only_interface_count: number
     unknown_parameter_type_count: number
+    excluded_static_resource_interface_count: number
   }
   claim_boundary: string
 }

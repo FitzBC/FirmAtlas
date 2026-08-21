@@ -53,7 +53,7 @@ FirmAtlas 是一个证据驱动的一体化固件分析平台。它聚合固件�
 | 版本关联 | 厂商 → 产品 → 版本三层匹配，支持精确版本与 NVD 范围边界 | 匹配类型、受影响边界、解释信号、相关性分值 |
 | 接口测绘 | 从漏洞证据提取路径、CGI、HTTP 方法、参数与安全影响 | 接口原文、所属类别、参数上下文、关联 CVE |
 | 固件冷启动通信测绘 | 原始固件上传、隔离解包、多 Producer、义务调度、不可变 Catalog 与通信图 | SHA-256、EvidenceAtom、Coverage Ledger、开放义务、可复核子图 |
-| 可折叠接口力导图 | 以固件身份为根节点，逐层展开二进制/组件 → Web 接口 → 参数；支持分支搜索、自动布局、折叠和参数证据侧栏 | 厂商/产品/型号/版本、HTTP 方法、handler、参数类型依据、代码约束、依赖与 EvidenceAtom |
+| 动态接口力导图 | 以固件为根，只展示真实二进制 → Web 接口 → 参数；支持拖拽回弹、矩形碰撞分离、悬停邻接高亮、滚轮缩放、搜索与折叠 | 二进制 owner、HTTP 方法、handler、参数类型依据、代码约束、依赖与 EvidenceAtom；静态前端资源仅保留为证据 locator |
 | 架构聚类 | 表单处理器、CGI 网关、管理路由、动态页面、资源型 API、HNAP/SOAP | 相似接口、命中理由、厂商与固件型号分布 |
 | 潜在隐藏接口 | 全固件 Native 注册减去 completed 客户端范围，默认选择每个固件最新目录 | 注册二进制、handler、覆盖 scope、证据 identity、运行时原因义务 |
 | 固件版本结构差异 | 覆盖感知地对齐同型号不可变测绘目录，比较接口、参数与潜在隐藏接口 | 发行身份依据、coverage/profile 边界、增删改置信度、BASE/TARGET 证据 |
@@ -230,8 +230,10 @@ PYTHONPATH=src python3 -m firmatlas.cli mapping query-graph \
 发布会验证 graph 与源 Catalog 的 firmware、coverage 和 EvidenceAtom 闭包；查询返回无悬空边的
 节点/边、facet、Coverage Ledger 与完整 EvidenceAtom。AC9 实证见 [R2-18 持久化图查询](./docs/firmware-mapping/progress/2026-08-11-r2-18-ac9-persisted-graph-query.md)。
 
-本地产品服务默认进入“通信测绘 → 接口调查”：以当前固件为力导图根节点，逐层展开二进制或
-前端组件、Web 接口和参数。节点可折叠，搜索只保留命中分支及其祖先，自动布局可随时重置；点击
+本地产品服务默认进入“通信测绘 → 接口调查”：以当前固件为力导图根节点，只沿有 Native 归属的
+真实二进制、Web 接口和参数逐层展开；JavaScript、HTML、CSS 等静态资源不作为组件节点展示，只在
+证据 locator 中保留。节点可拖拽并在释放后自动回弹分离，矩形碰撞约束避免卡片重叠，悬停高亮
+邻接关系，滚轮缩放；搜索只保留命中分支及其祖先，自动布局可随时重置。点击
 参数后，右侧固定面板展示所属接口、handler、语义、数据类型及其证据依据、代码约束、依赖和
 EvidenceAtom。`ubus://`、IPC 等内部逻辑操作不会作为 Web URL 混入默认接口图，需要时可从
 “高级图谱”或“原始证据”取证。后端读模型由

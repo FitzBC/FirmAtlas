@@ -10,7 +10,7 @@ const graph: InterfaceForceGraph = {
   summary: {
     component_count: 1, binary_component_count: 1, interface_count: 1,
     parameter_count: 1, native_only_interface_count: 0,
-    unknown_parameter_type_count: 0,
+    unknown_parameter_type_count: 0, excluded_static_resource_interface_count: 0,
   },
   claim_boundary: '参数名称不用于猜测数据类型与约束。',
   nodes: [{
@@ -83,4 +83,16 @@ it('narrows a large graph to the matching branch while preserving ancestors', ()
   expect(screen.getByRole('button', { name: '选择节点 /goform/SetTimeCfg' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: '选择节点 bin/httpd' })).toBeInTheDocument()
   expect(screen.getByText('可见 3 / 4 nodes · 2 edges')).toBeInTheDocument()
+})
+
+it('lets the user drag a node and explains the live mouse interactions', () => {
+  render(<FirmwareInterfaceForceGraph graph={graph} />)
+  const component = screen.getByRole('button', { name: '选择节点 bin/httpd' })
+
+  fireEvent.pointerDown(component, { pointerId: 1, clientX: 220, clientY: 180 })
+  fireEvent.pointerMove(component, { pointerId: 1, clientX: 360, clientY: 260 })
+  fireEvent.pointerUp(component, { pointerId: 1, clientX: 360, clientY: 260 })
+
+  expect(screen.getByRole('status')).toHaveTextContent('已拖动节点 bin/httpd')
+  expect(screen.getByText('拖拽节点 · 滚轮缩放 · 悬停高亮邻接关系')).toBeInTheDocument()
 })

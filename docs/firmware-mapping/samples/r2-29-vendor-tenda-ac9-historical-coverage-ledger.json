@@ -22,7 +22,7 @@
     "source_sha256": {
       "apps/console/src/api/client.ts": "4c3eac1efae87d99b94ea9be7024c5b324c8cc9d20a47b0a1e8e3d035a982920",
       "apps/console/src/components/CommunicationGraphWorkspace.tsx": "119d8921ab7c5003b106b60c1777f3f09230672f045e2c56d9b4be49b1965383",
-      "apps/console/src/types.ts": "37b219d851801519897908c3753d26e8306e2a802a438155b87feda113be9b13"
+      "apps/console/src/types.ts": "e012dde4ff3365893b5044010eea4a8d1a661e4a303d413ef399833da1981360"
     }
   },
   "coverage_ledger": {

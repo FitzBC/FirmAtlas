@@ -270,15 +270,9 @@ def project_interface_force_graph(
         if request_id:
             interface_by_request[request_id] = interface_id
 
-    for request_id, request in sorted(requests.items(), key=lambda pair: str(pair[1].get("canonical_identity", ""))):
-        if request_id in interface_by_request:
-            continue
-        source_path = str(request.get("source_path", "")) or "frontend owner unresolved"
-        component_id = ensure_component(source_path, False)
-        interface_by_request[request_id] = add_interface(
-            _display_path(str(request.get("canonical_identity", ""))),
-            component_id, request, request, "frontend_reference_only",
-        )
+    excluded_static_resource_interface_count = len([
+        request_id for request_id in requests if request_id not in interface_by_request
+    ])
 
     for parameter in sorted(parameters, key=lambda item: (str(item.get("owner_ref", "")), str(item.get("name", "")))):
         interface_id = interface_by_request.get(str(parameter.get("owner_ref", "")))
@@ -365,6 +359,7 @@ def project_interface_force_graph(
     ]
     interface_nodes = [item for item in nodes if item["node_kind"] == "interface"]
     parameter_nodes = [item for item in nodes if item["node_kind"] == "parameter"]
+    node_by_id[root_id]["expandable"] = bool(node_by_id[root_id]["child_ids"])
     return {
         "schema_version": SCHEMA_VERSION,
         "catalog_id": catalog.get("catalog_id", ""),
@@ -384,6 +379,7 @@ def project_interface_force_graph(
             "unknown_parameter_type_count": len([
                 item for item in parameter_nodes if item["details"]["data_type"] == "unknown"
             ]),
+            "excluded_static_resource_interface_count": excluded_static_resource_interface_count,
         },
         "claim_boundary": (
             "该力导图是 Catalog 的确定性界面投影。Native 注册不自动证明完整 URL、"

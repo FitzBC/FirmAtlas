@@ -294,7 +294,7 @@ class IntelligenceApiTests(unittest.TestCase):
         self.assertEqual(200, detail_status)
         self.assertEqual({"mac", "devName"}, {x["name"] for x in detail["parameters"]})
 
-    def test_mapping_catalog_force_graph_route_exposes_expandable_hierarchy(self) -> None:
+    def test_mapping_catalog_force_graph_route_excludes_frontend_static_resources(self) -> None:
         content = b'''var body = "timezone=" + zone;
         $.post("/goform/SetTimeCfg", body, callback);'''
         source = SourceArtifactEntry(
@@ -315,11 +315,9 @@ class IntelligenceApiTests(unittest.TestCase):
 
         self.assertEqual(200, status)
         self.assertEqual(catalog.catalog_id, result["catalog_id"])
-        self.assertEqual(
-            {"firmware", "component", "interface", "parameter"},
-            {item["node_kind"] for item in result["nodes"]},
-        )
-        self.assertEqual(1, result["summary"]["interface_count"])
+        self.assertEqual({"firmware"}, {item["node_kind"] for item in result["nodes"]})
+        self.assertEqual(0, result["summary"]["interface_count"])
+        self.assertEqual(1, result["summary"]["excluded_static_resource_interface_count"])
         self.assertIn("不自动证明完整 URL", result["claim_boundary"])
 
     def test_mapping_hidden_interface_route_exposes_cross_firmware_projection(self) -> None:

@@ -148,6 +148,43 @@ class InterfaceForceGraphProjectionTests(unittest.TestCase):
         self.assertFalse(interface["details"]["frontend_reference_observed"])
         self.assertEqual(1, result["summary"]["native_only_interface_count"])
 
+    def test_excludes_frontend_static_resources_without_native_binary_ownership(self):
+        document = {
+            "catalog_id": "discovery-catalog:static-resource-boundary",
+            "firmware_artifact_sha256": "3" * 64,
+            "coverage_status": "partial",
+            "candidates": [{
+                "candidate_id": "frontend-request:status",
+                "candidate_kind": "request_interface",
+                "canonical_identity": "/goform/GetStatus",
+                "claim_status": "candidate",
+                "source_path": "webroot_ro/js/status.js",
+                "source_construct": "frontend.request",
+                "evidence_ids": [],
+                "attributes": [["method", "GET"], ["endpoint_shape", "exact_literal"]],
+            }],
+            "parameters": [{
+                "parameter_id": "frontend-parameter:nonce",
+                "owner_ref": "frontend-request:status",
+                "name": "_",
+                "namespace": "query",
+                "literal_value": None,
+                "selector_values": [],
+                "is_operation_selector": False,
+                "source_construct": "query",
+                "evidence_ids": [],
+            }],
+            "associations": [], "open_obligations": [], "evidence_atoms": [],
+        }
+
+        result = project_interface_force_graph(document)
+
+        self.assertEqual(["firmware"], [node["node_kind"] for node in result["nodes"]])
+        self.assertEqual(0, result["summary"]["component_count"])
+        self.assertEqual(0, result["summary"]["interface_count"])
+        self.assertEqual(0, result["summary"]["parameter_count"])
+        self.assertEqual(1, result["summary"]["excluded_static_resource_interface_count"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -140,7 +140,7 @@ const interfaceForceGraph: InterfaceForceGraph = {
   schema_version: 'firmatlas.mapping.interface-force-graph/v1alpha1',
   catalog_id: catalog.catalog_id, firmware_artifact_sha256: catalog.firmware_artifact_sha256,
   root_node_id: 'force-root:ac9',
-  summary: { component_count: 1, binary_component_count: 1, interface_count: 1, parameter_count: 1, native_only_interface_count: 0, unknown_parameter_type_count: 1 },
+  summary: { component_count: 1, binary_component_count: 1, interface_count: 1, parameter_count: 1, native_only_interface_count: 0, unknown_parameter_type_count: 1, excluded_static_resource_interface_count: 0 },
   claim_boundary: 'Catalog 的确定性界面投影；参数名称不用于猜测类型。',
   nodes: [{
     node_id: 'force-root:ac9', node_kind: 'firmware', label: 'Tenda AC9 V15.03.05.19(6318)',
