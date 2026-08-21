@@ -240,7 +240,8 @@ PYTHONPATH=src python3 -m firmatlas.cli mapping query-graph \
 展开/折叠，拖拽结束不会误触展开；大图重新布局后固件和组件不会被推到首屏之外。只有实际存在
 子参数的接口显示展开箭头，无参数接口仍可点击查看接口证据。点击
 参数后，右侧固定面板展示所属接口、handler、语义、数据类型及其证据依据、代码约束、依赖和
-EvidenceAtom。`ubus://`、IPC 等内部逻辑操作不会作为 Web URL 混入默认接口图，需要时可从
+EvidenceAtom。搜索接口时画布自动聚焦命中节点；展开后显示直接关联参数，即使参数名不包含
+搜索词。参数继续围绕所属接口形成局部簇。`ubus://`、IPC 等内部逻辑操作不会作为 Web URL 混入默认接口图，需要时可从
 “高级图谱”或“原始证据”取证。后端读模型由
 `GET /api/mappings/catalogs/<catalog-id>/interface-force-graph` 提供，浏览器不二次猜测事实。
 AC9 真实页面回放、截图和解释边界见[产品功能与验收手册](./docs/firmware-mapping/product-guide.md)。

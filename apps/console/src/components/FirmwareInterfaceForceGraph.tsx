@@ -375,6 +375,7 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
   const dragRef = useRef<{ nodeId: string; x: number; y: number; moved: boolean } | null>(null)
   const canvasPanRef = useRef<{ x: number; y: number; moved: boolean } | null>(null)
   const suppressActivationRef = useRef<string | null>(null)
+  const autoFocusedQueryRef = useRef('')
   const projection = useMemo(
     () => visibleProjection(graph, expanded, query), [graph, expanded, query],
   )
@@ -383,6 +384,25 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
   )
   const selected = graph.nodes.find((node) => node.node_id === selectedId) ?? root
   const byId = useMemo(() => new Map(graph.nodes.map((node) => [node.node_id, node])), [graph.nodes])
+
+  useEffect(() => {
+    const normalized = query.trim().toLowerCase()
+    if (!normalized) {
+      if (autoFocusedQueryRef.current) setPan({ x: 0, y: 0 })
+      autoFocusedQueryRef.current = ''
+      return
+    }
+    const focusKey = `${graph.catalog_id}:${normalized}`
+    if (autoFocusedQueryRef.current === focusKey) return
+    const match = graph.nodes
+      .filter((node) => node.label.toLowerCase().includes(normalized))
+      .sort((left, right) => depthByKind[right.node_kind] - depthByKind[left.node_kind])[0]
+    const point = match ? layout.positions.get(match.node_id) : undefined
+    if (!match || !point) return
+    setPan({ x: -point.x, y: -point.y })
+    setLayoutNotice(`已聚焦搜索结果 ${match.label}；展开后显示其关联参数`)
+    autoFocusedQueryRef.current = focusKey
+  }, [graph.catalog_id, graph.nodes, layout.positions, query])
 
   const toggle = (nodeId: string) => {
     setExpanded((current) => {

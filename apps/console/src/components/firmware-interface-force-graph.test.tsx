@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it } from 'vitest'
 import type { InterfaceForceGraph } from '../types'
 import { FirmwareInterfaceForceGraph } from './FirmwareInterfaceForceGraph'
@@ -167,7 +167,7 @@ it('lets the user pan the blank canvas without dragging a node', () => {
   expect(canvas.querySelector('[data-graph-layer]')?.getAttribute('transform')).toContain('translate(0 0)')
 })
 
-it('narrows a large graph to the matching branch while preserving ancestors', () => {
+it('focuses a matching interface and reveals its parameters when expanded', async () => {
   render(<FirmwareInterfaceForceGraph graph={graph} />)
   fireEvent.change(screen.getByRole('textbox', { name: '搜索力导图节点' }), {
     target: { value: 'SetTimeCfg' },
@@ -176,6 +176,23 @@ it('narrows a large graph to the matching branch while preserving ancestors', ()
   expect(screen.getByRole('button', { name: '选择节点 /goform/SetTimeCfg' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: '选择节点 bin/httpd' })).toBeInTheDocument()
   expect(screen.getByText('可见 3 / 4 nodes · 2 edges')).toBeInTheDocument()
+
+  const interfaceCard = screen.getByRole('button', { name: '选择节点 /goform/SetTimeCfg' }).closest('foreignObject')
+  const center = {
+    x: Number(interfaceCard?.getAttribute('x')) + Number(interfaceCard?.getAttribute('width')) / 2,
+    y: Number(interfaceCard?.getAttribute('y')) + Number(interfaceCard?.getAttribute('height')) / 2,
+  }
+  await waitFor(() => {
+    const transform = screen.getByLabelText('固件接口力导向图').querySelector('[data-graph-layer]')?.getAttribute('transform') ?? ''
+    const match = transform.match(/translate\(([-\d.]+) ([-\d.]+)\)/)
+    expect(match).not.toBeNull()
+    expect(Math.abs(center.x + Number(match?.[1]))).toBeLessThan(60)
+    expect(Math.abs(center.y + Number(match?.[2]))).toBeLessThan(60)
+  })
+
+  fireEvent.click(screen.getByRole('button', { name: '展开接口 /goform/SetTimeCfg' }))
+  expect(screen.getByRole('button', { name: '选择参数 timezone' })).toBeInTheDocument()
+  expect(screen.getByText('可见 4 / 4 nodes · 3 edges')).toBeInTheDocument()
 })
 
 it('lets the user drag a node and explains the live mouse interactions', () => {
