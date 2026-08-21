@@ -1,6 +1,6 @@
 # 固件通信测绘产品功能与验收手册
 
-> 验收版本：R2-40
+> 验收版本：R2-41
 >
 > 验收日期：2026-08-21
 >
@@ -23,8 +23,8 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 1. 点击右上角“上传新固件”，选择不超过 64 MiB 的制品，并填写厂商、产品、型号和版本。
 2. 服务按 SHA-256 内容寻址保存制品，隔离执行解包和 AnalyzeRun，并发布不可变 Catalog/Graph。
 3. 进入“接口调查”，确认顶部固件身份，或切换到另一个已分析固件。
-4. 从固件根节点展开真实二进制，例如 `bin/httpd`；JavaScript/HTML/CSS 静态资源不会成为图节点。
-5. 点击接口展开参数组合；点击参数，在右侧查看类型、作用、代码约束、依赖和精确证据。
+4. 点击节点主体或右侧箭头展开真实二进制，例如 `bin/httpd`；JavaScript/HTML/CSS 静态资源不会成为图节点。
+5. 有子参数的接口才显示展开箭头；点击接口展开参数组合，再点击参数查看类型、作用、代码约束、依赖和精确证据。
 6. 拖拽节点观察邻居自动避让，悬停高亮直接邻接关系，滚轮缩放；碰撞层按卡片矩形自动分离。
 7. 使用搜索框把画布收敛到命中节点及其祖先，使用“重置自动布局”重新计算位置；节点可随时折叠。
 8. 需要 UBUS/IPC 等内部调用时进入“高级图谱”或“原始证据”。它们不会混入默认 Web 接口图。
@@ -35,8 +35,8 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 | --- | --- | --- |
 | 原始固件上传 | 64 MiB 有界、异步单 worker、内容寻址、完整设备身份持久化 | 固定摘要 Binwalk、禁网、只读输入/根、资源预算 |
 | 固件身份 | 持续展示 release context、SHA 和覆盖状态，支持切换已分析固件 | 未登记身份显示“待确认”，不从文件名猜测 |
-| 接口力导图 | 固件 → 真实二进制 → Web 接口 → 参数，逐层展开/折叠 | 静态前端资源仅作 evidence locator；UBUS/IPC 不冒充 Web URL |
-| 动态布局与搜索 | 持续物理模拟、拖拽固定/释放回弹、矩形碰撞、hover 邻接、滚轮缩放、一键重置 | 大图画布按层内节点数扩容，卡片交叠为硬约束；搜索保留命中分支和祖先 |
+| 接口力导图 | 固件 → 真实二进制 → Web 接口 → 参数；主体和箭头均可逐层展开/折叠 | 无子参数接口没有伪箭头；静态前端资源仅作 evidence locator；UBUS/IPC 不冒充 Web URL |
+| 动态布局与搜索 | 持续物理模拟、拖拽固定/释放回弹、矩形碰撞、hover 邻接、滚轮缩放、一键重置 | 大图首屏固定保留固件/组件层，拖拽不误展开；搜索保留命中分支和祖先 |
 | 参数详情 | 语义、位置、数据类型及依据、约束、依赖、owner、EvidenceAtom | 只从字面域/selector 证据推断类型，不按参数名猜测 |
 | 自动测绘编排 | Inventory → 多 Producer → Scheduler → Catalog → Graph | Producer 失败进入 coverage，不伪装为空成功 |
 | 高级图谱 | 四种证据约束视图、精确焦点、跳数/节点/边预算 | 子图无悬空边，UBUS/IPC 在这里保留取证价值 |
@@ -63,17 +63,17 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 
 ### 4.2 展开 httpd 接口与参数
 
-![httpd 接口与参数分支](./screenshots/2026-08-20-r2-39-httpd-interface-parameters.png)
+![点击 httpd 后首屏直接出现接口](./screenshots/2026-08-21-r2-41-click-expand.jpg)
 
-展开 `bin/httpd` 后可查看其 191 个接口。搜索 `SetSysTimeCfg` 后，画布仅保留固件、`bin/httpd`
-和目标接口；展开接口得到 `ntpServer`、`timePeriod`、`timeZone` 三个参数，并显示 handler
-`fromSetSysTime`。
+点击 `bin/httpd` 主体后从 3 个可见节点直接变为 194 个，首屏同时保留固件、组件和接口卡片。
+191 个接口中，28 个确实关联子参数并显示展开箭头，165 个无子参数接口不再显示无效箭头。
+浏览器继续展开 `/cgi-bin/UploadCfg` 后得到 `filename` 参数，变为 195 nodes / 194 edges。
 
 ### 4.3 参数详情与证据边界
 
-![timeZone 参数详情、约束与依赖](./screenshots/2026-08-20-r2-39-parameter-details.png)
+![filename 参数详情、约束与依赖](./screenshots/2026-08-21-r2-41-parameter-detail.jpg)
 
-点击 `timeZone` 后，侧栏同时给出 owner `/goform/SetSysTimeCfg`、所属 `bin/httpd`、依赖线索和
+点击 `filename` 后，侧栏同时给出 owner `/cgi-bin/UploadCfg`、所属 `bin/httpd`、依赖线索和
 前端/Native 精确位置。当前证据没有恢复整数范围、长度、格式或时间边界，因此数据类型和代码约束
 诚实显示 `unknown / not_recovered`。80 个参数中有 79 个仍为未知类型；这是后续代码使用点分析
 的明确任务，不是 UI 缺数或推断失败。
@@ -83,14 +83,15 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 | 验证层 | 命令或方式 | 结果 |
 | --- | --- | --- |
 | Python 力导图专项 | `PYTHONPATH=src python3 -m unittest tests.test_mapping_interface_force_graph tests.test_intelligence_api.IntelligenceApiTests.test_mapping_catalog_force_graph_route_excludes_frontend_static_resources` | 4/4 通过 |
-| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests` | 564/564 通过（617.191s） |
+| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests` | 564/564 通过（460.243s） |
 | Python 编译检查 | `python3 -m compileall -q src` | 通过 |
-| Console 全量回归 | `pnpm test` | 34/34 通过，10 个测试文件 |
+| Console 全量回归 | `pnpm test` | 37/37 通过，10 个测试文件 |
 | TypeScript/生产构建 | `pnpm build` | 通过，1,802 modules transformed |
 | API 验收 | AC9 force-graph endpoint | HTTP 200；276 nodes / 275 edges；2 个 binary；0 frontend module；排除 56 个静态资源接口 |
-| 浏览器交互 | 拖拽/回弹、hover 邻接、滚轮缩放、展开/折叠、搜索 | `httpd` 展开 194 nodes / 193 edges；矩形交叠 0 对 |
+| 浏览器交互 | 主体/箭头展开、拖拽不误展开、首屏布局、参数详情 | `httpd` 展开 194 nodes / 193 edges；`UploadCfg` 展开到 `filename` 为 195/194 |
 
-真实浏览器回放验证：首屏 3/276 可见节点、2 条边；展开 `bin/httpd` 后为 194/276 节点、193 条边。
+真实浏览器回放验证：首屏 3/276 可见节点、2 条边；点击 `bin/httpd` 主体后为 194/276 节点、193 条边，
+根与组件卡片坐标保持非负；接口箭头从错误的 191 个收敛到真实有参数的 28 个。
 逐轮矩形交叠检测从 194 对降为 98、23，最终为 0；拖动 `bin/dhttpd` 后出现释放回弹状态，悬停时
 非邻接 `bin/httpd` opacity 从 1 降为 0.18。默认页面不存在 `webroot_ro/js` 或 `ubus://` 节点。
 
@@ -134,4 +135,4 @@ curl -fsS http://127.0.0.1:18789/api/mappings/jobs
 - 通信测绘范围按仓库例外执行本地完整验收、提交和 GitHub 推送，不部署到 `satc_cloud`。
 
 架构决策、迭代修正、反事实失败模式和完整复验记录见
-[R2-40 动态碰撞力导图记录](./progress/2026-08-21-r2-40-dynamic-collision-force-graph.md)。
+[R2-41 点击展开交互修复记录](./progress/2026-08-21-r2-41-click-expand-interaction.md)。

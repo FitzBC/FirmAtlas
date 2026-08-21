@@ -46,6 +46,28 @@ const graph: InterfaceForceGraph = {
     { edge_id: 'e:3', source_ref: 'interface:set-time', target_ref: 'parameter:timezone', edge_kind: 'accepts', label: '接收参数' }],
 }
 
+const manyInterfaces = Array.from({ length: 60 }, (_, index) => ({
+  node_id: `interface:${index}`, node_kind: 'interface' as const,
+  label: `/goform/Operation${index}`, parent_id: 'component:httpd', child_ids: [],
+  expandable: false, status: 'observed', details: {},
+}))
+const largeGraph: InterfaceForceGraph = {
+  ...graph,
+  summary: { ...graph.summary, interface_count: manyInterfaces.length, parameter_count: 0 },
+  nodes: [
+    { ...graph.nodes[0], child_ids: ['component:httpd'] },
+    { ...graph.nodes[1], child_ids: manyInterfaces.map((node) => node.node_id) },
+    ...manyInterfaces,
+  ],
+  edges: [
+    graph.edges[0],
+    ...manyInterfaces.map((node, index) => ({
+      edge_id: `edge:${index}`, source_ref: 'component:httpd', target_ref: node.node_id,
+      edge_kind: 'exposes' as const, label: '暴露接口',
+    })),
+  ],
+}
+
 afterEach(cleanup)
 
 it('expands firmware to binary to interface to parameter and opens evidence details', () => {
@@ -74,6 +96,41 @@ it('resets the automatic force layout without losing expansion state', () => {
   expect(screen.getByRole('button', { name: '展开组件 bin/httpd' })).toBeInTheDocument()
 })
 
+it('expands an expandable node when the user clicks its body', () => {
+  render(<FirmwareInterfaceForceGraph graph={graph} />)
+
+  fireEvent.click(screen.getByRole('button', { name: '选择节点 bin/httpd' }))
+
+  expect(screen.getByRole('button', { name: '选择节点 /goform/SetTimeCfg' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '折叠组件 bin/httpd' })).toBeInTheDocument()
+})
+
+it('keeps the expand control separate from the node drag surface', () => {
+  render(<FirmwareInterfaceForceGraph graph={graph} />)
+  const expand = screen.getByRole('button', { name: '展开组件 bin/httpd' })
+
+  fireEvent.pointerDown(expand, { pointerId: 1, clientX: 220, clientY: 180 })
+  fireEvent.pointerMove(expand, { pointerId: 1, clientX: 230, clientY: 184 })
+  fireEvent.pointerUp(expand, { pointerId: 1, clientX: 230, clientY: 184 })
+  fireEvent.click(expand)
+
+  expect(screen.getByRole('button', { name: '选择节点 /goform/SetTimeCfg' })).toBeInTheDocument()
+  expect(screen.queryByText('已拖动节点 bin/httpd')).not.toBeInTheDocument()
+})
+
+it('keeps the expanded firmware and component inside the initial large-graph viewport', () => {
+  render(<FirmwareInterfaceForceGraph graph={largeGraph} />)
+
+  fireEvent.click(screen.getByRole('button', { name: '选择节点 bin/httpd' }))
+
+  const firmwareCard = screen.getByRole('button', { name: '选择节点 Tenda AC9 V15.03.05.19(6318)' }).closest('foreignObject')
+  const componentCard = screen.getByRole('button', { name: '选择节点 bin/httpd' }).closest('foreignObject')
+  expect(Number(firmwareCard?.getAttribute('y'))).toBeLessThan(500)
+  expect(Number(componentCard?.getAttribute('y'))).toBeLessThan(500)
+  expect(Number(firmwareCard?.getAttribute('x'))).toBeGreaterThanOrEqual(0)
+  expect(Number(componentCard?.getAttribute('x'))).toBeGreaterThanOrEqual(0)
+})
+
 it('narrows a large graph to the matching branch while preserving ancestors', () => {
   render(<FirmwareInterfaceForceGraph graph={graph} />)
   fireEvent.change(screen.getByRole('textbox', { name: '搜索力导图节点' }), {
@@ -92,7 +149,9 @@ it('lets the user drag a node and explains the live mouse interactions', () => {
   fireEvent.pointerDown(component, { pointerId: 1, clientX: 220, clientY: 180 })
   fireEvent.pointerMove(component, { pointerId: 1, clientX: 360, clientY: 260 })
   fireEvent.pointerUp(component, { pointerId: 1, clientX: 360, clientY: 260 })
+  fireEvent.click(component)
 
   expect(screen.getByRole('status')).toHaveTextContent('已拖动节点 bin/httpd')
-  expect(screen.getByText('拖拽节点 · 滚轮缩放 · 悬停高亮邻接关系')).toBeInTheDocument()
+  expect(screen.getByText('点击节点展开 / 折叠 · 拖拽移动 · 滚轮缩放 · 悬停高亮邻接关系')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: '选择节点 /goform/SetTimeCfg' })).not.toBeInTheDocument()
 })

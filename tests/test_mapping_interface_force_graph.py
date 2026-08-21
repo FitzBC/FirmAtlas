@@ -114,6 +114,7 @@ class InterfaceForceGraphProjectionTests(unittest.TestCase):
         self.assertEqual("selector_domain", parameter["details"]["data_type_basis"])
         self.assertEqual(["0", "8"], parameter["details"]["allowed_values"])
         self.assertEqual("bin/httpd@0x00071234", interface["details"]["handler_identity"])
+        self.assertTrue(interface["expandable"])
         self.assertEqual("virtual:0x712f0", parameter["details"]["evidence_locations"][1]["locator"])
         self.assertEqual(1, result["summary"]["binary_component_count"])
         self.assertEqual(1, result["summary"]["parameter_count"])
@@ -146,6 +147,7 @@ class InterfaceForceGraphProjectionTests(unittest.TestCase):
         self.assertEqual("native_registration_only", interface["details"]["exposure_status"])
         self.assertEqual("unresolved", interface["details"]["path_status"])
         self.assertFalse(interface["details"]["frontend_reference_observed"])
+        self.assertFalse(interface["expandable"])
         self.assertEqual(1, result["summary"]["native_only_interface_count"])
 
     def test_excludes_frontend_static_resources_without_native_binary_ownership(self):

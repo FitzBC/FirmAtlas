@@ -35,27 +35,57 @@ function hashFraction(value: string): number {
   return (hash >>> 0) / 0xffffffff
 }
 
+function forceLayoutGeometry(nodes: InterfaceForceGraphNode[]) {
+  const counts = [0, 0, 0, 0]
+  nodes.forEach((node) => { counts[depthByKind[node.node_kind]] += 1 })
+  const interfaceColumns = Math.min(6, Math.max(1, Math.ceil(Math.sqrt(counts[2]))))
+  const parameterColumns = Math.min(6, Math.max(1, Math.ceil(Math.sqrt(counts[3]))))
+  const interfaceStart = 610
+  const parameterStart = interfaceStart + interfaceColumns * 240 + 260
+  const deepestRight = counts[3]
+    ? parameterStart + parameterColumns * 190 + 180
+    : counts[2] ? interfaceStart + interfaceColumns * 240 + 180 : 1120
+  const height = Math.max(
+    680,
+    Math.ceil(counts[1] / 1) * 92 + 220,
+    Math.ceil(counts[2] / interfaceColumns) * 92 + 220,
+    Math.ceil(counts[3] / parameterColumns) * 82 + 220,
+  )
+  const width = Math.max(1120, deepestRight)
+  const ordinals = [0, 0, 0, 0]
+  const targets = new Map<string, Position>()
+  nodes.forEach((node) => {
+    const depth = depthByKind[node.node_kind]
+    const ordinal = ordinals[depth]
+    ordinals[depth] += 1
+    if (depth === 0) targets.set(node.node_id, { x: 130, y: 120 + ordinal * 92 })
+    if (depth === 1) targets.set(node.node_id, { x: 380, y: 120 + ordinal * 92 })
+    if (depth === 2) targets.set(node.node_id, {
+      x: interfaceStart + (ordinal % interfaceColumns) * 240,
+      y: 120 + Math.floor(ordinal / interfaceColumns) * 92,
+    })
+    if (depth === 3) targets.set(node.node_id, {
+      x: parameterStart + (ordinal % parameterColumns) * 190,
+      y: 120 + Math.floor(ordinal / parameterColumns) * 82,
+    })
+  })
+  return { width, height, targets }
+}
+
 function createSimulation(
   nodes: InterfaceForceGraphNode[], edges: InterfaceForceGraphEdge[], seed: number,
 ): SimulationState {
-  const count = Math.max(1, nodes.length)
-  const width = Math.max(1120, Math.ceil(Math.sqrt(count)) * 320)
-  const depthCounts = [0, 0, 0, 0]
-  nodes.forEach((node) => { depthCounts[depthByKind[node.node_kind]] += 1 })
-  const bandWidth = Math.max(240, width * 0.22)
-  const columnsPerBand = Math.max(1, Math.floor(bandWidth / 265))
-  const requiredRows = Math.max(...depthCounts.map((value) => Math.ceil(value / columnsPerBand)))
-  const height = Math.max(680, Math.ceil(Math.sqrt(count)) * 150, requiredRows * 92 + 180)
+  const { width, height, targets } = forceLayoutGeometry(nodes)
   const positions = new Map<string, Position>()
   const velocities = new Map<string, Position>()
-  const column = [130, width * 0.29, width * 0.59, width * 0.84]
 
-  nodes.forEach((node, index) => {
+  nodes.forEach((node) => {
     const depth = depthByKind[node.node_kind]
     const jitter = hashFraction(`${node.node_id}:${seed}`)
+    const target = targets.get(node.node_id)!
     positions.set(node.node_id, {
-      x: column[depth] + (jitter - 0.5) * bandWidth * 0.86,
-      y: 90 + ((index * 97 + jitter * height) % Math.max(240, height - 180)),
+      x: target.x + (depth <= 1 ? 0 : (jitter - 0.5) * 18),
+      y: target.y + (depth <= 1 ? 0 : (jitter - 0.5) * 12),
     })
     velocities.set(node.node_id, { x: 0, y: 0 })
   })
@@ -67,8 +97,13 @@ function tickSimulation(
   simulation: SimulationState,
   nodes: InterfaceForceGraphNode[], edges: InterfaceForceGraphEdge[], iterations = 1,
 ) {
-  const column = [130, simulation.width * 0.29, simulation.width * 0.59, simulation.width * 0.84]
+  const { targets } = forceLayoutGeometry(nodes)
   const columnStrength = nodes.length > 80 ? 0.004 : 0.018
+  const degrees = new Map<string, number>()
+  edges.forEach((edge) => {
+    degrees.set(edge.source_ref, (degrees.get(edge.source_ref) ?? 0) + 1)
+    degrees.set(edge.target_ref, (degrees.get(edge.target_ref) ?? 0) + 1)
+  })
   for (let iteration = 0; iteration < iterations; iteration += 1) {
     for (let left = 0; left < nodes.length; left += 1) {
       for (let right = left + 1; right < nodes.length; right += 1) {
@@ -118,19 +153,25 @@ function tickSimulation(
       const vy = dy / distance * force
       const sourceVelocity = simulation.velocities.get(edge.source_ref)!
       const targetVelocity = simulation.velocities.get(edge.target_ref)!
-      sourceVelocity.x += vx; sourceVelocity.y += vy
-      targetVelocity.x -= vx; targetVelocity.y -= vy
+      const sourceWeight = 1 / Math.max(1, degrees.get(edge.source_ref) ?? 1)
+      const targetWeight = 1 / Math.max(1, degrees.get(edge.target_ref) ?? 1)
+      sourceVelocity.x += vx * sourceWeight; sourceVelocity.y += vy * sourceWeight
+      targetVelocity.x -= vx * targetWeight; targetVelocity.y -= vy * targetWeight
     })
     nodes.forEach((node) => {
       const point = simulation.positions.get(node.node_id)!
       const velocity = simulation.velocities.get(node.node_id)!
       const depth = depthByKind[node.node_kind]
-      velocity.x += (column[depth] - point.x) * columnStrength * simulation.alpha
-      velocity.y += (simulation.height / 2 - point.y) * 0.0018 * simulation.alpha
+      const target = targets.get(node.node_id)!
+      const anchorStrength = depth <= 1 ? 0.05 : columnStrength
+      velocity.x += (target.x - point.x) * anchorStrength * simulation.alpha
+      velocity.y += (target.y - point.y) * anchorStrength * simulation.alpha
       velocity.x *= 0.72; velocity.y *= 0.72
       if (!simulation.pinned.has(node.node_id)) {
-        point.x = Math.max(45, Math.min(simulation.width - 45, point.x + velocity.x))
-        point.y = Math.max(45, Math.min(simulation.height - 45, point.y + velocity.y))
+        const insetX = nodeWidth[node.node_kind] / 2 + 12
+        const insetY = nodeHeight[node.node_kind] / 2 + 12
+        point.x = Math.max(insetX, Math.min(simulation.width - insetX, point.x + velocity.x))
+        point.y = Math.max(insetY, Math.min(simulation.height - insetY, point.y + velocity.y))
       }
     })
     // A final positional projection makes non-overlap a hard invariant even while
@@ -161,10 +202,14 @@ function tickSimulation(
             if (!leftPinned) a.y -= direction * (rightPinned ? shift : shift / 2)
             if (!rightPinned) b.y += direction * (leftPinned ? shift : shift / 2)
           }
-          a.x = Math.max(45, Math.min(simulation.width - 45, a.x))
-          a.y = Math.max(45, Math.min(simulation.height - 45, a.y))
-          b.x = Math.max(45, Math.min(simulation.width - 45, b.x))
-          b.y = Math.max(45, Math.min(simulation.height - 45, b.y))
+          const leftInsetX = nodeWidth[leftNode.node_kind] / 2 + 12
+          const leftInsetY = nodeHeight[leftNode.node_kind] / 2 + 12
+          const rightInsetX = nodeWidth[rightNode.node_kind] / 2 + 12
+          const rightInsetY = nodeHeight[rightNode.node_kind] / 2 + 12
+          a.x = Math.max(leftInsetX, Math.min(simulation.width - leftInsetX, a.x))
+          a.y = Math.max(leftInsetY, Math.min(simulation.height - leftInsetY, a.y))
+          b.x = Math.max(rightInsetX, Math.min(simulation.width - rightInsetX, b.x))
+          b.y = Math.max(rightInsetY, Math.min(simulation.height - rightInsetY, b.y))
         }
       }
       if (!corrected) break
@@ -222,10 +267,13 @@ function useDynamicForceLayout(
   const dragBy = (nodeId: string, dx: number, dy: number) => {
     const simulation = simulationRef.current
     const point = simulation?.positions.get(nodeId)
-    if (!simulation || !point) return
+    const node = nodes.find((candidate) => candidate.node_id === nodeId)
+    if (!simulation || !point || !node) return
     simulation.pinned.add(nodeId)
-    point.x = Math.max(45, Math.min(simulation.width - 45, point.x + dx))
-    point.y = Math.max(45, Math.min(simulation.height - 45, point.y + dy))
+    const insetX = nodeWidth[node.node_kind] / 2 + 12
+    const insetY = nodeHeight[node.node_kind] / 2 + 12
+    point.x = Math.max(insetX, Math.min(simulation.width - insetX, point.x + dx))
+    point.y = Math.max(insetY, Math.min(simulation.height - insetY, point.y + dy))
     simulation.velocities.set(nodeId, { x: 0, y: 0 })
     setLayout({ positions: new Map(simulation.positions), width: simulation.width, height: simulation.height })
     wakeRef.current(0.92)
@@ -286,6 +334,7 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [zoom, setZoom] = useState(1)
   const dragRef = useRef<{ nodeId: string; x: number; y: number; moved: boolean } | null>(null)
+  const suppressActivationRef = useRef<string | null>(null)
   const projection = useMemo(
     () => visibleProjection(graph, expanded, query), [graph, expanded, query],
   )
@@ -304,6 +353,14 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
     })
     setSelectedId(nodeId)
   }
+  const activate = (node: InterfaceForceGraphNode) => {
+    if (suppressActivationRef.current === node.node_id) {
+      suppressActivationRef.current = null
+      return
+    }
+    if (node.expandable) toggle(node.node_id)
+    else setSelectedId(node.node_id)
+  }
   const resetLayout = () => {
     setLayoutSeed((current) => current + 1)
     setLayoutNotice('自动布局已重置')
@@ -317,12 +374,12 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
     })
     return result
   }, [hoveredId, projection.edges])
-  const beginDrag = (node: InterfaceForceGraphNode, event: ReactPointerEvent<SVGForeignObjectElement>) => {
+  const beginDrag = (node: InterfaceForceGraphNode, event: ReactPointerEvent<HTMLButtonElement>) => {
     dragRef.current = { nodeId: node.node_id, x: event.clientX, y: event.clientY, moved: false }
     event.currentTarget.setPointerCapture?.(event.pointerId)
     setSelectedId(node.node_id)
   }
-  const continueDrag = (event: ReactPointerEvent<SVGForeignObjectElement>) => {
+  const continueDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const active = dragRef.current
     if (!active) return
     const dx = (event.clientX - active.x) / zoom
@@ -331,12 +388,16 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
     active.x = event.clientX; active.y = event.clientY; active.moved = true
     dragBy(active.nodeId, dx, dy)
   }
-  const endDrag = (event: ReactPointerEvent<SVGForeignObjectElement>) => {
+  const endDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const active = dragRef.current
     if (!active) return
     event.currentTarget.releasePointerCapture?.(event.pointerId)
     release(active.nodeId)
     if (active.moved) {
+      suppressActivationRef.current = active.nodeId
+      window.setTimeout(() => {
+        if (suppressActivationRef.current === active.nodeId) suppressActivationRef.current = null
+      }, 0)
       const node = byId.get(active.nodeId)
       setLayoutNotice(`已拖动节点 ${node?.label ?? active.nodeId}；碰撞力正在重新分离邻近节点`)
     }
@@ -354,7 +415,7 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
       <div>
         <div className="eyebrow"><Network size={12} /> Expandable interface force graph</div>
         <h2 className="mt-2 text-base font-semibold text-white">固件 → 二进制 → 接口 → 参数</h2>
-        <p className="mt-1 text-[10px] text-slate-600">拖拽节点 · 滚轮缩放 · 悬停高亮邻接关系</p>
+        <p className="mt-1 text-[10px] text-slate-600">点击节点展开 / 折叠 · 拖拽移动 · 滚轮缩放 · 悬停高亮邻接关系</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <label className="search-field w-[260px]"><Search size={14} /><input aria-label="搜索力导图节点" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索 httpd、接口或参数…" /></label>
@@ -392,10 +453,10 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
               const width = nodeWidth[node.node_kind]
               const height = nodeHeight[node.node_kind]
               const active = !hoveredId || highlighted.has(node.node_id)
-              return <foreignObject key={node.node_id} x={point.x - width / 2} y={point.y - height / 2} width={width} height={height} className="cursor-grab overflow-visible transition-opacity active:cursor-grabbing" opacity={active ? 1 : 0.18}
-                onPointerDown={(event) => beginDrag(node, event)} onPointerMove={continueDrag} onPointerUp={endDrag} onPointerCancel={endDrag}
+              return <foreignObject key={node.node_id} x={point.x - width / 2} y={point.y - height / 2} width={width} height={height} className="overflow-visible transition-opacity" opacity={active ? 1 : 0.18}
                 onMouseEnter={() => setHoveredId(node.node_id)} onMouseLeave={() => setHoveredId(null)}>
-                <ForceNode node={node} selected={selected?.node_id === node.node_id} expanded={expanded.has(node.node_id)} onSelect={() => setSelectedId(node.node_id)} onToggle={() => toggle(node.node_id)} />
+                <ForceNode node={node} selected={selected?.node_id === node.node_id} expanded={expanded.has(node.node_id)} onActivate={() => activate(node)} onToggle={() => toggle(node.node_id)}
+                  onPointerDown={(event) => beginDrag(node, event)} onPointerMove={continueDrag} onPointerUp={endDrag} onPointerCancel={endDrag} />
               </foreignObject>
             })}
             </g>
@@ -418,9 +479,13 @@ function Metric({ label, value, warning = false }: { label: string; value: numbe
   return <div className="border-r border-white/[0.05] px-4 py-3 last:border-r-0"><div className="text-[8px] uppercase tracking-[0.12em] text-slate-700">{label}</div><div className={`mt-1 font-mono text-lg font-semibold ${warning ? 'text-amber-300' : 'text-slate-200'}`}>{value}</div></div>
 }
 
-function ForceNode({ node, selected, expanded, onSelect, onToggle }: {
+function ForceNode({ node, selected, expanded, onActivate, onToggle, onPointerDown, onPointerMove, onPointerUp, onPointerCancel }: {
   node: InterfaceForceGraphNode; selected: boolean; expanded: boolean
-  onSelect: () => void; onToggle: () => void
+  onActivate: () => void; onToggle: () => void
+  onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => void
+  onPointerMove: (event: ReactPointerEvent<HTMLButtonElement>) => void
+  onPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => void
+  onPointerCancel: (event: ReactPointerEvent<HTMLButtonElement>) => void
 }) {
   const style = {
     firmware: 'border-signal/35 bg-[#112018]/95 text-signal',
@@ -431,7 +496,9 @@ function ForceNode({ node, selected, expanded, onSelect, onToggle }: {
   const Icon = { firmware: Crosshair, component: Binary, interface: Braces, parameter: CircleDot }[node.node_kind]
   const kindLabel = { firmware: '固件', component: '组件', interface: '接口', parameter: '参数' }[node.node_kind]
   return <div className={`flex h-full w-full items-center gap-2 rounded-xl border p-2 shadow-[0_12px_30px_rgba(0,0,0,.32)] transition ${style} ${selected ? 'ring-1 ring-white/20' : ''}`}>
-    <button type="button" aria-label={node.node_kind === 'parameter' ? `选择参数 ${node.label}` : `选择节点 ${node.label}`} onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+    <button type="button" aria-label={node.node_kind === 'parameter' ? `选择参数 ${node.label}` : `选择节点 ${node.label}`} onClick={onActivate}
+      onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerCancel}
+      className="flex min-w-0 flex-1 touch-none cursor-grab items-center gap-2 text-left active:cursor-grabbing">
       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-black/25"><Icon size={14} /></span>
       <span className="min-w-0"><span className="block text-[8px] uppercase tracking-[0.14em] opacity-50">{kindLabel}</span><span className="block truncate font-mono text-[10px] text-slate-100" title={node.label}>{node.label}</span></span>
     </button>

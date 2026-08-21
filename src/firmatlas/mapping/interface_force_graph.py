@@ -359,7 +359,9 @@ def project_interface_force_graph(
     ]
     interface_nodes = [item for item in nodes if item["node_kind"] == "interface"]
     parameter_nodes = [item for item in nodes if item["node_kind"] == "parameter"]
-    node_by_id[root_id]["expandable"] = bool(node_by_id[root_id]["child_ids"])
+    for node in nodes:
+        if node["node_kind"] != "parameter":
+            node["expandable"] = bool(node["child_ids"])
     return {
         "schema_version": SCHEMA_VERSION,
         "catalog_id": catalog.get("catalog_id", ""),
