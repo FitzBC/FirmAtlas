@@ -42,7 +42,8 @@ function forceLayoutGeometry(nodes: InterfaceForceGraphNode[]) {
   if (root) targets.set(root.node_id, { x: 0, y: 0 })
 
   const placeRings = (
-    items: InterfaceForceGraphNode[], startRadius: number, ringGap: number, arcWidth: number,
+    items: InterfaceForceGraphNode[], center: Position, startRadius: number, ringGap: number,
+    arcWidth: number, basePhase: number,
   ) => {
     let cursor = 0
     let ring = 0
@@ -51,12 +52,12 @@ function forceLayoutGeometry(nodes: InterfaceForceGraphNode[]) {
       const radius = startRadius + ring * ringGap
       const capacity = Math.max(1, Math.floor((Math.PI * 2 * radius) / arcWidth))
       const count = Math.min(capacity, items.length - cursor)
-      const phase = -Math.PI / 2 + (ring % 2 ? Math.PI / Math.max(1, count) : 0)
+      const phase = basePhase + (ring % 2 ? Math.PI / Math.max(1, count) : 0)
       for (let index = 0; index < count; index += 1) {
         const angle = phase + (Math.PI * 2 * index) / count
         targets.set(items[cursor + index].node_id, {
-          x: Math.cos(angle) * radius,
-          y: Math.sin(angle) * radius,
+          x: center.x + Math.cos(angle) * radius,
+          y: center.y + Math.sin(angle) * radius,
         })
       }
       cursor += count
@@ -66,8 +67,22 @@ function forceLayoutGeometry(nodes: InterfaceForceGraphNode[]) {
     return items.length ? outerRadius : 0
   }
 
-  placeRings(nodes.filter((node) => node.node_kind === 'component'), 245, 140, 240)
-  placeRings(nodes.filter((node) => node.node_kind === 'interface'), 500, 170, 245)
+  const components = nodes.filter((node) => node.node_kind === 'component')
+  placeRings(components, { x: 0, y: 0 }, 245, 140, 240, -Math.PI / 2)
+
+  const interfacesByParent = new Map<string, InterfaceForceGraphNode[]>()
+  nodes.filter((node) => node.node_kind === 'interface').forEach((node) => {
+    const siblings = interfacesByParent.get(node.parent_id ?? '') ?? []
+    siblings.push(node)
+    interfacesByParent.set(node.parent_id ?? '', siblings)
+  })
+  interfacesByParent.forEach((items, parentId) => {
+    const parent = targets.get(parentId) ?? { x: 0, y: 0 }
+    const outwardAngle = parent.x || parent.y
+      ? Math.atan2(parent.y, parent.x)
+      : hashFraction(parentId) * Math.PI * 2
+    placeRings(items, parent, 300, 160, 245, outwardAngle)
+  })
 
   const parametersByParent = new Map<string, InterfaceForceGraphNode[]>()
   nodes.filter((node) => node.node_kind === 'parameter').forEach((node) => {
@@ -77,17 +92,12 @@ function forceLayoutGeometry(nodes: InterfaceForceGraphNode[]) {
   })
   parametersByParent.forEach((items, parentId) => {
     const parent = targets.get(parentId) ?? { x: 0, y: 0 }
-    items.forEach((node, index) => {
-      const ring = Math.floor(index / 8)
-      const ringIndex = index % 8
-      const ringCount = Math.min(8, items.length - ring * 8)
-      const radius = 215 + ring * 105
-      const angle = -Math.PI / 2 + (Math.PI * 2 * ringIndex) / ringCount
-      targets.set(node.node_id, {
-        x: parent.x + Math.cos(angle) * radius,
-        y: parent.y + Math.sin(angle) * radius,
-      })
-    })
+    const owner = nodes.find((node) => node.node_id === parentId)
+    const grandparent = targets.get(owner?.parent_id ?? '') ?? { x: 0, y: 0 }
+    const dx = parent.x - grandparent.x
+    const dy = parent.y - grandparent.y
+    const outwardAngle = dx || dy ? Math.atan2(dy, dx) : hashFraction(parentId) * Math.PI * 2
+    placeRings(items, parent, 215, 105, 190, outwardAngle)
   })
 
   let extentX = 480
@@ -471,7 +481,7 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
       <div>
         <div className="eyebrow"><Network size={12} /> Expandable interface force graph</div>
         <h2 className="mt-2 text-base font-semibold text-white">固件 → 二进制 → 接口 → 参数</h2>
-        <p className="mt-1 text-[10px] text-slate-600">固件居中 · 点击节点展开 · 拖拽节点或空白画布 · 滚轮缩放 · 悬停高亮</p>
+        <p className="mt-1 text-[10px] text-slate-600">固件居中 · 子节点围绕展开父节点 · 拖拽节点或空白画布 · 滚轮缩放</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <label className="search-field w-[260px]"><Search size={14} /><input aria-label="搜索力导图节点" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索 httpd、接口或参数…" /></label>
@@ -505,8 +515,13 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
             onPointerDown={beginCanvasPan} onPointerMove={continueCanvasPan} onPointerUp={endCanvasPan} onPointerCancel={endCanvasPan}>
             <defs><filter id="force-glow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter></defs>
             <g data-graph-layer transform={`translate(${pan.x} ${pan.y}) scale(${zoom})`}>
-            <circle cx="0" cy="0" r="245" fill="none" stroke="rgba(99,203,232,.09)" strokeWidth="1" strokeDasharray="5 12" />
-            <circle cx="0" cy="0" r="500" fill="none" stroke="rgba(167,139,250,.08)" strokeWidth="1" strokeDasharray="3 15" />
+            {projection.nodes.filter((node) => expanded.has(node.node_id) && node.child_ids.length > 0).map((node) => {
+              const point = layout.positions.get(node.node_id)!
+              const radius = node.node_kind === 'firmware' ? 245 : node.node_kind === 'component' ? 300 : 215
+              const stroke = node.node_kind === 'firmware' ? 'rgba(99,203,232,.09)'
+                : node.node_kind === 'component' ? 'rgba(167,139,250,.1)' : 'rgba(252,211,77,.11)'
+              return <circle key={`orbit:${node.node_id}`} cx={point.x} cy={point.y} r={radius} fill="none" stroke={stroke} strokeWidth="1" strokeDasharray="5 12" pointerEvents="none" />
+            })}
             {projection.edges.map((edge) => {
               const source = layout.positions.get(edge.source_ref)!
               const target = layout.positions.get(edge.target_ref)!

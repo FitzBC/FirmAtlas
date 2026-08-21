@@ -113,6 +113,44 @@ it('centers the firmware and places the other object categories around it', () =
   expect(Math.hypot(componentCenter.x - firmwareCenter.x, componentCenter.y - firmwareCenter.y)).toBeGreaterThan(160)
 })
 
+it('places an expanded component interface cluster around that component instead of the firmware', () => {
+  const localGraph: InterfaceForceGraph = {
+    ...graph,
+    summary: { ...graph.summary, component_count: 2, binary_component_count: 2 },
+    nodes: [
+      { ...graph.nodes[0], child_ids: ['component:dhttpd', 'component:httpd'] },
+      {
+        node_id: 'component:dhttpd', node_kind: 'component', label: 'bin/dhttpd',
+        parent_id: 'root:ac9', child_ids: [], expandable: false, status: 'observed', details: {},
+      },
+      graph.nodes[1], graph.nodes[2], graph.nodes[3],
+    ],
+    edges: [
+      { edge_id: 'e:dhttpd', source_ref: 'root:ac9', target_ref: 'component:dhttpd', edge_kind: 'contains', label: '包含组件' },
+      ...graph.edges,
+    ],
+  }
+  render(<FirmwareInterfaceForceGraph graph={localGraph} />)
+
+  fireEvent.click(screen.getByRole('button', { name: '选择节点 bin/httpd' }))
+
+  const center = (label: string) => {
+    const card = screen.getByRole('button', { name: label }).closest('foreignObject')
+    return {
+      x: Number(card?.getAttribute('x')) + Number(card?.getAttribute('width')) / 2,
+      y: Number(card?.getAttribute('y')) + Number(card?.getAttribute('height')) / 2,
+    }
+  }
+  const owner = center('选择节点 bin/httpd')
+  const other = center('选择节点 bin/dhttpd')
+  const child = center('选择节点 /goform/SetTimeCfg')
+  const distanceToOwner = Math.hypot(child.x - owner.x, child.y - owner.y)
+  const distanceToOther = Math.hypot(child.x - other.x, child.y - other.y)
+
+  expect(distanceToOwner).toBeLessThan(distanceToOther)
+  expect(distanceToOwner).toBeLessThan(380)
+})
+
 it('lets the user pan the blank canvas without dragging a node', () => {
   render(<FirmwareInterfaceForceGraph graph={graph} />)
   const canvas = screen.getByLabelText('固件接口力导向图')
@@ -150,6 +188,6 @@ it('lets the user drag a node and explains the live mouse interactions', () => {
   fireEvent.click(component)
 
   expect(screen.getByRole('status')).toHaveTextContent('已拖动节点 bin/httpd')
-  expect(screen.getByText('固件居中 · 点击节点展开 · 拖拽节点或空白画布 · 滚轮缩放 · 悬停高亮')).toBeInTheDocument()
+  expect(screen.getByText('固件居中 · 子节点围绕展开父节点 · 拖拽节点或空白画布 · 滚轮缩放')).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: '选择节点 /goform/SetTimeCfg' })).not.toBeInTheDocument()
 })

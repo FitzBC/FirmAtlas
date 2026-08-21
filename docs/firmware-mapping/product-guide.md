@@ -1,6 +1,6 @@
 # 固件通信测绘产品功能与验收手册
 
-> 验收版本：R2-42
+> 验收版本：R2-43
 >
 > 验收日期：2026-08-21
 >
@@ -25,7 +25,7 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 3. 进入“接口调查”，确认顶部固件身份，或切换到另一个已分析固件。
 4. 点击节点主体或右侧箭头展开真实二进制，例如 `bin/httpd`；JavaScript/HTML/CSS 静态资源不会成为图节点。
 5. 有子参数的接口才显示展开箭头；点击接口展开参数组合，再点击参数查看类型、作用、代码约束、依赖和精确证据。
-6. 固件默认居中，组件/接口/参数在外层环绕；拖拽空白画布平移视角，拖拽节点调整局部位置。
+6. 固件默认居中；组件围绕固件，接口围绕所属组件，参数围绕所属接口。展开哪个节点，下一层就以它为局部中心。
 7. 使用滚轮或左上角按钮缩放，点击准星回到固件中心；碰撞层按卡片矩形自动分离。
 8. 使用搜索框把画布收敛到命中节点及其祖先，使用“重置自动布局”重新计算位置；节点可随时折叠。
 9. 需要 UBUS/IPC 等内部调用时进入“高级图谱”或“原始证据”。它们不会混入默认 Web 接口图。
@@ -37,7 +37,7 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 | 原始固件上传 | 64 MiB 有界、异步单 worker、内容寻址、完整设备身份持久化 | 固定摘要 Binwalk、禁网、只读输入/根、资源预算 |
 | 固件身份 | 持续展示 release context、SHA 和覆盖状态，支持切换已分析固件 | 未登记身份显示“待确认”，不从文件名猜测 |
 | 接口力导图 | 固件 → 真实二进制 → Web 接口 → 参数；主体和箭头均可逐层展开/折叠 | 无子参数接口没有伪箭头；静态前端资源仅作 evidence locator；UBUS/IPC 不冒充 Web URL |
-| 动态布局与搜索 | 固件中心锚点、组件/接口同心环、参数围绕 owner；节点拖拽、空白画布平移、滚轮/按钮缩放、一键回中 | 固件/组件/接口/参数分别使用双框、实线侧条、虚线卡片、胶囊；矩形零重叠 |
+| 动态布局与搜索 | 父节点局部坐标：组件围绕固件、接口围绕 owner 组件、参数围绕 owner 接口；节点拖拽、画布平移、缩放和回中 | 不再把接口做成固件中心的全局对称环；四类对象造型不同，矩形零重叠 |
 | 参数详情 | 语义、位置、数据类型及依据、约束、依赖、owner、EvidenceAtom | 只从字面域/selector 证据推断类型，不按参数名猜测 |
 | 自动测绘编排 | Inventory → 多 Producer → Scheduler → Catalog → Graph | Producer 失败进入 coverage，不伪装为空成功 |
 | 高级图谱 | 四种证据约束视图、精确焦点、跳数/节点/边预算 | 子图无悬空边，UBUS/IPC 在这里保留取证价值 |
@@ -69,6 +69,8 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 
 ![httpd 的 191 个接口形成紫色环绕层](./screenshots/2026-08-21-r2-42-expanded-radial-interfaces.jpg)
 
+![httpd 成为 191 个接口的局部布局中心](./screenshots/2026-08-21-r2-43-parent-centered-local-orbit.jpg)
+
 点击 `bin/httpd` 主体后从 3 个可见节点直接变为 194 个，首屏同时保留固件、组件和接口卡片。
 191 个接口中，28 个确实关联子参数并显示展开箭头，165 个无子参数接口不再显示无效箭头。
 浏览器继续展开 `/cgi-bin/UploadCfg` 后得到 `filename` 参数，变为 195 nodes / 194 edges。
@@ -87,12 +89,12 @@ Web 配置、脚本后端、Native ELF、访问策略和状态访问证据，发
 | 验证层 | 命令或方式 | 结果 |
 | --- | --- | --- |
 | Python 力导图专项 | `PYTHONPATH=src python3 -m unittest tests.test_mapping_interface_force_graph tests.test_intelligence_api.IntelligenceApiTests.test_mapping_catalog_force_graph_route_excludes_frontend_static_resources` | 4/4 通过 |
-| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests` | 564/564 通过（453.584s） |
+| Python 全量回归 | `PYTHONPATH=src python3 -m unittest discover -s tests` | 564/564 通过（458.925s） |
 | Python 编译检查 | `python3 -m compileall -q src` | 通过 |
-| Console 全量回归 | `pnpm test` | 38/38 通过，10 个测试文件 |
+| Console 全量回归 | `pnpm test` | 39/39 通过，10 个测试文件 |
 | TypeScript/生产构建 | `pnpm build` | 通过，1,802 modules transformed |
 | API 验收 | AC9 force-graph endpoint | HTTP 200；276 nodes / 275 edges；2 个 binary；0 frontend module；排除 56 个静态资源接口 |
-| 浏览器交互 | 居中/环绕、画布平移、节点拖拽、缩放/回中、类别样式、参数详情 | `httpd` 展开 194 nodes / 193 edges；194 卡片矩形重叠 0 对 |
+| 浏览器交互 | 父节点局部环绕、画布平移、节点拖拽、缩放/回中、类别样式、参数详情 | `httpd` 展开 194 nodes / 193 edges；接口质心距 `httpd` 14.5、距 `dhttpd` 343.9；0 重叠 |
 
 真实浏览器回放验证：首屏 3/276 可见节点、2 条边；点击 `bin/httpd` 主体后为 194/276 节点、193 条边，
 固件逻辑中心保持在 `(0,0)` 附近，组件半径大于 160；接口箭头从错误的 191 个收敛到真实有参数的
@@ -140,4 +142,4 @@ curl -fsS http://127.0.0.1:18789/api/mappings/jobs
 - 通信测绘范围按仓库例外执行本地完整验收、提交和 GitHub 推送，不部署到 `satc_cloud`。
 
 架构决策、迭代修正、反事实失败模式和完整复验记录见
-[R2-42 居中环绕与画布平移记录](./progress/2026-08-21-r2-42-centered-radial-pan.md)。
+[R2-43 父节点局部环绕记录](./progress/2026-08-21-r2-43-parent-centered-local-orbits.md)。
