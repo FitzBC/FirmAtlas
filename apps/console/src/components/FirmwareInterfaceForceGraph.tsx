@@ -10,6 +10,10 @@ import type {
 
 type Position = { x: number; y: number }
 type ForceLayout = { positions: Map<string, Position>; width: number; height: number }
+type InterfaceParameterMapping = {
+  interfaceNode: InterfaceForceGraphNode
+  parameters: InterfaceForceGraphNode[]
+}
 type SimulationState = ForceLayout & {
   velocities: Map<string, Position>
   pinned: Set<string>
@@ -372,6 +376,7 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState<Position>({ x: 0, y: 0 })
+  const [mappingIndexOpen, setMappingIndexOpen] = useState(true)
   const dragRef = useRef<{ nodeId: string; x: number; y: number; moved: boolean } | null>(null)
   const canvasPanRef = useRef<{ x: number; y: number; moved: boolean } | null>(null)
   const suppressActivationRef = useRef<string | null>(null)
@@ -384,6 +389,15 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
   )
   const selected = graph.nodes.find((node) => node.node_id === selectedId) ?? root
   const byId = useMemo(() => new Map(graph.nodes.map((node) => [node.node_id, node])), [graph.nodes])
+  const parameterMappings = useMemo<InterfaceParameterMapping[]>(() => graph.nodes
+    .filter((node) => node.node_kind === 'interface')
+    .map((interfaceNode) => ({
+      interfaceNode,
+      parameters: interfaceNode.child_ids
+        .map((childId) => byId.get(childId))
+        .filter((node): node is InterfaceForceGraphNode => node?.node_kind === 'parameter'),
+    }))
+    .filter((mapping) => mapping.parameters.length > 0), [byId, graph.nodes])
 
   useEffect(() => {
     const normalized = query.trim().toLowerCase()
@@ -426,6 +440,20 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
     setPan({ x: 0, y: 0 })
     setZoom(1)
     setLayoutNotice('自动布局已重置')
+  }
+  const focusMapping = (mapping: InterfaceParameterMapping) => {
+    setExpanded((current) => new Set(current).add(mapping.interfaceNode.node_id))
+    setSelectedId(mapping.interfaceNode.node_id)
+    setQuery(mapping.interfaceNode.label)
+    setLayoutNotice(`已聚焦接口参数映射 ${mapping.interfaceNode.label}`)
+  }
+  const inspectMappedParameter = (
+    mapping: InterfaceParameterMapping, parameter: InterfaceForceGraphNode,
+  ) => {
+    setExpanded((current) => new Set(current).add(mapping.interfaceNode.node_id))
+    setSelectedId(parameter.node_id)
+    setQuery(mapping.interfaceNode.label)
+    setLayoutNotice(`已打开参数 ${parameter.label} 及其所属接口映射`)
   }
   const highlighted = useMemo(() => {
     if (!hoveredId) return new Set<string>()
@@ -514,6 +542,9 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
       <Metric label="输入参数" value={graph.summary.parameter_count} />
       <Metric label="类型待恢复" value={graph.summary.unknown_parameter_type_count} warning />
     </div>
+    <InterfaceParameterMappingIndex mappings={parameterMappings} open={mappingIndexOpen}
+      onToggle={() => setMappingIndexOpen((current) => !current)} onFocus={focusMapping}
+      onInspectParameter={inspectMappedParameter} />
     {layoutNotice && <div role="status" className="border-b border-signal/10 bg-signal/[0.035] px-4 py-2 text-[10px] text-signal">{layoutNotice}</div>}
     <div className="grid min-h-[680px] xl:grid-cols-[minmax(0,1fr)_370px]">
       <div className="min-w-0 border-b border-white/[0.07] xl:border-b-0 xl:border-r">
@@ -571,6 +602,35 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
       </aside>
     </div>
     <footer className="border-t border-white/[0.06] px-4 py-3 text-[9px] leading-5 text-slate-700"><ShieldQuestion size={11} className="mr-2 inline" />{graph.claim_boundary}</footer>
+  </section>
+}
+
+function InterfaceParameterMappingIndex({ mappings, open, onToggle, onFocus, onInspectParameter }: {
+  mappings: InterfaceParameterMapping[]
+  open: boolean
+  onToggle: () => void
+  onFocus: (mapping: InterfaceParameterMapping) => void
+  onInspectParameter: (mapping: InterfaceParameterMapping, parameter: InterfaceForceGraphNode) => void
+}) {
+  const parameterCount = mappings.reduce((total, mapping) => total + mapping.parameters.length, 0)
+  return <section aria-label="接口参数映射索引" className="border-b border-white/[0.06] bg-[linear-gradient(135deg,rgba(139,92,246,.045),transparent_42%),#080d14]">
+    {/* Design rationale: a compact, responsive relation index makes Catalog ownership visible
+        before graph expansion while preserving the force canvas as the primary exploration surface. */}
+    <button type="button" aria-label={`${open ? '折叠' : '展开'}接口参数映射`} onClick={onToggle}
+      className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-white/[0.018]">
+      <span className="flex min-w-0 items-center gap-3"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-violet-400/20 bg-violet-400/[0.07] text-violet-300"><GitBranch size={14} /></span><span><span className="block text-[10px] font-semibold text-slate-200">接口参数映射</span><span className="mt-0.5 block text-[8px] text-slate-600">接口 owner、Handler、输入位置与确定性类型</span></span></span>
+      <span className="flex shrink-0 items-center gap-2 text-[9px]"><span className="rounded-full border border-violet-400/15 bg-violet-400/[0.05] px-2 py-1 text-violet-300">{mappings.length} 组接口映射</span><span className="rounded-full border border-amber-300/15 bg-amber-300/[0.05] px-2 py-1 text-amber-200">{parameterCount} 个关联参数</span>{open ? <ChevronDown size={13} className="text-slate-600" /> : <ChevronRight size={13} className="text-slate-600" />}</span>
+    </button>
+    {open && <div className="grid max-h-[250px] gap-2 overflow-y-auto border-t border-white/[0.05] p-3 md:grid-cols-2 2xl:grid-cols-3">
+      {mappings.map((mapping) => <article key={mapping.interfaceNode.node_id} className="rounded-xl border border-white/[0.065] bg-black/20 p-3 shadow-[0_10px_24px_rgba(0,0,0,.16)]">
+        <button type="button" aria-label={`聚焦映射 ${mapping.interfaceNode.label}`} onClick={() => onFocus(mapping)} className="group flex w-full items-start justify-between gap-3 text-left">
+          <span className="min-w-0"><span className="flex items-center gap-2"><span className="rounded bg-violet-400/[0.08] px-1.5 py-0.5 font-mono text-[8px] text-violet-300">{stringValue(mapping.interfaceNode.details.method)}</span><span className="truncate font-mono text-[10px] text-slate-200 group-hover:text-white">{mapping.interfaceNode.label}</span></span><span className="mt-1.5 block truncate font-mono text-[8px] text-slate-600">{stringValue(mapping.interfaceNode.details.handler_symbol)}</span></span>
+          <Crosshair size={12} className="mt-0.5 shrink-0 text-slate-700 group-hover:text-signal" />
+        </button>
+        <div className="mt-3 flex flex-wrap gap-1.5">{mapping.parameters.map((parameter) => <button key={parameter.node_id} type="button" aria-label={`查看参数 ${parameter.label}`} onClick={() => onInspectParameter(mapping, parameter)} className="rounded-full border border-amber-300/15 bg-amber-300/[0.045] px-2.5 py-1.5 text-left transition hover:border-amber-300/35 hover:bg-amber-300/[0.08]"><span className="block font-mono text-[9px] text-amber-100">{parameter.label}</span><span className="mt-0.5 block text-[7px] text-slate-600">{stringValue(parameter.details.namespace)} · {stringValue(parameter.details.data_type)}</span></button>)}</div>
+      </article>)}
+      {!mappings.length && <div className="col-span-full rounded-xl border border-dashed border-white/[0.07] p-4 text-center text-[10px] text-slate-600">当前 Catalog 尚未发布接口—参数 owner 映射。</div>}
+    </div>}
   </section>
 }
 

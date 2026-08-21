@@ -48,6 +48,23 @@ const graph: InterfaceForceGraph = {
 
 afterEach(cleanup)
 
+it('shows interface-to-parameter mappings and lets the user focus the mapped nodes', () => {
+  render(<FirmwareInterfaceForceGraph graph={graph} />)
+
+  expect(screen.getByText('接口参数映射')).toBeInTheDocument()
+  expect(screen.getByText('1 组接口映射')).toBeInTheDocument()
+  expect(screen.getByText('1 个关联参数')).toBeInTheDocument()
+  expect(screen.getAllByText('formSetTimeCfg').length).toBeGreaterThan(0)
+  expect(screen.getByText('form · integer')).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: '聚焦映射 /goform/SetTimeCfg' }))
+  expect(screen.getByRole('button', { name: '选择参数 timezone' })).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: '查看参数 timezone' }))
+  expect(screen.getByText('参数详情')).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'timezone' })).toBeInTheDocument()
+})
+
 it('expands firmware to binary to interface to parameter and opens evidence details', () => {
   render(<FirmwareInterfaceForceGraph graph={graph} />)
 
@@ -62,7 +79,7 @@ it('expands firmware to binary to interface to parameter and opens evidence deta
   expect(screen.getByText('参数详情')).toBeInTheDocument()
   expect(screen.getByText('integer')).toBeInTheDocument()
   expect(screen.getByText('0 · 8')).toBeInTheDocument()
-  expect(screen.getByText('formSetTimeCfg')).toBeInTheDocument()
+  expect(screen.getAllByText('formSetTimeCfg').length).toBeGreaterThan(0)
   expect(screen.getByText('bin/httpd · virtual:0x712f0')).toBeInTheDocument()
   expect(screen.getByText('静态观察值域')).toBeInTheDocument()
 })
