@@ -46,28 +46,6 @@ const graph: InterfaceForceGraph = {
     { edge_id: 'e:3', source_ref: 'interface:set-time', target_ref: 'parameter:timezone', edge_kind: 'accepts', label: '接收参数' }],
 }
 
-const manyInterfaces = Array.from({ length: 60 }, (_, index) => ({
-  node_id: `interface:${index}`, node_kind: 'interface' as const,
-  label: `/goform/Operation${index}`, parent_id: 'component:httpd', child_ids: [],
-  expandable: false, status: 'observed', details: {},
-}))
-const largeGraph: InterfaceForceGraph = {
-  ...graph,
-  summary: { ...graph.summary, interface_count: manyInterfaces.length, parameter_count: 0 },
-  nodes: [
-    { ...graph.nodes[0], child_ids: ['component:httpd'] },
-    { ...graph.nodes[1], child_ids: manyInterfaces.map((node) => node.node_id) },
-    ...manyInterfaces,
-  ],
-  edges: [
-    graph.edges[0],
-    ...manyInterfaces.map((node, index) => ({
-      edge_id: `edge:${index}`, source_ref: 'component:httpd', target_ref: node.node_id,
-      edge_kind: 'exposes' as const, label: '暴露接口',
-    })),
-  ],
-}
-
 afterEach(cleanup)
 
 it('expands firmware to binary to interface to parameter and opens evidence details', () => {
@@ -118,17 +96,37 @@ it('keeps the expand control separate from the node drag surface', () => {
   expect(screen.queryByText('已拖动节点 bin/httpd')).not.toBeInTheDocument()
 })
 
-it('keeps the expanded firmware and component inside the initial large-graph viewport', () => {
-  render(<FirmwareInterfaceForceGraph graph={largeGraph} />)
-
-  fireEvent.click(screen.getByRole('button', { name: '选择节点 bin/httpd' }))
-
+it('centers the firmware and places the other object categories around it', () => {
+  render(<FirmwareInterfaceForceGraph graph={graph} />)
   const firmwareCard = screen.getByRole('button', { name: '选择节点 Tenda AC9 V15.03.05.19(6318)' }).closest('foreignObject')
   const componentCard = screen.getByRole('button', { name: '选择节点 bin/httpd' }).closest('foreignObject')
-  expect(Number(firmwareCard?.getAttribute('y'))).toBeLessThan(500)
-  expect(Number(componentCard?.getAttribute('y'))).toBeLessThan(500)
-  expect(Number(firmwareCard?.getAttribute('x'))).toBeGreaterThanOrEqual(0)
-  expect(Number(componentCard?.getAttribute('x'))).toBeGreaterThanOrEqual(0)
+  const firmwareCenter = {
+    x: Number(firmwareCard?.getAttribute('x')) + Number(firmwareCard?.getAttribute('width')) / 2,
+    y: Number(firmwareCard?.getAttribute('y')) + Number(firmwareCard?.getAttribute('height')) / 2,
+  }
+  const componentCenter = {
+    x: Number(componentCard?.getAttribute('x')) + Number(componentCard?.getAttribute('width')) / 2,
+    y: Number(componentCard?.getAttribute('y')) + Number(componentCard?.getAttribute('height')) / 2,
+  }
+  expect(Math.abs(firmwareCenter.x)).toBeLessThan(60)
+  expect(Math.abs(firmwareCenter.y)).toBeLessThan(60)
+  expect(Math.hypot(componentCenter.x - firmwareCenter.x, componentCenter.y - firmwareCenter.y)).toBeGreaterThan(160)
+})
+
+it('lets the user pan the blank canvas without dragging a node', () => {
+  render(<FirmwareInterfaceForceGraph graph={graph} />)
+  const canvas = screen.getByLabelText('固件接口力导向图')
+
+  fireEvent.pointerDown(canvas, { pointerId: 9, clientX: 240, clientY: 180 })
+  fireEvent.pointerMove(canvas, { pointerId: 9, clientX: 340, clientY: 240 })
+  fireEvent.pointerUp(canvas, { pointerId: 9, clientX: 340, clientY: 240 })
+
+  expect(screen.getByRole('status')).toHaveTextContent('已平移画布')
+  expect(canvas.querySelector('[data-graph-layer]')?.getAttribute('transform')).toContain('translate(100 60)')
+
+  fireEvent.click(screen.getByRole('button', { name: '回到固件中心' }))
+  expect(screen.getByRole('status')).toHaveTextContent('已回到固件中心')
+  expect(canvas.querySelector('[data-graph-layer]')?.getAttribute('transform')).toContain('translate(0 0)')
 })
 
 it('narrows a large graph to the matching branch while preserving ancestors', () => {
@@ -152,6 +150,6 @@ it('lets the user drag a node and explains the live mouse interactions', () => {
   fireEvent.click(component)
 
   expect(screen.getByRole('status')).toHaveTextContent('已拖动节点 bin/httpd')
-  expect(screen.getByText('点击节点展开 / 折叠 · 拖拽移动 · 滚轮缩放 · 悬停高亮邻接关系')).toBeInTheDocument()
+  expect(screen.getByText('固件居中 · 点击节点展开 · 拖拽节点或空白画布 · 滚轮缩放 · 悬停高亮')).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: '选择节点 /goform/SetTimeCfg' })).not.toBeInTheDocument()
 })

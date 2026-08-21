@@ -1,6 +1,6 @@
 import {
   Binary, Box, Braces, ChevronDown, ChevronRight, CircleDot, Crosshair,
-  GitBranch, Info, Network, RotateCcw, Search, ShieldQuestion,
+  GitBranch, Info, Move, Network, RotateCcw, Search, ShieldQuestion, ZoomIn, ZoomOut,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent, ReactNode, WheelEvent as ReactWheelEvent } from 'react'
@@ -25,6 +25,7 @@ const nodeHeight: Record<InterfaceForceGraphNode['node_kind'], number> = {
 const depthByKind: Record<InterfaceForceGraphNode['node_kind'], number> = {
   firmware: 0, component: 1, interface: 2, parameter: 3,
 }
+const canvasViewWidth = 680
 
 function hashFraction(value: string): number {
   let hash = 2166136261
@@ -36,40 +37,67 @@ function hashFraction(value: string): number {
 }
 
 function forceLayoutGeometry(nodes: InterfaceForceGraphNode[]) {
-  const counts = [0, 0, 0, 0]
-  nodes.forEach((node) => { counts[depthByKind[node.node_kind]] += 1 })
-  const interfaceColumns = Math.min(6, Math.max(1, Math.ceil(Math.sqrt(counts[2]))))
-  const parameterColumns = Math.min(6, Math.max(1, Math.ceil(Math.sqrt(counts[3]))))
-  const interfaceStart = 610
-  const parameterStart = interfaceStart + interfaceColumns * 240 + 260
-  const deepestRight = counts[3]
-    ? parameterStart + parameterColumns * 190 + 180
-    : counts[2] ? interfaceStart + interfaceColumns * 240 + 180 : 1120
-  const height = Math.max(
-    680,
-    Math.ceil(counts[1] / 1) * 92 + 220,
-    Math.ceil(counts[2] / interfaceColumns) * 92 + 220,
-    Math.ceil(counts[3] / parameterColumns) * 82 + 220,
-  )
-  const width = Math.max(1120, deepestRight)
-  const ordinals = [0, 0, 0, 0]
   const targets = new Map<string, Position>()
-  nodes.forEach((node) => {
-    const depth = depthByKind[node.node_kind]
-    const ordinal = ordinals[depth]
-    ordinals[depth] += 1
-    if (depth === 0) targets.set(node.node_id, { x: 130, y: 120 + ordinal * 92 })
-    if (depth === 1) targets.set(node.node_id, { x: 380, y: 120 + ordinal * 92 })
-    if (depth === 2) targets.set(node.node_id, {
-      x: interfaceStart + (ordinal % interfaceColumns) * 240,
-      y: 120 + Math.floor(ordinal / interfaceColumns) * 92,
-    })
-    if (depth === 3) targets.set(node.node_id, {
-      x: parameterStart + (ordinal % parameterColumns) * 190,
-      y: 120 + Math.floor(ordinal / parameterColumns) * 82,
+  const root = nodes.find((node) => node.node_kind === 'firmware')
+  if (root) targets.set(root.node_id, { x: 0, y: 0 })
+
+  const placeRings = (
+    items: InterfaceForceGraphNode[], startRadius: number, ringGap: number, arcWidth: number,
+  ) => {
+    let cursor = 0
+    let ring = 0
+    let outerRadius = startRadius
+    while (cursor < items.length) {
+      const radius = startRadius + ring * ringGap
+      const capacity = Math.max(1, Math.floor((Math.PI * 2 * radius) / arcWidth))
+      const count = Math.min(capacity, items.length - cursor)
+      const phase = -Math.PI / 2 + (ring % 2 ? Math.PI / Math.max(1, count) : 0)
+      for (let index = 0; index < count; index += 1) {
+        const angle = phase + (Math.PI * 2 * index) / count
+        targets.set(items[cursor + index].node_id, {
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
+        })
+      }
+      cursor += count
+      outerRadius = radius
+      ring += 1
+    }
+    return items.length ? outerRadius : 0
+  }
+
+  placeRings(nodes.filter((node) => node.node_kind === 'component'), 245, 140, 240)
+  placeRings(nodes.filter((node) => node.node_kind === 'interface'), 500, 170, 245)
+
+  const parametersByParent = new Map<string, InterfaceForceGraphNode[]>()
+  nodes.filter((node) => node.node_kind === 'parameter').forEach((node) => {
+    const siblings = parametersByParent.get(node.parent_id ?? '') ?? []
+    siblings.push(node)
+    parametersByParent.set(node.parent_id ?? '', siblings)
+  })
+  parametersByParent.forEach((items, parentId) => {
+    const parent = targets.get(parentId) ?? { x: 0, y: 0 }
+    items.forEach((node, index) => {
+      const ring = Math.floor(index / 8)
+      const ringIndex = index % 8
+      const ringCount = Math.min(8, items.length - ring * 8)
+      const radius = 215 + ring * 105
+      const angle = -Math.PI / 2 + (Math.PI * 2 * ringIndex) / ringCount
+      targets.set(node.node_id, {
+        x: parent.x + Math.cos(angle) * radius,
+        y: parent.y + Math.sin(angle) * radius,
+      })
     })
   })
-  return { width, height, targets }
+
+  let extentX = 480
+  let extentY = 360
+  nodes.forEach((node) => {
+    const target = targets.get(node.node_id) ?? { x: 0, y: 0 }
+    extentX = Math.max(extentX, Math.abs(target.x) + nodeWidth[node.node_kind] / 2 + 120)
+    extentY = Math.max(extentY, Math.abs(target.y) + nodeHeight[node.node_kind] / 2 + 120)
+  })
+  return { width: extentX * 2, height: extentY * 2, targets }
 }
 
 function createSimulation(
@@ -163,15 +191,15 @@ function tickSimulation(
       const velocity = simulation.velocities.get(node.node_id)!
       const depth = depthByKind[node.node_kind]
       const target = targets.get(node.node_id)!
-      const anchorStrength = depth <= 1 ? 0.05 : columnStrength
+      const anchorStrength = depth === 0 ? 0.14 : depth === 1 ? 0.065 : columnStrength
       velocity.x += (target.x - point.x) * anchorStrength * simulation.alpha
       velocity.y += (target.y - point.y) * anchorStrength * simulation.alpha
       velocity.x *= 0.72; velocity.y *= 0.72
       if (!simulation.pinned.has(node.node_id)) {
         const insetX = nodeWidth[node.node_kind] / 2 + 12
         const insetY = nodeHeight[node.node_kind] / 2 + 12
-        point.x = Math.max(insetX, Math.min(simulation.width - insetX, point.x + velocity.x))
-        point.y = Math.max(insetY, Math.min(simulation.height - insetY, point.y + velocity.y))
+        point.x = Math.max(-simulation.width / 2 + insetX, Math.min(simulation.width / 2 - insetX, point.x + velocity.x))
+        point.y = Math.max(-simulation.height / 2 + insetY, Math.min(simulation.height / 2 - insetY, point.y + velocity.y))
       }
     })
     // A final positional projection makes non-overlap a hard invariant even while
@@ -206,10 +234,10 @@ function tickSimulation(
           const leftInsetY = nodeHeight[leftNode.node_kind] / 2 + 12
           const rightInsetX = nodeWidth[rightNode.node_kind] / 2 + 12
           const rightInsetY = nodeHeight[rightNode.node_kind] / 2 + 12
-          a.x = Math.max(leftInsetX, Math.min(simulation.width - leftInsetX, a.x))
-          a.y = Math.max(leftInsetY, Math.min(simulation.height - leftInsetY, a.y))
-          b.x = Math.max(rightInsetX, Math.min(simulation.width - rightInsetX, b.x))
-          b.y = Math.max(rightInsetY, Math.min(simulation.height - rightInsetY, b.y))
+          a.x = Math.max(-simulation.width / 2 + leftInsetX, Math.min(simulation.width / 2 - leftInsetX, a.x))
+          a.y = Math.max(-simulation.height / 2 + leftInsetY, Math.min(simulation.height / 2 - leftInsetY, a.y))
+          b.x = Math.max(-simulation.width / 2 + rightInsetX, Math.min(simulation.width / 2 - rightInsetX, b.x))
+          b.y = Math.max(-simulation.height / 2 + rightInsetY, Math.min(simulation.height / 2 - rightInsetY, b.y))
         }
       }
       if (!corrected) break
@@ -272,8 +300,8 @@ function useDynamicForceLayout(
     simulation.pinned.add(nodeId)
     const insetX = nodeWidth[node.node_kind] / 2 + 12
     const insetY = nodeHeight[node.node_kind] / 2 + 12
-    point.x = Math.max(insetX, Math.min(simulation.width - insetX, point.x + dx))
-    point.y = Math.max(insetY, Math.min(simulation.height - insetY, point.y + dy))
+    point.x = Math.max(-simulation.width / 2 + insetX, Math.min(simulation.width / 2 - insetX, point.x + dx))
+    point.y = Math.max(-simulation.height / 2 + insetY, Math.min(simulation.height / 2 - insetY, point.y + dy))
     simulation.velocities.set(nodeId, { x: 0, y: 0 })
     setLayout({ positions: new Map(simulation.positions), width: simulation.width, height: simulation.height })
     wakeRef.current(0.92)
@@ -333,7 +361,9 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
   const [layoutNotice, setLayoutNotice] = useState('')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState<Position>({ x: 0, y: 0 })
   const dragRef = useRef<{ nodeId: string; x: number; y: number; moved: boolean } | null>(null)
+  const canvasPanRef = useRef<{ x: number; y: number; moved: boolean } | null>(null)
   const suppressActivationRef = useRef<string | null>(null)
   const projection = useMemo(
     () => visibleProjection(graph, expanded, query), [graph, expanded, query],
@@ -363,6 +393,8 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
   }
   const resetLayout = () => {
     setLayoutSeed((current) => current + 1)
+    setPan({ x: 0, y: 0 })
+    setZoom(1)
     setLayoutNotice('自动布局已重置')
   }
   const highlighted = useMemo(() => {
@@ -407,6 +439,30 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
     event.preventDefault()
     setZoom((current) => Math.max(0.45, Math.min(1.8, current * (event.deltaY > 0 ? 0.9 : 1.1))))
   }
+  const beginCanvasPan = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (event.target !== event.currentTarget) return
+    canvasPanRef.current = { x: event.clientX, y: event.clientY, moved: false }
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+  const continueCanvasPan = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const active = canvasPanRef.current
+    if (!active) return
+    const viewScale = event.currentTarget.clientWidth > 0
+      ? canvasViewWidth / event.currentTarget.clientWidth / zoom
+      : 1
+    const dx = (event.clientX - active.x) * viewScale
+    const dy = (event.clientY - active.y) * viewScale
+    if (Math.abs(dx) + Math.abs(dy) < 0.5) return
+    active.x = event.clientX; active.y = event.clientY; active.moved = true
+    setPan((current) => ({ x: current.x + dx, y: current.y + dy }))
+  }
+  const endCanvasPan = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const active = canvasPanRef.current
+    if (!active) return
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    if (active.moved) setLayoutNotice('已平移画布；拖动空白区域可继续浏览环绕节点')
+    canvasPanRef.current = null
+  }
 
   return <section className="detail-enter overflow-hidden rounded-2xl border border-white/[0.07] bg-[#080d14]/90 backdrop-blur-xl">
     {/* Design rationale: progressive disclosure keeps AC9's large interface set legible;
@@ -415,7 +471,7 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
       <div>
         <div className="eyebrow"><Network size={12} /> Expandable interface force graph</div>
         <h2 className="mt-2 text-base font-semibold text-white">固件 → 二进制 → 接口 → 参数</h2>
-        <p className="mt-1 text-[10px] text-slate-600">点击节点展开 / 折叠 · 拖拽移动 · 滚轮缩放 · 悬停高亮邻接关系</p>
+        <p className="mt-1 text-[10px] text-slate-600">固件居中 · 点击节点展开 · 拖拽节点或空白画布 · 滚轮缩放 · 悬停高亮</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <label className="search-field w-[260px]"><Search size={14} /><input aria-label="搜索力导图节点" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索 httpd、接口或参数…" /></label>
@@ -438,15 +494,27 @@ export function FirmwareInterfaceForceGraph({ graph }: { graph: InterfaceForceGr
           </div>
           <div className="font-mono text-[9px] text-slate-600">可见 {projection.nodes.length} / {graph.nodes.length} nodes · {projection.edges.length} edges</div>
         </div>
-        <div className="max-h-[690px] overflow-auto bg-[radial-gradient(circle_at_50%_45%,rgba(73,214,179,0.045),transparent_38%),linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:auto,34px_34px,34px_34px]">
-          <svg aria-label="固件接口力导向图" width={layout.width} height={layout.height} className="block touch-none" onWheel={handleWheel}>
+        <div className="relative h-[690px] overflow-hidden bg-[radial-gradient(circle_at_50%_50%,rgba(183,243,107,0.055),transparent_22%),linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:auto,34px_34px,34px_34px]">
+          <div className="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-xl border border-white/[0.08] bg-[#080d14]/85 p-1.5 text-slate-500 shadow-xl backdrop-blur-md">
+            <span className="inline-flex items-center gap-1.5 px-2 text-[8px] uppercase tracking-[0.12em]"><Move size={11} />拖动画布</span>
+            <button type="button" aria-label="缩小图谱" onClick={() => setZoom((current) => Math.max(0.45, current * 0.9))} className="grid h-7 w-7 place-items-center rounded-lg hover:bg-white/[0.06] hover:text-white"><ZoomOut size={12} /></button>
+            <button type="button" aria-label="放大图谱" onClick={() => setZoom((current) => Math.min(1.8, current * 1.1))} className="grid h-7 w-7 place-items-center rounded-lg hover:bg-white/[0.06] hover:text-white"><ZoomIn size={12} /></button>
+            <button type="button" aria-label="回到固件中心" onClick={() => { setPan({ x: 0, y: 0 }); setZoom(1); setLayoutNotice('已回到固件中心') }} className="grid h-7 w-7 place-items-center rounded-lg text-signal/70 hover:bg-signal/[0.08] hover:text-signal"><Crosshair size={12} /></button>
+          </div>
+          <svg aria-label="固件接口力导向图" viewBox="-340 -400 680 800" preserveAspectRatio="xMidYMid meet" width="100%" height="690" className="block touch-none cursor-grab active:cursor-grabbing" onWheel={handleWheel}
+            onPointerDown={beginCanvasPan} onPointerMove={continueCanvasPan} onPointerUp={endCanvasPan} onPointerCancel={endCanvasPan}>
             <defs><filter id="force-glow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter></defs>
-            <g transform={`scale(${zoom})`} style={{ transformOrigin: '0 0' }}>
+            <g data-graph-layer transform={`translate(${pan.x} ${pan.y}) scale(${zoom})`}>
+            <circle cx="0" cy="0" r="245" fill="none" stroke="rgba(99,203,232,.09)" strokeWidth="1" strokeDasharray="5 12" />
+            <circle cx="0" cy="0" r="500" fill="none" stroke="rgba(167,139,250,.08)" strokeWidth="1" strokeDasharray="3 15" />
             {projection.edges.map((edge) => {
               const source = layout.positions.get(edge.source_ref)!
               const target = layout.positions.get(edge.target_ref)!
               const active = !hoveredId || edge.source_ref === hoveredId || edge.target_ref === hoveredId
-              return <g key={edge.edge_id} opacity={active ? 1 : 0.12} className="transition-opacity"><line x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke={edge.edge_kind === 'accepts' ? 'rgba(252,211,77,.42)' : 'rgba(99,203,232,.34)'} strokeWidth={active && hoveredId ? '2.2' : '1.3'} /><circle cx={(source.x + target.x) / 2} cy={(source.y + target.y) / 2} r="2" fill="rgba(183,243,107,.5)" /></g>
+              const edgeColor = edge.edge_kind === 'accepts'
+                ? 'rgba(252,211,77,.48)'
+                : edge.edge_kind === 'exposes' ? 'rgba(167,139,250,.38)' : 'rgba(99,203,232,.38)'
+              return <g key={edge.edge_id} opacity={active ? 1 : 0.12} className="transition-opacity"><line x1={source.x} y1={source.y} x2={target.x} y2={target.y} stroke={edgeColor} strokeWidth={active && hoveredId ? '2.2' : '1.3'} /><circle cx={(source.x + target.x) / 2} cy={(source.y + target.y) / 2} r="2" fill={edgeColor} /></g>
             })}
             {projection.nodes.map((node) => {
               const point = layout.positions.get(node.node_id)!
@@ -488,18 +556,24 @@ function ForceNode({ node, selected, expanded, onActivate, onToggle, onPointerDo
   onPointerCancel: (event: ReactPointerEvent<HTMLButtonElement>) => void
 }) {
   const style = {
-    firmware: 'border-signal/35 bg-[#112018]/95 text-signal',
-    component: 'border-cyan/30 bg-[#0c1a23]/95 text-cyan',
-    interface: 'border-violet-400/25 bg-[#141323]/95 text-violet-200',
-    parameter: 'border-amber-300/25 bg-[#211b10]/95 text-amber-200',
+    firmware: 'rounded-[20px] border-2 border-signal/55 bg-[radial-gradient(circle_at_20%_20%,rgba(183,243,107,.16),transparent_42%),#0d1c15] text-signal shadow-[0_0_0_5px_rgba(183,243,107,.035),0_18px_42px_rgba(0,0,0,.45)]',
+    component: 'rounded-lg border border-cyan/35 border-l-[4px] border-l-cyan/80 bg-[linear-gradient(135deg,rgba(34,211,238,.1),transparent_45%),#0a1720] text-cyan shadow-[0_14px_32px_rgba(0,0,0,.36)]',
+    interface: 'rounded-[14px] border border-dashed border-violet-400/45 bg-[linear-gradient(135deg,rgba(139,92,246,.11),transparent_46%),#121122] text-violet-200 shadow-[0_12px_28px_rgba(0,0,0,.32)]',
+    parameter: 'rounded-full border border-amber-300/45 bg-[linear-gradient(90deg,rgba(251,191,36,.12),transparent_58%),#211a0d] text-amber-200 shadow-[0_10px_24px_rgba(0,0,0,.3)]',
+  }[node.node_kind]
+  const iconStyle = {
+    firmware: 'rounded-full bg-signal/10 ring-1 ring-inset ring-signal/30',
+    component: 'rounded-md bg-cyan/10 ring-1 ring-inset ring-cyan/20',
+    interface: 'rounded-full bg-violet-400/10 ring-1 ring-inset ring-violet-400/20',
+    parameter: 'rounded-full bg-amber-300/10 ring-1 ring-inset ring-amber-300/20',
   }[node.node_kind]
   const Icon = { firmware: Crosshair, component: Binary, interface: Braces, parameter: CircleDot }[node.node_kind]
   const kindLabel = { firmware: '固件', component: '组件', interface: '接口', parameter: '参数' }[node.node_kind]
-  return <div className={`flex h-full w-full items-center gap-2 rounded-xl border p-2 shadow-[0_12px_30px_rgba(0,0,0,.32)] transition ${style} ${selected ? 'ring-1 ring-white/20' : ''}`}>
+  return <div data-node-kind={node.node_kind} className={`flex h-full w-full items-center gap-2 p-2 backdrop-blur-md transition ${style} ${selected ? 'ring-2 ring-white/30' : ''}`}>
     <button type="button" aria-label={node.node_kind === 'parameter' ? `选择参数 ${node.label}` : `选择节点 ${node.label}`} onClick={onActivate}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerCancel}
       className="flex min-w-0 flex-1 touch-none cursor-grab items-center gap-2 text-left active:cursor-grabbing">
-      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-black/25"><Icon size={14} /></span>
+      <span className={`grid h-8 w-8 shrink-0 place-items-center ${iconStyle}`}><Icon size={14} /></span>
       <span className="min-w-0"><span className="block text-[8px] uppercase tracking-[0.14em] opacity-50">{kindLabel}</span><span className="block truncate font-mono text-[10px] text-slate-100" title={node.label}>{node.label}</span></span>
     </button>
     {node.expandable && <button type="button" aria-label={`${expanded ? '折叠' : '展开'}${kindLabel} ${node.label}`} onClick={onToggle} className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-white/[0.06] bg-black/20 text-slate-500 hover:text-white">{expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</button>}
